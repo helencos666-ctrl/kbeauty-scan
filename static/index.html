@@ -73,6 +73,29 @@ nav{position:fixed;left:0;right:0;bottom:0;height:calc(60px + env(safe-area-inse
 nav button{flex:1;border:0;background:none;font-size:12px;color:var(--sub);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px}
 nav button i{font-style:normal;font-size:22px}
 nav button.on{color:var(--pink);font-weight:700}
+
+.route-box{margin-top:16px;padding-top:14px;border-top:1px dashed var(--line)}
+.route-box .rh{font-size:15px;font-weight:700;margin:0 0 10px}
+.route-grid{display:grid;grid-template-columns:1fr 44px;gap:8px;align-items:center}
+.route-fields{display:flex;flex-direction:column;gap:8px}
+.route-fields label{display:flex;flex-direction:column;gap:4px;font-size:13px;font-weight:600}
+.route-fields input{width:100%;border:1px solid var(--line);border-radius:12px;padding:12px;font-size:16px;font-family:inherit}
+#rtSwap{width:44px;height:44px;border:0;border-radius:12px;background:#ffe8ee;color:var(--pink);font-size:20px;font-weight:700;cursor:pointer;align-self:center}
+.route-out{margin-top:12px}
+.route-out .name-zh{font-size:18px}
+.route-links{display:flex;flex-direction:column;gap:8px;margin-top:10px}
+.route-links a{display:block;text-align:center;text-decoration:none;border-radius:12px;padding:12px 8px;font-size:16px;font-weight:600}
+.route-links a.kakao{background:var(--pink);color:#fff}
+.route-links a.naver{background:#ffe8ee;color:var(--pink)}
+.card-inrow{display:flex;gap:10px;align-items:stretch}
+.card-inrow textarea{flex:1;min-height:96px}
+.mic-btn{flex:none;width:86px;border:0;border-radius:12px;background:#ffe8ee;color:var(--pink);font-size:13px;font-weight:700;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;cursor:pointer;user-select:none;-webkit-user-select:none;-webkit-touch-callout:none;touch-action:none;-webkit-user-drag:none}
+.mic-btn span.ico{font-size:26px;line-height:1;pointer-events:none}
+.mic-btn span.lb{pointer-events:none;text-align:center;line-height:1.2}
+.mic-btn.on{background:var(--pink);color:#fff}
+.mic-btn:disabled{opacity:.5}
+#micState{display:none;margin-top:8px;font-size:13px;color:var(--pink);font-weight:600}
+#micTip{display:none}
 </style>
 </head>
 <body>
@@ -102,6 +125,20 @@ nav button.on{color:var(--pink);font-weight:700}
       <div class="btns"><button class="btn primary" data-pick="sub" data-cam="1">拍站牌/线路图</button><button class="btn ghost" data-pick="sub">从相册选</button></div>
       <img class="preview" id="pv-sub" alt="预览">
       <div class="tip">可以拍站名牌、换乘指示、出口指示或线路图。只根据图里能看到的内容说明，拿不准会直接告诉你。</div>
+      <div class="route-box">
+        <div class="rh">输入起点和终点查路线</div>
+        <div class="route-grid">
+          <div class="route-fields">
+            <label>起点<input id="rtFrom" maxlength="40" autocomplete="off" placeholder="如：明洞"></label>
+            <label>终点<input id="rtTo" maxlength="40" autocomplete="off" placeholder="如：弘大入口"></label>
+          </div>
+          <button type="button" id="rtSwap" aria-label="交换起点和终点" title="交换">⇅</button>
+        </div>
+        <div class="btns" style="margin-top:10px"><button type="button" class="btn primary" id="rtBtn">查路线</button></div>
+        <div class="loading" id="ld-rt"><div class="spin"></div>正在查找车站…</div>
+        <div class="route-out" id="rtOut"></div>
+        <div class="tip">可用中文、韩文或英文站名。路线仅供参考，请以车站标识和现场工作人员为准。</div>
+      </div>
     </div>
     <div class="card loading" id="ld-sub"><div class="spin"></div>正在看图，大约 5–15 秒…</div>
     <div class="card" id="rs-sub" style="display:none"></div>
@@ -111,7 +148,12 @@ nav button.on{color:var(--pink);font-weight:700}
   <section class="page" id="p-card">
     <div class="card">
       <h2>💬 中文 → 韩文沟通卡</h2>
-      <textarea id="cardIn" maxlength="120" placeholder="输入想说的话，例如：请帮我拿一个大一点的袋子"></textarea>
+      <div class="card-inrow">
+        <textarea id="cardIn" maxlength="120" placeholder="输入想说的话，例如：请帮我拿一个大一点的袋子"></textarea>
+        <button type="button" class="mic-btn" id="micBtn" aria-label="按住说话"><span class="ico">🎤</span><span class="lb">按住说话</span></button>
+      </div>
+      <div id="micState"></div>
+      <div class="tip" id="micTip">当前浏览器不支持语音，请用 Safari/Chrome 打开，或点输入框用键盘上的话筒说话</div>
       <div class="btns" style="margin-top:10px"><button class="btn primary" id="cardBtn">生成韩文卡片</button></div>
       <div class="card loading" id="ld-card" style="box-shadow:none"><div class="spin"></div>正在翻译…</div>
       <div id="cardOut"></div>
@@ -149,7 +191,7 @@ nav button.on{color:var(--pink);font-weight:700}
 <script>
 const $=id=>document.getElementById(id);
 const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
-const SUBS={cos:'拍一下韩国化妆品包装，马上看中文名称、用法和规格',sub:'拍地铁站牌或线路图，中文告诉你几号线、往哪走',card:'输入中文，生成大字韩文卡片，直接给店员或司机看',ph:'明洞常用韩语，一键大字展示并朗读'};
+const SUBS={cos:'拍一下韩国化妆品包装，马上看中文名称、用法和规格',sub:'拍地铁站牌或线路图，也可输入起点终点查路线',card:'输入中文，生成大字韩文卡片，直接给店员或司机看',ph:'明洞常用韩语，一键大字展示并朗读'};
 document.querySelectorAll('nav button').forEach(b=>b.onclick=()=>{
   document.querySelectorAll('nav button').forEach(x=>x.classList.toggle('on',x===b));
   document.querySelectorAll('.page').forEach(p=>p.classList.toggle('on',p.id==='p-'+b.dataset.tab));
@@ -247,9 +289,162 @@ function renderSub(d){
   el.style.display='block';el.scrollIntoView({behavior:'smooth',block:'start'});
 }
 
+// ---------- 地铁查路线 ----------
+const STATION_RAW=[
+  ['명동역',['明洞','明洞站','myeongdong','myeong-dong']],
+  ['홍대입구역',['弘大入口','弘大','弘益大学','hongdae','hongik','hongikuniversity']],
+  ['서울역',['首尔站','首尔车站','seoulstation','seoul']],
+  ['강남역',['江南','江南站','gangnam']],
+  ['이태원역',['梨泰院','itaewon']],
+  ['동대문역',['东大门','dongdaemun']],
+  ['동대문역사문화공원역',['东大门历史文化公园','ddp','dongdaemunhistoryandculturepark','dongdaemunhistory']],
+  ['광화문역',['光化门','光化门站','gwanghwamun']],
+  ['경복궁역',['景福宫','景福宫站','gyeongbokgung','gyeongbokpalace','gyeongbok']],
+  ['안국역',['安国','仁寺洞','北村','anguk','insadong','bukchon']],
+  ['종로3가역',['钟路3街','钟路三街','jongno3ga','jongno3-ga','jongno']],
+  ['종각역',['钟阁','jonggak']],
+  ['시청역',['市厅','首尔市厅','cityhall','seoulcityhall']],
+  ['을지로입구역',['乙支路入口','乙支路','euljiro1ga','euljiro']],
+  ['을지로3가역',['乙支路3街','euljiro3ga']],
+  ['충무로역',['忠武路','chungmuro']],
+  ['회현역',['会贤','南大门','南大门市场','hoehyeon','namdaemun']],
+  ['서울대입구역',['首尔大学','首尔大入口','seoulnationaluniversity','snu']],
+  ['신촌역',['新村','sinchon']],
+  ['이대역',['梨大','梨花女子大学','ewha','ewhawomansuniversity']],
+  ['합정역',['合井','hapjeong','hapjung']],
+  ['상수역',['上水','sangsu']],
+  ['망원역',['望远','mangwon']],
+  ['여의도역',['汝矣岛','yeouido','yoido']],
+  ['여의나루역',['汝矣渡口','yeouinaru']],
+  ['잠실역',['蚕室','乐天世界','jamsil','lotteworld']],
+  ['잠실새내역',['蚕室新川','jamsilsaenae']],
+  ['삼성역',['三成','科克斯','星空图书馆','samsung','coex']],
+  ['봉은사역',['奉恩寺','bongeunsa']],
+  ['선릉역',['宣陵','seolleung','seonreung']],
+  ['역삼역',['驿三','yeoksam']],
+  ['신논현역',['新论岘','sinnonhyeon','sinnonhyun']],
+  ['논현역',['论岘','nonhyeon']],
+  ['신사역',['新沙','林荫道','佳拉苏吉','sinsa','garosugil']],
+  ['압구정역',['狎鸥亭','apgujeong']],
+  ['압구정로데오역',['狎鸥亭罗德奥','apgujeongrodeo']],
+  ['청담역',['清潭','cheongdam']],
+  ['성수역',['圣水','seongsu','sungsoo']],
+  ['뚝섬역',['纛岛','ttukseom','dukseom']],
+  ['서울숲역',['首尔林','seoulforest']],
+  ['건대입구역',['建大入口','建大','建国大学','konkuk','konkukuniversity']],
+  ['어린이대공원역',['儿童大公园','childrensgrandpark']],
+  ['왕십리역',['往十里','wangsimni']],
+  ['용산역',['龙山','yongsan']],
+  ['숙대입구역',['淑大入口','淑大','sookmyung','sookmyungwomenuniversity']],
+  ['한강진역',['汉江镇','hangangjin']],
+  ['녹사평역',['绿莎坪','noksapyeong']],
+  ['삼각지역',['三角地','samgakji']],
+  ['이촌역',['二村','国立中央博物馆','ichon','nationalmuseum']],
+  ['사당역',['舍堂','sadang']],
+  ['교대역',['教大','gyodae','seoulnationalunivofeducation']],
+  ['고속터미널역',['高速巴士客运站','高速客运站','expressbusterminal']],
+  ['공덕역',['孔德','gongdeok','kongdok']],
+  ['김포공항역',['金浦机场','金浦','gimpoairport','gimpo']],
+  ['인천공항1터미널역',['仁川机场1号航站楼','仁川机场一号','仁川机场','incheonairportt1','incheonairport','icnt1','icn']],
+  ['인천공항2터미널역',['仁川机场2号航站楼','仁川机场二号','incheonairportt2','icnt2']],
+  ['청량리역',['清凉里','cheongnyangni']],
+  ['혜화역',['惠化','大学路','hyehwa','daehangno','daehakro']],
+  ['성신여대입구역',['诚信女大','sungshin']],
+  ['신림역',['新林','sillim','shillim']],
+  ['노량진역',['鹭梁津','水产市场','noryangjin']],
+  ['영등포역',['永登浦','yeongdeungpo']],
+  ['신도림역',['新道林','sindorim']],
+  ['구로디지털단지역',['九老数码园区','gurodigitalcomplex','guro']],
+  ['가산디지털단지역',['加山数码园区','gasandigitalcomplex','gasan']],
+  ['디지털미디어시티역',['数码媒体城','dmc','digitalmediacity']],
+  ['월드컵경기장역',['世界杯体育场','上岩','worldcupstadium','sangam']],
+  ['마곡나루역',['麻谷渡口','首尔植物园','magongnaru','magoknaru']],
+  ['마곡역',['麻谷','magok']],
+  ['발산역',['钵山','balsan']],
+  ['국회의사당역',['国会','国会议事堂','nationalassembly']],
+  ['종합운동장역',['综合运动场','sportscomplex']],
+  ['문정역',['文井','munjeong']],
+  ['약수역',['药水','yaksu']],
+  ['옥수역',['玉水','oksu']],
+  ['한남역',['汉南','hannam']],
+  ['동작역',['铜雀','dongjak']],
+  ['서대문역',['西大门','seodaemun']],
+  ['독립문역',['独立门','dongnimmun']],
+  ['충정로역',['忠正路','chungjeongno','chungjeongro']],
+  ['연신내역',['延新川','yeonsinnae']],
+  ['불광역',['佛光','bulgwang']],
+  ['노원역',['芦原','nowon']],
+  ['수유역',['水逾','suyu']],
+  ['창동역',['仓洞','changdong']],
+  ['고려대역',['高丽大学','koreauniversity']],
+  ['한양대역',['汉阳大学','hanyanguniversity','hanyang']],
+  ['군자역',['君子','gunja']],
+  ['대흥역',['大兴','daeheung']],
+  ['공릉역',['孔陵','gongneung']],
+  ['석촌역',['石村','石村湖','seokchon']],
+  ['송파역',['松坡','songpa']],
+  ['남영역',['南营','namyeong']],
+  ['신용산역',['新龙山','sinyongsan']]
+];
+function normSt(s){
+  return String(s||'').trim().toLowerCase()
+    .replace(/[.\s_\-'’]/g,'')
+    .replace(/(车站|地铁站|地铁)$/,'')
+    .replace(/站$/,'')
+    .replace(/역$/,'')
+    .replace(/station$/,'')
+    .replace(/stn$/,'');
+}
+const STATIONS={};
+STATION_RAW.forEach(([off,als])=>{
+  if(!off.endsWith('역') && off!=='여의도') return;
+  const official = off.endsWith('역')?off:null;
+  if(!official) return;
+  STATIONS[normSt(official)]=official;
+  (als||[]).forEach(a=>{const k=normSt(a); if(k) STATIONS[k]=official});
+});
+// 汝矣岛 already added via 여의도역; drop the accidental placeholder row
+function lookupStation(s){
+  const k=normSt(s);
+  return (k && STATIONS[k]) || '';
+}
+function kakaoRoute(s,e){return 'https://map.kakao.com/?sName='+encodeURIComponent(s)+'&eName='+encodeURIComponent(e)}
+function naverRoute(s,e){return 'https://map.naver.com/p/search/'+encodeURIComponent(s+' '+e+' 길찾기')}
+async function resolveStation(raw){
+  const hit=lookupStation(raw);
+  if(hit) return hit;
+  const r=await fetch('/api/station',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({name:raw})});
+  const j=await r.json().catch(()=>({}));
+  if(!r.ok) throw new Error(j.detail||'站名转换失败');
+  if(!j.station_ko) throw new Error('没能确认这个站名，请换个写法再试');
+  return j.station_ko;
+}
+async function findRoute(){
+  const a=$('rtFrom').value.trim(), b=$('rtTo').value.trim();
+  if(!a||!b){showErr('请先填写起点和终点');return}
+  if(a.length>40||b.length>40){showErr('站名太长，请只输入车站名称');return}
+  $('err').style.display='none';$('ld-rt').style.display='block';$('rtBtn').disabled=true;$('rtOut').innerHTML='';
+  try{
+    const [s,e]=await Promise.all([resolveStation(a),resolveStation(b)]);
+    const k=kakaoRoute(s,e), n=naverRoute(s,e);
+    $('rtOut').innerHTML=`<div class="name-zh">${esc(s)} → ${esc(e)}</div>
+      <div class="tip">仅供参考。将打开地图查看换乘和走法，请再核对站名。</div>
+      <div class="route-links">
+        <a class="kakao" href="${esc(k)}" target="_blank" rel="noopener">打开 Kakao 地图路线</a>
+        <a class="naver" href="${esc(n)}" target="_blank" rel="noopener">备用：Naver 地图搜索</a>
+      </div>`;
+    window.open(k,'_blank','noopener');
+  }catch(err){showErr(err.message||'查询失败，请稍后重试')}
+  finally{$('ld-rt').style.display='none';$('rtBtn').disabled=false}
+}
+$('rtBtn').onclick=findRoute;
+$('rtSwap').onclick=()=>{const a=$('rtFrom'),b=$('rtTo'),x=a.value;a.value=b.value;b.value=x};
+['rtFrom','rtTo'].forEach(id=>$(id).addEventListener('keydown',e=>{if(e.key==='Enter'){e.preventDefault();findRoute()}}));
+
 // ---------- 沟通卡 ----------
-$('cardBtn').onclick=async()=>{
-  const t=$('cardIn').value.trim();if(!t){showErr('请先输入中文');return}
+async function makeCard(text){
+  const t=(text??$('cardIn').value).trim();if(!t){showErr('请先输入中文');return}
+  $('cardIn').value=t;
   $('err').style.display='none';$('ld-card').style.display='block';$('cardBtn').disabled=true;$('cardOut').innerHTML='';
   try{
     const r=await fetch('/api/card',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({text:t})});
@@ -260,7 +455,72 @@ $('cardBtn').onclick=async()=>{
     $('cSpk').onclick=()=>speak(j.ko);$('cBig').onclick=()=>showBig(j.ko,t,j.roman);
   }catch(e){showErr(e.message||'网络错误')}
   finally{$('ld-card').style.display='none';$('cardBtn').disabled=false}
-};
+}
+$('cardBtn').onclick=()=>makeCard();
+
+// 沟通卡语音输入（仅浏览器端，不上传录音）
+(function(){
+  const btn=$('micBtn'), tip=$('micTip'), st=$('micState');
+  const SR=window.SpeechRecognition||window.webkitSpeechRecognition;
+  const unsupported='当前浏览器不支持语音，请用 Safari/Chrome 打开，或点输入框用键盘上的话筒说话';
+  if(!SR){tip.style.display='block';btn.onclick=()=>showErr(unsupported);return}
+  let rec=null, on=false, holding=false, t0=0, skipUp=false, autoGen=false;
+  const errMap={
+    'not-allowed':'没有麦克风权限，请在浏览器设置里允许后重试',
+    'permission-denied':'没有麦克风权限，请在浏览器设置里允许后重试',
+    'no-speech':'没听清，请再试一次或改用键盘输入',
+    'audio-capture':'找不到麦克风，请检查设备后重试',
+    'network':'语音识别网络错误，请稍后再试'
+  };
+  function setState(s){if(!s){st.style.display='none';st.textContent='';return}st.style.display='block';st.textContent=s}
+  function startRec(){
+    if(on) return;
+    rec=new SR();rec.lang='zh-CN';rec.interimResults=true;rec.continuous=true;autoGen=false;
+    rec.onresult=e=>{
+      let interim='',final='';
+      for(let i=e.resultIndex;i<e.results.length;i++){
+        const x=e.results[i][0].transcript;
+        if(e.results[i].isFinal) final+=x; else interim+=x;
+      }
+      if(interim) setState('正在听… '+interim);
+      if(final){const v=final.trim();$('cardIn').value=v;autoGen=true;setState('正在听…')}
+    };
+    rec.onerror=e=>{
+      if(e.error==='aborted') return;
+      autoGen=false;
+      const m=errMap[e.error];
+      if(m) showErr(m);
+    };
+    rec.onend=()=>{
+      on=false;btn.classList.remove('on');btn.querySelector('.lb').textContent='按住说话';setState('');
+      const v=$('cardIn').value.trim();
+      if(autoGen&&v) makeCard(v);
+    };
+    try{
+      rec.start();on=true;btn.classList.add('on');btn.querySelector('.lb').textContent='正在听…';setState('正在听…');
+    }catch(err){showErr('无法开始语音识别，请改用键盘输入')}
+  }
+  function stopRec(){if(!on||!rec) return;try{rec.stop()}catch(e){}}
+  btn.addEventListener('contextmenu',e=>e.preventDefault());
+  btn.addEventListener('selectstart',e=>e.preventDefault());
+  btn.addEventListener('pointerdown',e=>{
+    if(e.button!=null&&e.button!==0) return;
+    e.preventDefault();
+    try{btn.setPointerCapture(e.pointerId)}catch(ex){}
+    if(on){skipUp=true;holding=false;stopRec();return}
+    skipUp=false;holding=true;t0=Date.now();startRec();
+  });
+  function endHold(e){
+    if(skipUp){skipUp=false;return}
+    if(!holding) return;
+    holding=false;
+    if(Date.now()-t0>=250) stopRec(); // 长按松手结束；短按保持聆听，再点一次结束
+  }
+  btn.addEventListener('pointerup',endHold);
+  btn.addEventListener('pointerleave',endHold);
+  btn.addEventListener('pointercancel',()=>{skipUp=false;holding=false;stopRec()});
+  btn.addEventListener('lostpointercapture',endHold);
+})();
 
 // ---------- 常用句 ----------
 const SCENES={
