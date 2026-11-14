@@ -1,0 +1,84 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>交友广场 · 旅韩助手</title>
+<meta name="description" content="旅韩社区交友广场：在韩国认识新朋友、相亲、找旅行搭子、语言交换。">
+<meta name="theme-color" content="#ff6b8f">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="旅韩助手">
+<link rel="manifest" href="/manifest.webmanifest">
+<link rel="apple-touch-icon" href="/static/icons/apple-touch-icon.png">
+<link rel="icon" type="image/png" sizes="192x192" href="/static/icons/icon-192.png">
+<link rel="stylesheet" href="/static/pwa.css">
+<link rel="stylesheet" href="/static/community.css">
+</head>
+<header>
+  <h1>💞 交友广场</h1>
+  <p>在韩国认识新朋友 · 相亲 · 找搭子 · 语言交换</p>
+</header>
+<main>
+  <div class="card userbar" id="ub">加载中…</div>
+  <div class="antiscam" id="anti"></div>
+  <div class="card">
+    <div class="filters">
+      <select id="fg"><option value="">性别不限</option></select>
+      <select id="fp"><option value="">目的不限</option></select>
+      <select id="fc"><option value="">城市不限</option></select>
+      <select id="fa"><option value="">年龄不限</option><option value="18-25">18–25 岁</option><option value="26-30">26–30 岁</option><option value="31-35">31–35 岁</option><option value="36-45">36–45 岁</option><option value="46-80">46 岁以上</option></select>
+    </div>
+    <div class="row" style="margin-top:10px;justify-content:space-between">
+      <a class="btn sm primary" href="/community/friends/edit" id="myBtn">✏️ 我的交友资料</a>
+      <a class="btn sm ghost" href="/rules#r8">交友规则</a>
+    </div>
+  </div>
+  <div id="lockNote"></div>
+  <div class="fgrid" id="grid"><div class="loading">加载中…</div></div>
+  <div style="text-align:center;margin:12px 0 14px"><button class="btn ghost" id="more" style="display:none">加载更多</button></div>
+  <div class="disclaimer">本站未对用户进行实名认证，“已认证”标识仅表示管理员人工核实过部分资料。请自行判断，保护好个人信息和财产安全。</div>
+</main>
+<nav>
+  <a href="/"><i>🏠</i>首页</a>
+  <a href="/attractions"><i>🗺️</i>景点</a>
+  <a href="/tips"><i>📘</i>攻略</a>
+  <a href="/community" class="on"><i>💬</i>社区</a>
+  <a href="/member"><i>👑</i>会员</a>
+</nav>
+<script src="/static/community.js"></script>
+<script>
+document.getElementById('anti').textContent = LH.ANTISCAM;
+var next = 0, grid = document.getElementById('grid'), moreEl = document.getElementById('more');
+function opt(sel, obj){ Object.keys(obj).forEach(function(k){ sel.insertAdjacentHTML('beforeend', '<option value="' + LH.esc(Array.isArray(obj) ? obj[k] : k) + '">' + LH.esc(obj[k]) + '</option>'); }); }
+function url(){
+  var a = (document.getElementById('fa').value || '-').split('-');
+  return '/api/friends/list?gender=' + document.getElementById('fg').value + '&purpose=' + document.getElementById('fp').value +
+    '&city=' + encodeURIComponent(document.getElementById('fc').value) + '&age_min=' + (a[0] || 0) + '&age_max=' + (a[1] || 0) + '&offset=' + next;
+}
+async function load(reset){
+  if (reset){ next = 0; grid.innerHTML = '<div class="loading">加载中…</div>'; }
+  try {
+    var d = await LH.api('GET', url());
+    if (reset) grid.innerHTML = '';
+    document.getElementById('lockNote').innerHTML = d.locked ? '<div class="card" style="text-align:center"><b>🔒 开通会员可看清晰照片和完整资料</b><p class="tip">会员 ¥<span data-p="price_t1">9.9</span>：查看交友资料；高级会员 ¥<span data-p="price_t2">19.9</span>：发布资料、打招呼、私信</p>' +
+      (d.login_required ? '<a class="btn primary" href="/login?next=/community/friends">登录 / 注册</a>' : '<a class="btn primary" href="/member">开通会员</a>') + '</div>' : '';
+    LH.prices();
+    if (!d.cards.length && reset) grid.innerHTML = '<div class="card empty" style="grid-column:1/-1">没有符合条件的资料，换个筛选条件试试</div>';
+    grid.insertAdjacentHTML('beforeend', d.cards.map(LH.friendCard).join(''));
+    grid.querySelectorAll('[data-lock]').forEach(function(c){ c.onclick = LH.lockedPrompt; });
+    next = d.next; moreEl.style.display = d.more ? 'inline-block' : 'none';
+  } catch(e){ grid.innerHTML = '<div class="card empty" style="grid-column:1/-1">' + LH.esc(e.message) + '</div>'; }
+}
+moreEl.onclick = function(){ load(false); };
+['fg', 'fp', 'fc', 'fa'].forEach(function(id){ document.getElementById(id).onchange = function(){ load(true); }; });
+(async function(){
+  var m = await LH.userbar(document.getElementById('ub'));
+  if (m && m.user && m.user.has_profile) document.getElementById('myBtn').textContent = '✏️ 编辑我的资料';
+  try { var o = await LH.api('GET', '/api/friends/options'); opt(document.getElementById('fg'), o.genders); opt(document.getElementById('fp'), o.purposes); opt(document.getElementById('fc'), o.cities); } catch(e){}
+  load(true);
+})();
+</script>
+<script src="/static/pwa.js" defer></script>
+</body>
+</html>

@@ -1,0 +1,72 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>全部版块 · 旅韩助手</title>
+<meta name="description" content="旅韩社区全部版块：旅行、签证留学、在韩生活、交友相亲、商家服务。">
+<meta name="theme-color" content="#ff6b8f">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="旅韩助手">
+<link rel="manifest" href="/manifest.webmanifest">
+<link rel="apple-touch-icon" href="/static/icons/apple-touch-icon.png">
+<link rel="icon" type="image/png" sizes="192x192" href="/static/icons/icon-192.png">
+<link rel="stylesheet" href="/static/pwa.css">
+<link rel="stylesheet" href="/static/community.css">
+</head>
+<header>
+  <h1>☰ 全部版块</h1>
+  <p>点“＋ 加入”，版块新帖会出现在社区“关注”标签</p>
+</header>
+<main>
+  <div class="err" id="err"></div>
+  <div class="bwrap"><div class="bcat" id="cats"></div><div class="bsub" id="subs"><div class="loading">加载中…</div></div></div>
+  <div class="footlinks" style="margin-top:14px"><a href="/community">返回社区</a>·<a href="/community/friends">交友广场</a>·<a href="/community/rate">汇率换算</a></div>
+</main>
+<a class="fab round" href="/community/new"><b>＋</b>发布</a>
+<nav>
+  <a href="/"><i>🏠</i>首页</a>
+  <a href="/attractions"><i>🗺️</i>景点</a>
+  <a href="/tips"><i>📘</i>攻略</a>
+  <a href="/community" class="on"><i>💬</i>社区</a>
+  <a href="/member"><i>👑</i>会员</a>
+</nav>
+<script src="/static/community.js"></script>
+<script>
+var data = null, cur = LH.qs('cat') || '', user = null;
+function show(){
+  document.getElementById('cats').innerHTML = data.categories.map(function(c){
+    return '<button data-c="' + c.key + '"' + (c.key === cur ? ' class="on"' : '') + '>' + c.icon + '<br>' + LH.esc(c.name) + '</button>';
+  }).join('');
+  document.querySelectorAll('#cats button').forEach(function(b){ b.onclick = function(){ cur = b.dataset.c; history.replaceState(null, '', '?cat=' + cur); show(); }; });
+  var c = data.categories.filter(function(x){ return x.key === cur; })[0];
+  var extra = cur === 'friends' ? '<div class="bitem"><i>💞</i><a href="/community/friends"><b>交友广场</b><small>看看谁在韩国，打个招呼</small></a></div>' : '';
+  extra += cur === 'life' ? '<div class="bitem"><i>💱</i><a href="/community/rate"><b>汇率换算</b><small>人民币 ↔ 韩元</small></a></div>' : '';
+  document.getElementById('subs').innerHTML = c.boards.map(function(b){
+    return '<div class="bitem"><i>' + b.icon + '</i><a href="/community?board=' + b.key + '"><b>' + LH.esc(b.name) + '</b><small>' +
+      (b.merchant ? '商家会员发布 · ' : '') + (b.members_only ? '会员可看 · ' : '') + b.members + ' 人加入</small></a>' +
+      '<button class="jbtn' + (b.joined ? ' on' : '') + '" data-j="' + b.key + '">' + (b.joined ? '已加入' : '＋ 加入') + '</button></div>';
+  }).join('') + extra;
+  document.querySelectorAll('#subs [data-j]').forEach(function(btn){
+    btn.onclick = async function(){
+      if (!user){ location.href = '/login?next=' + encodeURIComponent('/community/boards?cat=' + cur); return; }
+      try {
+        var r = await LH.api('POST', '/api/community/boards/' + btn.dataset.j + '/join', {});
+        data.categories.forEach(function(c){ c.boards.forEach(function(b){ if (b.key === btn.dataset.j){ b.joined = r.joined; b.members += r.joined ? 1 : -1; } }); });
+        show();
+      } catch(e){ alert(e.message); }
+    };
+  });
+}
+(async function(){
+  try { var m = await LH.me(); user = m.user; } catch(e){}
+  try { data = await LH.api('GET', '/api/community/boards'); }
+  catch(e){ LH.showErr(document.getElementById('err'), e.message); return; }
+  if (!data.categories.some(function(c){ return c.key === cur; })) cur = data.categories[0].key;
+  show();
+})();
+</script>
+<script src="/static/pwa.js" defer></script>
+</body>
+</html>

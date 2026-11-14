@@ -34,7 +34,7 @@
       <div class="row" style="justify-content:space-between"><b id="stats">…</b><button class="btn sm gray" id="alogout">退出后台</button></div>
     </div>
     <div class="boards" id="tabs">
-      <button data-t="users" class="on">用户/会员</button><button data-t="reports">举报</button><button data-t="posts">帖子</button><button data-t="review">审核</button><button data-t="promo">推广统计</button><button data-t="settings">价格设置</button>
+      <button data-t="users" class="on">用户/会员</button><button data-t="reports">举报</button><button data-t="posts">帖子</button><button data-t="review">审核</button><button data-t="promo">推广统计</button><button data-t="settings">价格设置</button><button data-t="friends">交友</button>
     </div>
     <div class="card" id="t-users">
       <div class="row"><input class="f" id="us" placeholder="搜索编号/昵称/手机号/邮箱" style="flex:1"><button class="btn primary" id="usgo">搜索</button></div>
@@ -43,8 +43,21 @@
     <div class="card" id="t-reports" style="display:none"><div id="rlist"></div></div>
     <div class="card" id="t-posts" style="display:none"><div id="plist"></div><button class="btn ghost block" id="pmore" style="margin-top:10px">加载更多</button></div>
     <div class="card" id="t-review" style="display:none"><p class="tip" style="margin-top:0">普通版块中非商家用户发布的、含商业关键词的帖子在这里审核。通过后公开，拒绝后仅作者可见“未通过”。</p><div id="rvlist"></div></div>
+    <div id="t-friends" style="display:none">
+      <div class="card">
+        <h2>交友资料</h2>
+        <div class="row"><input class="f" id="fs" placeholder="搜索编号/昵称" style="flex:1"><button class="btn primary" id="fsgo">搜索</button></div>
+        <p class="tip">被举报多的排在前面。“隐藏”后资料不再出现在交友广场；“已认证”需你人工核实后再打开（本站没有实名认证）。</p>
+        <div id="flist" style="margin-top:6px"></div>
+      </div>
+      <div class="card">
+        <h2>可疑私信（自动标记）</h2>
+        <p class="tip" style="margin-top:0">私信含转账、投资、虚拟币、借钱等词会自动标记，并在双方聊天里显示防骗提醒。</p>
+        <div id="mlist"></div>
+      </div>
+    </div>
     <div class="card" id="t-settings" style="display:none">
-      <h2>价格设置（元）</h2>
+      <h2>价格与汇率设置</h2>
       <div id="setlist"></div>
       <button class="btn primary block" id="setsave" style="margin-top:12px">保存</button>
       <p class="tip">修改后会员页、发帖规则页和提示文字立即使用新价格。已开通的会员不受影响。</p>
@@ -90,14 +103,14 @@ document.getElementById('alogout').onclick = async function(){ await call('POST'
 document.querySelectorAll('#tabs button').forEach(function(b){
   b.onclick = function(){
     document.querySelectorAll('#tabs button').forEach(function(x){ x.className = x === b ? 'on' : ''; document.getElementById('t-' + x.dataset.t).style.display = x === b ? 'block' : 'none'; });
-    ({users: users, reports: reports, posts: function(){ posts(true); }, promo: promo, review: review, settings: settings})[b.dataset.t]();
+    ({users: users, reports: reports, posts: function(){ posts(true); }, promo: promo, review: review, settings: settings, friends: friends})[b.dataset.t]();
   };
 });
 async function boot(){
   var s;
   try { s = await LH.api('GET', '/api/admin/overview'); } catch(e){ if (e.status === 401) return showLogin(); return msg(e.message, true); }
   document.getElementById('loginBox').style.display = 'none'; document.getElementById('panel').style.display = 'block';
-  document.getElementById('stats').textContent = '用户 ' + s.users + ' · 会员 ' + s.members + ' · 高级 ' + s.premium + ' · 商家 ' + s.merchants + ' · 待审核 ' + s.pending + ' · 帖子 ' + s.posts + ' · 评论 ' + s.comments + ' · 待处理举报 ' + s.reports + ' · 数据库 ' + s.db_mb + 'MB/1024MB';
+  document.getElementById('stats').textContent = '用户 ' + s.users + ' · 会员 ' + s.members + ' · 高级 ' + s.premium + ' · 商家 ' + s.merchants + ' · 待审核 ' + s.pending + ' · 帖子 ' + s.posts + ' · 评论 ' + s.comments + ' · 待处理举报 ' + s.reports + ' · 交友资料 ' + s.profiles + ' · 7天可疑私信 ' + s.flagged7 + ' · 数据库 ' + s.db_mb + 'MB/1024MB';
   users();
 }
 async function users(){
@@ -105,17 +118,18 @@ async function users(){
   document.getElementById('ulist').innerHTML = d.users.length ? '<table class="adm"><tr><th>编号</th><th>昵称/账号</th><th>状态</th><th>操作</th></tr>' + d.users.map(function(u){
     return '<tr><td>' + u.id + '</td><td>' + E(u.nickname) + '<br><small>' + E(u.account) + '</small><br><small>注册 ' + E(u.joined) + (u.promoter ? ' · 推广码 ' + E(u.promoter) : '') + '</small></td><td>' +
       ['普通', '<b style="color:#1b7a3d">会员</b>', '<b style="color:#8e44ff">高级会员</b>'][u.tier] + (u.merchant_active ? '<br><b style="color:#1565c0">商家·' + (u.merchant_plan === 'year' ? '年付' : '月付') + '</b><br><small>到期 ' + E(u.merchant_until) + '<br>增发次数 ' + u.merchant_credits + '</small>' : (u.merchant_until ? '<br><small style="color:#c62828">商家已到期 ' + E(u.merchant_until) + '</small>' : '')) +
-      (u.is_banned ? '<br><b style="color:#c62828">已封禁</b>' : '') + '</td><td class="row">' +
+      (u.is_banned ? '<br><b style="color:#c62828">已封禁</b>' : '') + (u.verified ? '<br><span class="vbadge">✔ 已认证</span>' : '') + '</td><td class="row">' +
       [0, 1, 2].filter(function(t){ return t !== u.tier; }).map(function(t){ return '<button class="btn sm ' + (t > u.tier ? 'primary' : 'gray') + '" data-u="' + u.id + '" data-a="set_tier" data-t="' + t + '">设为' + ['普通', '会员', '高级'][t] + '</button>'; }).join('') +
       '<button class="btn sm primary" data-u="' + u.id + '" data-a="merchant" data-plan="month">商家' + (u.merchant_active ? '续' : '开') + '月付</button>' +
       '<button class="btn sm primary" data-u="' + u.id + '" data-a="merchant" data-plan="year">商家' + (u.merchant_active ? '续' : '开') + '年付</button>' +
       (u.merchant_active ? '<button class="btn sm gray" data-u="' + u.id + '" data-a="credits">+增发次数</button><button class="btn sm gray" data-u="' + u.id + '" data-a="merchant_off">停商家</button>' : '') +
       (u.is_banned ? '<button class="btn sm gray" data-u="' + u.id + '" data-a="unban">解封</button>' : '<button class="btn sm gray" data-u="' + u.id + '" data-a="ban">封禁</button>') +
+      '<button class="btn sm gray" data-u="' + u.id + '" data-a="' + (u.verified ? 'unverify">取消认证' : 'verify">标记已认证') + '</button>' +
       '<button class="btn sm gray" data-u="' + u.id + '" data-a="purge">删全部内容</button><button class="btn sm gray" data-u="' + u.id + '" data-a="reset_pw">重置密码</button></td></tr>';
   }).join('') + '</table>' : '<div class="empty">没有用户</div>';
   document.querySelectorAll('#ulist [data-a]').forEach(function(b){
     b.onclick = async function(){
-      var names = {set_tier: '设为' + ['普通用户', '会员', '高级会员'][+b.dataset.t || 0], merchant: '商家会员' + (b.dataset.plan === 'year' ? '年付（365 天）' : '月付（30 天）') + '开通/续费', merchant_off: '立即停用商家会员', credits: '增加增发次数', ban: '封禁', unban: '解封', purge: '删除该用户全部帖子和评论', reset_pw: '重置密码'};
+      var names = {set_tier: '设为' + ['普通用户', '会员', '高级会员'][+b.dataset.t || 0], merchant: '商家会员' + (b.dataset.plan === 'year' ? '年付（365 天）' : '月付（30 天）') + '开通/续费', merchant_off: '立即停用商家会员', credits: '增加增发次数', ban: '封禁', unban: '解封', verify: '标记“已认证”（请确认已人工核实）', unverify: '取消“已认证”', purge: '删除该用户全部帖子、评论、交友资料和私信', reset_pw: '重置密码'};
       var extra = {action: b.dataset.a, tier: +b.dataset.t || 0, plan: b.dataset.plan};
       if (b.dataset.a === 'credits'){ var n = prompt('增加几次增发（每次 = 1 篇，已收款后再加；负数为扣减）', '1'); if (!n) return; extra.n = parseInt(n, 10); }
       else if (!confirm('确定对用户 ' + b.dataset.u + ' 执行：' + names[b.dataset.a] + '？')) return;
@@ -131,16 +145,19 @@ document.getElementById('usgo').onclick = users;
 async function reports(){
   var d = await call('GET', '/api/admin/reports');
   document.getElementById('rlist').innerHTML = d.reports.length ? d.reports.map(function(r){
-    return '<div class="cmt"><div class="who">' + (r.type === 'post' ? '帖子' : '评论') + ' #' + r.target_id + ' · 举报人 ' + E(r.reporter || '-') + ' · ' + E(r.time) + '</div>' +
+    var TN = {post: '帖子', comment: '评论', profile: '交友资料', message: '私信'};
+    return '<div class="cmt"><div class="who">' + TN[r.type] + ' #' + r.target_id + ' · 举报人 ' + E(r.reporter || '-') + ' · ' + E(r.time) + '</div>' +
       '<div class="ct">内容：' + E(r.text) + '<br>理由：' + E(r.reason) + '</div><div class="row" style="margin-top:6px">' +
       (r.post_id ? '<a class="btn sm ghost" target="_blank" href="/community/post/' + r.post_id + '">查看</a>' : '') +
-      '<button class="btn sm primary" data-del="' + r.type + ':' + r.target_id + '">删除该内容</button>' +
+      (r.type === 'profile' ? '<button class="btn sm primary" data-hidep="' + r.target_id + '">隐藏资料</button>' :
+       '<button class="btn sm primary" data-del="' + r.type + ':' + r.target_id + '">删除该内容</button>') +
       (r.target_user ? '<button class="btn sm gray" data-ban="' + r.target_user + '">封禁作者</button>' : '') +
       '<button class="btn sm gray" data-res="' + r.id + '">忽略</button></div></div>';
   }).join('') : '<div class="empty">没有待处理的举报</div>';
   document.querySelectorAll('#rlist [data-del]').forEach(function(b){ b.onclick = async function(){
     var p = b.dataset.del.split(':'); if (!confirm('删除该内容？')) return;
-    await call('DELETE', '/api/admin/' + (p[0] === 'post' ? 'posts/' : 'comments/') + p[1]); reports(); }; });
+    await call('DELETE', '/api/admin/' + ({post: 'posts/', comment: 'comments/', message: 'messages/'})[p[0]] + p[1]); reports(); }; });
+  document.querySelectorAll('#rlist [data-hidep]').forEach(function(b){ b.onclick = async function(){ if (!confirm('隐藏该交友资料？')) return; await call('POST', '/api/admin/friends/' + b.dataset.hidep, {action: 'hide'}); reports(); }; });
   document.querySelectorAll('#rlist [data-ban]').forEach(function(b){ b.onclick = async function(){ if (!confirm('封禁该用户？')) return; await call('POST', '/api/admin/users/' + b.dataset.ban, {action: 'ban'}); msg('已封禁', false); }; });
   document.querySelectorAll('#rlist [data-res]').forEach(function(b){ b.onclick = async function(){ await call('POST', '/api/admin/reports/' + b.dataset.res + '/resolve', {}); reports(); }; });
 }
@@ -214,10 +231,41 @@ async function review(){
     await call('POST', '/api/admin/posts/' + b.dataset.no + '/review', {action: 'reject', reason: why}); document.getElementById('rv' + b.dataset.no).remove(); }; });
   document.querySelectorAll('#rvlist [data-banu]').forEach(function(b){ b.onclick = async function(){ if (!confirm('封禁该用户？')) return; await call('POST', '/api/admin/users/' + b.dataset.banu, {action: 'ban'}); msg('已封禁', false); }; });
 }
+async function friends(){
+  var d = await call('GET', '/api/admin/friends?s=' + encodeURIComponent(document.getElementById('fs').value));
+  document.getElementById('flist').innerHTML = d.profiles.length ? d.profiles.map(function(p){
+    return '<div class="cmt"><div class="who">#' + p.uid + ' ' + E(p.nickname) + '（账号昵称 ' + E(p.account_nick) + '）' + (p.verified ? '<span class="vbadge">✔ 已认证</span>' : '') +
+      (p.hidden ? ' <b style="color:#c62828">已隐藏</b>' : '') + (!p.visible ? ' <small>用户设为不公开</small>' : '') + (p.banned ? ' <b style="color:#c62828">已封禁</b>' : '') + '</div>' +
+      '<div class="ct" style="color:var(--sub)">' + E(p.gender_name + ' · ' + p.age + '岁 · ' + (p.height ? p.height + 'cm · ' : '') + p.city + (p.area ? '/' + p.area : '') + ' · ' + p.purpose_name + (p.visa ? ' · ' + p.visa : '')) +
+      ' · 被举报 ' + p.reports + ' · 可疑私信 ' + p.flagged_msgs + ' · 24h 打招呼 ' + p.greets24 + ' · 更新 ' + E(p.updated) + '</div>' +
+      '<div class="ct">' + E(p.intro) + '</div>' +
+      (p.photos.length ? '<div class="thumbs">' + p.photos.map(function(i){ return '<div><img src="/api/admin/friend-photo/' + i + '" alt=""><button data-fu="' + p.uid + '" data-fa="delete_photo" data-ph="' + i + '">×</button></div>'; }).join('') + '</div>' : '') +
+      '<div class="row" style="margin-top:8px">' +
+      '<button class="btn sm ' + (p.hidden ? 'gray" data-fu="' + p.uid + '" data-fa="unhide">取消隐藏' : 'primary" data-fu="' + p.uid + '" data-fa="hide">隐藏资料') + '</button>' +
+      '<button class="btn sm gray" data-fu="' + p.uid + '" data-fa="' + (p.verified ? 'unverify">取消认证' : 'verify">标记已认证') + '</button>' +
+      '<a class="btn sm ghost" target="_blank" href="/community/friends/' + p.uid + '">查看</a>' +
+      (p.banned ? '' : '<button class="btn sm gray" data-fban="' + p.uid + '">封禁用户</button>') + '</div></div>';
+  }).join('') : '<div class="empty">没有交友资料</div>';
+  document.querySelectorAll('#flist [data-fa]').forEach(function(b){ b.onclick = async function(){
+    var nm = {hide: '隐藏资料', unhide: '取消隐藏', verify: '标记已认证（请确认已人工核实）', unverify: '取消认证', delete_photo: '删除这张照片'}[b.dataset.fa];
+    if (!confirm('确定' + nm + '？')) return;
+    await call('POST', '/api/admin/friends/' + b.dataset.fu, {action: b.dataset.fa, photo: b.dataset.ph}); friends(); }; });
+  document.querySelectorAll('#flist [data-fban]').forEach(function(b){ b.onclick = async function(){ if (!confirm('封禁该用户？')) return; await call('POST', '/api/admin/users/' + b.dataset.fban, {action: 'ban'}); friends(); }; });
+  var m = await call('GET', '/api/admin/flagged-messages');
+  document.getElementById('mlist').innerHTML = m.messages.length ? m.messages.map(function(x){
+    return '<div class="cmt"><div class="who">' + E(x.sender) + '（#' + x.sender_id + '）→ ' + E(x.recipient) + '（#' + x.recipient_id + '）· ' + E(x.time) + (x.deleted ? ' <small>已删除</small>' : '') + (x.sender_banned ? ' <b style="color:#c62828">发送者已封禁</b>' : '') + '</div>' +
+      '<div class="ct">' + E(x.body) + '<br><small style="color:#8a5300">命中：' + E(x.words || '') + '</small></div><div class="row" style="margin-top:6px">' +
+      (x.deleted ? '' : '<button class="btn sm primary" data-dm="' + x.id + '">删除消息</button>') +
+      (x.sender_banned ? '' : '<button class="btn sm gray" data-mban="' + x.sender_id + '">封禁发送者</button>') + '</div></div>';
+  }).join('') : '<div class="empty">没有可疑私信</div>';
+  document.querySelectorAll('#mlist [data-dm]').forEach(function(b){ b.onclick = async function(){ await call('DELETE', '/api/admin/messages/' + b.dataset.dm); friends(); }; });
+  document.querySelectorAll('#mlist [data-mban]').forEach(function(b){ b.onclick = async function(){ if (!confirm('封禁该用户？')) return; await call('POST', '/api/admin/users/' + b.dataset.mban, {action: 'ban'}); friends(); }; });
+}
+document.getElementById('fsgo').onclick = friends;
 async function settings(){
   var d = await call('GET', '/api/admin/settings');
   document.getElementById('setlist').innerHTML = d.settings.map(function(x){
-    return '<label class="f">' + E(x.label) + '</label><input class="f" type="number" step="0.1" min="0" data-k="' + E(x.key) + '" value="' + E(x.value) + '">';
+    return '<label class="f">' + E(x.label) + '</label><input class="f" type="number" step="0.01" min="0" data-k="' + E(x.key) + '" value="' + E(x.value) + '">';
   }).join('');
 }
 document.getElementById('setsave').onclick = async function(){

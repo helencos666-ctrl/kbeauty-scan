@@ -1,0 +1,95 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>交友资料 · 旅韩助手</title>
+<meta name="description" content="旅韩社区交友资料。">
+<meta name="theme-color" content="#ff6b8f">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="旅韩助手">
+<link rel="manifest" href="/manifest.webmanifest">
+<link rel="apple-touch-icon" href="/static/icons/apple-touch-icon.png">
+<link rel="icon" type="image/png" sizes="192x192" href="/static/icons/icon-192.png">
+<link rel="stylesheet" href="/static/pwa.css">
+<link rel="stylesheet" href="/static/community.css">
+</head>
+<header>
+  <h1 id="h1">💞 交友资料</h1>
+  <p><a href="/community/friends">‹ 返回交友广场</a></p>
+</header>
+<main>
+  <div class="antiscam" id="anti"></div>
+  <div id="box"><div class="card loading">加载中…</div></div>
+  <div class="disclaimer">本站未做实名认证。“已认证”仅表示管理员人工核实过部分资料，请自行判断。</div>
+</main>
+<div class="actbar" id="act" style="display:none"></div>
+<div class="lightbox" id="lb"><img alt=""></div>
+<nav>
+  <a href="/"><i>🏠</i>首页</a>
+  <a href="/attractions"><i>🗺️</i>景点</a>
+  <a href="/tips"><i>📘</i>攻略</a>
+  <a href="/community" class="on"><i>💬</i>社区</a>
+  <a href="/member"><i>👑</i>会员</a>
+</nav>
+<script src="/static/community.js"></script>
+<script>
+document.getElementById('anti').textContent = LH.ANTISCAM;
+var uid = parseInt(location.pathname.split('/').pop(), 10), E = LH.esc, P = null;
+var lb = document.getElementById('lb'); lb.onclick = function(){ lb.style.display = 'none'; };
+async function load(){
+  var box = document.getElementById('box');
+  try { P = await LH.api('GET', '/api/friends/profile/' + uid); }
+  catch(e){
+    box.innerHTML = '<div class="card empty">' + E(e.message) + '<br><br>' + (e.status === 401 ? '<a class="btn primary" href="/login?next=' + encodeURIComponent(location.pathname) + '">登录 / 注册</a>' :
+      (e.status === 403 ? '<a class="btn primary" href="/member">开通会员</a>' : '<a class="btn ghost" href="/community/friends">返回交友广场</a>')) + '</div>';
+    return;
+  }
+  document.title = P.nickname + ' · 交友资料';
+  document.getElementById('h1').textContent = '💞 ' + P.nickname;
+  var gal = P.photos.length ? '<div class="pgal">' + P.photos.map(function(id){ return '<img loading="lazy" alt="" src="/api/friends/photo/' + id + '" data-z="1">'; }).join('') + '</div>' :
+    '<div class="ph0">' + (P.gender === 'f' ? '👩' : '👨') + '</div>';
+  box.innerHTML = '<div class="card">' + gal +
+    '<h2 style="color:var(--ink);font-size:20px;margin:14px 0 6px">' + E(P.nickname) + LH.vb(P.verified) + LH.badge(P.author_tier) + '</h2>' +
+    '<div class="chips"><span class="chip ' + (P.gender === 'f' ? 'g-f">♀ 女' : 'g-m">♂ 男') + '</span><span class="chip">' + P.age + ' 岁</span>' +
+    (P.height ? '<span class="chip">' + P.height + ' cm</span>' : '') + '<span class="chip">📍 ' + E(P.city + (P.area ? ' · ' + P.area : '')) + '</span>' +
+    (P.visa ? '<span class="chip">🪪 ' + E(P.visa) + '</span>' : '') + '<span class="chip" style="background:#ffe3eb;color:var(--pink)">🎯 ' + E(P.purpose_name) + '</span></div>' +
+    '<div class="body">' + E(P.intro) + '</div>' +
+    '<div class="row" style="justify-content:flex-end;margin-top:12px">' + (P.mine ? '<a class="btn sm ghost" href="/community/friends/edit">编辑资料</a>' :
+      '<button class="linkbtn" id="fo">' + (P.following ? '已关注' : '＋ 关注') + '</button><button class="linkbtn" id="bk">' + (P.blocked ? '解除拉黑' : '🚫 拉黑') + '</button><button class="linkbtn" id="rp">🚩 举报</button>') + '</div>' +
+    (P.mine && (!P.visible || P.hidden) ? '<div class="pending" style="margin-top:10px">' + (P.hidden ? '该资料已被管理员隐藏，如有疑问请联系管理员。' : '你的资料目前设为不公开，别人看不到。') + '</div>' : '') + '</div>';
+  box.querySelectorAll('[data-z]').forEach(function(im){ im.onclick = function(){ lb.querySelector('img').src = im.src; lb.style.display = 'flex'; }; });
+  if (!P.mine){
+    document.getElementById('fo').onclick = async function(){ try { var r = await LH.api('POST', '/api/community/follow/' + uid, {}); this.textContent = r.following ? '已关注' : '＋ 关注'; } catch(e){ alert(e.message); } };
+    document.getElementById('bk').onclick = async function(){
+      if (!P.blocked && !confirm('拉黑后双方互相看不到资料，对方也不能再给你发消息。确定拉黑？')) return;
+      try { var r = await LH.api('POST', '/api/friends/block/' + uid, {}); if (r.blocked){ alert('已拉黑'); location.href = '/community/friends'; } else load(); } catch(e){ alert(e.message); } };
+    document.getElementById('rp').onclick = function(){ LH.report('profile', uid); };
+  }
+  var act = document.getElementById('act');
+  if (P.mine){ act.style.display = 'none'; return; }
+  act.style.display = 'flex';
+  if (P.my_tier < 2){
+    act.innerHTML = '<a class="btn primary" href="/member">开通高级会员，打招呼 / 私信</a>';
+  } else if (P.blocked){
+    act.innerHTML = '<button class="btn gray" disabled>你已拉黑对方</button>';
+  } else {
+    act.innerHTML = (P.thread_id ? '<a class="btn ghost" href="/community/messages/' + P.thread_id + '">💬 私信</a>' : '') + '<button class="btn primary" id="greet">👋 打招呼</button>';
+    document.getElementById('greet').onclick = async function(){
+      if (!P.has_my_profile){ if (confirm('先发布你的交友资料，对方才能了解你。现在去填写？')) location.href = '/community/friends/edit'; return; }
+      var t = prompt('招呼语（可修改，最多 100 字）', '你好，看了你的资料，想认识一下 👋'); if (t === null) return;
+      this.disabled = true;
+      try {
+        var r = await LH.api('POST', '/api/friends/greet/' + uid, {body: t});
+        if (r.warning) alert(r.warning);
+        location.href = '/community/messages/' + r.thread_id;
+      } catch(e){ alert(e.message); this.disabled = false; }
+    };
+  }
+}
+load();
+</script>
+<script src="/static/pwa.js" defer></script>
+</body>
+</html>

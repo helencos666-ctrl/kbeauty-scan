@@ -1,0 +1,112 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>我的交友资料 · 旅韩助手</title>
+<meta name="description" content="编辑旅韩社区交友资料。">
+<meta name="theme-color" content="#ff6b8f">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="旅韩助手">
+<link rel="manifest" href="/manifest.webmanifest">
+<link rel="apple-touch-icon" href="/static/icons/apple-touch-icon.png">
+<link rel="icon" type="image/png" sizes="192x192" href="/static/icons/icon-192.png">
+<link rel="stylesheet" href="/static/pwa.css">
+<link rel="stylesheet" href="/static/community.css">
+<meta name="robots" content="noindex">
+</head>
+<header>
+  <h1>✏️ 我的交友资料</h1>
+  <p><a href="/community/friends">‹ 返回交友广场</a></p>
+</header>
+<main>
+  <div class="card userbar" id="ub">加载中…</div>
+  <div class="antiscam" id="anti"></div>
+  <div class="card" id="gate" style="display:none"></div>
+  <div class="card" id="form" style="display:none">
+    <div class="err" id="err"></div><div class="ok" id="ok"></div>
+    <label class="f">昵称（2–16 字）</label><input class="f" id="nickname" maxlength="16">
+    <div class="filters" style="margin-top:4px">
+      <div><label class="f">性别</label><select class="f" id="gender"><option value="">请选择</option></select></div>
+      <div><label class="f">年龄（18 岁以上）</label><input class="f" id="age" type="number" min="18" max="80" inputmode="numeric"></div>
+      <div><label class="f">身高 cm（可不填）</label><input class="f" id="height" type="number" min="140" max="220" inputmode="numeric"></div>
+      <div><label class="f">所在城市</label><select class="f" id="city"><option value="">请选择</option></select></div>
+      <div><label class="f">区域（可不填）</label><input class="f" id="area" maxlength="20" placeholder="如：弘大、江南"></div>
+      <div><label class="f">签证/身份（可不填）</label><select class="f" id="visa"><option value="">不填</option></select></div>
+    </div>
+    <label class="f">交友目的</label><select class="f" id="purpose"><option value="">请选择</option></select>
+    <label class="f">自我介绍（10–500 字，不要留联系方式）</label>
+    <textarea class="f" id="intro" maxlength="500" placeholder="介绍一下自己：在韩国做什么、兴趣爱好、想认识什么样的朋友"></textarea>
+    <label class="f" style="display:flex;align-items:center;gap:8px"><input type="checkbox" id="visible" checked> 公开我的资料（关闭后别人看不到你）</label>
+    <button class="btn primary block" id="save" style="margin-top:12px">保存资料</button>
+    <div id="photoBox" style="display:none">
+      <label class="f">照片（最多 <span id="maxp">6</span> 张，第一张为封面；上传前会自动压缩并去除定位信息）</label>
+      <div class="thumbs" id="thumbs"></div>
+      <input type="file" id="file" accept="image/*" multiple style="margin-top:10px">
+      <p class="tip">请上传本人真实照片，禁止盗用他人照片和色情低俗内容。点照片可设为封面。</p>
+    </div>
+    <button class="btn gray block" id="del" style="margin-top:16px;display:none">删除我的交友资料</button>
+  </div>
+</main>
+<nav>
+  <a href="/"><i>🏠</i>首页</a>
+  <a href="/attractions"><i>🗺️</i>景点</a>
+  <a href="/tips"><i>📘</i>攻略</a>
+  <a href="/community" class="on"><i>💬</i>社区</a>
+  <a href="/member"><i>👑</i>会员</a>
+</nav>
+<script src="/static/community.js"></script>
+<script>
+document.getElementById('anti').textContent = LH.ANTISCAM;
+var $ = function(id){ return document.getElementById(id); }, err = $('err'), okEl = $('ok'), D = null;
+function fill(sel, obj){ Object.keys(obj).forEach(function(k){ sel.insertAdjacentHTML('beforeend', '<option value="' + LH.esc(Array.isArray(obj) ? obj[k] : k) + '">' + LH.esc(obj[k]) + '</option>'); }); }
+function photos(list){
+  $('thumbs').innerHTML = list.map(function(id, i){ return '<div><img src="/api/friends/photo/' + id + '?t=1" data-cv="' + id + '" alt="" style="' + (i === 0 ? 'outline:3px solid var(--pink)' : '') + '"><button data-dp="' + id + '">×</button></div>'; }).join('');
+  $('thumbs').querySelectorAll('[data-dp]').forEach(function(b){ b.onclick = async function(){ if (!confirm('删除这张照片？')) return; try { await LH.api('DELETE', '/api/friends/me/photos/' + b.dataset.dp); reload(); } catch(e){ LH.showErr(err, e.message); } }; });
+  $('thumbs').querySelectorAll('[data-cv]').forEach(function(im){ im.onclick = async function(){ try { await LH.api('POST', '/api/friends/me/photos/' + im.dataset.cv + '/cover', {}); reload(); } catch(e){ LH.showErr(err, e.message); } }; });
+  $('file').style.display = list.length >= D.options.max_photos ? 'none' : 'block';
+}
+async function reload(){ D = await LH.api('GET', '/api/friends/me'); if (D.profile){ photos(D.profile.photos); $('photoBox').style.display = 'block'; $('del').style.display = 'block'; } }
+$('save').onclick = async function(){
+  LH.showErr(err, ''); LH.showErr(okEl, '');
+  var body = {nickname: $('nickname').value, gender: $('gender').value, age: $('age').value, height: $('height').value, city: $('city').value,
+    area: $('area').value, visa: $('visa').value, purpose: $('purpose').value, intro: $('intro').value, visible: $('visible').checked};
+  this.disabled = true;
+  try { await LH.api('POST', '/api/friends/me', body); await reload(); LH.showErr(okEl, D.profile.photos.length ? '已保存' : '已保存，再上传几张照片吧（有照片的资料更受欢迎）'); }
+  catch(e){ LH.showErr(err, e.message); }
+  this.disabled = false;
+};
+$('file').onchange = async function(){
+  var files = Array.prototype.slice.call(this.files, 0, D.options.max_photos - D.profile.photos.length);
+  LH.showErr(err, '');
+  for (var i = 0; i < files.length; i++){
+    var fd = new FormData(); fd.append('image', await LH.compress(files[i]));
+    try { await LH.api('POST', '/api/friends/me/photos', fd); } catch(e){ LH.showErr(err, e.message); break; }
+  }
+  this.value = ''; reload();
+};
+$('del').onclick = async function(){ if (!confirm('删除后资料和照片都会清除，确定？')) return; try { await LH.api('DELETE', '/api/friends/me'); location.href = '/community/friends'; } catch(e){ LH.showErr(err, e.message); } };
+(async function(){
+  var m = await LH.userbar($('ub'));
+  if (!m) return;
+  if (!m.user){ $('gate').style.display = 'block'; $('gate').innerHTML = '<div class="empty">请先登录<br><br><a class="btn primary" href="/login?next=/community/friends/edit">登录 / 注册</a></div>'; return; }
+  try { D = await LH.api('GET', '/api/friends/me'); } catch(e){ $('gate').style.display = 'block'; $('gate').textContent = e.message; return; }
+  if (!D.can_edit && !D.profile){
+    $('gate').style.display = 'block';
+    $('gate').innerHTML = '<div class="empty">开通高级会员（¥' + LH.esc(D.price_t2) + '）后可发布交友资料、打招呼和私信<br><br><a class="btn primary" href="/member">' + (m.user.tier === 1 ? '升级高级会员' : '了解会员') + '</a></div>';
+    return;
+  }
+  var o = D.options; fill($('gender'), o.genders); fill($('city'), o.cities); fill($('visa'), o.visa_types); fill($('purpose'), o.purposes); $('maxp').textContent = o.max_photos;
+  var p = D.profile || {};
+  $('nickname').value = p.nickname || D.default_nickname || ''; $('gender').value = p.gender || ''; $('age').value = p.age || ''; $('height').value = p.height || '';
+  $('city').value = p.city || ''; $('area').value = p.area || ''; $('visa').value = p.visa || ''; $('purpose').value = p.purpose || ''; $('intro').value = p.intro || '';
+  $('visible').checked = p.visible !== false;
+  if (!D.can_edit){ $('save').disabled = true; $('save').textContent = '高级会员到期，资料不能修改（可删除或在下方关闭公开）'; $('visible').onchange = async function(){ try { await LH.api('POST', '/api/friends/me/visible', {visible: this.checked}); } catch(e){ LH.showErr(err, e.message); } }; }
+  $('form').style.display = 'block';
+  if (D.profile){ photos(D.profile.photos); $('photoBox').style.display = 'block'; $('del').style.display = 'block'; }
+})();
+</script>
+<script src="/static/pwa.js" defer></script>
+</body>
+</html>

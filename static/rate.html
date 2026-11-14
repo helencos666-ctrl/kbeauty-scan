@@ -1,0 +1,63 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>汇率换算 · 旅韩助手</title>
+<meta name="description" content="人民币与韩元汇率换算，参考汇率由管理员手动更新。">
+<meta name="theme-color" content="#ff6b8f">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="旅韩助手">
+<link rel="manifest" href="/manifest.webmanifest">
+<link rel="apple-touch-icon" href="/static/icons/apple-touch-icon.png">
+<link rel="icon" type="image/png" sizes="192x192" href="/static/icons/icon-192.png">
+<link rel="stylesheet" href="/static/pwa.css">
+<link rel="stylesheet" href="/static/community.css">
+</head>
+<header>
+  <h1>💱 汇率换算</h1>
+  <p>人民币 ↔ 韩元，参考汇率</p>
+</header>
+<main>
+  <div class="card rate">
+    <div class="cur">🇨🇳 人民币 CNY</div>
+    <input class="big" id="cny" type="number" inputmode="decimal" min="0" placeholder="0">
+    <div class="cur">🇰🇷 韩元 KRW</div>
+    <input class="big" id="krw" type="number" inputmode="decimal" min="0" placeholder="0">
+    <div class="quick" id="quick"></div>
+    <p class="tip" id="rinfo">加载汇率…</p>
+  </div>
+  <div class="card">
+    <h2>💡 换钱小贴士</h2>
+    <ul class="rules">
+      <li>参考汇率由管理员手动更新，仅供估算；实际以银行、换钱所或支付软件当时的汇率为准。</li>
+      <li>明洞等正规换钱所看清“买入/卖出价”，当面点清现金。</li>
+      <li>不要通过社区网友私下换汇或转账，这是常见诈骗方式。</li>
+    </ul>
+  </div>
+  <div class="footlinks"><a href="/community">返回社区</a></div>
+</main>
+<nav>
+  <a href="/"><i>🏠</i>首页</a>
+  <a href="/attractions"><i>🗺️</i>景点</a>
+  <a href="/tips"><i>📘</i>攻略</a>
+  <a href="/community" class="on"><i>💬</i>社区</a>
+  <a href="/member"><i>👑</i>会员</a>
+</nav>
+<script src="/static/community.js"></script>
+<script>
+var rate = 195, cny = document.getElementById('cny'), krw = document.getElementById('krw');
+function fmt(n, d){ return isFinite(n) ? (Math.round(n * Math.pow(10, d)) / Math.pow(10, d)) : ''; }
+cny.oninput = function(){ krw.value = cny.value === '' ? '' : fmt(parseFloat(cny.value) * rate, 0); };
+krw.oninput = function(){ cny.value = krw.value === '' ? '' : fmt(parseFloat(krw.value) / rate, 2); };
+document.getElementById('quick').innerHTML = [1000, 5000, 10000, 50000, 100000].map(function(v){ return '<button data-k="' + v + '">₩' + v.toLocaleString() + '</button>'; }).join('') +
+  [100, 500, 1000].map(function(v){ return '<button data-c="' + v + '">¥' + v + '</button>'; }).join('');
+document.querySelectorAll('#quick button').forEach(function(b){ b.onclick = function(){
+  if (b.dataset.k){ krw.value = b.dataset.k; krw.oninput(); } else { cny.value = b.dataset.c; cny.oninput(); } }; });
+LH.api('GET', '/api/community/rate').then(function(d){ rate = d.cny_krw; show(); }).catch(show);
+function show(){ document.getElementById('rinfo').textContent = '参考汇率：1 人民币 ≈ ' + rate + ' 韩元；1000 韩元 ≈ ' + fmt(1000 / rate, 2) + ' 人民币（管理员手动设置）'; if (cny.value) cny.oninput(); }
+</script>
+<script src="/static/pwa.js" defer></script>
+</body>
+</html>

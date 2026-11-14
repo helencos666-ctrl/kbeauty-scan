@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <title>旅韩社区 · 旅韩助手</title>
-<meta name="description" content="旅韩助手社区：韩国旅行踩坑经验、组团同行、签证经验、留学学校和交友讨论。">
+<meta name="description" content="旅韩助手社区：交友相亲、韩国旅行经验、签证留学、租房二手、招聘求职等在韩华人交流。">
 <meta name="theme-color" content="#ff6b8f">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
@@ -16,29 +16,76 @@
 <link rel="stylesheet" href="/static/community.css">
 </head>
 <body>
-<header>
-  <h1>💬 旅韩社区</h1>
-  <p>真实的韩国旅行经验分享与讨论</p>
-</header>
-<main>
+<div class="ctop">
+  <div class="bar"><h1>💬 旅韩社区</h1><span class="sp"></span>
+    <a class="ic" href="/community/friends" title="交友广场">💞</a>
+    <a class="ic" href="/community/messages" title="私信" id="inboxIc">✉️</a>
+    <a class="ic" href="/community/boards" title="全部版块">☰</a>
+  </div>
+  <div class="ftabs" id="tabs">
+    <button data-t="follow" id="tFollow" style="display:none">关注</button>
+    <button data-t="recommend">推荐</button>
+    <button data-t="news">资讯</button>
+    <button data-t="hot">24小时热门</button>
+    <button data-t="latest">最新</button>
+  </div>
+</div>
+<main class="home">
   <div class="card userbar" id="ub">加载中…</div>
-  <div class="boards" id="boards"></div>
+
+  <div id="boardHead" class="card" style="display:none"></div>
   <div class="warn" id="bwarn" style="display:none"></div>
+
+  <div id="homeBlocks" style="display:none">
+    <div class="card tools" id="tools">
+      <a href="/community?board=visa"><i>🛂</i>签证</a>
+      <a href="/community?board=study"><i>🎓</i>留学</a>
+      <a href="/community?board=rent"><i>🏠</i>租房</a>
+      <a href="/community?board=used"><i>♻️</i>二手</a>
+      <a href="/community?board=jobs"><i>💼</i>招聘</a>
+      <a href="/community/rate"><i>💱</i>汇率换算</a>
+      <a href="/community?board=clinic"><i>💉</i>医美</a>
+      <a href="/community?board=hotel"><i>🏨</i>酒店住宿</a>
+      <a href="/community?board=car"><i>🚗</i>租车包车</a>
+      <a href="/community/boards"><i>⋯</i>更多</a>
+    </div>
+
+    <div class="card hl" id="friendsBox">
+      <div class="sech"><h2>💞 交友推荐</h2><a href="/community/friends">更多 ›</a></div>
+      <div class="frow" id="frow"><div class="loading">加载中…</div></div>
+      <div class="tip" id="fnote" style="margin-top:8px"></div>
+    </div>
+
+    <div class="card">
+      <div class="sech"><h2 id="hotTitle">🔥 24H热门</h2><a href="/community?tab=hot">更多 ›</a></div>
+      <div class="slist" id="hotList"><div class="loading">加载中…</div></div>
+    </div>
+
+    <div class="card">
+      <div class="sech"><h2>🎓 留学交友</h2><a href="/community/boards">全部版块 ›</a></div>
+      <div class="slist" id="sfList"><div class="loading">加载中…</div></div>
+    </div>
+
+    <div class="sech" style="margin:4px 2px 10px"><h2>🆕 最新</h2></div>
+  </div>
+
   <div id="list"><div class="loading">加载中…</div></div>
   <div style="text-align:center;margin:6px 0 14px"><button class="btn ghost" id="more" style="display:none">加载更多</button></div>
+
   <div class="card" id="rules">
     <h2>📢 社区公告</h2>
     <ul class="rules">
       <li>严禁诈骗、违法违禁、虚假信息、签证代办宣传、违法医疗广告、色情、赌博和骚扰，违者删帖封号，费用不退。</li>
+      <li>交友不谈钱：任何以投资、理财、虚拟币、借钱、转账为由要钱的都是骗子，请立即举报。</li>
       <li>酒店住宿、租车包车、医美皮肤科信息请开通商家会员后在商家版块发布；普通版块的商业内容需审核。</li>
       <li>签证、留学版块仅为经验分享，本站不提供代办服务。</li>
     </ul>
     <a class="btn ghost block" href="/rules" style="margin-top:10px">查看完整发帖规则</a>
   </div>
   <div class="disclaimer">帖子内容为网友个人经验，仅供参考，不代表本站观点。</div>
-  <div class="footlinks"><a href="/rules">社区公告与发帖规则</a>·<a href="/member">会员说明</a>·<a href="/community">社区首页</a></div>
+  <div class="footlinks"><a href="/rules">社区公告与发帖规则</a>·<a href="/rules#r8">交友规则</a>·<a href="/member">会员说明</a>·<a href="/community/boards">全部版块</a></div>
 </main>
-<a class="fab" href="/community/new" id="fab">✏️ 发帖</a>
+<a class="fab round" href="/community/new" id="fab"><b>＋</b>发布</a>
 <nav>
   <a href="/"><i>🏠</i>首页</a>
   <a href="/attractions"><i>🗺️</i>景点</a>
@@ -48,51 +95,109 @@
 </nav>
 <script src="/static/community.js"></script>
 <script>
-var BOARDS = [['','全部'],['pit','踩坑经验'],['group','组团同行'],['visa','签证经验'],['study','留学学校'],['friends','交友'],['hotel','🏨 酒店住宿'],['car','🚗 租车包车'],['clinic','🏥 医美皮肤科']];
 var WARN = {
   visa: '⚠️ 签证版块仅为网友个人经验分享，本站不提供签证代办。政策以韩国驻华使领馆、韩国签证申请中心和 K-ETA 官网为准。',
   study: '⚠️ 留学版块仅为网友经验与学校信息交流，本站不提供留学中介或代办服务。招生信息以学校官网为准。',
   friends: '⚠️ 交友请注意安全：不要转账借钱，不要透露证件和住址，线下见面选公共场所。遇到可疑账号请举报。',
   group: '⚠️ 组团同行请自行核实对方身份，费用 AA 透明，谨防以拼团为名收取定金的骗局。',
+  rent: '⚠️ 租房请实地看房，核对房东身份和房产登记（등기부등본），签正式合同后再付押金，谨防“先转定金”的骗局。',
+  used: '⚠️ 二手交易建议当面验货付款，不要提前转账，谨防假冒快递和代付链接。',
+  jobs: '⚠️ 请确认自己的签证允许就业，警惕“高薪轻松”“先交费再上岗”“代办打工签”等违法或诈骗信息。',
   hotel: '🏨 商家信息由商家自行发布并负责，本站不担保其资质、价格和服务。预订前请核实营业登记，使用正规支付并保留凭证。',
   car: '🚗 商家信息由商家自行发布并负责。租车包车请确认对方具备租赁或客运资质和保险，费用当面确认，谨慎预付。',
   clinic: '🏥 商家信息由商家自行发布并负责，本站不担保医疗效果。请选择合法医疗机构，遵医嘱，谨慎对待“包效果”类宣传。',
 };
-var cur = LH.qs('board') || '', last = 0;
-if (!BOARDS.some(function(b){ return b[0] === cur; })) cur = '';
-function renderBoards(){
-  document.getElementById('boards').innerHTML = BOARDS.map(function(b){
-    return '<button data-b="' + b[0] + '"' + (b[0] === cur ? ' class="on"' : '') + '>' + b[1] + '</button>';
-  }).join('');
-  document.querySelectorAll('#boards button').forEach(function(btn){
-    btn.onclick = function(){ cur = btn.dataset.b; history.replaceState(null, '', cur ? '?board=' + cur : '/community'); renderBoards(); load(true); };
-  });
-  var w = document.getElementById('bwarn'); w.textContent = WARN[cur] || ''; w.style.display = WARN[cur] ? 'block' : 'none';
-  document.getElementById('fab').href = '/community/new' + (cur ? '?board=' + cur : '');
+var board = LH.qs('board') || '', tab = LH.qs('tab') || 'recommend', next = 0, fb = false, boards = {}, user = null;
+var listEl = document.getElementById('list'), moreEl = document.getElementById('more');
+function setTab(t){
+  tab = t; board = '';
+  history.replaceState(null, '', t === 'recommend' ? '/community' : '/community?tab=' + t);
+  render();
 }
-function item(p){
-  var cover = p.cover ? '<img class="cover" loading="lazy" alt="" src="/api/community/img/' + p.cover + '?t=1">' : '';
-  return '<a class="post" href="/community/post/' + p.id + '"><div class="txt"><h3>' + LH.esc(p.title) + '</h3>' +
-    '<p class="ex">' + LH.esc(p.excerpt) + '</p><div class="meta">' + (p.merchant ? '<span class="tag biz">商家</span>' : '') + '<span class="tag">' + LH.esc(p.board_name) + '</span>' +
-    '<span>' + LH.esc(p.author) + LH.badge(p.author_tier) + '</span><span>' + LH.esc(p.time) + '</span>' +
-    '<span>❤️ ' + p.likes + '</span><span>💬 ' + p.comments + '</span>' + (p.img_n > 1 ? '<span>🖼 ' + p.img_n + '</span>' : '') +
-    '</div></div>' + cover + '</a>';
+document.querySelectorAll('#tabs button').forEach(function(b){ b.onclick = function(){ setTab(b.dataset.t); }; });
+function render(){
+  document.querySelectorAll('#tabs button').forEach(function(b){ b.className = (!board && b.dataset.t === tab) ? 'on' : ''; });
+  var home = !board && tab === 'recommend';
+  document.getElementById('homeBlocks').style.display = home ? 'block' : 'none';
+  var bh = document.getElementById('boardHead'), w = document.getElementById('bwarn');
+  w.textContent = WARN[board] || ''; w.style.display = WARN[board] ? 'block' : 'none';
+  document.getElementById('fab').href = '/community/new' + (board ? '?board=' + board : '');
+  if (board){
+    bh.style.display = 'block';
+    bh.innerHTML = '<div class="row" style="justify-content:space-between"><b style="font-size:18px">' + LH.esc(boards[board] || '') + '</b><span class="row">' +
+      (board === 'friends' ? '<a class="btn sm primary" href="/community/friends">💞 交友广场</a>' : '') +
+      '<button class="jbtn" id="joinB">＋ 加入</button></span></div>';
+    joinState();
+  } else bh.style.display = 'none';
+  if (home) loadHome();
+  load(true);
+}
+async function joinState(){
+  var btn = document.getElementById('joinB'); if (!btn) return;
+  try { var d = await LH.api('GET', '/api/community/boards'); var on = d.joined.indexOf(board) >= 0; btn.className = 'jbtn' + (on ? ' on' : ''); btn.textContent = on ? '已加入' : '＋ 加入'; } catch(e){}
+  btn.onclick = async function(){
+    if (!user){ location.href = '/login?next=' + encodeURIComponent(location.pathname + location.search); return; }
+    try { var r = await LH.api('POST', '/api/community/boards/' + board + '/join', {}); btn.className = 'jbtn' + (r.joined ? ' on' : ''); btn.textContent = r.joined ? '已加入' : '＋ 加入'; } catch(e){ alert(e.message); }
+  };
+}
+function feedUrl(){
+  if (board) return '/api/community/posts?board=' + board + (next ? '&before=' + next : '');
+  var t = tab === 'recommend' ? 'latest' : tab;   // 推荐页下方“最新”列表
+  return '/api/community/feed?tab=' + t + '&offset=' + next + (fb ? '&fb=1' : '');
 }
 async function load(reset){
-  var list = document.getElementById('list'), more = document.getElementById('more');
-  if (reset){ last = 0; list.innerHTML = '<div class="loading">加载中…</div>'; }
+  if (reset){ next = 0; fb = false; listEl.innerHTML = '<div class="loading">加载中…</div>'; }
   try {
-    var d = await LH.api('GET', '/api/community/posts?board=' + cur + (last ? '&before=' + last : ''));
-    if (reset) list.innerHTML = '';
-    if (d.tier_required){ list.innerHTML = d.login_required ? '<div class="card empty">交友版需登录并开通会员（¥9.9）后查看<br><br><a class="btn primary" href="/login?next=/community%3Fboard%3Dfriends">登录 / 注册</a></div>' : '<div class="card empty">交友版需开通会员（¥9.9）后查看<br><br><a class="btn primary" href="/member">了解会员</a></div>'; more.style.display = 'none'; return; }
-    if (!d.posts.length && reset){ list.innerHTML = '<div class="card empty">这里还没有帖子，来发第一篇吧</div>'; }
-    list.insertAdjacentHTML('beforeend', d.posts.map(item).join(''));
-    if (d.posts.length) last = d.posts[d.posts.length - 1].id;
-    more.style.display = d.more ? 'inline-block' : 'none';
-  } catch(e){ list.innerHTML = '<div class="card empty">' + LH.esc(e.message) + '</div>'; }
+    var d = await LH.api('GET', feedUrl());
+    if (reset) listEl.innerHTML = '';
+    if (d.tier_required){
+      listEl.innerHTML = '<div class="card empty">交友版需' + (d.login_required ? '登录并' : '') + '开通会员（¥<span data-p="price_t1">9.9</span>）后查看<br><br>' +
+        (d.login_required ? '<a class="btn primary" href="/login?next=/community%3Fboard%3Dfriends">登录 / 注册</a>' : '<a class="btn primary" href="/member">了解会员</a>') + '</div>';
+      LH.prices(); moreEl.style.display = 'none'; return;
+    }
+    if (d.login_required){ listEl.innerHTML = '<div class="card empty">登录后可关注用户和版块<br><br><a class="btn primary" href="/login?next=/community%3Ftab%3Dfollow">登录 / 注册</a></div>'; moreEl.style.display = 'none'; return; }
+    if (d.fallback && reset && tab === 'hot' && !board) listEl.insertAdjacentHTML('beforeend', '<div class="tip" style="margin:0 0 8px">24 小时内暂无热帖，以下为近 7 天热门</div>');
+    fb = !!d.fallback;
+    if (!d.posts.length && reset){
+      listEl.innerHTML = tab === 'follow' && !board ? '<div class="card empty">还没有内容。去<a href="/community/boards">全部版块</a>加入感兴趣的版块，或在帖子里关注作者</div>' : '<div class="card empty">这里还没有帖子，来发第一篇吧</div>';
+    }
+    var rankBase = (tab === 'hot' && !board) ? next : -1;
+    listEl.insertAdjacentHTML('beforeend', d.posts.map(function(p, i){ return LH.postItem(p, rankBase >= 0 ? rankBase + i + 1 : 0); }).join(''));
+    if (board){ if (d.posts.length) next = d.posts[d.posts.length - 1].id; } else next = d.next;
+    moreEl.style.display = d.more ? 'inline-block' : 'none';
+  } catch(e){ listEl.innerHTML = '<div class="card empty">' + LH.esc(e.message) + '</div>'; moreEl.style.display = 'none'; }
 }
-document.getElementById('more').onclick = function(){ load(false); };
-renderBoards(); load(true); LH.userbar(document.getElementById('ub'));
+moreEl.onclick = function(){ load(false); };
+async function section(el, url, ranked, titleEl){
+  try {
+    var d = await LH.api('GET', url);
+    if (titleEl && d.fallback) titleEl.textContent = '🔥 近 7 天热门';
+    el.innerHTML = d.posts.length ? d.posts.map(function(p, i){ return LH.postItem(p, ranked ? i + 1 : 0); }).join('') : '<div class="empty" style="padding:10px">暂时还没有帖子</div>';
+  } catch(e){ el.innerHTML = '<div class="empty" style="padding:10px">' + LH.esc(e.message) + '</div>'; }
+}
+async function loadHome(){
+  section(document.getElementById('hotList'), '/api/community/feed?tab=hot&limit_n=5', true, document.getElementById('hotTitle'));
+  section(document.getElementById('sfList'), '/api/community/feed?tab=latest&boards=study,friends&limit_n=5', false);
+  var fr = document.getElementById('frow'), note = document.getElementById('fnote');
+  try {
+    var d = await LH.api('GET', '/api/friends/list?limit_n=10');
+    fr.innerHTML = d.cards.length ? d.cards.map(LH.friendCard).join('') : '<div class="empty" style="padding:10px">还没有交友资料，<a href="/community/friends/edit">来做第一个</a></div>';
+    fr.querySelectorAll('[data-lock]').forEach(function(c){ c.onclick = LH.lockedPrompt; });
+    note.innerHTML = d.locked ? '🔒 ' + (d.login_required ? '登录并' : '') + '开通会员（¥<span data-p="price_t1">9.9</span>）可看清晰照片和完整资料；高级会员可发布资料、打招呼和私信' : '想被看到？<a href="/community/friends/edit">发布我的交友资料</a> · <a href="/rules#r8">交友规则</a>';
+    LH.prices();
+  } catch(e){ fr.innerHTML = '<div class="empty" style="padding:10px">' + LH.esc(e.message) + '</div>'; }
+}
+(async function(){
+  var d = await LH.userbar(document.getElementById('ub'));
+  if (d){ boards = d.boards || {}; user = d.user; }
+  if (board && !boards[board]) board = '';
+  if (user){
+    document.getElementById('tFollow').style.display = '';
+    if (user.unread) document.getElementById('inboxIc').insertAdjacentHTML('beforeend', '<span class="dot">' + (user.unread > 99 ? '99+' : user.unread) + '</span>');
+  } else if (tab === 'follow') tab = 'recommend';
+  if (['recommend', 'news', 'hot', 'latest', 'follow'].indexOf(tab) < 0) tab = 'recommend';
+  render();
+})();
 </script>
 <script src="/static/pwa.js" defer></script>
 </body>
