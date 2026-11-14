@@ -52,6 +52,19 @@ nav a.on{color:var(--pink);font-weight:700}
 @keyframes s{to{transform:rotate(360deg)}}
 .loading,.empty{text-align:center;padding:28px 10px;color:var(--sub)}
 .src a{color:#2c7be5;word-break:break-all}
+details.tip-acc{background:var(--card);border-radius:16px;box-shadow:0 4px 16px rgba(255,79,123,.08);margin-bottom:12px;overflow:hidden}
+details.tip-acc>summary{list-style:none;cursor:pointer;padding:16px;font-size:16px;font-weight:700;display:flex;align-items:center;justify-content:space-between;gap:10px;line-height:1.4}
+details.tip-acc>summary::-webkit-details-marker{display:none}
+details.tip-acc>summary::after{content:"＋";color:var(--pink);font-weight:700;flex:none;font-size:18px}
+details.tip-acc[open]>summary::after{content:"－"}
+details.tip-acc[open]>summary{border-bottom:1px solid var(--line)}
+details.tip-acc .tip-body{padding:12px 16px 16px}
+details.tip-acc ol{margin:0;padding-left:20px}
+details.tip-acc li{font-size:15px;line-height:1.7;margin:0 0 10px}
+details.tip-acc li:last-child{margin-bottom:0}
+details.tip-acc a{color:#2c7be5}
+.toc-label{font-size:12px;color:var(--sub);font-weight:600;margin:8px 0 6px}
+
 </style>
 
 </head>
@@ -72,6 +85,23 @@ nav a.on{color:var(--pink);font-weight:700}
 
 
   <div class="card">
+    <p class="toc-label" id="faq">出行贴士</p>
+    <div class="toc">
+      <a href="#tip-visa">签证入境</a>
+      <a href="#tip-flight">机票机场</a>
+      <a href="#tip-stay">住宿</a>
+      <a href="#tip-traffic">交通</a>
+      <a href="#tip-pay">换钱退税</a>
+      <a href="#tip-net">网络工具</a>
+      <a href="#tip-play">游玩打卡</a>
+      <a href="#tip-food">美食</a>
+      <a href="#tip-shop">购物</a>
+      <a href="#tip-clinic">医美皮肤科</a>
+      <a href="#tip-car">接送机包车</a>
+      <a href="#tip-customs">入境安全</a>
+      <a href="#tip-other">其他</a>
+    </div>
+    <p class="toc-label">详细说明</p>
     <div class="toc">
       <a href="#visa">签证入境</a>
       <a href="#money">换钱支付</a>
@@ -82,8 +112,166 @@ nav a.on{color:var(--pink);font-weight:700}
       <a href="#internet">上网通信</a>
       <a href="#scams">防骗提醒</a>
     </div>
-    <p class="tip" style="margin:8px 0 0">面向持中华人民共和国普通护照的短期游客。政策会调整，本页在 2026年11月15日 根据官方页面核对，出行前请再查原文。</p>
+    <p class="tip" style="margin:8px 0 0">面向持中华人民共和国普通护照的短期游客。政策会调整，本页在 2026年11月15日 根据官方公开页面核对，出行前请再查原文。</p>
   </div>
+
+
+  <details class="tip-acc" id="tip-visa">
+    <summary>签证入境</summary>
+    <div class="tip-body">
+      <ol>
+        <li>持中国普通护照前往首尔、釜山等济州以外地区，原则上需要事先取得韩国签证。济州岛对符合条件的游客可免签停留 30 天，但须从境外直达济州口岸入境，且活动范围仅限济州；经仁川、金浦、釜山等地中转，一般不能使用济州免签。符合条件的中国团队游客另有阶段性免签政策，细则以韩国驻华使领馆公告为准。</li>
+        <li>K-ETA（韩国电子旅行许可）是给免签入境对象国家/地区旅客办的出发前许可，不能代替中国游客前往首尔等地所需的旅游签证。持有效签证前往韩国本土，一般不必再办 K-ETA。中国游客若乘直达航班或船舶免签进入济州，通常也不在 K-ETA 办理对象之列。是否需要办理，请以官网 <a href="https://www.k-eta.go.kr" target="_blank" rel="noopener">k-eta.go.kr</a> 查询为准，不要使用非官方代办网站。</li>
+        <li>免签或持签证都不等于一定能入境。建议备好返程机票、首晚住宿订单和行程说明，入境审查时可能抽查。</li>
+        <li>韩国官方并未统一要求护照剩余有效期必须超过 6 个月，但护照须在整个停留期间保持有效。航空公司和出发地边检可能另有要求，出发前建议确认，并预留空白签证页。</li>
+      </ol>
+    </div>
+  </details>
+
+  <details class="tip-acc" id="tip-flight">
+    <summary>机票和机场</summary>
+    <div class="tip-body">
+      <ol>
+        <li>仁川机场国际航班较多，离市区较远；金浦离市区更近，去弘大、明洞通常更方便。具体以当时航班和交通时间为准。</li>
+        <li>仁川到市区可乘坐机场铁路（AREX）、机场大巴、出租车，也可预先预约包车。行李较多、需要点对点前往医院面诊时，不少游客会选择包车；费用和包含项目请事先书面确认。</li>
+        <li>若要在机场办理退税和托运，建议比航班更早到达，预留排队和海关查验时间。</li>
+        <li>机场兑换处方便，但牌价常常不如市区正规兑换所，适合只换少量应急现金。</li>
+      </ol>
+    </div>
+  </details>
+
+  <details class="tip-acc" id="tip-stay">
+    <summary>住宿</summary>
+    <div class="tip-body">
+      <ol>
+        <li>明洞购物和交通方便；弘大较年轻热闹；江南一带皮肤科和医美机构较多；乙支路附近相对安静，有时性价比更好。住哪里取决于行程，不是绝对标准。</li>
+        <li>不少韩国酒店不提供一次性牙刷、牙膏或拖鞋，建议自带。</li>
+        <li>韩国酒店常见入住 15:00、退房 11:00，以各酒店规定为准。能否提前入住要看当天房态，有的免费、有的收费；多数酒店可免费寄存行李。</li>
+        <li>入住房间人数一般按预订和登记来，不要私自加住未登记的人。</li>
+      </ol>
+    </div>
+  </details>
+
+  <details class="tip-acc" id="tip-traffic">
+    <summary>交通</summary>
+    <div class="tip-body">
+      <ol>
+        <li>T-money 等交通卡可在地铁、公交和部分便利店使用，便利店和地铁站通常可购买、充值。余额退还可在指定地点办理，一般会扣除手续费，卡本身工本费通常不退。</li>
+        <li>公交上下车都建议刷卡。不刷下车，在首尔市内线路上通常主要是无法享受换乘优惠；在实行距离计费的线路（如部分京畿道公交）上，还可能按该线路较高票价扣费。</li>
+        <li>白色或银色多为普通出租，黑色模范出租起步价和单价更高。首尔普通出租夜间加价时段目前一般为 22:00–04:00，其中 23:00–02:00 加价幅度更高；其他城市可能不同，以上车时计价器为准。</li>
+        <li>部分叫车应用提供中文界面。给司机看韩文地址，或发送 Naver 地图地点链接，通常比只说中文店名更稳妥。本站地点页也提供 Naver 地图和高德地图按钮。</li>
+        <li>深夜公共交通班次较少，虽有部分夜班公交，但多人出行或带行李时，可考虑出租车或预先预约的包车。</li>
+      </ol>
+    </div>
+  </details>
+
+  <details class="tip-acc" id="tip-pay">
+    <summary>换钱、支付和退税</summary>
+    <div class="tip-body">
+      <ol>
+        <li>换钱请选择有公示汇率的银行或正规兑换所（明洞一带选择较多），当场点清；不要私下找人换钱。</li>
+        <li>百货、Olive Young、免税店等较大商户越来越多支持微信、支付宝，但路边小摊、传统市场和不少小店仍可能只收现金或韩国卡，建议准备少量韩元。</li>
+        <li>在贴有退税标识的商店，单笔消费达到 <strong>15,000 韩元及以上</strong> 才可能退税（不是以前常说的 3 万韩元）。结账时出示护照并主动说明要退税。即时退税和一般退税的单笔、累计上限不同，详见本站 <a href="/shopping">购物与退税</a> 页。</li>
+        <li>在市内免税店购买、约定机场提货的商品，一般须在出境时提取，在韩国境内通常不能拆开使用。事后退税的商品出境前也应保持未使用，以便海关查验。</li>
+      </ol>
+    </div>
+  </details>
+
+  <details class="tip-acc" id="tip-net">
+    <summary>网络和常用工具</summary>
+    <div class="tip-body">
+      <ol>
+        <li>短期旅游很多人优先办理 eSIM，不用更换实体卡，但手机需支持 eSIM 且已解锁。也可以在机场办理预付 SIM 或租用随身 Wi-Fi。</li>
+        <li>在韩国，导航优先用 Naver 地图，翻译可用 Papago；谷歌地图在部分步行和公交线路上可能不够完整。</li>
+        <li>韩国常用电压 220V、60Hz，插座为两个圆孔（对应常见的欧标或德标转换头），请携带转换插头。</li>
+      </ol>
+    </div>
+  </details>
+
+  <details class="tip-acc" id="tip-play">
+    <summary>游玩打卡</summary>
+    <div class="tip-body">
+      <ol>
+        <li>穿着符合规定的韩服参观景福宫等部分宫殿，可免门票；服装须符合官方指引。热门时段建议提前查看是否需要预约。</li>
+        <li>弘大街头公演多在傍晚，周末通常更多，具体时间和地点不固定。</li>
+        <li>汉江公园可以野餐、租自行车，炸鸡和杯面是常见搭配；请把垃圾带走，并遵守公园规定。</li>
+        <li>爱宝乐园更偏大型园区和户外景区，乐天世界在市区、交通更方便，选择取决于行程和天气。</li>
+        <li>韩国公休日部分小店和餐厅会休息，出行前查好日期和营业时间。</li>
+      </ol>
+    </div>
+  </details>
+
+  <details class="tip-acc" id="tip-food">
+    <summary>美食</summary>
+    <div class="tip-body">
+      <ol>
+        <li>不少烤肉店设有 2 人起订，单独用餐可事先问清，或寻找标明接待单人的店铺。</li>
+        <li>韩国日常餐饮一般没有付小费的习惯；若账单已写服务费，按账单支付即可。</li>
+        <li>街边小吃、广藏市场等很多摊位可能只收现金，建议随身带一些韩元。</li>
+      </ol>
+    </div>
+  </details>
+
+  <details class="tip-acc" id="tip-shop">
+    <summary>购物</summary>
+    <div class="tip-body">
+      <ol>
+        <li>Olive Young 是常见的药妆连锁，不少门店可办理退税，进店请看退税标识，结账前向店员确认。</li>
+        <li>东大门部分商圈凌晨仍营业，批发和零售楼层不同，有的档口可能不接受单件散客，先问再买。</li>
+        <li>秋冬常有大型促销，部分商家也会做年末或圣诞折扣，力度因店而异。</li>
+        <li>大量采购回国时，注意中国海关对个人自用物品的限额，超额可能需申报或征税，以海关总署最新规定为准。</li>
+      </ol>
+    </div>
+  </details>
+
+  <details class="tip-acc" id="tip-clinic">
+    <summary>医美和皮肤科</summary>
+    <div class="tip-body">
+      <ol>
+        <li>请选择有正规资质的皮肤科或整形外科等医疗机构，避开无法确认资质的小店。</li>
+        <li>面诊时可询问医生资质、是否提供中文沟通或翻译，以及书面费用明细。</li>
+        <li>价格和项目因医院而异，建议向多家机构了解，并看清是否另有检查、药品或售后费用，不要轻信「一定同价」「绝无额外消费」这类口头承诺。</li>
+        <li>不同项目恢复期不同，面诊时问清楚能否正常逛街、何时适合乘飞机返回。</li>
+        <li>术后药品建议保留原包装，按航空和海关规定随身携带。本站只提供一般出行提示，不推荐或担保任何医疗机构。</li>
+      </ol>
+    </div>
+  </details>
+
+  <details class="tip-acc" id="tip-car">
+    <summary>接送机和包车</summary>
+    <div class="tip-body">
+      <ol>
+        <li>可预约接送机或包车。价格是一口价还是另计，航班延误是否收取等待费，因服务商而异，请事先书面确认。</li>
+        <li>包车常见按小时或按日计价，停车费、高速费是否包含在内，下单前问清。</li>
+        <li>有的行程可一并安排接送机、住宿协助、就医陪同或购物翻译，服务范围以合同为准。</li>
+        <li>选择时确认是否有强制购物安排，并保留订单和联系方式。本站不指定或推广某一车行。</li>
+      </ol>
+    </div>
+  </details>
+
+  <details class="tip-acc" id="tip-customs">
+    <summary>入境限制和安全</summary>
+    <div class="tip-body">
+      <ol>
+        <li>新鲜水果、蔬菜以及肉类、火腿、香肠等畜产品，旅客一般不得擅自带入韩国，须申报并接受检疫，违规可能被罚款或处罚。</li>
+        <li>常用药品尽量带原包装和说明书；数量较多或处方药，建议备好处方或医生证明，入境时按海关要求申报。</li>
+        <li>地铁、公交车内以及许多公共场所、指定禁烟区禁止吸烟，请到指定吸烟区。违者可能被罚款，金额因地方规定而异。</li>
+        <li>未经允许不要随意拍摄路人、店员，以免引发纠纷。</li>
+        <li>旅游咨询可拨打 1330，VisitKorea 写明提供中文等语言服务（在韩国拨 1330，境外可试 +82-2-1330）。报警 112，急救和火警 119。</li>
+      </ol>
+    </div>
+  </details>
+
+  <details class="tip-acc" id="tip-other">
+    <summary>其他</summary>
+    <div class="tip-body">
+      <ol>
+        <li>首尔整体治安相对较好，但独自出行仍建议选择人多、照明好的路段，尽量避开偏僻小巷。</li>
+        <li>CU、GS25、7-Eleven 等便利店购买零食、饮料和简单餐食很方便，部分门店 24 小时营业。</li>
+        <li>春秋昼夜温差大，建议穿可叠加的衣服；冬天室内暖气通常很足，外套方便穿脱更舒服。</li>
+      </ol>
+    </div>
+  </details>
 
   <article class="card article" id="visa">
     <h2>1. 签证与入境</h2>
@@ -206,6 +394,16 @@ nav a.on{color:var(--pink);font-weight:700}
       <li><a href="https://english.seoul.go.kr/policy/transportation/climate-card/" target="_blank" rel="noopener">Seoul Metropolitan Government: Climate Card</a></li>
       <li><a href="https://english.visitkorea.or.kr/svc/contents/contentsView.do?vcontsId=140654" target="_blank" rel="noopener">VisitKorea: Airport Transportation Guide</a>（页内注明 2026-05-22 更新）</li>
       <li><a href="https://english.visitkorea.or.kr/svc/contents/contentsView.do?vcontsId=1593864" target="_blank" rel="noopener">VisitKorea: WOWPASS</a></li>
+      <li><a href="https://overseas.mofa.go.kr/sg-en/brd/m_2435/view.do?seq=761394" target="_blank" rel="noopener">韩国驻新加坡大使馆 2026-01-02：济州免签与 K-ETA 适用对象说明</a></li>
+      <li><a href="https://www.mofa.go.kr/sg-en/brd/m_2435/view.do?seq=761395" target="_blank" rel="noopener">韩国驻新加坡大使馆：入境无需统一的 6 个月护照剩余有效期</a></li>
+      <li><a href="https://english.visitkorea.or.kr/svc/contents/contentsView.do?vcontsId=140736" target="_blank" rel="noopener">VisitKorea: Duty Free &amp; Tax Refunds</a>（单笔退税门槛 15,000 韩元；页内注明 2025-10-21 更新）</li>
+      <li><a href="https://english.visitkorea.or.kr/svc/contents/contentsView.do?vcontsId=248765" target="_blank" rel="noopener">VisitKorea: Comprehensive Tax Refund Guide</a></li>
+      <li><a href="https://english.seoul.go.kr/policy/transportation/modes-of-transport/taxi/" target="_blank" rel="noopener">首尔市：出租车夜间加价时段（普通出租 22:00–04:00，23:00–02:00 加价更高）</a></li>
+      <li><a href="https://english.seoul.go.kr/service/movement/public-transportation/" target="_blank" rel="noopener">首尔市：公交下车刷卡与换乘优惠说明</a></li>
+      <li><a href="https://english.visitkorea.or.kr/svc/contents/contentsView.do?vcontsId=140041" target="_blank" rel="noopener">VisitKorea: Electricity &amp; Communications</a>（220V、双圆孔插座）</li>
+      <li><a href="https://chinese.visitkorea.or.kr/svc/contents/contentsView.do?vcontsId=140655" target="_blank" rel="noopener">VisitKorea 中文：1330 旅游咨询翻译热线</a></li>
+      <li><a href="https://royal.khs.go.kr/ENG/contents/E701000000.do" target="_blank" rel="noopener">韩国宫廷遗址本部：符合规定的韩服可免宫殿门票</a></li>
+      <li><a href="https://english.visitkorea.or.kr/svc/contents/infoHtmlView.do?vcontsId=140629" target="_blank" rel="noopener">VisitKorea: Animal/Plant Quarantines</a></li>
       <li><a href="https://kr.china-embassy.gov.cn/lsfw/lsbhyxz/" target="_blank" rel="noopener">中国驻韩国大使馆：领事保护与协助</a></li>
     </ul>
     <p class="tip">本页只提供出行参考，不构成签证、法律或投资建议。最终以主管机关当场审查为准。</p>
@@ -222,5 +420,18 @@ nav a.on{color:var(--pink);font-weight:700}
 </nav>
 
 <script src="/static/pwa.js" defer></script>
+<script>
+(function(){
+  function openTarget(hash){
+    if(!hash) return;
+    var el = document.querySelector(hash);
+    if(el && el.tagName === "DETAILS") el.open = true;
+  }
+  document.querySelectorAll(".toc a[href^='#']").forEach(function(a){
+    a.addEventListener("click", function(){ openTarget(a.getAttribute("href")); });
+  });
+  openTarget(location.hash);
+})();
+</script>
 </body>
 </html>
