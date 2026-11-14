@@ -33,7 +33,7 @@ CYCLE_DAYS = 30
 PLAN_DAYS = {"month": 30, "year": 365}
 # 普通版块里非商家发布的明显商业信息 → 待审核
 COMMERCIAL_WORDS = ["酒店预订", "订酒店", "订房", "民宿预订", "租车", "包车", "接送机", "接机服务", "医美", "皮肤科", "整形", "整容",
-                    "微整", "价格", "报价", "优惠价", "微信号", "加微", "加v", "vx", "wx:", "wx：", "私信我", "私聊", "代办", "办签",
+                    "微整", "报价", "优惠价", "微信号", "加微", "加v", "vx", "wx:", "wx：", "私信我", "私聊", "代办", "办签",
                     "代购", "联系方式", "电话咨询", "kakao id", "kakaotalk id", "line id"]
 DEFAULT_SETTINGS = {"price_t1": "9.9", "price_t2": "19.9", "price_m_month": "99", "price_m_year": "999", "price_extra": "19.9"}
 SETTING_LABELS = {"price_t1": "会员价格", "price_t2": "高级会员价格", "price_m_month": "商家会员月付", "price_m_year": "商家会员年付",
@@ -687,7 +687,7 @@ async def api_new_post(req: Request, board: str = Form(...), title: str = Form(.
               (row["id"], i, big, th, w, h))
     if status == "pending":
         return {"ok": True, "id": row["id"], "pending": True,
-                "message": "你的帖子含有商业推广类内容（如酒店预订、租车包车、医美、价格、联系方式、代办等），已提交管理员审核，审核通过后才会公开。"
+                "message": "你的帖子含有商业推广类内容（如酒店预订、租车包车、医美、联系方式、代办等），已提交管理员审核，审核通过后才会公开。"
                            "酒店住宿、租车包车、医美皮肤科等商业信息请开通商家会员后在对应商家版块发布。"}
     return {"ok": True, "id": row["id"]}
 
