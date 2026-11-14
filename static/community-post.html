@@ -29,7 +29,8 @@
     <div id="clist"></div>
     <div id="cform" style="margin-top:10px"></div>
   </div>
-  <div class="disclaimer">帖子内容为网友个人经验，仅供参考，不代表本站观点。</div>
+  <div class="disclaimer">帖子内容为网友个人经验，仅供参考，不代表本站观点。商家信息由商家自行负责。</div>
+  <div class="footlinks"><a href="/rules">社区公告与发帖规则</a>·<a href="/member">会员说明</a>·<a href="/community">社区首页</a></div>
 </main>
 <div class="lightbox" id="lb"><img alt=""></div>
 <nav>
@@ -45,7 +46,10 @@ var pid = parseInt(location.pathname.split('/').pop(), 10);
 var WARN = {visa: '⚠️ 本帖为网友个人签证经验，本站不提供签证代办。政策以韩国驻华使领馆、韩国签证申请中心和 K-ETA 官网为准。',
   study: '⚠️ 本帖为网友留学经验分享，本站不提供留学中介或代办服务，招生信息以学校官网为准。',
   friends: '⚠️ 交友请注意安全：不要转账借钱，不要透露证件和住址，线下见面选公共场所。',
-  group: '⚠️ 组团同行请自行核实对方身份，费用 AA 透明，谨防收定金骗局。'};
+  group: '⚠️ 组团同行请自行核实对方身份，费用 AA 透明，谨防收定金骗局。',
+  hotel: '🏨 商家信息由商家自行发布并负责，本站不担保其资质、价格和服务。预订前请核实营业登记，使用正规支付并保留凭证。',
+  car: '🚗 商家信息由商家自行发布并负责。租车包车请确认对方具备租赁或客运资质和保险，费用当面确认，谨慎预付。',
+  clinic: '🏥 商家信息由商家自行发布并负责，本站不担保医疗效果。请选择合法医疗机构，遵医嘱，谨慎对待“包效果”类宣传。',};
 var lb = document.getElementById('lb');
 lb.onclick = function(){ lb.style.display = 'none'; };
 function zoom(src){ lb.querySelector('img').src = src; lb.style.display = 'flex'; }
@@ -56,23 +60,26 @@ async function load(){
   try {
     p = await LH.api('GET', '/api/community/posts/' + pid);
   } catch(e){
-    box.innerHTML = '<div class="empty">' + LH.esc(e.message) + (e.status === 401 ? '<br><br><a class="btn primary" href="/login?next=' + encodeURIComponent(location.pathname) + '">登录 / 注册</a>' : '') + '</div>';
+    box.innerHTML = '<div class="empty">' + LH.esc(e.message) + (e.status === 401 ? '<br><br><a class="btn primary" href="/login?next=' + encodeURIComponent(location.pathname) + '">登录 / 注册</a>' : (e.status === 403 ? '<br><br><a class="btn primary" href="/member">了解会员</a>' : '')) + '</div>';
     return;
   }
   document.title = p.title + ' · 旅韩社区';
-  document.getElementById('warn').innerHTML = WARN[p.board] ? '<div class="warn">' + WARN[p.board] + '</div>' : '';
+  document.getElementById('warn').innerHTML = (p.status === 'pending' ? '<div class="pending">⏳ 这篇帖子正在等待管理员审核，目前只有你自己能看到。' + (p.review_note ? '（' + LH.esc(p.review_note) + '）' : '') + '酒店、租车包车、医美等商业信息请开通商家会员后在商家版块发布。详见<a href="/rules#r3">发帖规则</a>。</div>' : '') +
+    (p.status === 'rejected' ? '<div class="pending">❌ 这篇帖子未通过审核：' + LH.esc(p.review_note || '') + '</div>' : '') +
+    (WARN[p.board] ? '<div class="warn">' + WARN[p.board] + '</div>' : '');
   var g = p.images.length ? '<div class="gallery' + (p.images.length === 1 ? ' one' : '') + '">' + p.images.map(function(i){
     return '<img loading="lazy" alt="" src="/api/community/img/' + i.id + (p.images.length === 1 ? '' : '?t=1') + '" data-full="/api/community/img/' + i.id + '">';
   }).join('') + '</div>' : '';
-  box.innerHTML = '<div class="meta" style="margin-top:0"><span class="tag">' + LH.esc(p.board_name) + '</span><span>' + LH.esc(p.time) + '</span></div>' +
+  box.innerHTML = '<div class="meta" style="margin-top:0">' + (p.merchant ? '<span class="tag biz">商家</span>' : '') + '<span class="tag">' + LH.esc(p.board_name) + '</span><span>' + LH.esc(p.time) + '</span></div>' +
     '<h2 style="color:var(--ink);font-size:19px;margin:10px 0 4px">' + LH.esc(p.title) + '</h2>' +
-    '<div class="meta" style="margin-top:4px"><span>👤 ' + LH.esc(p.author) + LH.badge(p.author_member) + '</span></div>' +
+    '<div class="meta" style="margin-top:4px"><span>👤 ' + LH.esc(p.author) + LH.badge(p.author_tier) + '</span></div>' +
     '<div class="body">' + LH.esc(p.body) + '</div>' + g +
     '<div class="row" style="margin-top:14px;justify-content:space-between"><button class="btn sm ghost" id="like">' + (p.liked ? '❤️ 已赞 ' : '🤍 点赞 ') + p.likes + '</button>' +
     '<span class="row">' + (p.mine ? '<button class="linkbtn" id="delp">删除</button>' : '') + '<button class="linkbtn" id="repp">🚩 举报</button></span></div>';
   box.querySelectorAll('.gallery img').forEach(function(im){ im.onclick = function(){ zoom(im.dataset.full); }; });
   document.getElementById('like').onclick = async function(){
     if (!me || !me.user){ location.href = '/login?next=' + encodeURIComponent(location.pathname); return; }
+    if (me.user.tier < 1){ if (confirm('开通会员后才能点赞。去了解会员？')) location.href = '/member'; return; }
     try { var r = await LH.api('POST', '/api/community/posts/' + pid + '/like', {}); this.textContent = (r.liked ? '❤️ 已赞 ' : '🤍 点赞 ') + r.likes; } catch(e){ alert(e.message); }
   };
   document.getElementById('repp').onclick = function(){ LH.report('post', pid); };
@@ -82,7 +89,7 @@ async function load(){
   document.getElementById('ctitle').textContent = '评论 ' + p.comment_list.length;
   var cl = document.getElementById('clist');
   cl.innerHTML = p.comment_list.length ? p.comment_list.map(function(c){
-    return '<div class="cmt"><div class="row" style="justify-content:space-between"><span class="who">' + LH.esc(c.author) + LH.badge(c.author_member) +
+    return '<div class="cmt"><div class="row" style="justify-content:space-between"><span class="who">' + LH.esc(c.author) + LH.badge(c.author_tier) +
       ' <span style="font-weight:400;color:var(--sub);font-size:12px">' + LH.esc(c.time) + '</span></span><span>' +
       (c.mine ? '<button class="linkbtn" data-delc="' + c.id + '">删除</button>' : '') + '<button class="linkbtn" data-repc="' + c.id + '">举报</button></span></div>' +
       '<div class="ct">' + LH.esc(c.body) + '</div></div>';
@@ -92,8 +99,8 @@ async function load(){
   var cf = document.getElementById('cform');
   if (!me || !me.user){
     cf.innerHTML = '<a class="btn ghost block" href="/login?next=' + encodeURIComponent(location.pathname) + '">登录后参与讨论</a>';
-  } else if (!me.user.is_member){
-    cf.innerHTML = '<a class="btn primary block" href="/member">开通会员（¥9.9）即可评论和发帖</a>';
+  } else if (me.user.tier < p.comment_tier){
+    cf.innerHTML = p.comment_tier >= 2 ? '<a class="btn primary block" href="/member">交友版评论需开通高级会员</a>' : '<a class="btn primary block" href="/member">开通会员即可评论</a>';
   } else {
     cf.innerHTML = '<div class="err" id="cerr"></div><textarea class="f" id="cbody" maxlength="500" style="min-height:80px" placeholder="友善发言，分享你的经验"></textarea>' +
       '<button class="btn primary block" id="csend" style="margin-top:8px">发表评论</button>';

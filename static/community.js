@@ -17,7 +17,14 @@ var LH = (function(){
     _me = await api('GET', '/api/community/me');
     return _me;
   }
-  function badge(m){ return m ? '<span class="mbadge">会员</span>' : ''; }
+  function badge(t){ t = +t || 0; return t >= 3 ? '<span class="mbadge biz">商家</span>' : (t === 2 ? '<span class="mbadge pro">高级会员</span>' : (t === 1 ? '<span class="mbadge">会员</span>' : '')); }
+  var _pr = null;
+  // 价格由管理员在后台设置，页面里 data-p="price_xxx" 的元素自动填入
+  async function prices(){
+    if (!_pr){ try { _pr = await api('GET', '/api/community/prices'); } catch(e){ return null; } }
+    document.querySelectorAll('[data-p]').forEach(function(el){ if (_pr[el.dataset.p] != null) el.textContent = _pr[el.dataset.p]; });
+    return _pr;
+  }
   function showErr(el, msg){ el.textContent = msg; el.style.display = msg ? 'block' : 'none'; }
   function qs(name){ return new URLSearchParams(location.search).get(name); }
   // 浏览器端压缩：最长边 1600px，JPEG 0.82，减少上传流量（服务器还会再压一次）
@@ -40,8 +47,8 @@ var LH = (function(){
     try {
       var d = await me();
       if (d.user){
-        el.innerHTML = '<span class="who">👤 ' + esc(d.user.nickname) + badge(d.user.is_member) + '</span>' +
-          '<span class="row">' + (d.user.is_member ? '' : '<a class="btn sm primary" href="/member">开通会员 ¥9.9</a>') +
+        el.innerHTML = '<span class="who">👤 ' + esc(d.user.nickname) + badge(d.user.display_tier) + '</span>' +
+          '<span class="row">' + (d.user.tier >= 2 ? '' : '<a class="btn sm primary" href="/member">' + (d.user.tier === 1 ? '升级高级会员' : '开通会员') + '</a>') +
           '<button class="btn sm gray" id="lhLogout">退出</button></span>';
         el.querySelector('#lhLogout').onclick = async function(){ await api('POST', '/api/community/logout', {}); location.reload(); };
       } else {
@@ -56,10 +63,11 @@ var LH = (function(){
   async function report(type, id){
     var d = await me().catch(function(){ return {}; });
     if (!d.user){ location.href = '/login?next=' + encodeURIComponent(location.pathname); return; }
+    if (d.user.tier < 1){ if (confirm('开通会员后才能举报。去了解会员？')) location.href = '/member'; return; }
     var reason = prompt('请简单说明举报理由（如：广告、诈骗、骚扰、违法违规）');
     if (!reason || !reason.trim()) return;
     try { await api('POST', '/api/community/report', {type: type, id: id, reason: reason.trim()}); alert('已收到举报，管理员会尽快处理'); }
     catch(e){ alert(e.message); }
   }
-  return {esc: esc, api: api, me: me, badge: badge, showErr: showErr, qs: qs, compress: compress, userbar: userbar, report: report};
+  return {prices: prices, esc: esc, api: api, me: me, badge: badge, showErr: showErr, qs: qs, compress: compress, userbar: userbar, report: report};
 })();

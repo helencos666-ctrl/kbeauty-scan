@@ -32,7 +32,13 @@
       <option value="visa">签证经验</option>
       <option value="study">留学学校</option>
       <option value="friends">交友</option>
+      <optgroup label="商家版块（仅限商家会员）">
+        <option value="hotel">🏨 酒店住宿</option>
+        <option value="car">🚗 租车包车</option>
+        <option value="clinic">🏥 医美皮肤科</option>
+      </optgroup>
     </select>
+    <div class="tip" id="quota" style="display:none"></div>
     <div class="warn" id="bwarn" style="display:none;margin-top:10px"></div>
     <label class="f">标题（4–40 字）</label>
     <input class="f" id="title" maxlength="40" placeholder="一句话说清楚，例如：明洞换钱踩坑记录">
@@ -42,7 +48,7 @@
     <input type="file" id="pick" accept="image/*" multiple>
     <div class="thumbs" id="thumbs"></div>
     <label style="display:flex;gap:8px;align-items:flex-start;font-size:13px;color:var(--sub);margin-top:14px;line-height:1.6">
-      <input type="checkbox" id="agree" style="margin-top:3px"> 我已阅读并遵守社区规则：不发广告、不引流、不公开他人隐私；签证/留学内容仅为个人经验分享。
+      <input type="checkbox" id="agree" style="margin-top:3px"> 我已阅读并同意<a href="/rules" target="_blank" style="color:#2c7be5">《社区公告与发帖规则》</a>：不发诈骗、违法、虚假、代办、违法医疗、色情赌博内容，不引流，不公开他人隐私。
     </label>
     <button class="btn primary block" id="send" style="margin-top:14px">发布</button>
     <p class="tip">请勿上传含证件号、二维码、手机号的图片。图片会去除拍摄定位等信息后保存。</p>
@@ -58,14 +64,27 @@
 <script src="/static/community.js"></script>
 <script>
 var WARN = {visa: '签证版块仅限个人经验分享，禁止发布代办广告。', study: '留学版块仅限经验交流，禁止发布中介广告。',
-  friends: '请勿在帖子里公开手机号、微信号、住址等隐私。', group: '组团请写清行程和 AA 方式，禁止收取定金类商业拼团。'};
+  friends: '请勿在帖子里公开手机号、微信号、住址等隐私。', group: '组团请写清行程和 AA 方式，禁止收取定金类商业拼团。',
+  hotel: '商家版块：请写清店名、地址、房型与价格，确保已办理合法住宿业登记。', car: '商家版块：请写清车型、服务范围与收费，确保具备租赁或客运资质。',
+  clinic: '商家版块：仅限合法医疗机构发布，不得承诺效果，不得使用术前术后对比图招揽。'};
+var MB = {hotel: 1, car: 1, clinic: 1}, ME = null;
+var NORMAL_HINT = '普通版块里含酒店预订、租车包车、医美、价格、微信号、代办等商业内容的帖子会先进入人工审核。';
 var files = [];
-document.getElementById('board').onchange = function(){ var w = document.getElementById('bwarn'), t = WARN[this.value]; w.textContent = t || ''; w.style.display = t ? 'block' : 'none'; };
+document.getElementById('board').onchange = function(){
+  var w = document.getElementById('bwarn'), t = WARN[this.value] || '';
+  var qd = document.getElementById('quota'), u = ME && ME.user;
+  if (MB[this.value]){
+    if (u && u.merchant_info){ var m = u.merchant_info; qd.innerHTML = '本周期剩余 <b>' + m.left + '</b> / 10 篇，增发次数 <b>' + m.credits + '</b>（周期至 ' + LH.esc(m.cycle_end) + '，商家会员有效期至 ' + LH.esc(m.until) + '）'; }
+    else { qd.innerHTML = '你还不是商家会员，不能在商家版块发帖。<a href="/member#merchant" style="color:#2c7be5">了解商家会员</a>'; }
+    qd.style.display = 'block';
+  } else { qd.style.display = 'none'; if (this.value && !(u && u.merchant)) t = (t ? t + ' ' : '') + NORMAL_HINT; }
+  w.textContent = t; w.style.display = t ? 'block' : 'none';
+};
 (async function(){
   var gate = document.getElementById('gate'), d;
-  try { d = await LH.me(); } catch(e){ gate.innerHTML = '<div class="empty">' + LH.esc(e.message) + '</div>'; return; }
+  try { d = ME = await LH.me(); } catch(e){ gate.innerHTML = '<div class="empty">' + LH.esc(e.message) + '</div>'; return; }
   if (!d.user){ gate.innerHTML = '<div class="empty">请先登录<br><br><a class="btn primary" href="/login?next=/community/new">登录 / 注册</a></div>'; return; }
-  if (!d.user.is_member){ gate.innerHTML = '<div class="empty">开通会员（¥9.9）后即可发帖、评论，并获得会员标识<br><br><a class="btn primary" href="/member">了解会员</a></div>'; return; }
+  if (d.user.tier < 2){ gate.innerHTML = '<div class="empty">开通高级会员（¥' + d.prices.price_t2 + '）后即可在所有版块发帖（含交友版）；酒店、租车包车、医美商家请开通商家会员<br><br><a class="btn primary" href="/member">' + (d.user.tier === 1 ? '升级高级会员' : '了解会员') + '</a></div>'; return; }
   gate.style.display = 'none'; document.getElementById('form').style.display = 'block';
   var b = LH.qs('board'); if (b) document.getElementById('board').value = b;
   document.getElementById('board').onchange();
@@ -93,7 +112,7 @@ document.getElementById('send').onclick = async function(){
   fd.append('body', document.getElementById('body').value);
   files.forEach(function(f){ fd.append('images', f, 'img.jpg'); });
   this.disabled = true; this.textContent = '发布中…';
-  try { var r = await LH.api('POST', '/api/community/posts', fd); location.href = '/community/post/' + r.id; }
+  try { var r = await LH.api('POST', '/api/community/posts', fd); if (r.pending) alert(r.message); location.href = '/community/post/' + r.id; }
   catch(e){ LH.showErr(err, e.message); this.disabled = false; this.textContent = '发布'; window.scrollTo(0, 0); }
 };
 </script>

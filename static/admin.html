@@ -34,7 +34,7 @@
       <div class="row" style="justify-content:space-between"><b id="stats">…</b><button class="btn sm gray" id="alogout">退出后台</button></div>
     </div>
     <div class="boards" id="tabs">
-      <button data-t="users" class="on">用户/会员</button><button data-t="reports">举报</button><button data-t="posts">帖子</button><button data-t="promo">推广统计</button>
+      <button data-t="users" class="on">用户/会员</button><button data-t="reports">举报</button><button data-t="posts">帖子</button><button data-t="review">审核</button><button data-t="promo">推广统计</button><button data-t="settings">价格设置</button>
     </div>
     <div class="card" id="t-users">
       <div class="row"><input class="f" id="us" placeholder="搜索编号/昵称/手机号/邮箱" style="flex:1"><button class="btn primary" id="usgo">搜索</button></div>
@@ -42,16 +42,26 @@
     </div>
     <div class="card" id="t-reports" style="display:none"><div id="rlist"></div></div>
     <div class="card" id="t-posts" style="display:none"><div id="plist"></div><button class="btn ghost block" id="pmore" style="margin-top:10px">加载更多</button></div>
+    <div class="card" id="t-review" style="display:none"><p class="tip" style="margin-top:0">普通版块中非商家用户发布的、含商业关键词的帖子在这里审核。通过后公开，拒绝后仅作者可见“未通过”。</p><div id="rvlist"></div></div>
+    <div class="card" id="t-settings" style="display:none">
+      <h2>价格设置（元）</h2>
+      <div id="setlist"></div>
+      <button class="btn primary block" id="setsave" style="margin-top:12px">保存</button>
+      <p class="tip">修改后会员页、发帖规则页和提示文字立即使用新价格。已开通的会员不受影响。</p>
+    </div>
     <div id="t-promo" style="display:none">
       <div class="card">
         <h2>新建推广员</h2>
         <div class="row">
           <input class="f" id="pname" placeholder="名称，例如：小王" style="flex:2;min-width:120px">
           <input class="f" id="pcode" placeholder="推广码，例如 A08" maxlength="12" style="flex:1;min-width:90px">
-          <input class="f" id="pcom" type="number" step="0.1" min="0" value="3" style="flex:1;min-width:80px" title="每个付费会员佣金（元）">
+          <input class="f" id="pcom" type="number" step="0.1" min="0" value="3" style="flex:1;min-width:80px" title="会员佣金（元/人）" placeholder="会员佣金">
+          <input class="f" id="pcom2" type="number" step="0.1" min="0" value="6" style="flex:1;min-width:80px" title="高级会员佣金（元/人）" placeholder="高级佣金">
+          <input class="f" id="pcom3" type="number" step="1" min="0" value="20" style="flex:1;min-width:80px" title="商家月付佣金（元/次）" placeholder="商家月付">
+          <input class="f" id="pcom4" type="number" step="1" min="0" value="200" style="flex:1;min-width:80px" title="商家年付佣金（元/次）" placeholder="商家年付">
           <button class="btn primary" id="padd">添加</button>
         </div>
-        <p class="tip">推广链接格式：<code id="linkfmt"></code>，访客 30 天内注册即归属该推广员（以第一次点进的推广码为准）。佣金按“已开通会员”计算，单位：元/人。</p>
+        <p class="tip">推广链接格式：<code id="linkfmt"></code>，访客 30 天内注册即归属该推广员（以第一次点进的推广码为准）。佣金分档：会员默认 ¥3/人、高级会员默认 ¥6/人；会员升级为高级只补差额（例如 ¥6−¥3=¥3），降级不扣回，重复开通不重复计。商家会员每次开通/续费各计一笔（默认月付 ¥20、年付 ¥200）。四个输入框依次为：会员、高级、商家月付、商家年付佣金。</p>
       </div>
       <div class="card">
         <h2>推广统计</h2>
@@ -59,7 +69,7 @@
           <input class="f" type="date" id="d1" style="flex:1;min-width:130px"> 至 <input class="f" type="date" id="d2" style="flex:1;min-width:130px">
           <button class="btn primary" id="pq">查询</button>
         </div>
-        <p class="tip">访问、注册、付费会员、区间佣金按所选日期（韩国时间）统计；“待结算”按全部时间计算。</p>
+        <p class="tip">访问、注册、会员/高级开通数、区间佣金按所选日期（韩国时间）统计；“待结算”按全部时间计算。</p>
         <div id="prlist" style="margin-top:10px;overflow-x:auto"></div>
       </div>
       <div class="card"><h2>结算记录</h2><div id="slist"></div></div>
@@ -80,31 +90,39 @@ document.getElementById('alogout').onclick = async function(){ await call('POST'
 document.querySelectorAll('#tabs button').forEach(function(b){
   b.onclick = function(){
     document.querySelectorAll('#tabs button').forEach(function(x){ x.className = x === b ? 'on' : ''; document.getElementById('t-' + x.dataset.t).style.display = x === b ? 'block' : 'none'; });
-    ({users: users, reports: reports, posts: function(){ posts(true); }, promo: promo})[b.dataset.t]();
+    ({users: users, reports: reports, posts: function(){ posts(true); }, promo: promo, review: review, settings: settings})[b.dataset.t]();
   };
 });
 async function boot(){
   var s;
   try { s = await LH.api('GET', '/api/admin/overview'); } catch(e){ if (e.status === 401) return showLogin(); return msg(e.message, true); }
   document.getElementById('loginBox').style.display = 'none'; document.getElementById('panel').style.display = 'block';
-  document.getElementById('stats').textContent = '用户 ' + s.users + ' · 会员 ' + s.members + ' · 帖子 ' + s.posts + ' · 评论 ' + s.comments + ' · 待处理举报 ' + s.reports + ' · 数据库 ' + s.db_mb + 'MB/1024MB';
+  document.getElementById('stats').textContent = '用户 ' + s.users + ' · 会员 ' + s.members + ' · 高级 ' + s.premium + ' · 商家 ' + s.merchants + ' · 待审核 ' + s.pending + ' · 帖子 ' + s.posts + ' · 评论 ' + s.comments + ' · 待处理举报 ' + s.reports + ' · 数据库 ' + s.db_mb + 'MB/1024MB';
   users();
 }
 async function users(){
   var d = await call('GET', '/api/admin/users?s=' + encodeURIComponent(document.getElementById('us').value));
   document.getElementById('ulist').innerHTML = d.users.length ? '<table class="adm"><tr><th>编号</th><th>昵称/账号</th><th>状态</th><th>操作</th></tr>' + d.users.map(function(u){
     return '<tr><td>' + u.id + '</td><td>' + E(u.nickname) + '<br><small>' + E(u.account) + '</small><br><small>注册 ' + E(u.joined) + (u.promoter ? ' · 推广码 ' + E(u.promoter) : '') + '</small></td><td>' +
-      (u.is_member ? '<b style="color:#1b7a3d">会员</b>' : '普通') + (u.is_banned ? '<br><b style="color:#c62828">已封禁</b>' : '') + '</td><td class="row">' +
-      (u.is_member ? '<button class="btn sm gray" data-u="' + u.id + '" data-a="member_off">取消会员</button>' : '<button class="btn sm primary" data-u="' + u.id + '" data-a="member_on">开通会员</button>') +
+      ['普通', '<b style="color:#1b7a3d">会员</b>', '<b style="color:#8e44ff">高级会员</b>'][u.tier] + (u.merchant_active ? '<br><b style="color:#1565c0">商家·' + (u.merchant_plan === 'year' ? '年付' : '月付') + '</b><br><small>到期 ' + E(u.merchant_until) + '<br>增发次数 ' + u.merchant_credits + '</small>' : (u.merchant_until ? '<br><small style="color:#c62828">商家已到期 ' + E(u.merchant_until) + '</small>' : '')) +
+      (u.is_banned ? '<br><b style="color:#c62828">已封禁</b>' : '') + '</td><td class="row">' +
+      [0, 1, 2].filter(function(t){ return t !== u.tier; }).map(function(t){ return '<button class="btn sm ' + (t > u.tier ? 'primary' : 'gray') + '" data-u="' + u.id + '" data-a="set_tier" data-t="' + t + '">设为' + ['普通', '会员', '高级'][t] + '</button>'; }).join('') +
+      '<button class="btn sm primary" data-u="' + u.id + '" data-a="merchant" data-plan="month">商家' + (u.merchant_active ? '续' : '开') + '月付</button>' +
+      '<button class="btn sm primary" data-u="' + u.id + '" data-a="merchant" data-plan="year">商家' + (u.merchant_active ? '续' : '开') + '年付</button>' +
+      (u.merchant_active ? '<button class="btn sm gray" data-u="' + u.id + '" data-a="credits">+增发次数</button><button class="btn sm gray" data-u="' + u.id + '" data-a="merchant_off">停商家</button>' : '') +
       (u.is_banned ? '<button class="btn sm gray" data-u="' + u.id + '" data-a="unban">解封</button>' : '<button class="btn sm gray" data-u="' + u.id + '" data-a="ban">封禁</button>') +
       '<button class="btn sm gray" data-u="' + u.id + '" data-a="purge">删全部内容</button><button class="btn sm gray" data-u="' + u.id + '" data-a="reset_pw">重置密码</button></td></tr>';
   }).join('') + '</table>' : '<div class="empty">没有用户</div>';
   document.querySelectorAll('#ulist [data-a]').forEach(function(b){
     b.onclick = async function(){
-      var names = {member_on: '开通会员', member_off: '取消会员', ban: '封禁', unban: '解封', purge: '删除该用户全部帖子和评论', reset_pw: '重置密码'};
-      if (!confirm('确定对用户 ' + b.dataset.u + ' 执行：' + names[b.dataset.a] + '？')) return;
-      var r = await call('POST', '/api/admin/users/' + b.dataset.u, {action: b.dataset.a});
-      if (r.temp_password) alert('临时密码：' + r.temp_password + '\n请私下告知用户，登录后尽快修改。'); else msg('已完成：' + names[b.dataset.a], false);
+      var names = {set_tier: '设为' + ['普通用户', '会员', '高级会员'][+b.dataset.t || 0], merchant: '商家会员' + (b.dataset.plan === 'year' ? '年付（365 天）' : '月付（30 天）') + '开通/续费', merchant_off: '立即停用商家会员', credits: '增加增发次数', ban: '封禁', unban: '解封', purge: '删除该用户全部帖子和评论', reset_pw: '重置密码'};
+      var extra = {action: b.dataset.a, tier: +b.dataset.t || 0, plan: b.dataset.plan};
+      if (b.dataset.a === 'credits'){ var n = prompt('增加几次增发（每次 = 1 篇，已收款后再加；负数为扣减）', '1'); if (!n) return; extra.n = parseInt(n, 10); }
+      else if (!confirm('确定对用户 ' + b.dataset.u + ' 执行：' + names[b.dataset.a] + '？')) return;
+      var r = await call('POST', '/api/admin/users/' + b.dataset.u, extra);
+      if (r.merchant_until) msg('商家会员已生效，到期 ' + r.merchant_until, false);
+      else if (r.credits != null) msg('当前增发次数：' + r.credits, false);
+      else if (r.temp_password) alert('临时密码：' + r.temp_password + '\n请私下告知用户，登录后尽快修改。'); else msg('已完成：' + names[b.dataset.a], false);
       users();
     };
   });
@@ -153,11 +171,11 @@ document.getElementById('pmore').onclick = function(){ posts(false); };
 async function promo(){
   var q = '?start=' + (document.getElementById('d1').value || '') + '&end=' + (document.getElementById('d2').value || '');
   var d = await call('GET', '/api/admin/promoters' + q);
-  document.getElementById('prlist').innerHTML = d.promoters.length ? '<table class="adm"><tr><th>推广员</th><th>访问</th><th>注册</th><th>付费</th><th>区间佣金</th><th>待结算</th><th>操作</th></tr>' + d.promoters.map(function(p){
-    return '<tr><td><b>' + E(p.code) + '</b> ' + E(p.name) + (p.active ? '' : ' <small style="color:#c62828">已停用</small>') + '<br><small>¥' + p.commission + '/人 · 已结 ¥' + p.settled_total + '</small></td>' +
-      '<td>' + p.visits + '</td><td>' + p.regs + '</td><td>' + p.paid + '</td><td>¥' + p.commission_in_range + '</td><td><b>¥' + p.owed + '</b><br><small>' + p.unsettled_members + ' 人</small></td>' +
+  document.getElementById('prlist').innerHTML = d.promoters.length ? '<table class="adm"><tr><th>推广员</th><th>访问</th><th>注册</th><th>会员/高级/商家月/商家年</th><th>区间佣金</th><th>待结算</th><th>操作</th></tr>' + d.promoters.map(function(p){
+    return '<tr><td><b>' + E(p.code) + '</b> ' + E(p.name) + (p.active ? '' : ' <small style="color:#c62828">已停用</small>') + '<br><small>会员 ¥' + p.commission + ' · 高级 ¥' + p.commission2 + ' · 商家月 ¥' + p.commission3 + ' · 商家年 ¥' + p.commission4 + ' · 已结 ¥' + p.settled_total + '</small></td>' +
+      '<td>' + p.visits + '</td><td>' + p.regs + '</td><td>' + p.paid1 + ' / ' + p.paid2 + ' / ' + p.paid3 + ' / ' + p.paid4 + '</td><td>¥' + p.commission_in_range + '</td><td><b>¥' + p.owed + '</b><br><small>' + p.unsettled_members + ' 笔</small></td>' +
       '<td class="row"><button class="btn sm primary" data-st="' + E(p.code) + '"' + (p.unsettled_members ? '' : ' disabled') + '>标记已结算</button>' +
-      '<button class="btn sm gray" data-cc="' + E(p.code) + '">改佣金</button>' +
+      '<button class="btn sm gray" data-cc="' + E(p.code) + '" data-c1="' + p.commission + '" data-c2="' + p.commission2 + '" data-c3="' + p.commission3 + '" data-c4="' + p.commission4 + '">改佣金</button>' +
       '<button class="btn sm gray" data-tg="' + E(p.code) + '" data-on="' + (p.active ? 1 : 0) + '">' + (p.active ? '停用' : '启用') + '</button>' +
       '<button class="btn sm gray" data-cp="' + E(p.code) + '">复制链接</button></td></tr>';
   }).join('') + '</table>' : '<div class="empty">还没有推广员</div>';
@@ -165,20 +183,49 @@ async function promo(){
     if (!confirm('确认已向 ' + b.dataset.st + ' 支付待结算佣金，并标记为已结算？')) return;
     var r = await call('POST', '/api/admin/promoters/' + b.dataset.st, {action: 'settle'}); msg('已结算 ' + r.members + ' 人，¥' + r.amount, false); promo(); }; });
   document.querySelectorAll('#prlist [data-cc]').forEach(function(b){ b.onclick = async function(){
-    var v = prompt('每个付费会员佣金（元）', '3'); if (v === null) return;
-    await call('POST', '/api/admin/promoters/' + b.dataset.cc, {action: 'commission', commission: v}); promo(); }; });
+    var v = prompt('会员佣金（元/人）', b.dataset.c1); if (v === null) return;
+    var v2 = prompt('高级会员佣金（元/人）', b.dataset.c2); if (v2 === null) return;
+    var v3 = prompt('商家月付佣金（元/次）', b.dataset.c3); if (v3 === null) return;
+    var v4 = prompt('商家年付佣金（元/次）', b.dataset.c4); if (v4 === null) return;
+    await call('POST', '/api/admin/promoters/' + b.dataset.cc, {action: 'commission', commission: v, commission2: v2, commission3: v3, commission4: v4}); promo(); }; });
   document.querySelectorAll('#prlist [data-tg]').forEach(function(b){ b.onclick = async function(){
     await call('POST', '/api/admin/promoters/' + b.dataset.tg, {action: b.dataset.on === '1' ? 'disable' : 'enable'}); promo(); }; });
   document.querySelectorAll('#prlist [data-cp]').forEach(function(b){ b.onclick = function(){
     var link = location.origin + '/?ref=' + b.dataset.cp;
     if (navigator.clipboard) navigator.clipboard.writeText(link).then(function(){ msg('已复制：' + link, false); }, function(){ prompt('推广链接', link); }); else prompt('推广链接', link); }; });
   var s = await call('GET', '/api/admin/settlements');
-  document.getElementById('slist').innerHTML = s.settlements.length ? '<table class="adm"><tr><th>时间</th><th>推广码</th><th>人数</th><th>金额</th></tr>' + s.settlements.map(function(x){
+  document.getElementById('slist').innerHTML = s.settlements.length ? '<table class="adm"><tr><th>时间</th><th>推广码</th><th>笔数</th><th>金额</th></tr>' + s.settlements.map(function(x){
     return '<tr><td>' + E(x.time) + '</td><td>' + E(x.code) + '</td><td>' + x.members + '</td><td>¥' + x.amount + '</td></tr>'; }).join('') + '</table>' : '<div class="tip">暂无</div>';
 }
 document.getElementById('pq').onclick = promo;
+async function review(){
+  var d = await call('GET', '/api/admin/pending');
+  document.getElementById('rvlist').innerHTML = d.posts.length ? d.posts.map(function(p){
+    return '<div class="cmt" id="rv' + p.id + '"><div class="who">#' + p.id + ' [' + E(p.board_name) + '] ' + E(p.title) + '</div>' +
+      '<div class="ct" style="color:var(--sub)">' + E(p.author) + '（编号 ' + p.user_id + '）· ' + E(p.time) + ' · ' + E(p.note || '') + '</div>' +
+      '<div class="ct">' + E(p.body) + '</div>' +
+      (p.images.length ? '<div class="thumbs">' + p.images.map(function(i){ return '<div><img src="/api/admin/img/' + i + '" alt=""></div>'; }).join('') + '</div>' : '') +
+      '<div class="row" style="margin-top:8px"><button class="btn sm primary" data-ok="' + p.id + '">通过</button><button class="btn sm gray" data-no="' + p.id + '">拒绝</button>' +
+      '<button class="btn sm gray" data-banu="' + p.user_id + '">封禁作者</button></div></div>';
+  }).join('') : '<div class="empty">没有待审核的帖子</div>';
+  document.querySelectorAll('#rvlist [data-ok]').forEach(function(b){ b.onclick = async function(){ await call('POST', '/api/admin/posts/' + b.dataset.ok + '/review', {action: 'approve'}); document.getElementById('rv' + b.dataset.ok).remove(); }; });
+  document.querySelectorAll('#rvlist [data-no]').forEach(function(b){ b.onclick = async function(){
+    var why = prompt('拒绝理由（作者可见）', '含商业推广内容，请开通商家会员后在商家版块发布'); if (why === null) return;
+    await call('POST', '/api/admin/posts/' + b.dataset.no + '/review', {action: 'reject', reason: why}); document.getElementById('rv' + b.dataset.no).remove(); }; });
+  document.querySelectorAll('#rvlist [data-banu]').forEach(function(b){ b.onclick = async function(){ if (!confirm('封禁该用户？')) return; await call('POST', '/api/admin/users/' + b.dataset.banu, {action: 'ban'}); msg('已封禁', false); }; });
+}
+async function settings(){
+  var d = await call('GET', '/api/admin/settings');
+  document.getElementById('setlist').innerHTML = d.settings.map(function(x){
+    return '<label class="f">' + E(x.label) + '</label><input class="f" type="number" step="0.1" min="0" data-k="' + E(x.key) + '" value="' + E(x.value) + '">';
+  }).join('');
+}
+document.getElementById('setsave').onclick = async function(){
+  var body = {}; document.querySelectorAll('#setlist [data-k]').forEach(function(i){ body[i.dataset.k] = i.value; });
+  await call('POST', '/api/admin/settings', body); msg('价格已保存', false); settings();
+};
 document.getElementById('padd').onclick = async function(){
-  var r = await call('POST', '/api/admin/promoters', {name: document.getElementById('pname').value, code: document.getElementById('pcode').value, commission: document.getElementById('pcom').value || 3});
+  var r = await call('POST', '/api/admin/promoters', {name: document.getElementById('pname').value, code: document.getElementById('pcode').value, commission: document.getElementById('pcom').value || 3, commission2: document.getElementById('pcom2').value || 6, commission3: document.getElementById('pcom3').value || 20, commission4: document.getElementById('pcom4').value || 200});
   msg('已添加推广员 ' + r.code + '，链接：' + location.origin + '/?ref=' + r.code, false);
   document.getElementById('pname').value = document.getElementById('pcode').value = ''; promo();
 };

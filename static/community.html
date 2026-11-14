@@ -27,17 +27,16 @@
   <div id="list"><div class="loading">加载中…</div></div>
   <div style="text-align:center;margin:6px 0 14px"><button class="btn ghost" id="more" style="display:none">加载更多</button></div>
   <div class="card" id="rules">
-    <h2>📜 社区规则</h2>
+    <h2>📢 社区公告</h2>
     <ul class="rules">
-      <li>真实分享，友善交流；禁止人身攻击、歧视、色情、赌博、诈骗和违法内容。</li>
-      <li>禁止发布广告、引流、代购刷单、换汇、代办等商业信息，违者删帖封号。</li>
-      <li>签证、留学版块仅为个人经验分享，<b>本站不提供任何签证或留学代办服务</b>，办理请以韩国驻华使领馆、韩国签证申请中心和学校官网为准。</li>
-      <li>交友请注意安全：不要轻易转账、借钱或透露证件和住址，线下见面选择公共场所。</li>
-      <li>不要在帖子里公开自己或他人的手机号、证件号、住址等隐私。</li>
-      <li>看到违规内容请点“举报”，管理员会尽快处理。</li>
+      <li>严禁诈骗、违法违禁、虚假信息、签证代办宣传、违法医疗广告、色情、赌博和骚扰，违者删帖封号，费用不退。</li>
+      <li>酒店住宿、租车包车、医美皮肤科信息请开通商家会员后在商家版块发布；普通版块的商业内容需审核。</li>
+      <li>签证、留学版块仅为经验分享，本站不提供代办服务。</li>
     </ul>
+    <a class="btn ghost block" href="/rules" style="margin-top:10px">查看完整发帖规则</a>
   </div>
   <div class="disclaimer">帖子内容为网友个人经验，仅供参考，不代表本站观点。</div>
+  <div class="footlinks"><a href="/rules">社区公告与发帖规则</a>·<a href="/member">会员说明</a>·<a href="/community">社区首页</a></div>
 </main>
 <a class="fab" href="/community/new" id="fab">✏️ 发帖</a>
 <nav>
@@ -49,12 +48,15 @@
 </nav>
 <script src="/static/community.js"></script>
 <script>
-var BOARDS = [['','全部'],['pit','踩坑经验'],['group','组团同行'],['visa','签证经验'],['study','留学学校'],['friends','交友']];
+var BOARDS = [['','全部'],['pit','踩坑经验'],['group','组团同行'],['visa','签证经验'],['study','留学学校'],['friends','交友'],['hotel','🏨 酒店住宿'],['car','🚗 租车包车'],['clinic','🏥 医美皮肤科']];
 var WARN = {
   visa: '⚠️ 签证版块仅为网友个人经验分享，本站不提供签证代办。政策以韩国驻华使领馆、韩国签证申请中心和 K-ETA 官网为准。',
   study: '⚠️ 留学版块仅为网友经验与学校信息交流，本站不提供留学中介或代办服务。招生信息以学校官网为准。',
   friends: '⚠️ 交友请注意安全：不要转账借钱，不要透露证件和住址，线下见面选公共场所。遇到可疑账号请举报。',
-  group: '⚠️ 组团同行请自行核实对方身份，费用 AA 透明，谨防以拼团为名收取定金的骗局。'
+  group: '⚠️ 组团同行请自行核实对方身份，费用 AA 透明，谨防以拼团为名收取定金的骗局。',
+  hotel: '🏨 商家信息由商家自行发布并负责，本站不担保其资质、价格和服务。预订前请核实营业登记，使用正规支付并保留凭证。',
+  car: '🚗 商家信息由商家自行发布并负责。租车包车请确认对方具备租赁或客运资质和保险，费用当面确认，谨慎预付。',
+  clinic: '🏥 商家信息由商家自行发布并负责，本站不担保医疗效果。请选择合法医疗机构，遵医嘱，谨慎对待“包效果”类宣传。',
 };
 var cur = LH.qs('board') || '', last = 0;
 if (!BOARDS.some(function(b){ return b[0] === cur; })) cur = '';
@@ -71,8 +73,8 @@ function renderBoards(){
 function item(p){
   var cover = p.cover ? '<img class="cover" loading="lazy" alt="" src="/api/community/img/' + p.cover + '?t=1">' : '';
   return '<a class="post" href="/community/post/' + p.id + '"><div class="txt"><h3>' + LH.esc(p.title) + '</h3>' +
-    '<p class="ex">' + LH.esc(p.excerpt) + '</p><div class="meta"><span class="tag">' + LH.esc(p.board_name) + '</span>' +
-    '<span>' + LH.esc(p.author) + LH.badge(p.author_member) + '</span><span>' + LH.esc(p.time) + '</span>' +
+    '<p class="ex">' + LH.esc(p.excerpt) + '</p><div class="meta">' + (p.merchant ? '<span class="tag biz">商家</span>' : '') + '<span class="tag">' + LH.esc(p.board_name) + '</span>' +
+    '<span>' + LH.esc(p.author) + LH.badge(p.author_tier) + '</span><span>' + LH.esc(p.time) + '</span>' +
     '<span>❤️ ' + p.likes + '</span><span>💬 ' + p.comments + '</span>' + (p.img_n > 1 ? '<span>🖼 ' + p.img_n + '</span>' : '') +
     '</div></div>' + cover + '</a>';
 }
@@ -82,7 +84,7 @@ async function load(reset){
   try {
     var d = await LH.api('GET', '/api/community/posts?board=' + cur + (last ? '&before=' + last : ''));
     if (reset) list.innerHTML = '';
-    if (d.login_required){ list.innerHTML = '<div class="card empty">交友版需要登录后查看<br><br><a class="btn primary" href="/login?next=/community%3Fboard%3Dfriends">登录 / 注册</a></div>'; more.style.display = 'none'; return; }
+    if (d.tier_required){ list.innerHTML = d.login_required ? '<div class="card empty">交友版需登录并开通会员（¥9.9）后查看<br><br><a class="btn primary" href="/login?next=/community%3Fboard%3Dfriends">登录 / 注册</a></div>' : '<div class="card empty">交友版需开通会员（¥9.9）后查看<br><br><a class="btn primary" href="/member">了解会员</a></div>'; more.style.display = 'none'; return; }
     if (!d.posts.length && reset){ list.innerHTML = '<div class="card empty">这里还没有帖子，来发第一篇吧</div>'; }
     list.insertAdjacentHTML('beforeend', d.posts.map(item).join(''));
     if (d.posts.length) last = d.posts[d.posts.length - 1].id;
