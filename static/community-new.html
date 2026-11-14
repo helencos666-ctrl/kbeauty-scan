@@ -1,0 +1,102 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>发帖 · 旅韩助手</title>
+<meta name="description" content="旅韩助手社区发帖">
+<meta name="theme-color" content="#ff6b8f">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="旅韩助手">
+<link rel="manifest" href="/manifest.webmanifest">
+<link rel="apple-touch-icon" href="/static/icons/apple-touch-icon.png">
+<link rel="icon" type="image/png" sizes="192x192" href="/static/icons/icon-192.png">
+<link rel="stylesheet" href="/static/pwa.css">
+<link rel="stylesheet" href="/static/community.css">
+</head>
+<body>
+<header>
+  <h1>✏️ 发帖</h1>
+  <p><a href="/community">← 返回社区</a></p>
+</header>
+<main>
+  <div class="card" id="gate"><div class="loading">加载中…</div></div>
+  <div class="card" id="form" style="display:none">
+    <div class="err" id="err"></div>
+    <label class="f">版块</label>
+    <select class="f" id="board">
+      <option value="">请选择版块</option>
+      <option value="pit">踩坑经验</option>
+      <option value="group">组团同行</option>
+      <option value="visa">签证经验</option>
+      <option value="study">留学学校</option>
+      <option value="friends">交友</option>
+    </select>
+    <div class="warn" id="bwarn" style="display:none;margin-top:10px"></div>
+    <label class="f">标题（4–40 字）</label>
+    <input class="f" id="title" maxlength="40" placeholder="一句话说清楚，例如：明洞换钱踩坑记录">
+    <label class="f">正文（10–3000 字）</label>
+    <textarea class="f" id="body" maxlength="3000" placeholder="时间、地点、经过、建议……写得越具体越有用"></textarea>
+    <label class="f">图片（最多 6 张，会自动压缩）</label>
+    <input type="file" id="pick" accept="image/*" multiple>
+    <div class="thumbs" id="thumbs"></div>
+    <label style="display:flex;gap:8px;align-items:flex-start;font-size:13px;color:var(--sub);margin-top:14px;line-height:1.6">
+      <input type="checkbox" id="agree" style="margin-top:3px"> 我已阅读并遵守社区规则：不发广告、不引流、不公开他人隐私；签证/留学内容仅为个人经验分享。
+    </label>
+    <button class="btn primary block" id="send" style="margin-top:14px">发布</button>
+    <p class="tip">请勿上传含证件号、二维码、手机号的图片。图片会去除拍摄定位等信息后保存。</p>
+  </div>
+</main>
+<nav>
+  <a href="/"><i>🏠</i>首页</a>
+  <a href="/attractions"><i>🗺️</i>景点</a>
+  <a href="/tips"><i>📘</i>攻略</a>
+  <a href="/community" class="on"><i>💬</i>社区</a>
+  <a href="/member"><i>👑</i>会员</a>
+</nav>
+<script src="/static/community.js"></script>
+<script>
+var WARN = {visa: '签证版块仅限个人经验分享，禁止发布代办广告。', study: '留学版块仅限经验交流，禁止发布中介广告。',
+  friends: '请勿在帖子里公开手机号、微信号、住址等隐私。', group: '组团请写清行程和 AA 方式，禁止收取定金类商业拼团。'};
+var files = [];
+document.getElementById('board').onchange = function(){ var w = document.getElementById('bwarn'), t = WARN[this.value]; w.textContent = t || ''; w.style.display = t ? 'block' : 'none'; };
+(async function(){
+  var gate = document.getElementById('gate'), d;
+  try { d = await LH.me(); } catch(e){ gate.innerHTML = '<div class="empty">' + LH.esc(e.message) + '</div>'; return; }
+  if (!d.user){ gate.innerHTML = '<div class="empty">请先登录<br><br><a class="btn primary" href="/login?next=/community/new">登录 / 注册</a></div>'; return; }
+  if (!d.user.is_member){ gate.innerHTML = '<div class="empty">开通会员（¥9.9）后即可发帖、评论，并获得会员标识<br><br><a class="btn primary" href="/member">了解会员</a></div>'; return; }
+  gate.style.display = 'none'; document.getElementById('form').style.display = 'block';
+  var b = LH.qs('board'); if (b) document.getElementById('board').value = b;
+  document.getElementById('board').onchange();
+})();
+function drawThumbs(){
+  var el = document.getElementById('thumbs');
+  el.innerHTML = '';
+  files.forEach(function(f, i){
+    var d = document.createElement('div'), im = document.createElement('img'), x = document.createElement('button');
+    im.src = URL.createObjectURL(f); x.textContent = '×'; x.onclick = function(){ files.splice(i, 1); drawThumbs(); };
+    d.appendChild(im); d.appendChild(x); el.appendChild(d);
+  });
+}
+document.getElementById('pick').onchange = async function(){
+  var picked = Array.from(this.files || []); this.value = '';
+  for (var f of picked){ if (files.length >= 6){ alert('最多 6 张图片'); break; } files.push(await LH.compress(f)); }
+  drawThumbs();
+};
+document.getElementById('send').onclick = async function(){
+  var err = document.getElementById('err'); LH.showErr(err, '');
+  if (!document.getElementById('agree').checked){ LH.showErr(err, '请先勾选同意社区规则'); return; }
+  var fd = new FormData();
+  fd.append('board', document.getElementById('board').value);
+  fd.append('title', document.getElementById('title').value);
+  fd.append('body', document.getElementById('body').value);
+  files.forEach(function(f){ fd.append('images', f, 'img.jpg'); });
+  this.disabled = true; this.textContent = '发布中…';
+  try { var r = await LH.api('POST', '/api/community/posts', fd); location.href = '/community/post/' + r.id; }
+  catch(e){ LH.showErr(err, e.message); this.disabled = false; this.textContent = '发布'; window.scrollTo(0, 0); }
+};
+</script>
+<script src="/static/pwa.js" defer></script>
+</body>
+</html>

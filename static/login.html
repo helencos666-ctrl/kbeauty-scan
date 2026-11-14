@@ -1,0 +1,89 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>登录 / 注册 · 旅韩助手</title>
+<meta name="description" content="旅韩助手社区登录注册">
+<meta name="theme-color" content="#ff6b8f">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="旅韩助手">
+<link rel="manifest" href="/manifest.webmanifest">
+<link rel="apple-touch-icon" href="/static/icons/apple-touch-icon.png">
+<link rel="icon" type="image/png" sizes="192x192" href="/static/icons/icon-192.png">
+<link rel="stylesheet" href="/static/pwa.css">
+<link rel="stylesheet" href="/static/community.css">
+</head>
+<body>
+<header>
+  <h1>👤 登录 / 注册</h1>
+  <p>用手机号或邮箱注册，免费浏览社区</p>
+</header>
+<main>
+  <div class="card">
+    <div class="tabs"><button id="tLogin" class="on">登录</button><button id="tReg">注册</button></div>
+    <div class="err" id="err"></div>
+    <label class="f">手机号或邮箱</label>
+    <input class="f" id="account" autocomplete="username" placeholder="中国 11 位手机号 / 韩国 010 手机号 / 邮箱">
+    <div id="regOnly" style="display:none">
+      <label class="f">昵称（2–16 字，公开显示）</label>
+      <input class="f" id="nickname" maxlength="16" placeholder="例如：首尔小旅人">
+    </div>
+    <label class="f">密码（至少 8 位）</label>
+    <input class="f" id="password" type="password" autocomplete="current-password" placeholder="请输入密码">
+    <div id="regOnly2" style="display:none">
+      <label class="f">推广码（选填）</label>
+      <input class="f" id="promoter" maxlength="12" placeholder="没有可不填" autocapitalize="characters">
+      <label style="display:flex;gap:8px;align-items:flex-start;font-size:13px;color:var(--sub);margin-top:14px;line-height:1.6">
+        <input type="checkbox" id="agree" style="margin-top:3px"> 我已阅读并同意<a href="/community#rules" style="color:#2c7be5">社区规则</a>。手机号/邮箱仅用于登录，不会公开显示。
+      </label>
+    </div>
+    <button class="btn primary block" id="go" style="margin-top:16px">登录</button>
+    <p class="tip">本站暂不发送短信或邮件验证码。忘记密码请联系管理员重置。</p>
+  </div>
+</main>
+<nav>
+  <a href="/"><i>🏠</i>首页</a>
+  <a href="/attractions"><i>🗺️</i>景点</a>
+  <a href="/tips"><i>📘</i>攻略</a>
+  <a href="/community"><i>💬</i>社区</a>
+  <a href="/member" class="on"><i>👑</i>会员</a>
+</nav>
+<script src="/static/community.js"></script>
+<script>
+var mode = 'login';
+var next = LH.qs('next') || '/community';
+if (!/^\/(?![\/\\])/.test(next)) next = '/community';
+function setMode(m){
+  mode = m;
+  document.getElementById('tLogin').className = m === 'login' ? 'on' : '';
+  document.getElementById('tReg').className = m === 'reg' ? 'on' : '';
+  document.getElementById('regOnly').style.display = document.getElementById('regOnly2').style.display = m === 'reg' ? 'block' : 'none';
+  document.getElementById('go').textContent = m === 'login' ? '登录' : '注册';
+  document.getElementById('password').autocomplete = m === 'login' ? 'current-password' : 'new-password';
+  LH.showErr(document.getElementById('err'), '');
+}
+document.getElementById('tLogin').onclick = function(){ setMode('login'); };
+document.getElementById('tReg').onclick = function(){ setMode('reg'); };
+if (LH.qs('mode') === 'reg') setMode('reg');
+LH.api('GET', '/api/community/ref').then(function(r){
+  if (r.ref){ var p = document.getElementById('promoter'); p.value = r.ref; p.readOnly = true; }
+}).catch(function(){});
+document.getElementById('go').onclick = async function(){
+  var err = document.getElementById('err'); LH.showErr(err, '');
+  var body = {account: document.getElementById('account').value, password: document.getElementById('password').value};
+  if (mode === 'reg'){
+    body.nickname = document.getElementById('nickname').value;
+    body.promoter = document.getElementById('promoter').value;
+    body.agree = document.getElementById('agree').checked;
+    if (!body.agree){ LH.showErr(err, '请先勾选同意社区规则'); return; }
+  }
+  this.disabled = true;
+  try { await LH.api('POST', mode === 'login' ? '/api/community/login' : '/api/community/register', body); location.href = mode === 'reg' ? '/member?new=1' : next; }
+  catch(e){ LH.showErr(err, e.message); this.disabled = false; }
+};
+</script>
+<script src="/static/pwa.js" defer></script>
+</body>
+</html>

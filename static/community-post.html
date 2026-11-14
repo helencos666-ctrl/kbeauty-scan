@@ -1,0 +1,112 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>帖子详情 · 旅韩助手</title>
+<meta name="description" content="旅韩助手社区帖子">
+<meta name="theme-color" content="#ff6b8f">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="旅韩助手">
+<link rel="manifest" href="/manifest.webmanifest">
+<link rel="apple-touch-icon" href="/static/icons/apple-touch-icon.png">
+<link rel="icon" type="image/png" sizes="192x192" href="/static/icons/icon-192.png">
+<link rel="stylesheet" href="/static/pwa.css">
+<link rel="stylesheet" href="/static/community.css">
+</head>
+<body>
+<header>
+  <h1>💬 旅韩社区</h1>
+  <p><a href="/community">← 返回社区</a></p>
+</header>
+<main>
+  <div class="card userbar" id="ub">加载中…</div>
+  <div id="warn"></div>
+  <div class="card" id="post"><div class="loading">加载中…</div></div>
+  <div class="card" id="cbox" style="display:none">
+    <h2 id="ctitle">评论</h2>
+    <div id="clist"></div>
+    <div id="cform" style="margin-top:10px"></div>
+  </div>
+  <div class="disclaimer">帖子内容为网友个人经验，仅供参考，不代表本站观点。</div>
+</main>
+<div class="lightbox" id="lb"><img alt=""></div>
+<nav>
+  <a href="/"><i>🏠</i>首页</a>
+  <a href="/attractions"><i>🗺️</i>景点</a>
+  <a href="/tips"><i>📘</i>攻略</a>
+  <a href="/community" class="on"><i>💬</i>社区</a>
+  <a href="/member"><i>👑</i>会员</a>
+</nav>
+<script src="/static/community.js"></script>
+<script>
+var pid = parseInt(location.pathname.split('/').pop(), 10);
+var WARN = {visa: '⚠️ 本帖为网友个人签证经验，本站不提供签证代办。政策以韩国驻华使领馆、韩国签证申请中心和 K-ETA 官网为准。',
+  study: '⚠️ 本帖为网友留学经验分享，本站不提供留学中介或代办服务，招生信息以学校官网为准。',
+  friends: '⚠️ 交友请注意安全：不要转账借钱，不要透露证件和住址，线下见面选公共场所。',
+  group: '⚠️ 组团同行请自行核实对方身份，费用 AA 透明，谨防收定金骗局。'};
+var lb = document.getElementById('lb');
+lb.onclick = function(){ lb.style.display = 'none'; };
+function zoom(src){ lb.querySelector('img').src = src; lb.style.display = 'flex'; }
+var me = null, booted = false;
+async function load(){
+  if (!booted){ me = await LH.userbar(document.getElementById('ub')); booted = true; }
+  var box = document.getElementById('post'), p;
+  try {
+    p = await LH.api('GET', '/api/community/posts/' + pid);
+  } catch(e){
+    box.innerHTML = '<div class="empty">' + LH.esc(e.message) + (e.status === 401 ? '<br><br><a class="btn primary" href="/login?next=' + encodeURIComponent(location.pathname) + '">登录 / 注册</a>' : '') + '</div>';
+    return;
+  }
+  document.title = p.title + ' · 旅韩社区';
+  document.getElementById('warn').innerHTML = WARN[p.board] ? '<div class="warn">' + WARN[p.board] + '</div>' : '';
+  var g = p.images.length ? '<div class="gallery' + (p.images.length === 1 ? ' one' : '') + '">' + p.images.map(function(i){
+    return '<img loading="lazy" alt="" src="/api/community/img/' + i.id + (p.images.length === 1 ? '' : '?t=1') + '" data-full="/api/community/img/' + i.id + '">';
+  }).join('') + '</div>' : '';
+  box.innerHTML = '<div class="meta" style="margin-top:0"><span class="tag">' + LH.esc(p.board_name) + '</span><span>' + LH.esc(p.time) + '</span></div>' +
+    '<h2 style="color:var(--ink);font-size:19px;margin:10px 0 4px">' + LH.esc(p.title) + '</h2>' +
+    '<div class="meta" style="margin-top:4px"><span>👤 ' + LH.esc(p.author) + LH.badge(p.author_member) + '</span></div>' +
+    '<div class="body">' + LH.esc(p.body) + '</div>' + g +
+    '<div class="row" style="margin-top:14px;justify-content:space-between"><button class="btn sm ghost" id="like">' + (p.liked ? '❤️ 已赞 ' : '🤍 点赞 ') + p.likes + '</button>' +
+    '<span class="row">' + (p.mine ? '<button class="linkbtn" id="delp">删除</button>' : '') + '<button class="linkbtn" id="repp">🚩 举报</button></span></div>';
+  box.querySelectorAll('.gallery img').forEach(function(im){ im.onclick = function(){ zoom(im.dataset.full); }; });
+  document.getElementById('like').onclick = async function(){
+    if (!me || !me.user){ location.href = '/login?next=' + encodeURIComponent(location.pathname); return; }
+    try { var r = await LH.api('POST', '/api/community/posts/' + pid + '/like', {}); this.textContent = (r.liked ? '❤️ 已赞 ' : '🤍 点赞 ') + r.likes; } catch(e){ alert(e.message); }
+  };
+  document.getElementById('repp').onclick = function(){ LH.report('post', pid); };
+  var dp = document.getElementById('delp');
+  if (dp) dp.onclick = async function(){ if (!confirm('确定删除这篇帖子？')) return; try { await LH.api('DELETE', '/api/community/posts/' + pid); location.href = '/community'; } catch(e){ alert(e.message); } };
+  document.getElementById('cbox').style.display = 'block';
+  document.getElementById('ctitle').textContent = '评论 ' + p.comment_list.length;
+  var cl = document.getElementById('clist');
+  cl.innerHTML = p.comment_list.length ? p.comment_list.map(function(c){
+    return '<div class="cmt"><div class="row" style="justify-content:space-between"><span class="who">' + LH.esc(c.author) + LH.badge(c.author_member) +
+      ' <span style="font-weight:400;color:var(--sub);font-size:12px">' + LH.esc(c.time) + '</span></span><span>' +
+      (c.mine ? '<button class="linkbtn" data-delc="' + c.id + '">删除</button>' : '') + '<button class="linkbtn" data-repc="' + c.id + '">举报</button></span></div>' +
+      '<div class="ct">' + LH.esc(c.body) + '</div></div>';
+  }).join('') : '<div class="empty" style="padding:12px">还没有评论</div>';
+  cl.querySelectorAll('[data-repc]').forEach(function(b){ b.onclick = function(){ LH.report('comment', +b.dataset.repc); }; });
+  cl.querySelectorAll('[data-delc]').forEach(function(b){ b.onclick = async function(){ if (!confirm('删除这条评论？')) return; try { await LH.api('DELETE', '/api/community/comments/' + b.dataset.delc); load(); } catch(e){ alert(e.message); } }; });
+  var cf = document.getElementById('cform');
+  if (!me || !me.user){
+    cf.innerHTML = '<a class="btn ghost block" href="/login?next=' + encodeURIComponent(location.pathname) + '">登录后参与讨论</a>';
+  } else if (!me.user.is_member){
+    cf.innerHTML = '<a class="btn primary block" href="/member">开通会员（¥9.9）即可评论和发帖</a>';
+  } else {
+    cf.innerHTML = '<div class="err" id="cerr"></div><textarea class="f" id="cbody" maxlength="500" style="min-height:80px" placeholder="友善发言，分享你的经验"></textarea>' +
+      '<button class="btn primary block" id="csend" style="margin-top:8px">发表评论</button>';
+    document.getElementById('csend').onclick = async function(){
+      var t = document.getElementById('cbody').value.trim(); if (!t) return;
+      this.disabled = true;
+      try { await LH.api('POST', '/api/community/posts/' + pid + '/comments', {body: t}); load(); }
+      catch(e){ LH.showErr(document.getElementById('cerr'), e.message); this.disabled = false; }
+    };
+  }
+}
+load();
+</script>
+<script src="/static/pwa.js" defer></script>
+</body>
+</html>

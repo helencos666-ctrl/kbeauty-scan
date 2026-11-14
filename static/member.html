@@ -1,0 +1,75 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>会员 · 旅韩助手</title>
+<meta name="description" content="旅韩助手社区会员：¥9.9 开通，发帖评论并获得会员标识。">
+<meta name="theme-color" content="#ff6b8f">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="旅韩助手">
+<link rel="manifest" href="/manifest.webmanifest">
+<link rel="apple-touch-icon" href="/static/icons/apple-touch-icon.png">
+<link rel="icon" type="image/png" sizes="192x192" href="/static/icons/icon-192.png">
+<link rel="stylesheet" href="/static/pwa.css">
+<link rel="stylesheet" href="/static/community.css">
+</head>
+<body>
+<header>
+  <h1>👑 旅韩社区会员</h1>
+  <p>¥9.9 开通，参与讨论、分享经验</p>
+</header>
+<main>
+  <div class="card userbar" id="ub">加载中…</div>
+  <div class="ok" id="okmsg"></div>
+  <div class="card" id="status"></div>
+  <div class="card">
+    <h2>会员权益</h2>
+    <ul class="steps" style="list-style:none;padding-left:0">
+      <li>✏️ 发布图文帖子（每帖最多 6 张图）</li>
+      <li>💬 评论、回复，和同路人交流</li>
+      <li>👑 昵称旁显示“会员”标识</li>
+      <li>🤝 参与组团同行、交友版块互动</li>
+    </ul>
+    <p class="tip">免费注册即可浏览全部帖子（交友版需登录）、点赞和举报。</p>
+  </div>
+  <div class="card">
+    <h2>开通步骤（人工开通）</h2>
+    <ol class="steps">
+      <li>先<a href="/login?mode=reg&next=/member" style="color:#2c7be5">注册</a>并登录，记下“我的状态”里的<b>会员编号</b>。</li>
+      <li>扫码支付 <b>¥9.9</b>，付款备注填写会员编号。</li>
+      <li>付款后<b>截图发给管理员</b>，管理员核对后为你开通。</li>
+      <li>开通后刷新本页，即可发帖和评论。</li>
+    </ol>
+    <!-- 收款码位置：管理员提供收款码图片后在这里替换 -->
+    <div class="row" style="margin-top:12px;justify-content:center" id="payqr">
+      <div class="qr" style="flex:1;min-width:140px">微信收款码<br><small>即将上线</small></div>
+      <div class="qr" style="flex:1;min-width:140px">支付宝收款码<br><small>即将上线</small></div>
+    </div>
+    <p class="tip">会员费用于网站服务器与社区维护。虚拟服务一经开通不支持退款；因违规被封禁的账号不退费。</p>
+  </div>
+</main>
+<nav>
+  <a href="/"><i>🏠</i>首页</a>
+  <a href="/attractions"><i>🗺️</i>景点</a>
+  <a href="/tips"><i>📘</i>攻略</a>
+  <a href="/community"><i>💬</i>社区</a>
+  <a href="/member" class="on"><i>👑</i>会员</a>
+</nav>
+<script src="/static/community.js"></script>
+<script>
+(async function(){
+  var d = await LH.userbar(document.getElementById('ub'));
+  var s = document.getElementById('status');
+  if (LH.qs('new')){ var ok = document.getElementById('okmsg'); ok.textContent = '🎉 注册成功！现在可以浏览社区了。'; ok.style.display = 'block'; }
+  if (!d || !d.user){ s.innerHTML = '<h2>我的状态</h2><p style="margin:0 0 12px">还没登录</p><a class="btn primary block" href="/login?mode=reg&next=/member">免费注册 / 登录</a>'; return; }
+  s.innerHTML = '<h2>我的状态</h2><p style="margin:0;line-height:1.9">昵称：' + LH.esc(d.user.nickname) + LH.badge(d.user.is_member) +
+    '<br>会员编号：<b style="font-size:18px;color:var(--pink)">' + d.user.id + '</b><br>登录账号：' + LH.esc(d.user.account) +
+    '<br>状态：' + (d.user.is_member ? '<b style="color:#1b7a3d">已开通会员</b>' : '未开通') + '</p>' +
+    (d.user.is_member ? '<a class="btn primary block" style="margin-top:12px" href="/community/new">去发帖</a>' : '');
+})();
+</script>
+<script src="/static/pwa.js" defer></script>
+</body>
+</html>

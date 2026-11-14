@@ -1,5 +1,5 @@
 /* 旅韩助手 service worker: cache app shell, never cache API or POST. */
-const CACHE = 'lvhan-shell-v2';
+const CACHE = 'lvhan-shell-v3';
 const SHELL = [
   '/',
   '/attractions',
@@ -7,6 +7,9 @@ const SHELL = [
   '/shopping',
   '/tips',
   '/beauty',
+  '/community',
+  '/member',
+  '/login',
   '/static/index.html',
   '/static/attractions.html',
   '/static/attractions.json',
@@ -16,6 +19,13 @@ const SHELL = [
   '/static/tips.html',
   '/static/beauty.html',
   '/static/guide.css',
+  '/static/community.css',
+  '/static/community.js',
+  '/static/community.html',
+  '/static/community-post.html',
+  '/static/community-new.html',
+  '/static/login.html',
+  '/static/member.html',
   '/static/pwa.js',
   '/static/pwa.css',
   '/manifest.webmanifest',
@@ -95,6 +105,7 @@ self.addEventListener('fetch', event => {
   const url = new URL(request.url);
   if (url.origin !== self.location.origin) return;
   if (isApi(url)) return; // never intercept /api/*
+  if (url.pathname === '/admin' || url.searchParams.has('ref')) return; // admin and referral visits always hit the network
 
   if (isHtml(request, url)) {
     event.respondWith(networkFirst(request));
