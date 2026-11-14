@@ -123,11 +123,16 @@ async def chat(messages, max_tokens=1500):
 
 app = FastAPI(docs_url=None, redoc_url=None, openapi_url=None)
 
+from community import router as community_router, ref_middleware
+app.include_router(community_router)
+app.middleware("http")(ref_middleware)
+
 @app.middleware("http")
 async def limit_body(request: Request, call_next):
     cl = request.headers.get("content-length")
-    if cl and cl.isdigit() and int(cl) > MAX_UPLOAD + 100_000:
-        return JSONResponse({"detail": "图片太大（最大 8MB）"}, status_code=413)
+    cap = 20 * 1024 * 1024 if request.url.path == "/api/community/posts" else MAX_UPLOAD + 100_000
+    if cl and cl.isdigit() and int(cl) > cap:
+        return JSONResponse({"detail": "图片太大，请少选几张或换小一点的图"}, status_code=413)
     return await call_next(request)
 
 @app.post("/api/scan")
