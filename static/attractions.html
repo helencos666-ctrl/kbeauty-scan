@@ -95,7 +95,9 @@ nav a.on{color:var(--pink);font-weight:700}
   <a href="/?tab=ph"><i>📍</i>常用句</a>
 </nav>
 <script src="/static/pwa.js" defer></script>
+<script src="/static/maps.js"></script>
 <script>
+var STN={}; LHMap.stations().then(function(s){ STN=s; if(DATA.items&&DATA.items.length) render(); });
 const $=id=>document.getElementById(id);
 const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const CAT_ZH={landmark:'地标',palace:'宫殿',temple:'寺庙',market:'市场',nature:'自然',event:'季节活动',hidden:'小众推荐'};
@@ -148,12 +150,15 @@ function render(){
       rows.push(`<h3>实用提示</h3><ul>${it.tips.map(t=>`<li>${esc(t)}</li>`).join('')}</ul>`);
     }
     const go=it.station?`<a class="go" href="/?tab=sub&to=${encodeURIComponent(it.station)}">用地铁查到这里</a>`:'';
+    const c=it.station&&STN[it.station]||null;
+    const maps=LHMap.buttons(LHMap.naverSearch(it.name_ko||it.name_zh), LHMap.amapSearch(it.name_zh||it.name_ko, c));
     return `<article class="place">
       <div class="name-zh">${esc(it.name_zh)}</div>
       <div class="name-ko">${esc(it.name_ko)}</div>
       <div class="badges">${badges.join('')}</div>
       <p class="desc">${esc(it.desc)}</p>
       <div class="meta">${rows.join('')}</div>
+      ${maps}
       ${go}
     </article>`;
   }).join('');

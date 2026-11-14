@@ -9,3 +9,7 @@
 .toc{display:flex;flex-wrap:wrap;gap:8px;margin:0 0 6px}
 .toc a{text-decoration:none;border-radius:20px;padding:7px 12px;font-size:13px;background:#ffe8ee;color:#ff4f7b;font-weight:600}
 .src a{color:#2c7be5;word-break:break-all}
+.lhmap{display:flex;gap:8px;margin-top:10px}
+.lhmap a{flex:1;display:block;text-align:center;text-decoration:none;border-radius:12px;padding:12px 6px;font-size:15px;font-weight:700}
+.lhmap a.lhmap-naver{background:#03c75a;color:#fff}
+.lhmap a.lhmap-amap{background:#eef4ff;color:#1a66ff}

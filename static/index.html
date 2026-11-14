@@ -93,8 +93,8 @@ nav button.on,nav a.on{color:var(--pink);font-weight:700}
 .route-out .name-zh{font-size:18px}
 .route-links{display:flex;flex-direction:column;gap:8px;margin-top:10px}
 .route-links a{display:block;text-align:center;text-decoration:none;border-radius:12px;padding:12px 8px;font-size:16px;font-weight:600}
-.route-links a.kakao{background:var(--pink);color:#fff}
-.route-links a.naver{background:#ffe8ee;color:var(--pink)}
+.route-links a.naver{background:#03c75a;color:#fff}
+.route-links a.amap{background:#eef4ff;color:#1a66ff}
 .card-inrow{display:flex;gap:10px;align-items:stretch}
 .card-inrow textarea{flex:1;min-height:96px}
 .mic-btn{flex:none;width:86px;border:0;border-radius:12px;background:#ffe8ee;color:var(--pink);font-size:13px;font-weight:700;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;cursor:pointer;user-select:none;-webkit-user-select:none;-webkit-touch-callout:none;touch-action:none;-webkit-user-drag:none}
@@ -442,8 +442,15 @@ function lookupStation(s){
   const k=normSt(s);
   return (k && STATIONS[k]) || '';
 }
-function kakaoRoute(s,e){return 'https://map.kakao.com/?sName='+encodeURIComponent(s)+'&eName='+encodeURIComponent(e)}
-function naverRoute(s,e){return 'https://map.naver.com/p/search/'+encodeURIComponent(s+' '+e+' 길찾기')}
+// 有两站坐标时打开 Naver / 高德的公交路线规划；缺坐标时退回搜索终点站
+async function mapLinks(s,e){
+  const st=await LHMap.stations(), a=st[s], b=st[e];
+  if(a&&b){
+    const A={name:s,lng:a[0],lat:a[1]}, B={name:e,lng:b[0],lat:b[1]};
+    return {naver:LHMap.naverRoute(A,B), amap:LHMap.amapRoute(A,B), exact:true};
+  }
+  return {naver:LHMap.naverSearch(e), amap:LHMap.amapSearch(e, b||null), exact:false};
+}
 async function resolveStation(raw){
   const hit=lookupStation(raw);
   if(hit) return hit;
@@ -460,14 +467,14 @@ async function findRoute(){
   $('err').style.display='none';$('ld-rt').style.display='block';$('rtBtn').disabled=true;$('rtOut').innerHTML='';
   try{
     const [s,e]=await Promise.all([resolveStation(a),resolveStation(b)]);
-    const k=kakaoRoute(s,e), n=naverRoute(s,e);
+    const m=await mapLinks(s,e);
     $('rtOut').innerHTML=`<div class="name-zh">${esc(s)} → ${esc(e)}</div>
-      <div class="tip">仅供参考。将打开地图查看换乘和走法，请再核对站名。</div>
+      <div class="tip">${m.exact?'仅供参考。将打开地图查看换乘和走法，请再核对站名。':'暂时没有这两站的坐标，将打开地图搜索终点站，再点“길찾기/路线”规划。'}</div>
       <div class="route-links">
-        <a class="kakao" href="${esc(k)}" target="_blank" rel="noopener">打开 Kakao 地图路线</a>
-        <a class="naver" href="${esc(n)}" target="_blank" rel="noopener">备用：Naver 地图搜索</a>
+        <a class="naver" href="${esc(m.naver)}" target="_blank" rel="noopener">Naver 地图（推荐）</a>
+        <a class="amap" href="${esc(m.amap)}" target="_blank" rel="noopener">高德地图</a>
       </div>`;
-    window.open(k,'_blank','noopener');
+    window.open(m.naver,'_blank','noopener');
   }catch(err){showErr(err.message||'查询失败，请稍后重试')}
   finally{$('ld-rt').style.display='none';$('rtBtn').disabled=false}
 }
@@ -592,6 +599,7 @@ drawScenes();
   if(to && $('rtTo')) $('rtTo').value=to;
 })();
 </script>
+<script src="/static/maps.js"></script>
 <script src="/static/pwa.js" defer></script>
 </body>
 </html>

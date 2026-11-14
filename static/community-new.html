@@ -68,7 +68,7 @@ var WARN = {visa: '签证版块仅限个人经验分享，禁止发布代办广�
   hotel: '商家版块：请写清店名、地址、房型与价格，确保已办理合法住宿业登记。', car: '商家版块：请写清车型、服务范围与收费，确保具备租赁或客运资质。',
   clinic: '商家版块：仅限合法医疗机构发布，不得承诺效果，不得使用术前术后对比图招揽。'};
 var MB = {hotel: 1, car: 1, clinic: 1}, ME = null;
-var NORMAL_HINT = '普通版块里含酒店预订、租车包车、医美、价格、微信号、代办等商业内容的帖子会先进入人工审核。';
+var NORMAL_HINT = '普通版块里含酒店预订、租车包车、医美、微信号、代办等商业内容的帖子会先进入人工审核。';
 var files = [];
 document.getElementById('board').onchange = function(){
   var w = document.getElementById('bwarn'), t = WARN[this.value] || '';
