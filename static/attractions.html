@@ -13,6 +13,7 @@
 <link rel="apple-touch-icon" href="/static/icons/apple-touch-icon.png">
 <link rel="icon" type="image/png" sizes="192x192" href="/static/icons/icon-192.png">
 <link rel="stylesheet" href="/static/pwa.css">
+<link rel="stylesheet" href="/static/guide.css">
 <style>
 :root{--pink:#ff4f7b;--ink:#1f2330;--sub:#6b7080;--bg:#fff6f8;--card:#fff;--line:#f0e3e7}
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
@@ -59,6 +60,13 @@ nav a.on{color:var(--pink);font-weight:700}
   <p>韩国免费景点指南，按城市和类型查看</p>
 </header>
 <main>
+  <div class="gbar">
+    <a href="/attractions" class="on">🗺️ 景点</a>
+    <a href="/food">🍜 美食</a>
+    <a href="/shopping">🛍️ 购物</a>
+    <a href="/tips">📘 攻略</a>
+    <a href="/beauty">💄 买妆</a>
+  </div>
   <div class="card">
     <input id="q" type="search" enterkeyhint="search" placeholder="搜索中文名、韩文名或地点" autocomplete="off">
     <div class="lab">城市</div>
@@ -81,6 +89,7 @@ nav a.on{color:var(--pink);font-weight:700}
   <a href="/?tab=cos"><i>💄</i>化妆品</a>
   <a href="/?tab=sub"><i>🚇</i>地铁</a>
   <a href="/attractions" class="on"><i>🗺️</i>景点</a>
+  <a href="/food"><i>🍜</i>美食</a>
   <a href="/?tab=card"><i>💬</i>沟通卡</a>
   <a href="/?tab=ph"><i>📍</i>常用句</a>
 </nav>

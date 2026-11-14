@@ -1,11 +1,21 @@
 /* 旅韩助手 service worker: cache app shell, never cache API or POST. */
-const CACHE = 'lvhan-shell-v1';
+const CACHE = 'lvhan-shell-v2';
 const SHELL = [
   '/',
   '/attractions',
+  '/food',
+  '/shopping',
+  '/tips',
+  '/beauty',
   '/static/index.html',
   '/static/attractions.html',
   '/static/attractions.json',
+  '/static/food.html',
+  '/static/food.json',
+  '/static/shopping.html',
+  '/static/tips.html',
+  '/static/beauty.html',
+  '/static/guide.css',
   '/static/pwa.js',
   '/static/pwa.css',
   '/manifest.webmanifest',

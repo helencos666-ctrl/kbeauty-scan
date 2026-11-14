@@ -1,0 +1,225 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>韩国旅行攻略 · 旅韩助手</title>
+<meta name="description" content="旅韩助手：中国游客赴韩签证、交通、安全、礼仪与防骗提醒，资料来自官方网站。">
+
+<meta name="theme-color" content="#ff6b8f">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="旅韩助手">
+<link rel="manifest" href="/manifest.webmanifest">
+<link rel="apple-touch-icon" href="/static/icons/apple-touch-icon.png">
+<link rel="icon" type="image/png" sizes="192x192" href="/static/icons/icon-192.png">
+<link rel="stylesheet" href="/static/pwa.css">
+<link rel="stylesheet" href="/static/guide.css">
+<style>
+:root{--pink:#ff4f7b;--ink:#1f2330;--sub:#6b7080;--bg:#fff6f8;--card:#fff;--line:#f0e3e7}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+body{margin:0;font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Noto Sans SC","Microsoft YaHei",sans-serif;background:var(--bg);color:var(--ink);padding-bottom:132px}
+header{background:linear-gradient(135deg,#ff6b8f,#ff9a6b);color:#fff;padding:20px 18px 30px;border-radius:0 0 22px 22px}
+header h1{margin:0;font-size:21px}
+header p{margin:6px 0 0;font-size:14px;opacity:.95}
+main{max-width:560px;margin:-18px auto 0;padding:0 14px}
+.card{background:var(--card);border-radius:16px;padding:16px;box-shadow:0 4px 16px rgba(255,79,123,.08);margin-bottom:14px}
+.tip{font-size:12px;color:var(--sub);margin-top:10px;line-height:1.6}
+.disclaimer{font-size:12px;color:var(--sub);text-align:center;margin:6px 0 14px;line-height:1.6}
+nav{position:fixed;left:0;right:0;bottom:0;height:calc(60px + env(safe-area-inset-bottom));padding-bottom:env(safe-area-inset-bottom);background:#fff;border-top:1px solid var(--line);display:flex;z-index:10}
+nav a{flex:1;border:0;background:none;font-size:11px;color:var(--sub);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;text-decoration:none}
+nav a i{font-style:normal;font-size:20px}
+nav a.on{color:var(--pink);font-weight:700}
+#q{width:100%;border:1px solid var(--line);border-radius:12px;padding:12px 14px;font-size:16px;font-family:inherit}
+.chips{display:flex;gap:8px;overflow-x:auto;padding:2px 0 4px;margin-top:10px;-webkit-overflow-scrolling:touch}
+.chips button{flex:none;border:0;border-radius:20px;padding:7px 13px;font-size:14px;background:#fff;color:var(--ink);box-shadow:0 2px 6px rgba(0,0,0,.05)}
+.chips button.on{background:var(--pink);color:#fff}
+.lab{font-size:12px;color:var(--sub);margin:10px 0 0;font-weight:600}
+#count{font-size:13px;color:var(--sub);margin:4px 0 10px}
+.place{background:var(--card);border-radius:16px;padding:16px;box-shadow:0 4px 16px rgba(255,79,123,.08);margin-bottom:12px}
+.place .name-zh{font-size:18px;font-weight:700;margin:0}
+.place .name-ko{font-size:13px;color:var(--sub);margin:3px 0 0}
+.badges{display:flex;gap:6px;flex-wrap:wrap;margin-top:8px}
+.badge{font-size:12px;padding:3px 8px;border-radius:20px;background:#ffe8ee;color:var(--pink)}
+.badge.gray{background:#eef0f4;color:#555}
+.place .desc{font-size:15px;line-height:1.65;margin:10px 0 0}
+.meta{border-top:1px solid var(--line);margin-top:12px;padding-top:10px}
+.meta h3{margin:8px 0 4px;font-size:13px;color:var(--pink)}
+.meta p,.meta li{font-size:14px;line-height:1.65;margin:0}
+.meta ul{margin:0;padding-left:18px}
+.go{display:block;margin-top:12px;text-align:center;text-decoration:none;border-radius:12px;padding:12px 8px;font-size:15px;font-weight:700;background:#ffe8ee;color:var(--pink)}
+.spin{width:28px;height:28px;border:3px solid #ffd1dc;border-top-color:var(--pink);border-radius:50%;animation:s 1s linear infinite;margin:0 auto 8px}
+@keyframes s{to{transform:rotate(360deg)}}
+.loading,.empty{text-align:center;padding:28px 10px;color:var(--sub)}
+.src a{color:#2c7be5;word-break:break-all}
+</style>
+
+</head>
+<body>
+<header>
+  <h1>🇰🇷 旅韩助手</h1>
+  <p>中国游客赴韩旅行攻略</p>
+</header>
+<main>
+  <div class="gbar">
+    <a href="/attractions">🗺️ 景点</a>
+    <a href="/food">🍜 美食</a>
+    <a href="/shopping">🛍️ 购物</a>
+    <a href="/tips" class="on">📘 攻略</a>
+    <a href="/beauty">💄 买妆</a>
+  </div>
+
+
+  <div class="card">
+    <div class="toc">
+      <a href="#visa">签证入境</a>
+      <a href="#money">换钱支付</a>
+      <a href="#transport">交通</a>
+      <a href="#safety">安全电话</a>
+      <a href="#etiquette">礼仪</a>
+      <a href="#weather">天气行装</a>
+      <a href="#internet">上网通信</a>
+      <a href="#scams">防骗提醒</a>
+    </div>
+    <p class="tip" style="margin:8px 0 0">面向持中华人民共和国普通护照的短期游客。政策会调整，本页在 2026年11月15日 根据官方页面核对，出行前请再查原文。</p>
+  </div>
+
+  <article class="card article" id="visa">
+    <h2>1. 签证与入境</h2>
+    <h3>去首尔、釜山等韩国本土</h3>
+    <p>持普通护照的中国公民前往首尔、釜山等济州以外地区，原则上需要事先取得韩国签证。观光常用的是短期访问（C-3）类别中的一般旅游（C-3-9）等，具体发给对象、停留期和材料以韩国驻华使领馆及签证申请中心的说明为准。</p>
+    <p>韩国旅游发展局 VisitKorea 也提醒：除济州免签、符合条件的过境等情形外，中国游客访问济州以外地区需要准备签证。申请途径包括各地韩国签证申请中心或使领馆指定机构。</p>
+    <h3>关于 K-ETA</h3>
+    <p>韩国电子旅行许可（K-ETA）是给「免签入境对象国家/地区」旅客，在出发前于官网或官方应用申请的许可。中国不属于免签入境韩国本土的国家，因此不能用「先办 K-ETA、再免签去首尔」来替代旅游签证。</p>
+    <p>韩国法务部曾对部分免签国家/地区实施 K-ETA 阶段性免除，并延长至 <strong>2026年12月31日</strong>。官方列出的免除地区包括日本、中国香港、中国澳门、台湾、新加坡及美、加、部分欧洲国家和澳大利亚、新西兰等，<strong>名单中不包括中国大陆</strong>。请以 <a href="https://www.k-eta.go.kr" target="_blank" rel="noopener">k-eta.go.kr</a> 为准，不要使用非官方代办网站。</p>
+    <h3>济州免签</h3>
+    <p>韩国驻华使领馆说明：以旅游、过境等为目的，乘坐<strong>直达济州</strong>的飞机或船舶，经济州口岸入境的个人及团体游客（中国游客包含在内），可在<strong>仅限济州岛</strong>的范围内停留<strong>30天以内</strong>。经首尔、釜山等韩国其他地区中转再去济州，一般不能使用这一济州免签，而需要相应签证。</p>
+    <p>免签不等于一定能入境。中国驻济州总领事馆曾提醒：入境审查官员有权拒绝入境，建议备好行程单、酒店订单和往返机票等，以备查验。</p>
+    <h3>中国团队游客阶段性免签</h3>
+    <p>大韩民国驻上海总领事馆 2026年6月22日公告：自 2025年9月29 日起实施的中国团队游客阶段性免签政策，实施期限延长为 <strong>2026年7月1日至2026年12月31日</strong>。韩国驻新加坡大使馆的说明则强调：适用对象是在中国参加特定团队旅游的中国公民，须向<strong>驻华使领馆</strong>核实细则。</p>
+    <p>团队人数、停留天数、指定旅行社名单和出发地限制，本页不臆测，请以驻华使领馆最新公告和指定旅行社名单为准。政策到期后是否再延长，也需要再查官方。</p>
+    <p>签证与入境咨询：韩国出入境咨询 1345（在韩国拨打）；详情见韩国签证门户 <a href="https://www.visa.go.kr" target="_blank" rel="noopener">visa.go.kr</a>、HiKorea <a href="https://www.hikorea.go.kr" target="_blank" rel="noopener">hikorea.go.kr</a>。</p>
+  </article>
+
+  <article class="card article" id="money">
+    <h2>2. 货币与兑换</h2>
+    <p>韩国使用韩元（KRW，符号 ₩）。纸币常见面额为 1,000、5,000、10,000、50,000 韩元。兑换请选择银行或公示汇率的正规兑换所，并在柜台当面点清现金。</p>
+    <p>很多旅客会比较仁川机场兑换处和明洞、南大门一带兑换所的牌价。市区兑换所的牌价<strong>常常</strong>更有利，但每家手续费、是否收取额外费用并不相同，请当场比较，不要只听拉客报价。机场兑换方便但未必划算，适合只换少量应急现金。</p>
+    <p>餐饮、便利店、商场普遍可刷卡。VisitKorea 介绍的退税柜台也支持部分情形下的人民币现金、支付宝或微信支付（以各机场柜台当日说明为准）。支付宝、微信支付在旅游区和部分商店越来越常见，但传统市场摊位仍可能只收现金或韩国卡，建议准备少量韩元现金。</p>
+    <p>银联卡在部分商户和ATM可用，能否取现、是否收费取决于发卡行和ATM，请向自己的银行确认。</p>
+  </article>
+
+  <article class="card article" id="transport">
+    <h2>3. 交通</h2>
+    <h3>交通卡</h3>
+    <p><strong>T-money</strong> 等交通卡可在地铁、公交和部分便利店使用，可在便利店、地铁站和机场购买、充值。是最常规的游客选择。</p>
+    <p><strong>WOWPASS</strong> 是面向游客的多功能预付卡，VisitKorea 有专门介绍，可用于交通和部分消费，并支持用外币充值等功能，具体以官方说明和办理点为准。</p>
+    <p><strong>气候同行卡（Climate Card）短期券</strong>：据首尔市官方介绍（页面修订日 2026-10-12），一次充值后可在所选天数内无限乘坐指定公共交通。覆盖范围为<strong>首尔市内地铁</strong>（可在仁川机场 T1/T2 下车，但不能在这两站上车）以及<strong>首尔市执照</strong>的市内、社区公交（含深夜、循环公交）。不包含新盆唐线、GTX、首尔以外地铁、广域/机场巴士及其他地区执照公交。若在首尔市内上车、在京畿道等范围外下车，该卡不能作为出站凭证，需另付车费。</p>
+    <p>短期券官方标价（韩元，以首尔市交通页面为准）：1日 5,000；2日 8,000；3日 10,000；5日 15,000；7日 20,000。使用从充值当天首班车起算，一般不能提前充后面的日期。实体卡本身可能另计工本费，请在售卡处确认。询问：多山呼叫中心 120，或 T-money 客户中心 1644-0088。</p>
+    <h3>机场往来</h3>
+    <p>据 VisitKorea《机场交通指南》（该页注明最近更新 2026年5月22日）：</p>
+    <ul>
+      <li><strong>AREX 机场铁路</strong>：仁川机场往首尔站，直达约 43 分钟（1号航站楼）或约 51 分钟（2号航站楼）；普通列车经弘大入口、数码媒体城等站，分别约 59 分钟、66 分钟。直达票可在网上或车站购买；普通列车可用各类交通卡。</li>
+      <li><strong>机场大巴（Limousine）</strong>：线路覆盖首尔及韩国其他地区。仁川线通常需预先购票，现场现金或交通卡可能无法直接上车，请在航站楼售票处或售票机购票。</li>
+      <li><strong>出租车</strong>：普通、豪华、大型和国际出租车在指定上客点候客。国际出租车一般需要预约。可支付现金、信用卡或交通卡。请走官方出租车站，并确认司机打表。</li>
+    </ul>
+    <p>夜间公交、金浦、金海、济州机场的接驳，同样见 VisitKorea 该指南。问询可打 1330。</p>
+  </article>
+
+  <article class="card article" id="safety">
+    <h2>4. 安全与紧急电话</h2>
+    <ul>
+      <li><strong>112</strong>：报警（在韩国可直拨）。中国驻韩国大使馆曾说明该热线可提供中文翻译协助。</li>
+      <li><strong>119</strong>：火灾、事故和急救。</li>
+      <li><strong>1330</strong>：韩国旅游咨询热线，VisitKorea 写明提供中文等语言服务（国内拨 1330，境外可试 +82-2-1330）。</li>
+      <li><strong>1345</strong>：出入境咨询。</li>
+    </ul>
+    <p>中国驻韩国大使馆（官方网站，本页 2026-11-15 查阅）：</p>
+    <ul>
+      <li>领事保护与协助电话：<strong>+82-2-755-0572</strong>（工作日 09:00–12:00、13:30–17:00）</li>
+      <li>领事保护邮箱：seoul_lb@csm.mfa.gov.cn</li>
+      <li>外交部全球领事保护与服务应急热线：<strong>+86-10-12308</strong>（24 小时）</li>
+      <li>驻釜山总领馆领保：+82-51-743-7989</li>
+      <li>驻光州总领馆领保：+82-62-361-8880</li>
+      <li>驻济州总领馆领保：+82-64-722-8802</li>
+      <li>领事证件咨询：+82-2-755-0568、+82-2-755-0473（工作日同上）</li>
+    </ul>
+    <p>官网：<a href="https://kr.china-embassy.gov.cn/lsfw/lsbhyxz/" target="_blank" rel="noopener">kr.china-embassy.gov.cn</a>。电话如有变更，以官网为准。</p>
+  </article>
+
+  <article class="card article" id="etiquette">
+    <h2>5. 礼仪</h2>
+    <ul>
+      <li>见面或致谢时可微微鞠躬，接收名片、钱或物品时尽量用双手。</li>
+      <li>韩国日常餐饮一般<strong>没有付小费的习惯</strong>。若账单已写明服务费，按账单支付即可，不必额外再加，除非菜单或店规另有说明。</li>
+      <li>进入需要脱鞋的餐厅或传统住宿，把鞋放在指定位置。</li>
+      <li>不要把筷子直立插在饭碗里；用餐时尽量不要过于大声。地铁和公交上也请控制音量。</li>
+      <li>排队、靠右或按车站标识站立。过马路要看信号，中国驻济州总领馆曾提醒不要乱穿马路。</li>
+      <li>未经允许不要随意拍摄他人，以免引发纠纷。公共场所禁烟范围较广，请看标识，违者可能被罚款。</li>
+    </ul>
+  </article>
+
+  <article class="card article" id="weather">
+    <h2>6. 天气与行装</h2>
+    <p>韩国四季分明，首尔等内陆城市冬季常可低于冰点、干燥多风；夏季闷热，并有梅雨和暴雨；春季可能遇到扬尘或较大温差；秋季通常凉爽，适合出行，山区降温更早。济州、釜山海风更明显，体感会与市区不同。</p>
+    <ul>
+      <li>春季：薄外套和可叠加的内搭，必要时准备口罩。</li>
+      <li>夏季：透气衣物、雨具、防晒和舒适步行鞋；山区仍可能需要一件薄外套。</li>
+      <li>秋季：长袖和一件暖和的外套，早晚温差大。</li>
+      <li>冬季：厚大衣、围巾手套、防滑鞋底；室内供暖足，方便穿脱更舒服。</li>
+    </ul>
+    <p>无论季节，都建议穿适合走路的鞋，并预留一件可防风的外衣。具体预报请出发前查看气象厅或可靠天气应用，不要只按往年印象打包。</p>
+  </article>
+
+  <article class="card article" id="internet">
+    <h2>7. 上网：SIM / eSIM / 随身 Wi-Fi</h2>
+    <p>短期游客常见做法包括：在机场或市区办理韩国预付 SIM、购买 eSIM，或租用随身 Wi-Fi。仁川、金浦、金海、济州等机场通常有电信商或旅游通信柜台，具体套餐和价格经常变动，本页不列举金额，请在柜台或官方渠道比较覆盖范围、流量和是否含通话。</p>
+    <p>主要移动运营商包括 SKT、KT、LG U+ 及其旅游品牌或合作柜台。eSIM 需要手机支持并已解锁。部分旅游预付卡（如与交通卡结合的产品）也可能提供上网功能，办理前看清有效期和限速条款。</p>
+    <p>也可使用中国境内运营商的国际漫游，费用通常较高，出发前向自己的运营商确认开通方式和收费。咖啡馆和部分商场有公共 Wi-Fi，但不要在公共网络里登录网银或输入重要验证码。</p>
+    <p>沟通卡、常用句和 1330 在信号不好时仍然有用。可把本站「攻略」页先加到主屏幕，方便离线查看已缓存的内容。</p>
+  </article>
+
+  <article class="card article" id="scams">
+    <h2>8. 常见陷阱，请小心</h2>
+    <ul>
+      <li><strong>退税黄牛</strong>：不要把护照和退税单交给主动搭讪的「代办」。应按商店或官方退税点流程办理，出境仍可能要接受海关查验。</li>
+      <li><strong>出租车</strong>：在机场和车站走官方出租车上客点，确认打表。对主动揽客、拒绝打表或临时加价的车辆应拒绝。可使用当地叫车应用或酒店代叫。</li>
+      <li><strong>兑换与付款</strong>：只在有公示汇率的正规兑换所换钱，当面点清。扫码支付时核对店名和金额，不要扫来路不明的二维码。</li>
+      <li><strong>购物</strong>：对「特别便宜的正品化妆品」、无证摊贩和没有正规小票的商品保持警惕。详情见「买妆」和「购物」页。</li>
+      <li><strong>拉客</strong>：对街上强力推销的酒吧、按摩、「免费」参观要谨慎，先问清价格，不要把护照抵押给陌生人。</li>
+      <li><strong>行程与证件</strong>：护照和现金分开存放；重要证件拍照备份。中国驻外机构也曾提醒注意住宿门锁、出租车发票和户外活动安全。</li>
+    </ul>
+    <p>如果已经发生财物损失或人身危险，先拨 112 或 119，再视需要联系大使馆领事保护电话或 12308。</p>
+  </article>
+
+  <div class="card src article">
+    <h2 style="color:#1f2330">资料来源（2026-11-15 查阅）</h2>
+    <ul>
+      <li><a href="https://chinese.visitkorea.or.kr/svc/contents/contentsView.do?vcontsId=189505" target="_blank" rel="noopener">VisitKorea 中文：韩国签证 A to Z</a></li>
+      <li><a href="https://www.k-eta.go.kr" target="_blank" rel="noopener">K-ETA 官方网站</a> 及法务部关于免除期延长至 2026-12-31 的公告</li>
+      <li><a href="https://overseas.mofa.go.kr/nz-en/brd/m_24857/view.do?seq=29" target="_blank" rel="noopener">韩国驻新西兰大使馆：K-ETA 免除地区名单（至 2026-12-31）</a></li>
+      <li>韩国驻沈阳总领事馆「其他签证业务」说明中的济州无签证入境条款；韩国驻新加坡大使馆 2026-01-02 济州免签说明</li>
+      <li>中国驻济州总领事馆：赴济州领事提醒（免签不等于无条件入境）</li>
+      <li><a href="https://www.mofa.go.kr/cn-shanghai-zh/brd/m_492/view.do?seq=760833" target="_blank" rel="noopener">韩国驻上海总领事馆 2026-06-22：团队游客阶段性免签延长至 2026-12-31</a></li>
+      <li><a href="https://news.seoul.go.kr/traffic/archives/510651" target="_blank" rel="noopener">首尔市：气候同行卡（短期券）介绍</a>（修订日 2026-10-12）</li>
+      <li><a href="https://english.seoul.go.kr/policy/transportation/climate-card/" target="_blank" rel="noopener">Seoul Metropolitan Government: Climate Card</a></li>
+      <li><a href="https://english.visitkorea.or.kr/svc/contents/contentsView.do?vcontsId=140654" target="_blank" rel="noopener">VisitKorea: Airport Transportation Guide</a>（页内注明 2026-05-22 更新）</li>
+      <li><a href="https://english.visitkorea.or.kr/svc/contents/contentsView.do?vcontsId=1593864" target="_blank" rel="noopener">VisitKorea: WOWPASS</a></li>
+      <li><a href="https://kr.china-embassy.gov.cn/lsfw/lsbhyxz/" target="_blank" rel="noopener">中国驻韩国大使馆：领事保护与协助</a></li>
+    </ul>
+    <p class="tip">本页只提供出行参考，不构成签证、法律或投资建议。最终以主管机关当场审查为准。</p>
+  </div>
+
+</main>
+<nav>
+  <a href="/?tab=cos"><i>💄</i>化妆品</a>
+  <a href="/?tab=sub"><i>🚇</i>地铁</a>
+  <a href="/attractions"><i>🗺️</i>景点</a>
+  <a href="/food"><i>🍜</i>美食</a>
+  <a href="/?tab=card"><i>💬</i>沟通卡</a>
+  <a href="/?tab=ph"><i>📍</i>常用句</a>
+</nav>
+
+<script src="/static/pwa.js" defer></script>
+</body>
+</html>
