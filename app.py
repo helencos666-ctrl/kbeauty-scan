@@ -323,4 +323,24 @@ def healthz(): return {"ok": True}
 @app.get("/")
 def index(): return FileResponse(os.path.join(BASE, "static", "index.html"), headers={"Cache-Control": "no-cache"})
 
+@app.get("/attractions")
+def attractions():
+    return FileResponse(os.path.join(BASE, "static", "attractions.html"), headers={"Cache-Control": "no-cache"})
+
+@app.get("/manifest.webmanifest")
+def webmanifest():
+    return FileResponse(
+        os.path.join(BASE, "static", "manifest.webmanifest"),
+        media_type="application/manifest+json",
+        headers={"Cache-Control": "no-cache"},
+    )
+
+@app.get("/sw.js")
+def service_worker():
+    return FileResponse(
+        os.path.join(BASE, "static", "sw.js"),
+        media_type="application/javascript",
+        headers={"Cache-Control": "no-cache", "Service-Worker-Allowed": "/"},
+    )
+
 app.mount("/static", StaticFiles(directory=os.path.join(BASE, "static")), name="static")
