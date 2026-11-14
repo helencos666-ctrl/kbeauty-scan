@@ -3,8 +3,16 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<title>韩国旅行中文助手</title>
-<meta name="description" content="韩妆拍照识别、地铁看图、韩文沟通卡、明洞常用句">
+<title>旅韩助手</title>
+<meta name="description" content="旅韩助手（Korea Travel Assistant）：韩妆拍照识别、地铁路线、韩文沟通卡与韩国免费景点指南。">
+<meta name="theme-color" content="#ff6b8f">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="旅韩助手">
+<link rel="manifest" href="/manifest.webmanifest">
+<link rel="apple-touch-icon" href="/static/icons/apple-touch-icon.png">
+<link rel="icon" type="image/png" sizes="192x192" href="/static/icons/icon-192.png">
+<link rel="stylesheet" href="/static/pwa.css">
 <style>
 :root{--pink:#ff4f7b;--ink:#1f2330;--sub:#6b7080;--bg:#fff6f8;--card:#fff;--line:#f0e3e7}
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
@@ -70,9 +78,9 @@ textarea{width:100%;min-height:90px;border:1px solid var(--line);border-radius:1
 .live b{font-weight:600}
 .live a{background:var(--pink);color:#fff;text-decoration:none;padding:6px 12px;border-radius:16px;font-size:13px;white-space:nowrap}
 nav{position:fixed;left:0;right:0;bottom:0;height:calc(60px + env(safe-area-inset-bottom));padding-bottom:env(safe-area-inset-bottom);background:#fff;border-top:1px solid var(--line);display:flex;z-index:10}
-nav button{flex:1;border:0;background:none;font-size:12px;color:var(--sub);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px}
-nav button i{font-style:normal;font-size:22px}
-nav button.on{color:var(--pink);font-weight:700}
+nav button,nav a{flex:1;border:0;background:none;font-size:11px;color:var(--sub);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;text-decoration:none}
+nav button i,nav a i{font-style:normal;font-size:20px}
+nav button.on,nav a.on{color:var(--pink);font-weight:700}
 
 .route-box{margin-top:16px;padding-top:14px;border-top:1px dashed var(--line)}
 .route-box .rh{font-size:15px;font-weight:700;margin:0 0 10px}
@@ -100,7 +108,7 @@ nav button.on{color:var(--pink);font-weight:700}
 </head>
 <body>
 <header>
-  <h1 id="htitle">🇰🇷 韩国旅行中文助手</h1>
+  <h1 id="htitle">🇰🇷 旅韩助手</h1>
   <p id="hsub">拍一下韩国化妆品包装，马上看中文名称、用法和规格</p>
 </header>
 <main>
@@ -108,6 +116,11 @@ nav button.on{color:var(--pink);font-weight:700}
 
   <!-- 化妆品识别 -->
   <section class="page on" id="p-cos">
+    <div class="card">
+      <h2>🗺️ 韩国免费景点</h2>
+      <p style="margin:0 0 12px;font-size:15px;line-height:1.65">宫殿、寺庙、市场、自然风光和季节活动，面向中国游客的简短说明和交通提示。资料来自公开信息，不收费。</p>
+      <div class="btns"><a class="btn primary" href="/attractions" style="text-align:center;text-decoration:none">查看景点指南</a></div>
+    </div>
     <div class="card">
       <h2>📷 韩妆拍照识别</h2>
       <div class="btns"><button class="btn primary" data-pick="cos" data-cam="1">拍照识别</button><button class="btn ghost" data-pick="cos">从相册选</button></div>
@@ -175,6 +188,7 @@ nav button.on{color:var(--pink);font-weight:700}
 <nav>
   <button class="on" data-tab="cos"><i>💄</i>化妆品</button>
   <button data-tab="sub"><i>🚇</i>地铁</button>
+  <a href="/attractions"><i>🗺️</i>景点</a>
   <button data-tab="card"><i>💬</i>沟通卡</button>
   <button data-tab="ph"><i>📍</i>常用句</button>
 </nav>
@@ -544,6 +558,20 @@ function drawScenes(){
   });
 }
 drawScenes();
+
+// 从景点页带回的地铁终点，或其他 ?tab= 深链接
+(function(){
+  const q=new URLSearchParams(location.search);
+  const tab=q.get('tab');
+  if(tab){
+    const b=document.querySelector('nav button[data-tab="'+tab+'"]');
+    if(b) b.click();
+  }
+  const fr=q.get('from'), to=q.get('to');
+  if(fr && $('rtFrom')) $('rtFrom').value=fr;
+  if(to && $('rtTo')) $('rtTo').value=to;
+})();
 </script>
+<script src="/static/pwa.js" defer></script>
 </body>
 </html>

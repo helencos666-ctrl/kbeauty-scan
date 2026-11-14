@@ -1,0 +1,177 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>韩国免费景点指南 · 旅韩助手</title>
+<meta name="description" content="旅韩助手（Korea Travel Assistant）免费景点指南：宫殿、寺庙、市场、自然与季节活动，面向在韩中国游客。">
+<meta name="theme-color" content="#ff6b8f">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="旅韩助手">
+<link rel="manifest" href="/manifest.webmanifest">
+<link rel="apple-touch-icon" href="/static/icons/apple-touch-icon.png">
+<link rel="icon" type="image/png" sizes="192x192" href="/static/icons/icon-192.png">
+<link rel="stylesheet" href="/static/pwa.css">
+<style>
+:root{--pink:#ff4f7b;--ink:#1f2330;--sub:#6b7080;--bg:#fff6f8;--card:#fff;--line:#f0e3e7}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+body{margin:0;font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Noto Sans SC","Microsoft YaHei",sans-serif;background:var(--bg);color:var(--ink);padding-bottom:132px}
+header{background:linear-gradient(135deg,#ff6b8f,#ff9a6b);color:#fff;padding:20px 18px 30px;border-radius:0 0 22px 22px}
+header h1{margin:0;font-size:21px}
+header p{margin:6px 0 0;font-size:14px;opacity:.95}
+main{max-width:560px;margin:-18px auto 0;padding:0 14px}
+.card{background:var(--card);border-radius:16px;padding:16px;box-shadow:0 4px 16px rgba(255,79,123,.08);margin-bottom:14px}
+.tip{font-size:12px;color:var(--sub);margin-top:10px;line-height:1.6}
+.disclaimer{font-size:12px;color:var(--sub);text-align:center;margin:6px 0 14px;line-height:1.6}
+nav{position:fixed;left:0;right:0;bottom:0;height:calc(60px + env(safe-area-inset-bottom));padding-bottom:env(safe-area-inset-bottom);background:#fff;border-top:1px solid var(--line);display:flex;z-index:10}
+nav a{flex:1;border:0;background:none;font-size:11px;color:var(--sub);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;text-decoration:none}
+nav a i{font-style:normal;font-size:20px}
+nav a.on{color:var(--pink);font-weight:700}
+#q{width:100%;border:1px solid var(--line);border-radius:12px;padding:12px 14px;font-size:16px;font-family:inherit}
+.chips{display:flex;gap:8px;overflow-x:auto;padding:2px 0 4px;margin-top:10px;-webkit-overflow-scrolling:touch}
+.chips button{flex:none;border:0;border-radius:20px;padding:7px 13px;font-size:14px;background:#fff;color:var(--ink);box-shadow:0 2px 6px rgba(0,0,0,.05)}
+.chips button.on{background:var(--pink);color:#fff}
+.lab{font-size:12px;color:var(--sub);margin:10px 0 0;font-weight:600}
+#count{font-size:13px;color:var(--sub);margin:4px 0 10px}
+.place{background:var(--card);border-radius:16px;padding:16px;box-shadow:0 4px 16px rgba(255,79,123,.08);margin-bottom:12px}
+.place .name-zh{font-size:18px;font-weight:700;margin:0}
+.place .name-ko{font-size:13px;color:var(--sub);margin:3px 0 0}
+.badges{display:flex;gap:6px;flex-wrap:wrap;margin-top:8px}
+.badge{font-size:12px;padding:3px 8px;border-radius:20px;background:#ffe8ee;color:var(--pink)}
+.badge.gray{background:#eef0f4;color:#555}
+.place .desc{font-size:15px;line-height:1.65;margin:10px 0 0}
+.meta{border-top:1px solid var(--line);margin-top:12px;padding-top:10px}
+.meta h3{margin:8px 0 4px;font-size:13px;color:var(--pink)}
+.meta p,.meta li{font-size:14px;line-height:1.65;margin:0}
+.meta ul{margin:0;padding-left:18px}
+.go{display:block;margin-top:12px;text-align:center;text-decoration:none;border-radius:12px;padding:12px 8px;font-size:15px;font-weight:700;background:#ffe8ee;color:var(--pink)}
+.spin{width:28px;height:28px;border:3px solid #ffd1dc;border-top-color:var(--pink);border-radius:50%;animation:s 1s linear infinite;margin:0 auto 8px}
+@keyframes s{to{transform:rotate(360deg)}}
+.loading{text-align:center;padding:28px;color:var(--sub)}
+.src a{color:#2c7be5;word-break:break-all}
+.empty{text-align:center;color:var(--sub);padding:28px 10px}
+</style>
+</head>
+<body>
+<header>
+  <h1>🇰🇷 旅韩助手</h1>
+  <p>韩国免费景点指南，按城市和类型查看</p>
+</header>
+<main>
+  <div class="card">
+    <input id="q" type="search" enterkeyhint="search" placeholder="搜索中文名、韩文名或地点" autocomplete="off">
+    <div class="lab">城市</div>
+    <div class="chips" id="cityChips"></div>
+    <div class="lab">类型</div>
+    <div class="chips" id="catChips"></div>
+    <div class="lab">季节</div>
+    <div class="chips" id="seasonChips"></div>
+  </div>
+  <div id="count"></div>
+  <div id="list"><div class="loading"><div class="spin"></div>正在载入景点…</div></div>
+  <div class="disclaimer" id="disc"></div>
+  <div class="card src" id="src" style="display:none">
+    <div style="font-size:14px;font-weight:700;margin-bottom:8px">资料来源</div>
+    <div class="tip" style="margin:0 0 8px">条目根据以下公开资料整理，不含收费内容和需密钥的接口。请以官方最新信息为准。</div>
+    <ul id="srcList" style="margin:0;padding-left:18px;font-size:13px;line-height:1.7"></ul>
+  </div>
+</main>
+<nav>
+  <a href="/?tab=cos"><i>💄</i>化妆品</a>
+  <a href="/?tab=sub"><i>🚇</i>地铁</a>
+  <a href="/attractions" class="on"><i>🗺️</i>景点</a>
+  <a href="/?tab=card"><i>💬</i>沟通卡</a>
+  <a href="/?tab=ph"><i>📍</i>常用句</a>
+</nav>
+<script src="/static/pwa.js" defer></script>
+<script>
+const $=id=>document.getElementById(id);
+const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const CAT_ZH={landmark:'地标',palace:'宫殿',temple:'寺庙',market:'市场',nature:'自然',event:'季节活动',hidden:'小众推荐'};
+const SEASONS=[{id:'',zh:'全部'},{id:'spring',zh:'春季'},{id:'summer',zh:'夏季'},{id:'autumn',zh:'秋季'},{id:'winter',zh:'冬季'}];
+const SEASON_MONTHS={spring:[3,4,5],summer:[6,7,8],autumn:[9,10,11],winter:[12,1,2]};
+let DATA={items:[],categories:[],cities:[],sources:[],disclaimer:''};
+let city='', cat='', season='', q='';
+
+function chipBar(el, opts, current, onpick){
+  el.innerHTML=opts.map(([id,zh])=>`<button type="button" class="${id===current?'on':''}" data-id="${esc(id)}">${esc(zh)}</button>`).join('');
+  el.querySelectorAll('button').forEach(b=>b.onclick=()=>onpick(b.dataset.id));
+}
+function inSeason(it, s){
+  if(!s) return true;
+  if(it.season===s) return true;
+  const months=it.months||[];
+  return months.some(m=> (SEASON_MONTHS[s]||[]).includes(m));
+}
+function filtered(){
+  const k=q.trim().toLowerCase();
+  return DATA.items.filter(it=>{
+    if(city && it.city_zh!==city) return false;
+    if(cat && it.category!==cat) return false;
+    if(!inSeason(it, season)) return false;
+    if(!k) return true;
+    const blob=[it.name_zh,it.name_ko,it.area,it.city_zh,it.desc,it.transport,(it.tips||[]).join(' ')].join(' ').toLowerCase();
+    return blob.includes(k);
+  });
+}
+function render(){
+  const arr=filtered();
+  $('count').textContent=arr.length?`共 ${arr.length} 条`:'没有符合条件的景点，试试改筛选或关键词。';
+  if(!arr.length){ $('list').innerHTML='<div class="empty">没有符合条件的景点</div>'; return; }
+  $('list').innerHTML=arr.map(it=>{
+    const badges=[
+      `<span class="badge">${esc(it.city_zh)}</span>`,
+      `<span class="badge gray">${esc(CAT_ZH[it.category]||it.category)}</span>`
+    ];
+    if(it.area) badges.push(`<span class="badge gray">${esc(it.area)}</span>`);
+    if(it.season) badges.push(`<span class="badge">${esc({spring:'春季',summer:'夏季',autumn:'秋季',winter:'冬季'}[it.season]||'')}</span>`);
+    if(it.months&&it.months.length){
+      const m=it.months.slice().sort((a,b)=>a-b);
+      badges.push(`<span class="badge gray">${esc(m.join(' / ')+' 月')}</span>`);
+    }
+    const rows=[];
+    rows.push(`<h3>怎么去</h3><p>${esc(it.transport)}</p>`);
+    if(it.hours) rows.push(`<h3>开放时间</h3><p>${esc(it.hours)}</p>`);
+    if(it.fee) rows.push(`<h3>费用</h3><p>${esc(it.fee)}</p>`);
+    if(it.tips&&it.tips.length){
+      rows.push(`<h3>实用提示</h3><ul>${it.tips.map(t=>`<li>${esc(t)}</li>`).join('')}</ul>`);
+    }
+    const go=it.station?`<a class="go" href="/?tab=sub&to=${encodeURIComponent(it.station)}">用地铁查到这里</a>`:'';
+    return `<article class="place">
+      <div class="name-zh">${esc(it.name_zh)}</div>
+      <div class="name-ko">${esc(it.name_ko)}</div>
+      <div class="badges">${badges.join('')}</div>
+      <p class="desc">${esc(it.desc)}</p>
+      <div class="meta">${rows.join('')}</div>
+      ${go}
+    </article>`;
+  }).join('');
+}
+function drawFilters(){
+  const cities=[['', '全部']].concat((DATA.cities||[]).map(c=>[c,c]));
+  chipBar($('cityChips'), cities, city, id=>{city=id;drawFilters();render();});
+  const cats=[['', '全部']].concat((DATA.categories||[]).map(c=>[c.id,c.zh]));
+  chipBar($('catChips'), cats, cat, id=>{cat=id;drawFilters();render();});
+  chipBar($('seasonChips'), SEASONS.map(s=>[s.id,s.zh]), season, id=>{season=id;drawFilters();render();});
+}
+
+fetch('/static/attractions.json')
+  .then(r=>{if(!r.ok) throw new Error('load'); return r.json()})
+  .then(d=>{
+    DATA=d;
+    $('disc').textContent=d.disclaimer||'';
+    if(d.sources&&d.sources.length){
+      $('src').style.display='block';
+      $('srcList').innerHTML=d.sources.map(s=>`<li><a href="${esc(s.url)}" target="_blank" rel="noopener">${esc(s.name)}</a></li>`).join('');
+    }
+    drawFilters();
+    render();
+  })
+  .catch(()=>{
+    $('list').innerHTML='<div class="empty">景点数据暂时载入失败，请检查网络后重试。已缓存过的设备可在离线时再次打开本页。</div>';
+  });
+$('q').addEventListener('input',()=>{q=$('q').value;render()});
+</script>
+</body>
+</html>

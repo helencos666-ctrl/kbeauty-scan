@@ -1,0 +1,99 @@
+/* 旅韩助手 service worker: cache app shell, never cache API or POST. */
+const CACHE = 'lvhan-shell-v1';
+const SHELL = [
+  '/',
+  '/attractions',
+  '/static/index.html',
+  '/static/attractions.html',
+  '/static/attractions.json',
+  '/static/pwa.js',
+  '/static/pwa.css',
+  '/manifest.webmanifest',
+  '/static/manifest.webmanifest',
+  '/static/icons/icon-192.png',
+  '/static/icons/icon-512.png',
+  '/static/icons/icon-192-maskable.png',
+  '/static/icons/icon-512-maskable.png',
+  '/static/icons/apple-touch-icon.png'
+];
+
+self.addEventListener('install', event => {
+  event.waitUntil(
+    caches.open(CACHE)
+      .then(cache => cache.addAll(SHELL))
+      .then(() => self.skipWaiting())
+      .catch(() => self.skipWaiting())
+  );
+});
+
+self.addEventListener('activate', event => {
+  event.waitUntil(
+    caches.keys().then(keys =>
+      Promise.all(keys.filter(k => k !== CACHE).map(k => caches.delete(k)))
+    ).then(() => self.clients.claim())
+  );
+});
+
+function isApi(url) {
+  return url.pathname === '/api' || url.pathname.startsWith('/api/');
+}
+
+function isHtml(request, url) {
+  if (request.mode === 'navigate') return true;
+  const accept = request.headers.get('accept') || '';
+  if (accept.includes('text/html')) return true;
+  return url.pathname === '/' || url.pathname === '/attractions' ||
+    url.pathname.endsWith('.html');
+}
+
+async function networkFirst(request) {
+  const cache = await caches.open(CACHE);
+  try {
+    const fresh = await fetch(request);
+    if (fresh && fresh.ok && fresh.type !== 'opaque') {
+      cache.put(request, fresh.clone());
+    }
+    return fresh;
+  } catch (err) {
+    const cached = await cache.match(request, { ignoreSearch: true });
+    if (cached) return cached;
+    if (request.mode === 'navigate') {
+      const fallback = await cache.match('/') || await cache.match('/static/index.html');
+      if (fallback) return fallback;
+    }
+    throw err;
+  }
+}
+
+async function cacheFirst(request) {
+  const cache = await caches.open(CACHE);
+  const cached = await cache.match(request, { ignoreSearch: true });
+  if (cached) {
+    fetch(request).then(fresh => {
+      if (fresh && fresh.ok && fresh.type !== 'opaque') cache.put(request, fresh.clone());
+    }).catch(() => {});
+    return cached;
+  }
+  const fresh = await fetch(request);
+  if (fresh && fresh.ok && fresh.type !== 'opaque') cache.put(request, fresh.clone());
+  return fresh;
+}
+
+self.addEventListener('fetch', event => {
+  const request = event.request;
+  if (request.method !== 'GET') return; // POST and others always go to network (browser default)
+  const url = new URL(request.url);
+  if (url.origin !== self.location.origin) return;
+  if (isApi(url)) return; // never intercept /api/*
+
+  if (isHtml(request, url)) {
+    event.respondWith(networkFirst(request));
+    return;
+  }
+  // App-shell assets (JSON, icons, JS, CSS, manifest)
+  const shellExt = /\.(json|js|css|png|webmanifest)$/i.test(url.pathname) ||
+    url.pathname === '/manifest.webmanifest';
+  if (shellExt) {
+    event.respondWith(cacheFirst(request));
+  }
+});
