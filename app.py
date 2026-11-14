@@ -327,6 +327,22 @@ def index(): return FileResponse(os.path.join(BASE, "static", "index.html"), hea
 def attractions():
     return FileResponse(os.path.join(BASE, "static", "attractions.html"), headers={"Cache-Control": "no-cache"})
 
+@app.get("/food")
+def food():
+    return FileResponse(os.path.join(BASE, "static", "food.html"), headers={"Cache-Control": "no-cache"})
+
+@app.get("/shopping")
+def shopping():
+    return FileResponse(os.path.join(BASE, "static", "shopping.html"), headers={"Cache-Control": "no-cache"})
+
+@app.get("/tips")
+def tips():
+    return FileResponse(os.path.join(BASE, "static", "tips.html"), headers={"Cache-Control": "no-cache"})
+
+@app.get("/beauty")
+def beauty():
+    return FileResponse(os.path.join(BASE, "static", "beauty.html"), headers={"Cache-Control": "no-cache"})
+
 @app.get("/manifest.webmanifest")
 def webmanifest():
     return FileResponse(
