@@ -26,7 +26,24 @@ BOARDS = {
     "hotel": "酒店住宿",
     "car": "租车包车",
     "clinic": "医美皮肤科",
+    "news": "资讯",
+    "rent": "租房",
+    "used": "二手闲置",
+    "jobs": "招聘求职",
 }
+# “全部版块”页左侧分类（右侧为子版块）。可直接改这里调整分类
+BOARD_CATEGORIES = [
+    {"key": "travel", "name": "旅行", "icon": "✈️", "boards": ["pit", "group", "news"]},
+    {"key": "visa", "name": "签证留学", "icon": "🎓", "boards": ["visa", "study"]},
+    {"key": "life", "name": "在韩生活", "icon": "🏠", "boards": ["rent", "used", "jobs"]},
+    {"key": "friends", "name": "交友相亲", "icon": "💞", "boards": ["friends"]},
+    {"key": "biz", "name": "商家服务", "icon": "🏪", "boards": ["hotel", "car", "clinic"]},
+]
+BOARD_ICONS = {"pit": "⚠️", "group": "🧳", "news": "📰", "visa": "🛂", "study": "🎓", "rent": "🏠", "used": "♻️",
+               "jobs": "💼", "friends": "💞", "hotel": "🏨", "car": "🚗", "clinic": "🏥"}
+NEWS_BOARDS = ["news", "visa", "study", "pit"]   # “资讯”标签包含的版块
+HOT_HOURS, HOT_FALLBACK_DAYS = 24, 7             # 24 小时热门；24 小时内没有帖子时退回近 7 天
+RECOMMEND_DAYS = 30
 MERCHANT_BOARDS = {"hotel", "car", "clinic"}   # 仅有效商家会员可发
 MERCHANT_QUOTA = 10                            # 每 30 天周期 10 篇
 CYCLE_DAYS = 30
@@ -35,9 +52,10 @@ PLAN_DAYS = {"month": 30, "year": 365}
 COMMERCIAL_WORDS = ["酒店预订", "订酒店", "订房", "民宿预订", "租车", "包车", "接送机", "接机服务", "医美", "皮肤科", "整形", "整容",
                     "微整", "报价", "优惠价", "微信号", "加微", "加v", "vx", "wx:", "wx：", "私信我", "私聊", "代办", "办签",
                     "代购", "联系方式", "电话咨询", "kakao id", "kakaotalk id", "line id"]
-DEFAULT_SETTINGS = {"price_t1": "9.9", "price_t2": "19.9", "price_m_month": "99", "price_m_year": "999", "price_extra": "19.9"}
+DEFAULT_SETTINGS = {"price_t1": "9.9", "price_t2": "19.9", "price_m_month": "99", "price_m_year": "999", "price_extra": "19.9",
+                    "rate_cny_krw": "195"}
 SETTING_LABELS = {"price_t1": "会员价格", "price_t2": "高级会员价格", "price_m_month": "商家会员月付", "price_m_year": "商家会员年付",
-                  "price_extra": "商家超额每篇"}
+                  "price_extra": "商家超额每篇", "rate_cny_krw": "汇率换算：1 人民币 = ? 韩元（手动设置）"}
 LOGIN_ONLY_BOARDS = {"friends"}          # 交友版：会员（≥1 档）才能查看
 TIER_NAMES = {0: "普通用户", 1: "会员", 2: "高级会员", 3: "商家会员"}
 MAX_IMAGES = 6
@@ -189,6 +207,84 @@ INSERT INTO c_commissions(code,user_id,tier,cents,settled_at,created_at)
   WHERE u.tier>=1 AND NOT EXISTS (SELECT 1 FROM c_commissions c WHERE c.user_id=u.id);
 """
 
+# 第三期：社区首页改版（关注、版块订阅）+ 交友/相亲。幂等，可重复执行
+MIGRATE3 = """
+ALTER TABLE c_users ADD COLUMN IF NOT EXISTS verified BOOLEAN NOT NULL DEFAULT FALSE;
+CREATE TABLE IF NOT EXISTS c_follows (
+  follower_id BIGINT NOT NULL REFERENCES c_users(id) ON DELETE CASCADE,
+  followee_id BIGINT NOT NULL REFERENCES c_users(id) ON DELETE CASCADE,
+  created_at TIMESTAMPTZ NOT NULL DEFAULT now(),
+  PRIMARY KEY (follower_id, followee_id)
+);
+CREATE INDEX IF NOT EXISTS c_follows_followee_idx ON c_follows(followee_id);
+CREATE TABLE IF NOT EXISTS c_board_follows (
+  user_id BIGINT NOT NULL REFERENCES c_users(id) ON DELETE CASCADE,
+  board TEXT NOT NULL,
+  created_at TIMESTAMPTZ NOT NULL DEFAULT now(),
+  PRIMARY KEY (user_id, board)
+);
+CREATE INDEX IF NOT EXISTS c_posts_created_idx ON c_posts(created_at DESC) WHERE NOT deleted;
+CREATE INDEX IF NOT EXISTS c_posts_user_idx ON c_posts(user_id, id DESC);
+CREATE TABLE IF NOT EXISTS c_dating_profiles (
+  user_id BIGINT PRIMARY KEY REFERENCES c_users(id) ON DELETE CASCADE,
+  nickname TEXT NOT NULL,
+  gender TEXT NOT NULL,
+  age SMALLINT NOT NULL,
+  height SMALLINT,
+  city TEXT NOT NULL,
+  area TEXT,
+  visa TEXT,
+  purpose TEXT NOT NULL,
+  intro TEXT NOT NULL,
+  visible BOOLEAN NOT NULL DEFAULT TRUE,
+  hidden_by_admin BOOLEAN NOT NULL DEFAULT FALSE,
+  created_at TIMESTAMPTZ NOT NULL DEFAULT now(),
+  updated_at TIMESTAMPTZ NOT NULL DEFAULT now()
+);
+CREATE INDEX IF NOT EXISTS c_dating_list_idx ON c_dating_profiles(updated_at DESC) WHERE visible AND NOT hidden_by_admin;
+CREATE TABLE IF NOT EXISTS c_dating_photos (
+  id BIGSERIAL PRIMARY KEY,
+  user_id BIGINT NOT NULL REFERENCES c_users(id) ON DELETE CASCADE,
+  pos INT NOT NULL DEFAULT 0,
+  data BYTEA NOT NULL,
+  thumb BYTEA NOT NULL,
+  width INT, height INT,
+  created_at TIMESTAMPTZ NOT NULL DEFAULT now()
+);
+CREATE INDEX IF NOT EXISTS c_dating_photos_user_idx ON c_dating_photos(user_id, pos, id);
+CREATE TABLE IF NOT EXISTS c_threads (
+  id BIGSERIAL PRIMARY KEY,
+  user_a BIGINT NOT NULL REFERENCES c_users(id) ON DELETE CASCADE,
+  user_b BIGINT NOT NULL REFERENCES c_users(id) ON DELETE CASCADE,
+  created_at TIMESTAMPTZ NOT NULL DEFAULT now(),
+  last_at TIMESTAMPTZ NOT NULL DEFAULT now(),
+  UNIQUE (user_a, user_b)
+);
+CREATE INDEX IF NOT EXISTS c_threads_b_idx ON c_threads(user_b);
+CREATE TABLE IF NOT EXISTS c_messages (
+  id BIGSERIAL PRIMARY KEY,
+  thread_id BIGINT NOT NULL REFERENCES c_threads(id) ON DELETE CASCADE,
+  sender_id BIGINT NOT NULL REFERENCES c_users(id) ON DELETE CASCADE,
+  recipient_id BIGINT NOT NULL REFERENCES c_users(id) ON DELETE CASCADE,
+  kind TEXT NOT NULL DEFAULT 'msg',
+  body TEXT NOT NULL,
+  flagged BOOLEAN NOT NULL DEFAULT FALSE,
+  flag_words TEXT,
+  deleted BOOLEAN NOT NULL DEFAULT FALSE,
+  read_at TIMESTAMPTZ,
+  created_at TIMESTAMPTZ NOT NULL DEFAULT now()
+);
+CREATE INDEX IF NOT EXISTS c_messages_thread_idx ON c_messages(thread_id, id);
+CREATE INDEX IF NOT EXISTS c_messages_unread_idx ON c_messages(recipient_id) WHERE read_at IS NULL;
+CREATE INDEX IF NOT EXISTS c_messages_sender_idx ON c_messages(sender_id, kind, created_at);
+CREATE TABLE IF NOT EXISTS c_blocks (
+  blocker_id BIGINT NOT NULL REFERENCES c_users(id) ON DELETE CASCADE,
+  blocked_id BIGINT NOT NULL REFERENCES c_users(id) ON DELETE CASCADE,
+  created_at TIMESTAMPTZ NOT NULL DEFAULT now(),
+  PRIMARY KEY (blocker_id, blocked_id)
+);
+"""
+
 @contextmanager
 def db():
     global _psycopg, _schema_ready
@@ -210,6 +306,7 @@ def db():
                         cur.execute("SELECT pg_advisory_xact_lock(424242)")
                         cur.execute(SCHEMA)
                         cur.execute(MIGRATE)
+                        cur.execute(MIGRATE3)
                     conn.commit()
                     _schema_ready = True
         yield conn
@@ -300,7 +397,7 @@ def current_user(conn, req: Request):
     if not tok or len(tok) > 200:
         return None
     u = q(conn, """SELECT u.id,u.nickname,u.tier,u.is_banned,u.phone,u.email,u.created_at,
-                      u.merchant_until,u.merchant_started,u.merchant_plan,u.merchant_credits,
+                      u.merchant_until,u.merchant_started,u.merchant_plan,u.merchant_credits,u.verified,
                       (u.merchant_until IS NOT NULL AND u.merchant_until>now()) AS merchant
                       FROM c_sessions s JOIN c_users u ON u.id=s.user_id
                       WHERE s.token_hash=%s AND NOT s.is_admin AND s.expires_at>now() AND NOT u.is_banned""",
@@ -468,6 +565,27 @@ def p_rules(): return _page("rules.html")
 @router.get("/admin")
 def p_admin(): return _page("admin.html")
 
+@router.get("/community/boards")
+def p_boards(): return _page("community-boards.html")
+
+@router.get("/community/rate")
+def p_rate(): return _page("rate.html")
+
+@router.get("/community/friends")
+def p_friends(): return _page("friends.html")
+
+@router.get("/community/friends/edit")
+def p_friend_edit(): return _page("friend-edit.html")
+
+@router.get("/community/friends/{uid}")
+def p_friend(uid: str): return _page("friend.html")
+
+@router.get("/community/messages")
+def p_inbox(): return _page("messages.html")
+
+@router.get("/community/messages/{tid}")
+def p_chat(tid: str): return _page("chat.html")
+
 # ---------------- 账号 API ----------------
 @router.get("/api/community/me")
 def api_me(req: Request):
@@ -477,11 +595,16 @@ def api_me(req: Request):
         if not u:
             return {"user": None, "boards": BOARDS, "merchant_boards": sorted(MERCHANT_BOARDS), "prices": st}
         disp = 3 if u["merchant"] else u["tier"]
+        unread = q(conn, """SELECT count(*) AS n FROM c_messages m WHERE m.recipient_id=%s AND m.read_at IS NULL AND NOT m.deleted
+                            AND NOT EXISTS (SELECT 1 FROM c_blocks b WHERE b.blocker_id=%s AND b.blocked_id=m.sender_id)""",
+                   (u["id"], u["id"]), one=True)["n"]
+        has_profile = q(conn, "SELECT 1 AS x FROM c_dating_profiles WHERE user_id=%s", (u["id"],), one=True) is not None
         return {"user": {"id": u["id"], "nickname": u["nickname"], "tier": u["tier"], "base_tier": u["base_tier"],
                          "display_tier": disp, "tier_name": TIER_NAMES[disp], "is_member": u["tier"] >= 1,
                          "merchant": bool(u["merchant"]), "merchant_info": merchant_quota(conn, u),
                          "merchant_expired": bool(u["merchant_until"] and not u["merchant"]),
-                         "account": mask_account(u), "joined": _ts(u["created_at"])},
+                         "account": mask_account(u), "joined": _ts(u["created_at"]),
+                         "verified": bool(u.get("verified")), "unread": unread, "has_profile": has_profile},
                 "boards": BOARDS, "merchant_boards": sorted(MERCHANT_BOARDS), "prices": st}
 
 @router.get("/api/community/prices")
@@ -613,11 +736,139 @@ def api_posts(req: Request, board: str = "", before: int = 0, limit_n: int = 20)
         o = _post_out(r); o["cover"] = r["cover"]; o["img_n"] = r["img_n"]; out.append(o)
     return {"posts": out, "more": more}
 
+FEED_TABS = ("recommend", "news", "hot", "latest", "follow")
+
+@router.get("/api/community/feed")
+def api_feed(req: Request, tab: str = "recommend", boards: str = "", offset: int = 0, limit_n: int = 20):
+    """首页信息流：推荐 / 资讯 / 24小时热门 / 最新 / 关注（关注=关注的用户 + 加入的版块）"""
+    if tab not in FEED_TABS:
+        raise HTTPException(400, "标签不存在")
+    limit_n = max(1, min(limit_n, 30))
+    offset = max(0, min(offset, 300))
+    bl = [b for b in boards.split(",") if b][:12]
+    if any(b not in BOARDS for b in bl):
+        raise HTTPException(400, "版块不存在")
+    with db() as conn:
+        u = current_user(conn, req)
+        tier = u["tier"] if u else 0
+        if tab == "follow" and not u:
+            return {"posts": [], "more": False, "login_required": True}
+        cond, args = ["NOT p.deleted", "p.status='published'", "NOT au.is_banned"], []
+        if tier < 1:
+            cond.append("p.board <> ALL(%s)"); args.append(list(LOGIN_ONLY_BOARDS))
+        if bl:
+            cond.append("p.board = ANY(%s)"); args.append(bl)
+        if u:
+            cond.append("NOT EXISTS (SELECT 1 FROM c_blocks b WHERE b.blocker_id=%s AND b.blocked_id=p.user_id)"); args.append(u["id"])
+        if tab == "news":
+            cond.append("p.board = ANY(%s)"); args.append(NEWS_BOARDS)
+        if tab == "follow":
+            cond.append("""(p.user_id IN (SELECT followee_id FROM c_follows WHERE follower_id=%s)
+                           OR p.board IN (SELECT board FROM c_board_follows WHERE user_id=%s))""")
+            args += [u["id"], u["id"]]
+        score, order = "0", "p.id DESC"
+        if tab == "recommend":
+            score = """((p.like_count*2 + p.comment_count*3 + 1 + CASE WHEN EXISTS (SELECT 1 FROM c_images i WHERE i.post_id=p.id) THEN 1 ELSE 0 END)
+                       / power(EXTRACT(EPOCH FROM (now()-p.created_at))/3600 + 2, 1.3))"""
+            order = "score DESC, p.id DESC"
+        elif tab == "hot":
+            score = "(p.like_count + p.comment_count*2)"
+            order = "score DESC, p.id DESC"
+
+        def run(extra, eargs):
+            return q(conn, f"""SELECT p.*, au.nickname, au.verified, (CASE WHEN au.merchant_until>now() THEN 3 ELSE au.tier END) AS tier,
+                     {score} AS score,
+                     (SELECT id FROM c_images i WHERE i.post_id=p.id ORDER BY pos LIMIT 1) AS cover,
+                     (SELECT count(*) FROM c_images i WHERE i.post_id=p.id) AS img_n
+                     FROM c_posts p JOIN c_users au ON au.id=p.user_id
+                     WHERE {' AND '.join(cond + extra)} ORDER BY {order} LIMIT %s OFFSET %s""",
+                     (*args, *eargs, limit_n + 1, offset))
+        fallback = False
+        if tab == "recommend":
+            rows = run(["p.created_at > now() - make_interval(days => %s)"], [RECOMMEND_DAYS])
+            if not rows and offset == 0:
+                order = "p.id DESC"; rows = run([], []); fallback = True
+        elif tab == "hot":
+            if offset > 0 and req.query_params.get("fb") == "1":   # 第一页已退回 7 天时，后续页保持一致
+                rows = []
+            else:
+                rows = run(["p.created_at > now() - make_interval(hours => %s)"], [HOT_HOURS])
+            if not rows and (offset == 0 or req.query_params.get("fb") == "1"):
+                rows = run(["p.created_at > now() - make_interval(days => %s)"], [HOT_FALLBACK_DAYS]); fallback = True
+        else:
+            rows = run([], [])
+    more = len(rows) > limit_n
+    out = []
+    for r in rows[:limit_n]:
+        o = _post_out(r); o["cover"] = r["cover"]; o["img_n"] = r["img_n"]; o["author_verified"] = bool(r["verified"]); out.append(o)
+    return {"posts": out, "more": more, "fallback": fallback, "next": offset + limit_n}
+
+@router.get("/api/community/boards")
+def api_boards(req: Request):
+    """全部版块：分类 + 子版块 + 当前用户已加入的版块（未配置数据库时也能返回分类）"""
+    cats = [{"key": c["key"], "name": c["name"], "icon": c["icon"],
+             "boards": [{"key": b, "name": BOARDS[b], "icon": BOARD_ICONS.get(b, "📌"), "merchant": b in MERCHANT_BOARDS,
+                         "members_only": b in LOGIN_ONLY_BOARDS} for b in c["boards"]]} for c in BOARD_CATEGORIES]
+    joined, counts = [], {}
+    if _db_url():
+        with db() as conn:
+            u = current_user(conn, req)
+            if u:
+                joined = [r["board"] for r in q(conn, "SELECT board FROM c_board_follows WHERE user_id=%s", (u["id"],))]
+            for r in q(conn, "SELECT board, count(*) AS n FROM c_board_follows GROUP BY board"):
+                counts[r["board"]] = r["n"]
+    for c in cats:
+        for b in c["boards"]:
+            b["joined"] = b["key"] in joined
+            b["members"] = counts.get(b["key"], 0)
+    return {"categories": cats, "joined": joined}
+
+@router.post("/api/community/boards/{board}/join")
+def api_board_join(req: Request, board: str):
+    csrf(req)
+    if board not in BOARDS:
+        raise HTTPException(404, "版块不存在")
+    with db() as conn:
+        u = need_user(conn, req)
+        limit("bj:" + str(u["id"]), 60, 600)
+        had = q(conn, "DELETE FROM c_board_follows WHERE user_id=%s AND board=%s RETURNING board", (u["id"], board), one=True)
+        if not had:
+            q(conn, "INSERT INTO c_board_follows(user_id,board) VALUES (%s,%s) ON CONFLICT DO NOTHING", (u["id"], board))
+    return {"joined": not had}
+
+@router.post("/api/community/follow/{uid}")
+def api_follow(req: Request, uid: int):
+    """关注/取消关注某个用户（关注后其帖子出现在“关注”标签）"""
+    csrf(req)
+    with db() as conn:
+        u = need_user(conn, req)
+        if uid == u["id"]:
+            raise HTTPException(400, "不能关注自己")
+        if not q(conn, "SELECT id FROM c_users WHERE id=%s AND NOT is_banned", (uid,), one=True):
+            raise HTTPException(404, "用户不存在")
+        limit("fo:" + str(u["id"]), 60, 600)
+        had = q(conn, "DELETE FROM c_follows WHERE follower_id=%s AND followee_id=%s RETURNING followee_id", (u["id"], uid), one=True)
+        if not had:
+            q(conn, "INSERT INTO c_follows(follower_id,followee_id) VALUES (%s,%s) ON CONFLICT DO NOTHING", (u["id"], uid))
+    return {"following": not had}
+
+@router.get("/api/community/rate")
+def api_rate():
+    """汇率换算用的参考汇率：管理员在后台手动设置；数据库未配置时用默认值"""
+    v = DEFAULT_SETTINGS["rate_cny_krw"]
+    if _db_url():
+        try:
+            with db() as conn:
+                v = get_settings(conn)["rate_cny_krw"]
+        except HTTPException:
+            pass
+    return {"cny_krw": float(v), "source": "manual"}
+
 @router.get("/api/community/posts/{pid}")
 def api_post(req: Request, pid: int):
     with db() as conn:
         u = current_user(conn, req)
-        r = q(conn, """SELECT p.*, au.nickname, (CASE WHEN au.merchant_until>now() THEN 3 ELSE au.tier END) AS tier FROM c_posts p JOIN c_users au ON au.id=p.user_id
+        r = q(conn, """SELECT p.*, au.nickname, au.verified, (CASE WHEN au.merchant_until>now() THEN 3 ELSE au.tier END) AS tier FROM c_posts p JOIN c_users au ON au.id=p.user_id
                        WHERE p.id=%s AND NOT p.deleted AND NOT au.is_banned""", (pid,), one=True)
         if not r or (r["status"] != "published" and not (u and u["id"] == r["user_id"])):
             raise HTTPException(404, "帖子不存在或已删除")
@@ -630,7 +881,11 @@ def api_post(req: Request, pid: int):
                          JOIN c_users au ON au.id=c.user_id
                          WHERE c.post_id=%s AND NOT c.deleted AND NOT au.is_banned ORDER BY c.id LIMIT 500""", (pid,))
         liked = bool(u and q(conn, "SELECT 1 AS x FROM c_likes WHERE post_id=%s AND user_id=%s", (pid, u["id"]), one=True))
+        following = bool(u and q(conn, "SELECT 1 AS x FROM c_follows WHERE follower_id=%s AND followee_id=%s", (u["id"], r["user_id"]), one=True))
     o = _post_out(r, full=True)
+    o["author_id"] = r["user_id"]
+    o["author_verified"] = bool(r["verified"])
+    o["following"] = following
     o["images"] = [{"id": i["id"], "w": i["width"], "h": i["height"]} for i in imgs]
     o["liked"] = liked
     o["mine"] = bool(u and u["id"] == r["user_id"])
@@ -775,7 +1030,7 @@ async def api_report(req: Request):
     csrf(req)
     d = await req.json()
     tt = d.get("type")
-    if tt not in ("post", "comment"):
+    if tt not in ("post", "comment", "profile", "message"):
         raise HTTPException(400, "举报对象无效")
     try:
         tid = int(d.get("id"))
@@ -785,6 +1040,11 @@ async def api_report(req: Request):
     with db() as conn:
         u = need_tier(conn, req, 1, "开通会员（¥{t1}）后才能举报；遇到严重违规也可直接联系管理员")
         limit("rep:" + str(u["id"]), 10, 3600, "举报太频繁，请稍后再试")
+        if tt == "message" and not q(conn, "SELECT 1 AS x FROM c_messages WHERE id=%s AND (sender_id=%s OR recipient_id=%s)",
+                                     (tid, u["id"], u["id"]), one=True):
+            raise HTTPException(404, "消息不存在")
+        if tt == "profile" and not q(conn, "SELECT 1 AS x FROM c_dating_profiles WHERE user_id=%s", (tid,), one=True):
+            raise HTTPException(404, "资料不存在")
         q(conn, "INSERT INTO c_reports(target_type,target_id,user_id,reason) VALUES (%s,%s,%s,%s)", (tt, tid, u["id"], reason))
     return {"ok": True}
 
@@ -827,6 +1087,8 @@ def api_admin_overview(req: Request):
                               (SELECT count(*) FROM c_posts WHERE NOT deleted) AS posts,
                               (SELECT count(*) FROM c_comments WHERE NOT deleted) AS comments,
                               (SELECT count(*) FROM c_reports WHERE NOT resolved) AS reports,
+                              (SELECT count(*) FROM c_dating_profiles) AS profiles,
+                              (SELECT count(*) FROM c_messages WHERE flagged AND created_at>now()-interval '7 days') AS flagged7,
                               pg_database_size(current_database()) AS db_bytes""", one=True)
     s["db_mb"] = round(s.pop("db_bytes") / 1048576, 1)
     return s
@@ -849,7 +1111,8 @@ def api_admin_users(req: Request, s: str = ""):
                        "member_since": _ts(r["member_since"]), "tier2_since": _ts(r["tier2_since"]),
                        "merchant_until": _ts(r["merchant_until"]), "merchant_plan": r["merchant_plan"],
                        "merchant_active": bool(r["merchant_until"] and r["merchant_until"] > datetime.datetime.now(datetime.timezone.utc)),
-                       "merchant_credits": r["merchant_credits"], "last_login": _ts(r["last_login"])} for r in rows]}
+                       "merchant_credits": r["merchant_credits"], "last_login": _ts(r["last_login"]),
+                       "verified": bool(r.get("verified"))} for r in rows]}
 
 @router.post("/api/admin/users/{uid}")
 async def api_admin_user_action(req: Request, uid: int):
@@ -891,11 +1154,16 @@ async def api_admin_user_action(req: Request, uid: int):
             q(conn, "DELETE FROM c_sessions WHERE user_id=%s", (uid,))
         elif act == "unban":
             q(conn, "UPDATE c_users SET is_banned=FALSE WHERE id=%s", (uid,))
+        elif act in ("verify", "unverify"):     # “已认证”标识：管理员人工核实后手动打开
+            q(conn, "UPDATE c_users SET verified=%s WHERE id=%s", (act == "verify", uid))
         elif act == "purge":
             q(conn, "UPDATE c_posts SET deleted=TRUE WHERE user_id=%s", (uid,))
             pids = q(conn, "UPDATE c_comments SET deleted=TRUE WHERE user_id=%s RETURNING post_id", (uid,))
             for pid in {p["post_id"] for p in pids}:
                 _recount(conn, pid)
+            q(conn, "DELETE FROM c_dating_photos WHERE user_id=%s", (uid,))
+            q(conn, "DELETE FROM c_dating_profiles WHERE user_id=%s", (uid,))
+            q(conn, "UPDATE c_messages SET deleted=TRUE WHERE sender_id=%s", (uid,))
         elif act == "reset_pw":
             tmp = secrets.token_urlsafe(8)
             q(conn, "UPDATE c_users SET pw_hash=%s WHERE id=%s", (hash_pw(tmp), uid))
@@ -942,16 +1210,21 @@ def api_admin_reports(req: Request):
         need_admin(conn, req)
         rows = q(conn, """SELECT r.*, u.nickname AS reporter,
             CASE WHEN r.target_type='post' THEN (SELECT title FROM c_posts WHERE id=r.target_id)
-                 ELSE (SELECT body FROM c_comments WHERE id=r.target_id) END AS target_text,
+                 WHEN r.target_type='comment' THEN (SELECT body FROM c_comments WHERE id=r.target_id)
+                 WHEN r.target_type='message' THEN (SELECT body FROM c_messages WHERE id=r.target_id)
+                 ELSE (SELECT nickname || '：' || intro FROM c_dating_profiles WHERE user_id=r.target_id) END AS target_text,
             CASE WHEN r.target_type='post' THEN r.target_id
-                 ELSE (SELECT post_id FROM c_comments WHERE id=r.target_id) END AS post_id,
+                 WHEN r.target_type='comment' THEN (SELECT post_id FROM c_comments WHERE id=r.target_id) END AS post_id,
             CASE WHEN r.target_type='post' THEN (SELECT user_id FROM c_posts WHERE id=r.target_id)
-                 ELSE (SELECT user_id FROM c_comments WHERE id=r.target_id) END AS target_user
+                 WHEN r.target_type='comment' THEN (SELECT user_id FROM c_comments WHERE id=r.target_id)
+                 WHEN r.target_type='message' THEN (SELECT sender_id FROM c_messages WHERE id=r.target_id)
+                 ELSE r.target_id END AS target_user
             FROM c_reports r LEFT JOIN c_users u ON u.id=r.user_id
             WHERE NOT r.resolved ORDER BY r.id DESC LIMIT 100""")
     return {"reports": [{"id": r["id"], "type": r["target_type"], "target_id": r["target_id"], "post_id": r["post_id"],
                          "target_user": r["target_user"], "text": (r["target_text"] or "")[:120], "reason": r["reason"],
-                         "reporter": r["reporter"], "time": _ts(r["created_at"])} for r in rows]}
+                         "reporter": r["reporter"] or ("系统自动标记" if r["user_id"] is None else None),
+                         "time": _ts(r["created_at"])} for r in rows]}
 
 @router.post("/api/admin/reports/{rid}/resolve")
 def api_admin_resolve(req: Request, rid: int):
@@ -1256,3 +1529,7 @@ async def api_admin_settings_save(req: Request):
                        ON CONFLICT (key) DO UPDATE SET value=EXCLUDED.value, updated_at=now()""", (k, v))
         st = get_settings(conn)
     return {"ok": True, "settings": st}
+
+# 交友/相亲（friends.py 依赖本模块的工具函数，放在文件末尾导入）
+from friends import router as _friends_router   # noqa: E402
+router.include_router(_friends_router)
