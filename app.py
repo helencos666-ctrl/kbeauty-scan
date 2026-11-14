@@ -280,6 +280,39 @@ async def tts(request: Request, text: str = ""):
             raise HTTPException(502, "朗读服务暂不可用")
     return FileResponse(path, media_type="audio/mpeg", headers={"Cache-Control": "public, max-age=86400"})
 
+# ================= 站名转换（中/英/韩 -> 官方韩文站名）=================
+STATION_MAX = 40
+STATION_PROMPT = """你是韩国地铁站名转换助手，用户是在韩国的中国游客。
+把用户输入（可能是简体中文、英文或韩文，可能不带“站/역”）转换成韩国境内地铁或铁路车站的官方韩文站名。
+只输出一个 JSON 对象，不要多余文字。
+成功：{"ok": true, "station_ko": "명동역"}
+无法确定：{"ok": false, "reason": "无法确定是哪个车站"}
+规则：
+1. 必须是韩国境内车站；站名一般以“역”结尾（如 명동역、홍대입구역）。
+2. 仁川机场用 인천공항1터미널역 / 인천공항2터미널역，金浦机场用 김포공항역。
+3. 只返回一个最对应的官方站名，不要附加线路或说明。
+4. 拿不准、不是车站、或可能对应多个完全不同的站时，返回 ok=false，不要编造。
+用户输入：
+"""
+
+@app.post("/api/station")
+async def station(request: Request):
+    rate_limit(request, "station", per_min=10, per_day=60)
+    try:
+        body = await request.json()
+    except Exception:
+        raise HTTPException(400, "请输入车站名称")
+    raw = str(body.get("name", "")).strip()
+    if not raw:
+        raise HTTPException(400, "请输入车站名称")
+    if len(raw) > STATION_MAX:
+        raise HTTPException(400, "站名太长，请只输入车站名称")
+    res, _ = await chat([{"role": "user", "content": STATION_PROMPT + raw}], max_tokens=200)
+    ko = str(res.get("station_ko", "")).strip() if res.get("ok") else ""
+    if not ko or not re.search(r"[\uac00-\ud7a3]", ko):
+        raise HTTPException(400, str(res.get("reason") or "没能确认这个站名，请换个写法再试"))
+    return {"station_ko": ko[:40]}
+
 @app.exception_handler(HTTPException)
 async def http_exc(request, exc):
     return JSONResponse({"detail": exc.detail}, status_code=exc.status_code)
