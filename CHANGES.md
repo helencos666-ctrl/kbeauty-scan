@@ -1,22 +1,22 @@
-# kbeauty-push13：同路社区 AI 自动回复（旅韩小助手）
+# kbeauty-push14：会员编号（靓号）可改 + AI 提示补充
 
-基于线上最新版 push12（community.py / 静态页面）与 push11 的 app.py。无新环境变量；复用已有的 `DEEPSEEK_API_KEY` 与模型 `deepseek-flash`。不要改已有表含义，只追加 `c_users.is_bot`。上传到仓库同路径即可，无需改 app.py。
+基于线上最新版（push12 + push13 覆盖）。不要改 `c_users.id` 主键。不要推送部署。
 
 ## 根目录
 - community.py
-  - 建表时自动创建系统账号「旅韩小助手」（`is_bot`、密码哈希为不可用的 `disabled`、无手机号/邮箱，不能登录；后台不能改此账号）
-  - 用户发新帖（已公开）后，后台线程调用 DeepSeek 自动写一条中文评论；发帖接口不等待 AI，失败只记日志
-  - 评论默认不回：仅当评论 @旅韩小助手，或帖主在评论里提问时才回
-  - 每日全站上限 200 次，单用户每小时 6 次、每天 20 次；超时约 20 秒
-  - 后台设置项 `ai_reply`（默认开启），可关闭
-  - 系统提示：只提供公开信息参考；签证只说信息不代办；医美、包车保持中立不推荐具体商家；不留联系方式；不提其他社区品牌；不提直播或抖音
-  - `/api/community/prices` 仍只返回价格/汇率，不含 AI 开关
+  - 新增 `c_users.member_no BIGINT UNIQUE`（`ADD COLUMN IF NOT EXISTS`，启动时把空值回填为 id）
+  - 新注册用户自动分配未被占用的 member_no：默认等于 id；若 id 已被别人当靓号占用，则取其后第一个空号
+  - 给用户看的「会员编号」改用 member_no（`/api/community/me`、后台用户列表、按编号搜索、后台帖子/待审核上的编号）
+  - 后台新接口 `POST /api/admin/users/{uid}/member_no`（需管理员登录和 CSRF）；正整数、不可占用、不可改旅韩小助手
+  - AI 系统提示增加：涉及地铁线路、价格、营业时间等具体信息时，提醒用户出发前再核实
+- friends.py
+  - 交友资料/个人主页和后台交友搜索按编号改为使用 member_no；内部 uid 仍是主键，关注、私信等接口不变
 
 ## static/
-- community-post.html：小助手回复旁显示「AI」标签
-- community.css：新增 `.ai-tag`
-- admin.html：设置页增加「AI 自动回复」开关
-- sw.js：缓存 lvhan-shell-v16 → v17
+- member.html：「我的状态」显示 member_no
+- friend.html：个人主页显示会员编号
+- admin.html：用户列表编号列改为 member_no，每行增加「改编号」按钮（系统账号除外）；帖子/待审核/交友资料上的编号同步
+- sw.js：缓存 lvhan-shell-v17 → v18
 
 ## test/
-- test_community.py：增加 mock DeepSeek 的单元/集成测试（连同原有用例 325/325 通过）；原有用例在管理员登录后先关闭 AI，避免评论计数被后台回复干扰
+- test_community.py：会员编号分配、改号、搜索、权限/CSRF，以及系统提示与 sw.js v18

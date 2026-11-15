@@ -79,7 +79,7 @@ def _photos(conn, uid):
     return [p["id"] for p in q(conn, "SELECT id FROM c_dating_photos WHERE user_id=%s ORDER BY pos, id", (uid,))]
 
 def _profile_out(r, photos, full=True):
-    o = {"uid": r["user_id"], "nickname": r["nickname"], "gender": r["gender"], "gender_name": GENDERS.get(r["gender"], ""),
+    o = {"uid": r["user_id"], "member_no": r.get("member_no") or r["user_id"], "nickname": r["nickname"], "gender": r["gender"], "gender_name": GENDERS.get(r["gender"], ""),
          "age": r["age"], "height": r["height"], "city": r["city"], "area": r["area"] or "", "purpose": r["purpose"],
          "purpose_name": PURPOSES.get(r["purpose"], ""), "verified": bool(r.get("verified")), "photos": photos,
          "cover": photos[0] if photos else None}
@@ -88,7 +88,7 @@ def _profile_out(r, photos, full=True):
                   "updated": _ts(r["updated_at"])})
     return o
 
-LIST_SQL = """SELECT d.*, u.verified,
+LIST_SQL = """SELECT d.*, u.verified, u.member_no,
     (SELECT id FROM c_dating_photos ph WHERE ph.user_id=d.user_id ORDER BY pos, id LIMIT 1) AS cover
     FROM c_dating_profiles d JOIN c_users u ON u.id=d.user_id
     WHERE d.visible AND NOT d.hidden_by_admin AND NOT u.is_banned"""
@@ -147,7 +147,7 @@ def api_profile(req: Request, uid: int):
         u = current_user(conn, req)
         if not u:
             raise HTTPException(401, "请先登录，开通会员后查看交友资料")
-        r = q(conn, """SELECT d.*, u.verified, u.is_banned, (CASE WHEN u.merchant_until>now() THEN 3 ELSE u.tier END) AS tier
+        r = q(conn, """SELECT d.*, u.verified, u.is_banned, u.member_no, (CASE WHEN u.merchant_until>now() THEN 3 ELSE u.tier END) AS tier
                        FROM c_dating_profiles d JOIN c_users u ON u.id=d.user_id WHERE d.user_id=%s""", (uid,), one=True)
         mine = uid == u["id"]
         if not mine and u["tier"] < FRIEND_VIEW_TIER:
@@ -173,7 +173,7 @@ def api_profile(req: Request, uid: int):
 def api_my_profile(req: Request):
     with db() as conn:
         u = need_user(conn, req)
-        r = q(conn, "SELECT d.*, u.verified FROM c_dating_profiles d JOIN c_users u ON u.id=d.user_id WHERE d.user_id=%s",
+        r = q(conn, "SELECT d.*, u.verified, u.member_no FROM c_dating_profiles d JOIN c_users u ON u.id=d.user_id WHERE d.user_id=%s",
               (u["id"],), one=True)
         photos = _photos(conn, u["id"]) if r else []
         st = get_settings(conn)
@@ -498,10 +498,10 @@ def api_admin_friends(req: Request, s: str = ""):
         s = s.strip()[:60]
         cond, args = "", []
         if s:
-            cond = " WHERE d.user_id=%s OR d.nickname ILIKE %s OR u.nickname ILIKE %s"
+            cond = " WHERE u.member_no=%s OR d.nickname ILIKE %s OR u.nickname ILIKE %s"
             like = "%" + s.replace("%", "").replace("_", "") + "%"
-            args = [int(s) if s.isdigit() and len(s) < 10 else -1, like, like]
-        rows = q(conn, """SELECT d.*, u.verified, u.is_banned, u.tier, u.nickname AS account_nick,
+            args = [int(s) if s.isdigit() and len(s) < 18 else -1, like, like]
+        rows = q(conn, """SELECT d.*, u.verified, u.is_banned, u.tier, u.member_no, u.nickname AS account_nick,
                  (SELECT count(*) FROM c_reports r WHERE r.target_type='profile' AND r.target_id=d.user_id AND NOT r.resolved) AS reports,
                  (SELECT count(*) FROM c_messages m WHERE m.sender_id=d.user_id AND m.flagged) AS flagged_msgs,
                  (SELECT count(*) FROM c_messages m WHERE m.sender_id=d.user_id AND m.kind='greet' AND m.created_at>now()-interval '1 day') AS greets24

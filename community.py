@@ -298,6 +298,13 @@ ALTER TABLE c_users ADD COLUMN IF NOT EXISTS is_bot BOOLEAN NOT NULL DEFAULT FAL
 CREATE UNIQUE INDEX IF NOT EXISTS c_users_one_bot_idx ON c_users((is_bot)) WHERE is_bot;
 """
 
+# 第五期：对外会员编号 member_no（靓号）。不改主键 id，避免外键牵连
+MIGRATE5 = """
+ALTER TABLE c_users ADD COLUMN IF NOT EXISTS member_no BIGINT;
+UPDATE c_users SET member_no = id WHERE member_no IS NULL;
+CREATE UNIQUE INDEX IF NOT EXISTS c_users_member_no_uidx ON c_users(member_no);
+"""
+
 BOT_NICK = "旅韩小助手"
 BOT_PW_HASH = "disabled"          # 非 scrypt 格式，check_pw 恒为失败，不能登录
 AI_TIMEOUT = 20
@@ -319,6 +326,7 @@ AI_SYSTEM = """你是「旅韩小助手」，旅韩助手网站同路社区里�
 - 不提及任何其他社区或网站品牌，尤其不得出现“奋韩”或近似写法。
 - 不提及直播、抖音或任何带货内容。
 - 可以自称小助手，不要假装是去过当地的真人旅伴。
+- 涉及地铁线路、价格、营业时间等具体信息时，提醒用户出发前再核实。
 只输出回复正文，不要标题，不要用引号把全文包起来。"""
 
 
@@ -345,6 +353,7 @@ def db():
                         cur.execute(MIGRATE)
                         cur.execute(MIGRATE3)
                         cur.execute(MIGRATE4)
+                        cur.execute(MIGRATE5)
                     ensure_bot(conn)
                     conn.commit()
                     _schema_ready = True
@@ -437,6 +446,7 @@ def current_user(conn, req: Request):
         return None
     u = q(conn, """SELECT u.id,u.nickname,u.tier,u.is_banned,u.phone,u.email,u.created_at,
                       u.merchant_until,u.merchant_started,u.merchant_plan,u.merchant_credits,u.verified,
+                      u.member_no,
                       (u.merchant_until IS NOT NULL AND u.merchant_until>now()) AS merchant
                       FROM c_sessions s JOIN c_users u ON u.id=s.user_id
                       WHERE s.token_hash=%s AND NOT s.is_admin AND s.expires_at>now() AND NOT u.is_banned""",
@@ -638,7 +648,7 @@ def api_me(req: Request):
                             AND NOT EXISTS (SELECT 1 FROM c_blocks b WHERE b.blocker_id=%s AND b.blocked_id=m.sender_id)""",
                    (u["id"], u["id"]), one=True)["n"]
         has_profile = q(conn, "SELECT 1 AS x FROM c_dating_profiles WHERE user_id=%s", (u["id"],), one=True) is not None
-        return {"user": {"id": u["id"], "nickname": u["nickname"], "tier": u["tier"], "base_tier": u["base_tier"],
+        return {"user": {"id": u["id"], "member_no": u.get("member_no") or u["id"], "nickname": u["nickname"], "tier": u["tier"], "base_tier": u["base_tier"],
                          "display_tier": disp, "tier_name": TIER_NAMES[disp], "is_member": u["tier"] >= 1,
                          "merchant": bool(u["merchant"]), "merchant_info": merchant_quota(conn, u),
                          "merchant_expired": bool(u["merchant_until"] and not u["merchant"]),
@@ -684,6 +694,7 @@ async def api_register(req: Request, resp: Response):
         ref = resolve_ref(conn, req, d.get("promoter"))
         row = q(conn, f"INSERT INTO c_users({kind},nickname,pw_hash,last_login,promoter_code) VALUES (%s,%s,%s,now(),%s) RETURNING id",
                 (acct, nick, hash_pw(pw), ref), one=True)
+        assign_member_no(conn, row["id"])
         new_session(conn, resp, req, user_id=row["id"])
     return {"ok": True}
 
@@ -743,16 +754,29 @@ _ai_user_hits = defaultdict(deque)
 _ai_threads = []
 _ai_threads_lock = threading.Lock()
 
+def assign_member_no(conn, uid):
+    """给用户分配未被占用的会员编号：默认用 id；若 id 已被别人当靓号占用，则取其后第一个空号。"""
+    q(conn, """UPDATE c_users SET member_no = (
+         SELECT s FROM generate_series(%s, %s + 1000000) s
+         WHERE NOT EXISTS (SELECT 1 FROM c_users u WHERE u.member_no = s)
+         LIMIT 1
+       ) WHERE id=%s AND member_no IS NULL""", (uid, uid, uid))
+
+
 def ensure_bot(conn):
     """建表时创建系统账号；无可用密码、无手机号/邮箱，不能登录。"""
-    row = q(conn, "SELECT id FROM c_users WHERE is_bot LIMIT 1", one=True)
+    row = q(conn, "SELECT id, member_no FROM c_users WHERE is_bot LIMIT 1", one=True)
     if row:
         q(conn, "UPDATE c_users SET nickname=%s, pw_hash=%s, is_banned=FALSE WHERE id=%s AND (nickname<>%s OR pw_hash<>%s OR is_banned)",
           (BOT_NICK, BOT_PW_HASH, row["id"], BOT_NICK, BOT_PW_HASH))
+        if not row.get("member_no"):
+            assign_member_no(conn, row["id"])
         return row
-    return q(conn, """INSERT INTO c_users(nickname,pw_hash,is_bot,is_member,tier,verified)
+    row = q(conn, """INSERT INTO c_users(nickname,pw_hash,is_bot,is_member,tier,verified)
                       VALUES (%s,%s,TRUE,FALSE,0,FALSE) RETURNING id""",
              (BOT_NICK, BOT_PW_HASH), one=True)
+    assign_member_no(conn, row["id"])
+    return row
 
 def bot_id(conn):
     r = ensure_bot(conn)
@@ -1354,12 +1378,12 @@ def api_admin_users(req: Request, s: str = ""):
         s = s.strip()[:60]
         if s:
             like = "%" + s.replace("%", "").replace("_", "") + "%"
-            idq = int(s) if s.isdigit() and len(s) < 10 else -1
-            rows = q(conn, """SELECT * FROM c_users WHERE id=%s OR nickname ILIKE %s OR email ILIKE %s OR phone ILIKE %s
+            idq = int(s) if s.isdigit() and len(s) < 18 else -1
+            rows = q(conn, """SELECT * FROM c_users WHERE member_no=%s OR nickname ILIKE %s OR email ILIKE %s OR phone ILIKE %s
                               ORDER BY id DESC LIMIT 50""", (idq, like, like, like))
         else:
             rows = q(conn, "SELECT * FROM c_users ORDER BY id DESC LIMIT 50")
-    return {"users": [{"id": r["id"], "nickname": r["nickname"], "account": r["email"] or r["phone"],
+    return {"users": [{"id": r["id"], "member_no": r.get("member_no") or r["id"], "nickname": r["nickname"], "account": r["email"] or r["phone"],
                        "tier": r["tier"], "is_banned": r["is_banned"], "joined": _ts(r["created_at"]),
                        "promoter": r.get("promoter_code"),
                        "member_since": _ts(r["member_since"]), "tier2_since": _ts(r["tier2_since"]),
@@ -1429,15 +1453,40 @@ async def api_admin_user_action(req: Request, uid: int):
             raise HTTPException(400, "未知操作")
     return {"ok": True}
 
+@router.post("/api/admin/users/{uid}/member_no")
+async def api_admin_set_member_no(req: Request, uid: int):
+    csrf(req)
+    d = await req.json()
+    try:
+        n = int(d.get("member_no"))
+    except Exception:
+        n = 0
+    if n < 1:
+        raise HTTPException(400, "编号须为正整数")
+    with db() as conn:
+        need_admin(conn, req)
+        if not q(conn, "SELECT id FROM c_users WHERE id=%s", (uid,), one=True):
+            raise HTTPException(404, "用户不存在")
+        if is_bot_uid(conn, uid):
+            raise HTTPException(403, "系统账号不可修改")
+        cur = q(conn, "SELECT member_no FROM c_users WHERE id=%s", (uid,), one=True)
+        if cur and cur["member_no"] == n:
+            return {"ok": True, "member_no": n}
+        taken = q(conn, "SELECT id FROM c_users WHERE member_no=%s AND id<>%s", (n, uid), one=True)
+        if taken:
+            raise HTTPException(409, "这个编号已被占用")
+        q(conn, "UPDATE c_users SET member_no=%s WHERE id=%s", (n, uid))
+    return {"ok": True, "member_no": n}
+
 @router.get("/api/admin/posts")
 def api_admin_posts(req: Request, before: int = 0):
     with db() as conn:
         need_admin(conn, req)
-        rows = q(conn, """SELECT p.*, au.nickname, (CASE WHEN au.merchant_until>now() THEN 3 ELSE au.tier END) AS tier FROM c_posts p JOIN c_users au ON au.id=p.user_id
+        rows = q(conn, """SELECT p.*, au.nickname, au.member_no, (CASE WHEN au.merchant_until>now() THEN 3 ELSE au.tier END) AS tier FROM c_posts p JOIN c_users au ON au.id=p.user_id
                           WHERE NOT p.deleted AND p.status<>'rejected' AND (%s=0 OR p.id<%s) ORDER BY p.id DESC LIMIT 30""", (before, before))
     out = []
     for r in rows:
-        o = _post_out(r); o["user_id"] = r["user_id"]; out.append(o)
+        o = _post_out(r); o["user_id"] = r["user_id"]; o["member_no"] = r.get("member_no") or r["user_id"]; out.append(o)
     return {"posts": out}
 
 @router.delete("/api/admin/posts/{pid}")
@@ -1718,7 +1767,7 @@ def merchant_activate(conn, uid, plan):
 def api_admin_pending(req: Request):
     with db() as conn:
         need_admin(conn, req)
-        rows = q(conn, """SELECT p.*, au.nickname, (CASE WHEN au.merchant_until>now() THEN 3 ELSE au.tier END) AS tier
+        rows = q(conn, """SELECT p.*, au.nickname, au.member_no, (CASE WHEN au.merchant_until>now() THEN 3 ELSE au.tier END) AS tier
                           FROM c_posts p JOIN c_users au ON au.id=p.user_id
                           WHERE p.status='pending' AND NOT p.deleted ORDER BY p.id LIMIT 100""")
         imgs = {}
@@ -1727,7 +1776,7 @@ def api_admin_pending(req: Request):
                 imgs.setdefault(i["post_id"], []).append(i["id"])
     out = []
     for r in rows:
-        o = _post_out(r, full=True); o["user_id"] = r["user_id"]; o["note"] = r["review_note"]; o["images"] = imgs.get(r["id"], [])
+        o = _post_out(r, full=True); o["user_id"] = r["user_id"]; o["member_no"] = r.get("member_no") or r["user_id"]; o["note"] = r["review_note"]; o["images"] = imgs.get(r["id"], [])
         out.append(o)
     return {"posts": out}
 
