@@ -165,6 +165,18 @@ PAGES = {
         "实名核验,旅韩助手",
         False,
     ),
+    "/promo": (
+        "推广中心 · 旅韩助手",
+        "查看推广码和推荐佣金。",
+        "推广,旅韩助手",
+        False,
+    ),
+    "/promo/rules": (
+        "推广约定 · 旅韩助手",
+        "旅韩助手推广员约定：单层推荐、按实付金额 50% 计佣，禁止骚扰、虚假承诺和医疗保证。",
+        "推广约定,旅韩助手",
+        True,
+    ),
     "/privacy": (
         "隐私政策 · 旅韩助手",
         "旅韩助手隐私政策：收集哪些个人信息、用途、保存期限、第三方处理、跨境传输，以及如何查询、更正和删除你的信息。",
@@ -216,6 +228,8 @@ FILE_PATHS = {
     "chat.html": "/community/messages",
     "rate.html": "/community/rate",
     "admin.html": "/admin",
+    "promo.html": "/promo",
+    "promo-rules.html": "/promo/rules",
     "privacy.html": "/privacy",
     "terms.html": "/terms",
 }
@@ -236,7 +250,7 @@ NOINDEX_PREFIXES = (
 SITEMAP_PATHS = [
     "/", "/attractions", "/food", "/shopping", "/tips", "/beauty", "/faq",
     "/community", "/community/boards", "/community/rate", "/community/friends",
-    "/rules", "/member", "/shops", "/pay", "/tax-refund", "/visa", "/itineraries", "/privacy", "/terms",
+    "/rules", "/member", "/shops", "/pay", "/tax-refund", "/visa", "/itineraries", "/privacy", "/terms", "/promo/rules",
 ]
 
 router = APIRouter()
@@ -513,6 +527,8 @@ def robots():
         "Disallow: /community/new\n"
         "Disallow: /community/friends/edit\n"
         "Disallow: /community/friends/verify\n"
+        "Allow: /promo/rules\n"
+        "Disallow: /promo\n"
         "Disallow: /login\n"
         "\n"
         f"Sitemap: {origin}/sitemap.xml\n"

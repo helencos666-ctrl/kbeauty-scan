@@ -1,0 +1,88 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>推广中心 · 旅韩助手</title>
+<meta name="description" content="旅韩助手推广中心：查看推广码、推荐注册和佣金。">
+<meta name="theme-color" content="#ff6b8f">
+<meta name="robots" content="noindex">
+<link rel="manifest" href="/manifest.webmanifest">
+<link rel="apple-touch-icon" href="/static/icons/apple-touch-icon.png">
+<link rel="icon" type="image/png" sizes="192x192" href="/static/icons/icon-192.png">
+<link rel="stylesheet" href="/static/pwa.css">
+<link rel="stylesheet" href="/static/community.css">
+</head>
+<body>
+<header>
+  <h1>📣 推广中心</h1>
+  <p><a href="/member">‹ 会员</a> · <a href="/promo/rules">推广约定</a></p>
+</header>
+<main>
+  <div class="card userbar" id="ub">加载中…</div>
+  <div class="err" id="err" style="display:none"></div>
+  <div class="ok" id="ok" style="display:none"></div>
+  <div id="box"><div class="card loading">加载中…</div></div>
+</main>
+<nav>
+  <a href="/"><i>🏠</i>首页</a>
+  <a href="/attractions"><i>🗺️</i>景点</a>
+  <a href="/tips"><i>📘</i>攻略</a>
+  <a href="/community"><i>💬</i>社区</a>
+  <a href="/member" class="on"><i>👑</i>会员</a>
+</nav>
+<script src="/static/community.js"></script>
+<script>
+(async function(){
+  var box = document.getElementById('box'), err = document.getElementById('err'), ok = document.getElementById('ok');
+  function show(el,t){ el.textContent=t||''; el.style.display=t?'block':'none'; }
+  var m = await LH.userbar(document.getElementById('ub'));
+  if (!m || !m.user){
+    box.innerHTML = '<div class="card empty">请先登录后申请或查看推广数据。<br><br><a class="btn primary" href="/login?next=/promo">登录 / 注册</a></div>';
+    return;
+  }
+  var d;
+  try { d = await LH.api('GET', '/api/promo/me'); }
+  catch(e){ box.textContent = e.message; return; }
+  var terms = '<p class="tip">' + LH.esc(d.terms||'') + ' 详见 <a href="/promo/rules">推广约定</a>。当前比例 ' + (d.rate_percent||50) + '%，冻结 ' + (d.hold_days||0) + ' 天。</p>';
+  if (d.dashboard){
+    var x = d.dashboard, origin = location.origin, link = origin + x.link;
+    var refs = (x.referrals||[]).map(function(r){ return '<li>' + LH.esc(r.name) + ' · ' + LH.esc(r.joined||'') + (r.converted?' · 已付费':'') + '</li>'; }).join('');
+    box.innerHTML = '<div class="card"><h2>我的推广码</h2><p style="font-size:22px;font-weight:700;letter-spacing:1px">' + LH.esc(x.code) + '</p>' +
+      '<p class="tip" id="plink">' + LH.esc(link) + '</p>' +
+      '<div class="row"><button class="btn primary" id="copy">复制链接</button><button class="btn ghost" id="share">分享</button></div>' +
+      '<div class="chips" style="margin-top:12px"><span class="chip">点击 ' + x.visits + '</span><span class="chip">注册 ' + x.regs + '</span><span class="chip">付费转化 ' + x.paid_conversions + '</span></div>' +
+      '<p style="margin-top:10px">冻结中 ¥' + x.pending + ' · 待发放 ¥' + x.payable + ' · 已发放 ¥' + x.paid + '</p>' +
+      terms + '</div>' +
+      '<div class="card"><h2>推荐用户（姓名已打码）</h2>' + (refs ? '<ul>' + refs + '</ul>' : '<p class="tip">还没有推荐注册。</p>') + '</div>';
+    document.getElementById('copy').onclick = function(){ if (navigator.clipboard) navigator.clipboard.writeText(link).then(function(){ show(ok,'已复制'); }); else prompt('推广链接', link); };
+    document.getElementById('share').onclick = function(){
+      if (navigator.share) navigator.share({title:'旅韩助手', text:'我的推荐链接', url:link}).catch(function(){});
+      else if (navigator.clipboard) navigator.clipboard.writeText(link).then(function(){ show(ok,'已复制链接，可发给朋友'); });
+      else prompt('推广链接', link);
+    };
+    return;
+  }
+  var app = d.application;
+  if (app && app.status === 'pending'){
+    box.innerHTML = '<div class="card"><b>申请审核中。</b><p class="tip">提交于 ' + LH.esc(app.time||'') + '。</p>' + terms + '</div>';
+    return;
+  }
+  var rejected = (app && app.status === 'rejected') ? '<p>上次未通过：' + LH.esc(app.reject_reason||'') + '</p>' : '';
+  box.innerHTML = '<div class="card"><h2>申请成为推广员</h2>' + rejected + terms +
+    '<label class="f" style="display:flex;gap:8px;align-items:flex-start"><input type="checkbox" id="agree"><span>我已阅读并同意<a href="/promo/rules">推广约定</a>（单层推荐、按实付 50% 计佣，禁止骚扰和虚假、医疗承诺）</span></label>' +
+    '<textarea class="f" id="msg" maxlength="200" placeholder="选填：简单介绍你打算如何推广"></textarea>' +
+    '<button class="btn primary block" id="sub">提交申请</button></div>';
+  document.getElementById('sub').onclick = async function(){
+    show(err,''); show(ok,'');
+    this.disabled = true;
+    try {
+      var r = await LH.api('POST', '/api/promo/apply', {agree: document.getElementById('agree').checked, message: document.getElementById('msg').value});
+      show(ok, r.message||'已提交'); location.reload();
+    } catch(e){ show(err, e.message); this.disabled = false; }
+  };
+})();
+</script>
+<script src="/static/pwa.js" defer></script>
+</body>
+</html>

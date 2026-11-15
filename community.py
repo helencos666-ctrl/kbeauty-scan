@@ -375,6 +375,8 @@ def db():
                         cur.execute(MIGRATE_SHOP_EXTRAS)
                         from buddy_verify import MIGRATE_BUDDY_VERIFY
                         cur.execute(MIGRATE_BUDDY_VERIFY)
+                        from promo import MIGRATE_PROMO
+                        cur.execute(MIGRATE_PROMO)
                     ensure_bot(conn)
                     from chicken import ensure_chicken_shops
                     ensure_chicken_shops(conn)
@@ -1746,6 +1748,10 @@ async def api_admin_user_action(req: Request, uid: int):
             if t not in (0, 1, 2):
                 raise HTTPException(400, "等级只能是 0/1/2")
             set_tier(conn, uid, t)
+        elif act == "confirm_payment":
+            from promo import confirm_payment
+            apply = str(d.get("apply_benefit", True)).lower() not in ("0", "false", "no")
+            return confirm_payment(conn, uid, d.get("kind"), d.get("amount"), d.get("note") or "", apply_benefit=apply)
         elif act == "merchant":
             plan = d.get("plan")
             if plan not in PLAN_DAYS:
@@ -1985,13 +1991,13 @@ def api_admin_promoters(req: Request, start: str = "", end: str = ""):
         rows = q(conn, """SELECT p.*,
             (SELECT count(*) FROM c_ref_visits v WHERE v.code=p.code AND v.created_at>=%(a)s AND v.created_at<%(b)s) AS visits,
             (SELECT count(*) FROM c_users u WHERE u.promoter_code=p.code AND u.created_at>=%(a)s AND u.created_at<%(b)s) AS regs,
-            (SELECT count(*) FROM c_commissions c WHERE c.code=p.code AND c.tier=1 AND c.created_at>=%(a)s AND c.created_at<%(b)s) AS paid1,
-            (SELECT count(*) FROM c_commissions c WHERE c.code=p.code AND c.tier=2 AND c.created_at>=%(a)s AND c.created_at<%(b)s) AS paid2,
-            (SELECT count(*) FROM c_commissions c WHERE c.code=p.code AND c.tier=3 AND c.created_at>=%(a)s AND c.created_at<%(b)s) AS paid3,
-            (SELECT count(*) FROM c_commissions c WHERE c.code=p.code AND c.tier=4 AND c.created_at>=%(a)s AND c.created_at<%(b)s) AS paid4,
-            (SELECT COALESCE(sum(cents),0) FROM c_commissions c WHERE c.code=p.code AND c.created_at>=%(a)s AND c.created_at<%(b)s) AS range_cents,
-            (SELECT count(*) FROM c_commissions c WHERE c.code=p.code AND c.settled_at IS NULL) AS unsettled,
-            (SELECT COALESCE(sum(cents),0) FROM c_commissions c WHERE c.code=p.code AND c.settled_at IS NULL) AS owed_cents,
+            (SELECT count(*) FROM c_commissions c WHERE c.code=p.code AND c.tier=1 AND COALESCE(c.status,'payable')<>'void' AND c.created_at>=%(a)s AND c.created_at<%(b)s) AS paid1,
+            (SELECT count(*) FROM c_commissions c WHERE c.code=p.code AND c.tier=2 AND COALESCE(c.status,'payable')<>'void' AND c.created_at>=%(a)s AND c.created_at<%(b)s) AS paid2,
+            (SELECT count(*) FROM c_commissions c WHERE c.code=p.code AND c.tier=3 AND COALESCE(c.status,'payable')<>'void' AND c.created_at>=%(a)s AND c.created_at<%(b)s) AS paid3,
+            (SELECT count(*) FROM c_commissions c WHERE c.code=p.code AND c.tier=4 AND COALESCE(c.status,'payable')<>'void' AND c.created_at>=%(a)s AND c.created_at<%(b)s) AS paid4,
+            (SELECT COALESCE(sum(cents),0) FROM c_commissions c WHERE c.code=p.code AND COALESCE(c.status,'payable')<>'void' AND c.created_at>=%(a)s AND c.created_at<%(b)s) AS range_cents,
+            (SELECT count(*) FROM c_commissions c WHERE c.code=p.code AND c.settled_at IS NULL AND COALESCE(c.status,'payable')<>'void') AS unsettled,
+            (SELECT COALESCE(sum(cents),0) FROM c_commissions c WHERE c.code=p.code AND c.settled_at IS NULL AND COALESCE(c.status,'payable')<>'void') AS owed_cents,
             (SELECT COALESCE(sum(amount_cents),0) FROM c_settlements s WHERE s.code=p.code) AS settled_cents
             FROM c_promoters p ORDER BY p.created_at""", {"a": t0, "b": t1})
     return {"promoters": [{"code": r["code"], "name": r["name"], "active": r["active"],
@@ -2055,7 +2061,12 @@ async def api_admin_promoter_action(req: Request, code: str):
         elif act in ("disable", "enable"):
             q(conn, "UPDATE c_promoters SET active=%s WHERE code=%s", (act == "enable", code))
         elif act == "settle":
-            rows = q(conn, """UPDATE c_commissions SET settled_at=now() WHERE code=%s AND settled_at IS NULL
+            from promo import refresh_status
+            for row in q(conn, "SELECT * FROM c_commissions WHERE code=%s AND status='pending'", (code,)):
+                refresh_status(conn, row)
+            rows = q(conn, """UPDATE c_commissions SET settled_at=now(), status='paid', paid_at=now(),
+                              paid_note=COALESCE(paid_note, '批量结算')
+                              WHERE code=%s AND settled_at IS NULL AND status='payable'
                               RETURNING cents""", (code,))
             n = len(rows)
             amt = sum(r["cents"] for r in rows)
@@ -2078,30 +2089,15 @@ def api_admin_settlements(req: Request):
 
 
 def set_tier(conn, uid, t):
-    """设置会员等级，并按“补差价”规则记录推广佣金：
-    每个用户累计佣金 = 其达到过的最高档位当时的佣金标准；升档只补差额，降档不追回，重复开通不重复计。"""
+    """设置会员等级。推广佣金改为按管理员确认的实付金额 50% 记账，见 promo.confirm_payment。"""
     q(conn, """UPDATE c_users SET tier=%s, is_member=%s,
                member_since=CASE WHEN %s>=1 THEN COALESCE(member_since, now()) ELSE member_since END,
                tier2_since=CASE WHEN %s>=2 THEN COALESCE(tier2_since, now()) ELSE tier2_since END
                WHERE id=%s""", (t, t >= 1, t, t, uid))
-    if t < 1:
-        return
-    u = q(conn, "SELECT promoter_code FROM c_users WHERE id=%s", (uid,), one=True)
-    if not u or not u["promoter_code"]:
-        return
-    p = q(conn, "SELECT commission_cents, commission2_cents FROM c_promoters WHERE code=%s", (u["promoter_code"],), one=True)
-    if not p:
-        return
-    target = p["commission2_cents"] if t == 2 else p["commission_cents"]
-    have = q(conn, "SELECT COALESCE(sum(cents),0) AS s, COALESCE(max(tier),0) AS mt FROM c_commissions WHERE user_id=%s AND tier<=2",
-             (uid,), one=True)
-    if t > have["mt"]:
-        diff = max(0, target - have["s"])
-        q(conn, "INSERT INTO c_commissions(code,user_id,tier,cents) VALUES (%s,%s,%s,%s)", (u["promoter_code"], uid, t, diff))
 
 
 def merchant_activate(conn, uid, plan):
-    """开通/续费商家会员：有效期内续费顺延，过期后重新开通从现在起算；每次开通/续费各计一笔推广佣金（月付/年付标准）"""
+    """开通/续费商家会员：有效期内续费顺延，过期后重新开通从现在起算。佣金由 confirm_payment 按实付记录。"""
     days = PLAN_DAYS[plan]
     r = q(conn, """UPDATE c_users SET
             merchant_started=CASE WHEN merchant_until IS NOT NULL AND merchant_until>now() THEN merchant_started ELSE now() END,
@@ -2109,12 +2105,6 @@ def merchant_activate(conn, uid, plan):
             merchant_plan=%s
             WHERE id=%s RETURNING merchant_until, promoter_code""", (days, plan, uid), one=True)
     q(conn, "INSERT INTO c_merchant_log(user_id,action,detail) VALUES (%s,'activate',%s)", (uid, plan))
-    if r["promoter_code"]:
-        p = q(conn, "SELECT commission3_cents, commission4_cents FROM c_promoters WHERE code=%s", (r["promoter_code"],), one=True)
-        if p:
-            cents = p["commission4_cents"] if plan == "year" else p["commission3_cents"]
-            q(conn, "INSERT INTO c_commissions(code,user_id,tier,cents) VALUES (%s,%s,%s,%s)",
-              (r["promoter_code"], uid, 4 if plan == "year" else 3, cents))
     return {"merchant_until": _ts(r["merchant_until"]), "plan": plan}
 
 @router.get("/api/admin/pending")
@@ -2209,3 +2199,5 @@ from shop_extras import router as _shop_extras_router   # noqa: E402
 router.include_router(_shop_extras_router)
 from buddy_verify import router as _buddy_verify_router   # noqa: E402
 router.include_router(_buddy_verify_router)
+from promo import router as _promo_router   # noqa: E402
+router.include_router(_promo_router)

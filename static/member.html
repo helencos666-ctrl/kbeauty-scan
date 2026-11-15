@@ -102,7 +102,8 @@
     (u.has_avatar ? '<button class="btn sm gray" type="button" id="delAv">删除头像</button>' : '') + '</div></div></div>';
   html += '<div class="row" style="margin-top:12px;gap:8px;flex-wrap:wrap">' +
     '<a class="btn ghost" href="/points">🫘 旅行豆 ' + (u.points_balance != null ? u.points_balance : 0) + (u.points_streak ? ' · 连续签到' + u.points_streak + '天' : '') + '</a>' +
-    '<a class="btn ghost" href="/coupons">🎫 卡券' + (u.coupon_available ? ' · ' + u.coupon_available + '张可用' : '') + '</a></div>';
+    '<a class="btn ghost" href="/coupons">🎫 卡券' + (u.coupon_available ? ' · ' + u.coupon_available + '张可用' : '') + '</a>' +
+    '<a class="btn ghost" href="/promo">📣 推广中心</a></div>';
   if (u.tier >= 2) html += '<a class="btn primary block" style="margin-top:12px" href="/community/new">去发帖</a>';
   else if (u.tier === 1) html += '<p class="tip">升级高级会员补差价即可发帖、交友和在旅韩交友帖子下评论。</p>';
   html += '<details style="margin-top:16px;font-size:13px;color:var(--sub)"><summary style="cursor:pointer">注销账号（删除我的全部信息）</summary>' +
