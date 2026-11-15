@@ -3,8 +3,8 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<title>全部版块 · 旅韩助手</title>
-<meta name="description" content="旅韩社区全部版块：旅行、签证留学、在韩生活、交友相亲、商家服务。">
+<title>全部频道 · 同路社区 · 旅韩助手</title>
+<meta name="description" content="同路社区全部频道：旅途路上、签证·留学、住在韩国、旅韩交友、商家专区。">
 <meta name="theme-color" content="#ff6b8f">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
@@ -15,16 +15,18 @@
 <link rel="stylesheet" href="/static/pwa.css">
 <link rel="stylesheet" href="/static/community.css">
 </head>
+<body>
 <header>
-  <h1>☰ 全部版块</h1>
-  <p>点“＋ 加入”，版块新帖会出现在社区“关注”标签</p>
+  <h1>🗂️ 全部频道</h1>
+  <p>点“＋ 关注”，频道新帖会出现在“我关注的”里</p>
 </header>
 <main>
   <div class="err" id="err"></div>
-  <div class="bwrap"><div class="bcat" id="cats"></div><div class="bsub" id="subs"><div class="loading">加载中…</div></div></div>
-  <div class="footlinks" style="margin-top:14px"><a href="/community">返回社区</a>·<a href="/community/friends">交友广场</a>·<a href="/community/rate">汇率换算</a></div>
+  <div class="chpills" id="cats"></div>
+  <div id="subs"><div class="loading">加载中…</div></div>
+  <div class="footlinks" style="margin-top:14px"><a href="/community">返回社区</a>·<a href="/community/friends">旅韩交友</a>·<a href="/community/rate">汇率换算</a></div>
 </main>
-<a class="fab round" href="/community/new"><b>＋</b>发布</a>
+<a class="fab pill" href="/community/new">✏️ 写帖子</a>
 <nav>
   <a href="/"><i>🏠</i>首页</a>
   <a href="/attractions"><i>🗺️</i>景点</a>
@@ -37,20 +39,20 @@
 var data = null, cur = LH.qs('cat') || '', user = null;
 function show(){
   document.getElementById('cats').innerHTML = data.categories.map(function(c){
-    return '<button data-c="' + c.key + '"' + (c.key === cur ? ' class="on"' : '') + '>' + c.icon + '<br>' + LH.esc(c.name) + '</button>';
+    return '<a href="#cat-' + c.key + '">' + c.icon + ' ' + LH.esc(c.name) + '</a>';
   }).join('');
-  document.querySelectorAll('#cats button').forEach(function(b){ b.onclick = function(){ cur = b.dataset.c; history.replaceState(null, '', '?cat=' + cur); show(); }; });
-  var c = data.categories.filter(function(x){ return x.key === cur; })[0];
-  var extra = cur === 'friends' ? '<div class="bitem"><i>💞</i><a href="/community/friends"><b>交友广场</b><small>看看谁在韩国，打个招呼</small></a></div>' : '';
-  extra += cur === 'life' ? '<div class="bitem"><i>💱</i><a href="/community/rate"><b>汇率换算</b><small>人民币 ↔ 韩元</small></a></div>' : '';
-  document.getElementById('subs').innerHTML = c.boards.map(function(b){
-    return '<div class="bitem"><i>' + b.icon + '</i><a href="/community?board=' + b.key + '"><b>' + LH.esc(b.name) + '</b><small>' +
-      (b.merchant ? '商家会员发布 · ' : '') + (b.members_only ? '会员可看 · ' : '') + b.members + ' 人加入</small></a>' +
-      '<button class="jbtn' + (b.joined ? ' on' : '') + '" data-j="' + b.key + '">' + (b.joined ? '已加入' : '＋ 加入') + '</button></div>';
-  }).join('') + extra;
+  document.getElementById('subs').innerHTML = data.categories.map(function(c){
+    var extra = c.key === 'friends' ? '<div class="bitem"><i>💗</i><a href="/community/friends"><b>交友资料</b><small>看看谁在韩国，打个招呼</small></a></div>' : '';
+    extra += c.key === 'life' ? '<div class="bitem"><i>💱</i><a href="/community/rate"><b>汇率换算</b><small>人民币 ↔ 韩元</small></a></div>' : '';
+    return '<section class="chgroup" id="cat-' + c.key + '"><h2>' + c.icon + ' ' + LH.esc(c.name) + '</h2>' + c.boards.map(function(b){
+      return '<div class="bitem"><i>' + b.icon + '</i><a href="/community?board=' + b.key + '"><b>' + LH.esc(b.name) + '</b><small>' +
+        (b.desc ? LH.esc(b.desc) + '<br>' : '') + (b.merchant ? '商家会员发布 · ' : '') + (b.members_only ? '会员可看 · ' : '') + b.members + ' 人关注</small></a>' +
+        '<button class="jbtn' + (b.joined ? ' on' : '') + '" data-j="' + b.key + '">' + (b.joined ? '已关注' : '＋ 关注') + '</button></div>';
+    }).join('') + extra + '</section>';
+  }).join('');
   document.querySelectorAll('#subs [data-j]').forEach(function(btn){
     btn.onclick = async function(){
-      if (!user){ location.href = '/login?next=' + encodeURIComponent('/community/boards?cat=' + cur); return; }
+      if (!user){ location.href = '/login?next=' + encodeURIComponent('/community/boards'); return; }
       try {
         var r = await LH.api('POST', '/api/community/boards/' + btn.dataset.j + '/join', {});
         data.categories.forEach(function(c){ c.boards.forEach(function(b){ if (b.key === btn.dataset.j){ b.joined = r.joined; b.members += r.joined ? 1 : -1; } }); });
@@ -63,8 +65,8 @@ function show(){
   try { var m = await LH.me(); user = m.user; } catch(e){}
   try { data = await LH.api('GET', '/api/community/boards'); }
   catch(e){ LH.showErr(document.getElementById('err'), e.message); return; }
-  if (!data.categories.some(function(c){ return c.key === cur; })) cur = data.categories[0].key;
   show();
+  if (cur){ var el = document.getElementById('cat-' + cur); if (el) el.scrollIntoView(); }
 })();
 </script>
 <script src="/static/pwa.js" defer></script>

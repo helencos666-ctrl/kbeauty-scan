@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <title>私信 · 旅韩助手</title>
-<meta name="description" content="旅韩社区私信。">
+<meta name="description" content="同路社区私信。">
 <meta name="theme-color" content="#ff6b8f">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
@@ -25,7 +25,7 @@
   <div class="antiscam" id="anti"></div>
   <div class="card" id="box"><div class="loading">加载中…</div></div>
   <div class="card" id="bbox" style="display:none"><h2>🚫 黑名单</h2><div id="blist"></div></div>
-  <div class="footlinks"><a href="/community/friends">交友广场</a>·<a href="/community">社区首页</a>·<a href="/rules#r8">交友规则</a></div>
+  <div class="footlinks"><a href="/community/friends">旅韩交友</a>·<a href="/community">社区首页</a>·<a href="/rules#r8">交友约定</a></div>
 </main>
 <nav>
   <a href="/"><i>🏠</i>首页</a>
@@ -49,7 +49,7 @@ var E = LH.esc;
         (t.unread ? '<span class="dot">' + t.unread + '</span>' : '') + '</span><span class="tx"><b>' + E(t.nickname) + '</b>' + LH.vb(t.verified) +
         (t.blocked ? ' <small style="color:#c62828">已拉黑</small>' : '') + (t.flagged ? ' <small style="color:#8a5300">⚠️ 含敏感词</small>' : '') +
         '<p>' + E(t.last) + '</p></span><span class="tm">' + E((t.time || '').slice(5)) + '</span></a>';
-    }).join('') : '<div class="empty">还没有私信。去<a href="/community/friends">交友广场</a>看看，遇到合眼缘的打个招呼吧</div>';
+    }).join('') : '<div class="empty">还没有私信。去<a href="/community/friends">旅韩交友</a>看看，遇到合眼缘的打个招呼吧</div>';
     var b = await LH.api('GET', '/api/friends/blocks');
     if (b.blocks.length){
       document.getElementById('bbox').style.display = 'block';

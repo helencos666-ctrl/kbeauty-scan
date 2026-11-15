@@ -17,7 +17,7 @@
 </head>
 <body>
 <header>
-  <h1>💬 旅韩社区</h1>
+  <h1>🧭 同路社区</h1>
   <p><a href="/community">← 返回社区</a></p>
 </header>
 <main>
@@ -30,7 +30,7 @@
     <div id="cform" style="margin-top:10px"></div>
   </div>
   <div class="disclaimer">帖子内容为网友个人经验，仅供参考，不代表本站观点。商家信息由商家自行负责。</div>
-  <div class="footlinks"><a href="/rules">社区公告与发帖规则</a>·<a href="/member">会员说明</a>·<a href="/community">社区首页</a></div>
+  <div class="footlinks"><a href="/rules">社区约定</a>·<a href="/member">会员说明</a>·<a href="/community">社区首页</a></div>
 </main>
 <div class="lightbox" id="lb"><img alt=""></div>
 <nav>
@@ -46,7 +46,7 @@ var pid = parseInt(location.pathname.split('/').pop(), 10);
 var WARN = {visa: '⚠️ 本帖为网友个人签证经验，本站不提供签证代办。政策以韩国驻华使领馆、韩国签证申请中心和 K-ETA 官网为准。',
   study: '⚠️ 本帖为网友留学经验分享，本站不提供留学中介或代办服务，招生信息以学校官网为准。',
   friends: '⚠️ 交友请注意安全：不要转账借钱，不要透露证件和住址，线下见面选公共场所。',
-  group: '⚠️ 组团同行请自行核实对方身份，费用 AA 透明，谨防收定金骗局。',
+  group: '⚠️ 结伴同行请自行核实对方身份，费用 AA 透明，谨防收定金骗局。',
   hotel: '🏨 商家信息由商家自行发布并负责，本站不担保其资质、价格和服务。预订前请核实营业登记，使用正规支付并保留凭证。',
   car: '🚗 商家信息由商家自行发布并负责。租车包车请确认对方具备租赁或客运资质和保险，费用当面确认，谨慎预付。',
   clinic: '🏥 商家信息由商家自行发布并负责，本站不担保医疗效果。请选择合法医疗机构，遵医嘱，谨慎对待“包效果”类宣传。',};
@@ -63,8 +63,8 @@ async function load(){
     box.innerHTML = '<div class="empty">' + LH.esc(e.message) + (e.status === 401 ? '<br><br><a class="btn primary" href="/login?next=' + encodeURIComponent(location.pathname) + '">登录 / 注册</a>' : (e.status === 403 ? '<br><br><a class="btn primary" href="/member">了解会员</a>' : '')) + '</div>';
     return;
   }
-  document.title = p.title + ' · 旅韩社区';
-  document.getElementById('warn').innerHTML = (p.status === 'pending' ? '<div class="pending">⏳ 这篇帖子正在等待管理员审核，目前只有你自己能看到。' + (p.review_note ? '（' + LH.esc(p.review_note) + '）' : '') + '酒店、租车包车、医美等商业信息请开通商家会员后在商家版块发布。详见<a href="/rules#r3">发帖规则</a>。</div>' : '') +
+  document.title = p.title + ' · 同路社区';
+  document.getElementById('warn').innerHTML = (p.status === 'pending' ? '<div class="pending">⏳ 这篇帖子正在等待管理员审核，目前只有你自己能看到。' + (p.review_note ? '（' + LH.esc(p.review_note) + '）' : '') + '住宿、包车用车、医美等商业信息请开通商家会员后在商家专区发布。详见<a href="/rules#r3">社区约定</a>。</div>' : '') +
     (p.status === 'rejected' ? '<div class="pending">❌ 这篇帖子未通过审核：' + LH.esc(p.review_note || '') + '</div>' : '') +
     (WARN[p.board] ? '<div class="warn">' + WARN[p.board] + '</div>' : '');
   var g = p.images.length ? '<div class="gallery' + (p.images.length === 1 ? ' one' : '') + '">' + p.images.map(function(i){
@@ -106,7 +106,7 @@ async function load(){
   if (!me || !me.user){
     cf.innerHTML = '<a class="btn ghost block" href="/login?next=' + encodeURIComponent(location.pathname) + '">登录后参与讨论</a>';
   } else if (me.user.tier < p.comment_tier){
-    cf.innerHTML = p.comment_tier >= 2 ? '<a class="btn primary block" href="/member">交友版评论需开通高级会员</a>' : '<a class="btn primary block" href="/member">开通会员即可评论</a>';
+    cf.innerHTML = p.comment_tier >= 2 ? '<a class="btn primary block" href="/member">旅韩交友评论需开通高级会员</a>' : '<a class="btn primary block" href="/member">开通会员即可评论</a>';
   } else {
     cf.innerHTML = '<div class="err" id="cerr"></div><textarea class="f" id="cbody" maxlength="500" style="min-height:80px" placeholder="友善发言，分享你的经验"></textarea>' +
       '<button class="btn primary block" id="csend" style="margin-top:8px">发表评论</button>';

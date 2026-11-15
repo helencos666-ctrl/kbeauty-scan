@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <title>交友资料 · 旅韩助手</title>
-<meta name="description" content="旅韩社区交友资料。">
+<meta name="description" content="同路社区交友资料。">
 <meta name="theme-color" content="#ff6b8f">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
@@ -16,8 +16,8 @@
 <link rel="stylesheet" href="/static/community.css">
 </head>
 <header>
-  <h1 id="h1">💞 交友资料</h1>
-  <p><a href="/community/friends">‹ 返回交友广场</a></p>
+  <h1 id="h1">💗 交友资料</h1>
+  <p><a href="/community/friends">‹ 返回旅韩交友</a></p>
 </header>
 <main>
   <div class="antiscam" id="anti"></div>
@@ -43,11 +43,11 @@ async function load(){
   try { P = await LH.api('GET', '/api/friends/profile/' + uid); }
   catch(e){
     box.innerHTML = '<div class="card empty">' + E(e.message) + '<br><br>' + (e.status === 401 ? '<a class="btn primary" href="/login?next=' + encodeURIComponent(location.pathname) + '">登录 / 注册</a>' :
-      (e.status === 403 ? '<a class="btn primary" href="/member">开通会员</a>' : '<a class="btn ghost" href="/community/friends">返回交友广场</a>')) + '</div>';
+      (e.status === 403 ? '<a class="btn primary" href="/member">开通会员</a>' : '<a class="btn ghost" href="/community/friends">返回旅韩交友</a>')) + '</div>';
     return;
   }
   document.title = P.nickname + ' · 交友资料';
-  document.getElementById('h1').textContent = '💞 ' + P.nickname;
+  document.getElementById('h1').textContent = '💗 ' + P.nickname;
   var gal = P.photos.length ? '<div class="pgal">' + P.photos.map(function(id){ return '<img loading="lazy" alt="" src="/api/friends/photo/' + id + '" data-z="1">'; }).join('') + '</div>' :
     '<div class="ph0">' + (P.gender === 'f' ? '👩' : '👨') + '</div>';
   box.innerHTML = '<div class="card">' + gal +

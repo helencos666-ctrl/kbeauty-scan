@@ -42,12 +42,12 @@
     </div>
     <div class="card" id="t-reports" style="display:none"><div id="rlist"></div></div>
     <div class="card" id="t-posts" style="display:none"><div id="plist"></div><button class="btn ghost block" id="pmore" style="margin-top:10px">加载更多</button></div>
-    <div class="card" id="t-review" style="display:none"><p class="tip" style="margin-top:0">普通版块中非商家用户发布的、含商业关键词的帖子在这里审核。通过后公开，拒绝后仅作者可见“未通过”。</p><div id="rvlist"></div></div>
+    <div class="card" id="t-review" style="display:none"><p class="tip" style="margin-top:0">普通频道中非商家用户发布的、含商业关键词的帖子在这里审核。通过后公开，拒绝后仅作者可见“未通过”。</p><div id="rvlist"></div></div>
     <div id="t-friends" style="display:none">
       <div class="card">
         <h2>交友资料</h2>
         <div class="row"><input class="f" id="fs" placeholder="搜索编号/昵称" style="flex:1"><button class="btn primary" id="fsgo">搜索</button></div>
-        <p class="tip">被举报多的排在前面。“隐藏”后资料不再出现在交友广场；“已认证”需你人工核实后再打开（本站没有实名认证）。</p>
+        <p class="tip">被举报多的排在前面。“隐藏”后资料不再出现在旅韩交友；“已认证”需你人工核实后再打开（本站没有实名认证）。</p>
         <div id="flist" style="margin-top:6px"></div>
       </div>
       <div class="card">
@@ -60,7 +60,7 @@
       <h2>价格与汇率设置</h2>
       <div id="setlist"></div>
       <button class="btn primary block" id="setsave" style="margin-top:12px">保存</button>
-      <p class="tip">修改后会员页、发帖规则页和提示文字立即使用新价格。已开通的会员不受影响。</p>
+      <p class="tip">修改后会员页、社区约定页和提示文字立即使用新价格。已开通的会员不受影响。</p>
     </div>
     <div id="t-promo" style="display:none">
       <div class="card">
@@ -227,7 +227,7 @@ async function review(){
   }).join('') : '<div class="empty">没有待审核的帖子</div>';
   document.querySelectorAll('#rvlist [data-ok]').forEach(function(b){ b.onclick = async function(){ await call('POST', '/api/admin/posts/' + b.dataset.ok + '/review', {action: 'approve'}); document.getElementById('rv' + b.dataset.ok).remove(); }; });
   document.querySelectorAll('#rvlist [data-no]').forEach(function(b){ b.onclick = async function(){
-    var why = prompt('拒绝理由（作者可见）', '含商业推广内容，请开通商家会员后在商家版块发布'); if (why === null) return;
+    var why = prompt('拒绝理由（作者可见）', '含商业推广内容，请开通商家会员后在商家专区发布'); if (why === null) return;
     await call('POST', '/api/admin/posts/' + b.dataset.no + '/review', {action: 'reject', reason: why}); document.getElementById('rv' + b.dataset.no).remove(); }; });
   document.querySelectorAll('#rvlist [data-banu]').forEach(function(b){ b.onclick = async function(){ if (!confirm('封禁该用户？')) return; await call('POST', '/api/admin/users/' + b.dataset.banu, {action: 'ban'}); msg('已封禁', false); }; });
 }
