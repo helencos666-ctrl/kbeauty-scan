@@ -344,6 +344,10 @@ def shopping():
 def tips():
     return FileResponse(os.path.join(BASE, "static", "tips.html"), headers={"Cache-Control": "no-cache"})
 
+@app.get("/faq")
+def faq():
+    return FileResponse(os.path.join(BASE, "static", "faq.html"), headers={"Cache-Control": "no-cache"})
+
 @app.get("/beauty")
 def beauty():
     return FileResponse(os.path.join(BASE, "static", "beauty.html"), headers={"Cache-Control": "no-cache"})
