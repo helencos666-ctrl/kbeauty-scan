@@ -225,6 +225,20 @@ var LH = (function(){
       (opts.share === false ? '' : '<button class="btn sm ghost" type="button" data-share="' + sid + '" data-kind="' + typ + '" data-name="' + esc(shop.name || '') + '">分享</button>') +
       '</div>';
   }
+  function starsHtml(v){
+    v = Math.max(0, Math.min(5, Math.round(Number(v) || 0)));
+    return '<span class="stars" aria-label="' + v + ' 星">' + '★★★★★'.slice(0, v) + '<span class="off">' + '★★★★★'.slice(v) + '</span></span>';
+  }
+  function priceLine(shop, rate){
+    if (!shop.price_text) return '';
+    var t = '人均 ' + shop.price_text;
+    if (rate && (shop.price_min != null || shop.price_max != null)){
+      var a = shop.price_min != null ? shop.price_min : shop.price_max, b = shop.price_max != null ? shop.price_max : shop.price_min;
+      var ca = Math.round(a / Number(rate)), cb = Math.round(b / Number(rate));
+      t += '（约 ¥' + (ca === cb ? ca : (ca + '–' + cb)) + '）';
+    }
+    return t;
+  }
   function ratingText(shop){
     if (!shop.rating_count) return '<span class="tip" style="margin:0">暂无评价</span>';
     return '<span>★ ' + shop.rating_avg + '（' + shop.rating_count + ' 条评价）</span>';
@@ -242,5 +256,5 @@ var LH = (function(){
   }
   return {prices: prices, esc: esc, api: api, me: me, badge: badge, showErr: showErr, qs: qs, compress: compress, userbar: userbar, report: report,
           vb: vb, avatar: avatar, pickAvatar: pickAvatar, postItem: postItem, friendCard: friendCard, lockedPrompt: lockedPrompt, ANTISCAM: ANTISCAM, share: share,
-          mapLinks: mapLinks, copyText: copyText, krwCny: krwCny, menuHtml: menuHtml, locHtml: locHtml, ratingText: ratingText, bindShopExtras: bindShopExtras};
+          mapLinks: mapLinks, copyText: copyText, krwCny: krwCny, menuHtml: menuHtml, locHtml: locHtml, ratingText: ratingText, bindShopExtras: bindShopExtras, starsHtml: starsHtml, priceLine: priceLine};
 })();

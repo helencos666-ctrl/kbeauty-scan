@@ -426,7 +426,11 @@ def _shop_out(r, *, mine=False, admin=False):
         "time": _ts(r["created_at"]),
         "menu": parse_menu(r.get("menu")),
         "address": (r.get("address") or "").strip(),
+        "is_example": bool(r.get("is_example")),
+        "official": bool(r.get("official")),
     }
+    from shop_extras import price_out
+    o.update(price_out(r))
     if mine or admin:
         o["review_note"] = r.get("review_note")
         o["points_awarded"] = bool(r.get("points_awarded"))
@@ -453,7 +457,7 @@ def api_shops_public(req: Request, area: str = "", shop_type: str = ""):
         raise HTTPException(400, "地区不正确")
     if shop_type and shop_type not in SHOP_TYPES:
         raise HTTPException(400, "类型不正确")
-    sql = "SELECT id,name,area,shop_type,description,status,created_at,menu,address FROM c_shop_recs WHERE status='approved'"
+    sql = "SELECT id,name,area,shop_type,description,status,created_at,menu,address,price_min,price_max,price_note,is_example,official FROM c_shop_recs WHERE status='approved'"
     args = []
     if area:
         sql += " AND area=%s"; args.append(area)

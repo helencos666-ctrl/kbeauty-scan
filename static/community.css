@@ -203,3 +203,43 @@ header.thero{padding:18px 18px 34px}
 .chpills a{flex:none;text-decoration:none;font-size:13px;padding:6px 12px;border-radius:16px;background:#fff;color:var(--pink);border:1px solid #ffc6d6;font-weight:600}
 
 .ai-tag{display:inline-block;font-size:11px;padding:1px 6px;border-radius:8px;background:linear-gradient(135deg,#3d5afe,#1565c0);color:#fff;font-weight:700;margin-left:4px;vertical-align:1px;letter-spacing:.5px}
+
+/* 商家：列表卡片、详情、相册、星级、评价 */
+.mlist{display:flex;flex-direction:column;gap:12px}
+.mcard{display:flex;gap:12px;text-decoration:none;color:inherit;background:#fff;border:1px solid var(--line);border-radius:14px;padding:10px;align-items:stretch}
+.mcard .mimg{flex:none;width:96px;height:96px;border-radius:10px;overflow:hidden;background:#f6eef1;display:flex;align-items:center;justify-content:center;font-size:30px}
+.mcard .mimg img{width:100%;height:100%;object-fit:cover;display:block}
+.mcard .mbody{flex:1;min-width:0;display:flex;flex-direction:column;gap:4px}
+.mcard h3{margin:0;font-size:16px;line-height:1.35;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.mcard .mline{font-size:13px;color:var(--sub);line-height:1.5;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.mcard .mprice{font-size:14px;color:var(--ink);font-weight:600}
+.stars{color:#ffb400;letter-spacing:1px;font-size:14px;white-space:nowrap}
+.stars .off{color:#e2d9dc}
+.rating-row{display:flex;align-items:center;gap:6px;font-size:13px;color:var(--sub)}
+.rating-row b{color:var(--ink);font-size:15px}
+.tag.ex{background:#fff3cd;color:#8a5300}
+.tag.off{background:#e8f4ff;color:#2c7be5}
+.gallery{display:flex;gap:8px;overflow-x:auto;scroll-snap-type:x mandatory;margin:-4px -4px 10px;padding:4px}
+.gallery a{flex:none;width:78%;max-width:360px;aspect-ratio:4/3;border-radius:12px;overflow:hidden;scroll-snap-align:start;background:#f6eef1}
+.gallery a:only-child{width:100%;max-width:none}
+.gallery img{width:100%;height:100%;object-fit:cover;display:block}
+.gallery-empty{aspect-ratio:16/7;border-radius:12px;background:#f6eef1;display:flex;align-items:center;justify-content:center;color:var(--sub);font-size:13px;margin-bottom:10px}
+.kv{display:flex;gap:10px;font-size:14px;line-height:1.7;margin:6px 0}
+.kv>span:first-child{flex:none;color:var(--sub);width:42px}
+.price-big{font-size:18px;font-weight:700;color:var(--pink)}
+.rv{border-top:1px solid var(--line);padding:10px 0}
+.rv:first-child{border-top:0}
+.rv .rvh{display:flex;justify-content:space-between;gap:8px;font-size:13px;color:var(--sub)}
+.rv .rvb{font-size:14px;line-height:1.7;margin-top:4px;white-space:pre-wrap;word-break:break-word}
+.rv img{margin-top:6px;width:96px;height:96px;object-fit:cover;border-radius:8px;display:block}
+.starpick{display:flex;gap:4px;margin:4px 0 8px}
+.starpick button{border:0;background:none;font-size:30px;line-height:1;padding:2px;color:#e2d9dc;cursor:pointer}
+.starpick button.on{color:#ffb400}
+.ph-row{display:flex;flex-wrap:wrap;gap:8px;margin:8px 0}
+.ph-row .ph{position:relative;width:84px}
+.ph-row .ph img{width:84px;height:84px;object-fit:cover;border-radius:8px;display:block}
+.ph-row .ph .btn{margin-top:4px;width:100%;padding:4px 0;font-size:12px}
+.pill{display:inline-block;padding:2px 8px;border-radius:999px;font-size:12px;font-weight:700}
+.pill.pending{background:#fff3cd;color:#8a5300}
+.pill.approved{background:#e3f7e9;color:#1b7a3d}
+.pill.rejected{background:#fde2e2;color:#c62828}

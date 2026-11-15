@@ -146,7 +146,7 @@ app.middleware("http")(ref_middleware)
 
 # 安全中间件（最外层之一）：安全头、https 跳转、写操作同源校验、请求体流式限长
 app.add_middleware(SecurityMiddleware, max_body=MAX_UPLOAD + 100_000,
-                   big_paths={"/api/community/posts"}, big_body=20 * 1024 * 1024)
+                   big_paths={"/api/community/posts", "/api/admin/shop-photos"}, big_body=20 * 1024 * 1024)
 
 @app.post("/api/scan")
 async def scan(request: Request, image: UploadFile = File(...)):

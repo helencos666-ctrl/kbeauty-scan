@@ -373,6 +373,8 @@ def db():
                         cur.execute(MIGRATE_CHICKEN)
                         from shop_extras import MIGRATE_SHOP_EXTRAS
                         cur.execute(MIGRATE_SHOP_EXTRAS)
+                        from shop_extras import MIGRATE_MERCHANT
+                        cur.execute(MIGRATE_MERCHANT)
                         from buddy_verify import MIGRATE_BUDDY_VERIFY
                         cur.execute(MIGRATE_BUDDY_VERIFY)
                         from promo import MIGRATE_PROMO
@@ -1694,6 +1696,7 @@ def api_admin_overview(req: Request):
                               (SELECT count(*) FROM c_dating_profiles) AS profiles,
                               (SELECT count(*) FROM c_messages WHERE flagged AND created_at>now()-interval '7 days') AS flagged7,
                               (SELECT count(*) FROM c_shop_recs WHERE status='pending') AS shop_pending,
+                              (SELECT count(*) FROM c_shop_reviews WHERE status='pending') AS review_pending,
                               pg_database_size(current_database()) AS db_bytes""", one=True)
     s["db_mb"] = round(s.pop("db_bytes") / 1048576, 1)
     return s

@@ -2,6 +2,20 @@
 
 基于线上 93d109c（push16）。不要自动部署；上传后手动 trigger deploy。
 
+
+## 2026-11-15 商家升级：照片、地址、价格、评价先审后发（feature/merchant-upgrade，未部署）
+- 商家照片：管理员在后台「商家/评价」上传，每家最多 8 张，第一张为封面，可设封面/删除；服务器重新压缩（最长边 1280、缩略图 480）并去掉 EXIF/定位，存 Postgres 新表 c_shop_photos（Render 免费实例磁盘不持久，故不存文件）
+- 价格：人均价格区间（price_min / price_max，韩元）+ 价格说明；原菜单价目表保留，前台按手动汇率估算人民币
+- 地址：保留复制地址与 Naver / Kakao / Google 地图搜索链接（无 API 密钥）
+- 商家详情页 /shops/{id}（新文件 static/shop.html）：相册、评分、价格、菜单、地址、评价列表、写评价；列表页改为卡片（封面、星级、人均、地区）
+- 评价：1–5 星 + 4–200 字 + 可选 1 张照片；提交和修改后都是“审核中”，管理员通过后才公开并计入平均分；作者能看到自己评价的状态
+- 后台：评价审核（待审核/已通过/未通过筛选）、通过、拒绝、隐藏/取消隐藏、删除；直接新增商家（归属系统账号，直接公开）、编辑资料/价格/示例标记；概览增加“待审评价”
+- 防刷：每用户每小时 8 次、每 IP 每小时 20 次、全站每小时 300 次、每用户每天 10 条；每人每店一条；仍拦截网址、联系方式和诈骗词
+- 迁移（MIGRATE_MERCHANT，只增不删）：c_shop_recs 加 price_min/price_max/price_note/is_example/official；c_shop_reviews 加 status（默认 approved，旧评价保持公开）/photo/photo_thumb/reviewed_at/updated_at；新表 c_shop_photos 和索引
+- 安全中间件：/api/admin/shop-photos 允许 20MB 请求体（多张照片）
+- sw.js 缓存 v23 → v24
+- 测试：test/test_merchant_upgrade.py（含用 cfda814 旧代码建库后迁移的兼容测试）；test_shop_extras.py 改为先审后发流程
+
 ## 2026-11-15 实用工具、路线、签证、避雷与炸鸡代点
 - 首页工具条：汇率、地铁、支付、退税；另有路线卡片、签证须知、炸鸡代点、避雷经验入口
 - /pay 支付与交通卡：闸机一般不能直接刷支付宝、微信或银联；T-money / WOWPASS / 外卡；未核实处以现场为准

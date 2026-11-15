@@ -1,0 +1,126 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>商家详情 · 旅韩助手</title>
+<meta name="description" content="旅韩助手商家详情：照片、地址、人均价格、菜单和用户评价。">
+<meta name="theme-color" content="#ff6b8f">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="旅韩助手">
+<link rel="manifest" href="/manifest.webmanifest">
+<link rel="apple-touch-icon" href="/static/icons/apple-touch-icon.png">
+<link rel="icon" type="image/png" sizes="192x192" href="/static/icons/icon-192.png">
+<link rel="stylesheet" href="/static/pwa.css">
+<link rel="stylesheet" href="/static/community.css">
+</head>
+<body>
+<header>
+  <p style="margin:0 0 6px"><a href="/shops">← 全部商家</a></p>
+  <h1 id="hname">商家详情</h1>
+  <p id="hsub">加载中…</p>
+</header>
+<main>
+  <div class="err" id="err" style="display:none"></div>
+  <div class="ok" id="ok" style="display:none"></div>
+  <div id="box"><div class="card">加载中…</div></div>
+  <div class="footlinks"><a href="/shops">推荐店铺</a>·<a href="/points">旅行豆</a>·<a href="/member">会员</a>·<a href="/community">社区</a></div>
+  <p style="font-size:12px;color:#888;text-align:center;margin:10px 0 16px;line-height:1.7">价格、营业信息以店内为准；评价为用户个人体验，审核后公开，仅供参考。<br><a href="/terms" style="color:#2c7be5">用户协议与免责声明</a> · <a href="/privacy" style="color:#2c7be5">隐私政策</a> · <a href="/rules" style="color:#2c7be5">社区约定</a></p>
+</main>
+<nav>
+  <a href="/"><i>🏠</i>首页</a>
+  <a href="/attractions"><i>🗺️</i>景点</a>
+  <a href="/tips"><i>📘</i>攻略</a>
+  <a href="/community"><i>💬</i>社区</a>
+  <a href="/member"><i>👑</i>会员</a>
+</nav>
+<script src="/static/community.js"></script>
+<script>
+(async function(){
+  var E = LH.esc, err = document.getElementById('err'), ok = document.getElementById('ok');
+  function show(el, t){ el.textContent = t || ''; el.style.display = t ? 'block' : 'none'; }
+  var m = location.pathname.match(/\/shops\/(\d+)/), sid = m ? +m[1] : 0;
+  var box = document.getElementById('box');
+  var me = null; try { me = await LH.me(); } catch(e){}
+  var r;
+  try { r = await LH.api('GET', '/api/shops/' + sid); }
+  catch(e){ box.innerHTML = '<div class="card"><div class="empty">' + E(e.message) + '</div><a class="btn ghost block" href="/shops">返回全部商家</a></div>'; document.getElementById('hsub').textContent = ''; return; }
+  var s = r.item, rate = r.rate_cny_krw;
+  document.getElementById('hname').textContent = s.name;
+  document.getElementById('hsub').textContent = s.area + ' · ' + s.shop_type;
+  var gal = s.photos && s.photos.length ? '<div class="gallery">' + s.photos.map(function(p){
+      return '<a href="/api/shop-photos/' + p.id + '" target="_blank" rel="noopener"><img alt="' + E(s.name) + '" loading="lazy" src="/api/shop-photos/' + p.id + '"></a>';
+    }).join('') + '</div>' : '<div class="gallery-empty">商家还没有上传照片</div>';
+  var rating = s.rating_count ? (LH.starsHtml(s.rating_avg) + ' <b>' + s.rating_avg + '</b> <span>（' + s.rating_count + ' 条评价）</span>') : '<span>暂无评价，欢迎写第一条</span>';
+  var price = LH.priceLine(s, rate);
+  box.innerHTML =
+    '<div class="card">' + gal +
+      '<div class="rating-row" style="margin-bottom:6px">' + rating + '</div>' +
+      '<div class="meta" style="margin-bottom:6px">' + (s.is_example ? '<span class="tag ex">示例</span>' : '') + (s.official ? '<span class="tag off">站方收录</span>' : '') + '<span class="tag">' + E(s.shop_type) + '</span><span>' + E(s.area) + '</span></div>' +
+      '<p style="margin:8px 0;line-height:1.7;white-space:pre-wrap">' + E(s.description) + '</p>' +
+    '</div>' +
+    '<div class="card"><h2>💰 价格</h2>' +
+      (price ? '<div class="price-big">' + E(price) + '</div>' : '<div class="tip" style="margin:0">暂未填写人均价格</div>') +
+      (s.price_note ? '<div class="tip" style="margin-top:4px">' + E(s.price_note) + '</div>' : '') +
+      (s.menu && s.menu.length ? '<div style="margin-top:8px;font-weight:600">菜单 / 价目表</div>' + LH.menuHtml(s.menu, rate) : '') +
+      (rate ? '<div class="tip">人民币为按站内手动汇率估算，实际以店内韩元价格为准。</div>' : '') +
+    '</div>' +
+    '<div class="card"><h2>📍 地址</h2>' + (s.address ? LH.locHtml(s, {targetType: 'shop'}) : '<div class="tip" style="margin:0">暂未填写地址</div>') + '</div>' +
+    '<div class="card" id="revcard"><h2>⭐ 用户评价</h2><div id="revsum"></div><div id="revlist">加载中…</div></div>' +
+    '<div class="card" id="formcard"><h2>✍️ 写评价</h2><div id="formbox"></div></div>';
+  LH.bindShopExtras(box, {onShare: function(b){
+    LH.share({title: '推荐店铺：' + s.name, text: '旅韩助手上的店铺推荐', url: location.origin + '/shops/' + s.id, targetType: 'shop', targetId: String(s.id)});
+  }});
+
+  var ST = {pending: '审核中', approved: '已公开', rejected: '未通过'};
+  async function loadReviews(){
+    var d = await LH.api('GET', '/api/shop-reviews?kind=rec&shop_id=' + sid);
+    document.getElementById('revsum').innerHTML = d.rating_count ?
+      '<div class="rating-row" style="margin-bottom:6px"><b style="font-size:26px;color:var(--ink)">' + d.rating_avg + '</b>' + LH.starsHtml(d.rating_avg) + '<span>' + d.rating_count + ' 条评价</span></div>' : '';
+    document.getElementById('revlist').innerHTML = (d.items || []).map(function(it){
+      return '<div class="rv"><div class="rvh"><span>' + LH.starsHtml(it.stars) + ' ' + E(it.author) + '</span><span>' + E(it.time || '') + '</span></div>' +
+        '<div class="rvb">' + E(it.body) + '</div>' +
+        (it.has_photo ? '<a href="' + E(it.photo) + '" target="_blank" rel="noopener"><img loading="lazy" alt="评价照片" src="' + E(it.photo_thumb) + '"></a>' : '') + '</div>';
+    }).join('') || '<div class="empty">还没有公开的评价</div>';
+    renderForm(d.mine);
+  }
+  function renderForm(mine){
+    var fb = document.getElementById('formbox');
+    if (!me || !me.user){ fb.innerHTML = '<a class="btn primary block" href="/login?next=' + encodeURIComponent(location.pathname) + '">登录后写评价</a>'; return; }
+    var cur = mine ? mine.stars : 0;
+    fb.innerHTML =
+      (mine ? '<div class="tip" style="margin:0 0 8px">你的评价：<span class="pill ' + E(mine.status) + '">' + E(ST[mine.status] || mine.status) + '</span>' + (mine.status === 'approved' && mine.hidden ? ' <span class="pill rejected">已隐藏</span>' : '') + ' 再次提交会覆盖原评价，并重新审核。</div>' : '') +
+      '<div class="tip" style="margin:0">打分</div>' +
+      '<div class="starpick" id="sp">' + [1,2,3,4,5].map(function(n){ return '<button type="button" data-n="' + n + '" aria-label="' + n + ' 星">★</button>'; }).join('') + '</div>' +
+      '<textarea class="f" id="rbody" maxlength="200" rows="4" placeholder="说说真实体验（4–200 字，不要写网址、电话或微信）" style="min-height:90px">' + (mine ? E(mine.body) : '') + '</textarea>' +
+      '<label class="btn ghost sm" style="margin-top:8px;display:inline-block">📷 添加照片（选填，1 张）<input type="file" id="rphoto" accept="image/jpeg,image/png,image/webp" style="display:none"></label> <span class="tip" id="rphn"></span>' +
+      '<button class="btn primary block" type="button" id="rsub" style="margin-top:10px">提交评价</button>' +
+      '<div class="tip">评价提交后由管理员审核，通过后公开。每人每家店一条，可修改；请勿刷评或发广告。</div>';
+    function paint(){ fb.querySelectorAll('#sp button').forEach(function(b){ b.className = (+b.dataset.n <= cur) ? 'on' : ''; }); }
+    fb.querySelectorAll('#sp button').forEach(function(b){ b.onclick = function(){ cur = +b.dataset.n; paint(); }; });
+    paint();
+    document.getElementById('rphoto').onchange = function(){ var f = this.files[0]; document.getElementById('rphn').textContent = f ? ('已选：' + f.name) : ''; };
+    document.getElementById('rsub').onclick = async function(){
+      show(err, ''); show(ok, '');
+      if (!cur){ show(err, '请先点星星打分（1–5 星）'); return; }
+      var btn = this; btn.disabled = true;
+      try {
+        var fd = new FormData();
+        fd.append('kind', 'rec'); fd.append('shop_id', String(sid)); fd.append('stars', String(cur));
+        fd.append('body', document.getElementById('rbody').value);
+        var f = document.getElementById('rphoto').files[0];
+        if (f){ var c = await LH.compress(f); fd.append('photo', c, 'review.jpg'); }
+        var res = await LH.api('POST', '/api/shop-reviews', fd);
+        show(ok, res.message || '已提交，审核后显示');
+        await loadReviews();
+      } catch(e){ show(err, e.message); }
+      btn.disabled = false;
+    };
+  }
+  try { await loadReviews(); } catch(e){ document.getElementById('revlist').innerHTML = '<p class="tip">' + E(e.message) + '</p>'; }
+})();
+</script>
+<script src="/static/pwa.js" defer></script>
+</body>
+</html>

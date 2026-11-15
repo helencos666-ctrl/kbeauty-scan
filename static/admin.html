@@ -34,7 +34,7 @@
       <div class="row" style="justify-content:space-between"><b id="stats">…</b><button class="btn sm gray" id="alogout">退出后台</button></div>
     </div>
     <div class="boards" id="tabs">
-      <button data-t="users" class="on">用户/会员</button><button data-t="reports">举报</button><button data-t="posts">帖子</button><button data-t="review">审核</button><button data-t="chicken">代点</button><button data-t="promo">推广统计</button><button data-t="settings">设置</button><button data-t="friends">交友</button><button data-t="idv">实名核验</button><button data-t="opening">开业活动</button>
+      <button data-t="users" class="on">用户/会员</button><button data-t="reports">举报</button><button data-t="posts">帖子</button><button data-t="review">审核</button><button data-t="merchants">商家/评价</button><button data-t="chicken">代点</button><button data-t="promo">推广统计</button><button data-t="settings">设置</button><button data-t="friends">交友</button><button data-t="idv">实名核验</button><button data-t="opening">开业活动</button>
     </div>
     <div class="card" id="t-users">
       <div class="row"><input class="f" id="us" placeholder="搜索编号/昵称/手机号/邮箱" style="flex:1"><button class="btn primary" id="usgo">搜索</button></div>
@@ -49,28 +49,38 @@
         <p class="tip" style="margin-top:0">用户提交的店铺推荐和避雷经验。通过后公开，并向提交人发放 10 旅行豆；拒绝后仅提交人可见理由。简介不得含网址、电话或联系方式。</p>
         <div id="shoplist"></div>
       </div>
+      <div class="card"><p class="tip" style="margin:0">商家资料（照片、地址、价格、菜单）和用户评价审核在「商家/评价」标签里。</p></div>
+    </div>
+    <div id="t-merchants" style="display:none">
       <div class="card">
-        <h2>已公开推荐店铺（菜单 / 地址）</h2>
-        <p class="tip" style="margin-top:0">可补充菜单价格（韩元）和地址。地址会用于复制和打开 Naver / Kakao / Google 地图搜索，不使用地图 API 密钥。</p>
-        <div id="shoppub"></div>
-      </div>
-      <div class="card">
-        <h2>店铺评价</h2>
-        <p class="tip" style="margin-top:0">用户对推荐店铺和炸鸡店铺的评价。隐藏后前台不再展示，不删除记录。</p>
-        <div class="row" style="gap:8px;margin-bottom:8px">
-          <select class="f" id="revkind" style="flex:1;min-width:120px">
+        <h2>评价审核 <span id="revpend" class="pill pending" style="display:none"></span></h2>
+        <p class="tip" style="margin-top:0">用户评价先审后发：通过后才在前台显示并计入评分。拒绝=不公开（作者可见“未通过”）；隐藏=已通过但暂不显示；删除不可恢复。</p>
+        <div class="row" style="gap:8px;margin-bottom:8px;flex-wrap:wrap">
+          <select class="f" id="revstatus" style="flex:1;min-width:110px">
+            <option value="pending">待审核</option>
+            <option value="approved">已通过</option>
+            <option value="rejected">未通过</option>
+            <option value="">全部</option>
+          </select>
+          <select class="f" id="revkind" style="flex:1;min-width:110px">
             <option value="">全部类型</option>
             <option value="rec">推荐店铺</option>
             <option value="chicken">炸鸡店铺</option>
           </select>
-          <select class="f" id="revhid" style="flex:1;min-width:120px">
-            <option value="all">全部</option>
+          <select class="f" id="revhid" style="flex:1;min-width:110px">
+            <option value="all">显示/隐藏都看</option>
             <option value="0">仅显示中</option>
             <option value="1">仅已隐藏</option>
           </select>
           <button class="btn primary" id="revgo">刷新</button>
         </div>
         <div id="revlist"></div>
+      </div>
+      <div class="card">
+        <div class="row" style="justify-content:space-between;align-items:center"><h2 style="margin:0">商家资料</h2><button class="btn sm primary" id="madd">＋ 新增商家</button></div>
+        <p class="tip">每家最多 8 张照片（第一张是封面，服务器会压缩并去掉定位信息）。价格填人均韩元区间，菜单填具体价目。勾选“示例”的商家前台会标“示例”，正式上线前请删掉或改成真实资料。</p>
+        <div id="mform" style="display:none"></div>
+        <div id="mlist"></div>
       </div>
     </div>
     <div id="t-friends" style="display:none">
@@ -199,14 +209,14 @@ document.getElementById('alogout').onclick = async function(){ await call('POST'
 document.querySelectorAll('#tabs button').forEach(function(b){
   b.onclick = function(){
     document.querySelectorAll('#tabs button').forEach(function(x){ x.className = x === b ? 'on' : ''; document.getElementById('t-' + x.dataset.t).style.display = x === b ? 'block' : 'none'; });
-    ({users: users, reports: reports, posts: function(){ posts(true); }, promo: promo, review: review, settings: settings, friends: friends, chicken: chickenAdmin, idv: idvQueue, opening: openingPromo})[b.dataset.t]();
+    ({users: users, reports: reports, posts: function(){ posts(true); }, promo: promo, review: review, settings: settings, friends: friends, chicken: chickenAdmin, idv: idvQueue, opening: openingPromo, merchants: function(){ loadReviews(); merchants(); }})[b.dataset.t]();
   };
 });
 async function boot(){
   var s;
   try { s = await LH.api('GET', '/api/admin/overview'); } catch(e){ if (e.status === 401) return showLogin(); return msg(e.message, true); }
   document.getElementById('loginBox').style.display = 'none'; document.getElementById('panel').style.display = 'block';
-  document.getElementById('stats').textContent = '用户 ' + s.users + ' · 会员 ' + s.members + ' · 高级 ' + s.premium + ' · 商家 ' + s.merchants + ' · 待审核 ' + s.pending + ' · 待审店铺 ' + (s.shop_pending || 0) + ' · 帖子 ' + s.posts + ' · 评论 ' + s.comments + ' · 待处理举报 ' + s.reports + ' · 交友资料 ' + s.profiles + ' · 7天可疑私信 ' + s.flagged7 + ' · 数据库 ' + s.db_mb + 'MB/1024MB';
+  document.getElementById('stats').textContent = '用户 ' + s.users + ' · 会员 ' + s.members + ' · 高级 ' + s.premium + ' · 商家 ' + s.merchants + ' · 待审核 ' + s.pending + ' · 待审店铺 ' + (s.shop_pending || 0) + ' · 待审评价 ' + (s.review_pending || 0) + ' · 帖子 ' + s.posts + ' · 评论 ' + s.comments + ' · 待处理举报 ' + s.reports + ' · 交友资料 ' + s.profiles + ' · 7天可疑私信 ' + s.flagged7 + ' · 数据库 ' + s.db_mb + 'MB/1024MB';
   users();
 }
 async function users(){
@@ -416,34 +426,107 @@ async function review(){
     var body=editShopExtras(x); if(!body) return;
     await call('POST', '/api/admin/shop-recs/' + x.id + '/extras', body); msg('已保存菜单/地址', false); review();
   }; });
-  var pub = await call('GET', '/api/admin/shop-recs?status=approved');
-  document.getElementById('shoppub').innerHTML = pub.items.length ? pub.items.map(function(x){
-    return '<div class="cmt"><div class="who">#' + x.id + ' ' + E(x.name) + ' · ' + E(x.area) + ' · ' + E(x.shop_type) + '</div>' +
-      shopExtraLine(x) + '<button class="btn sm ghost" data-pubex="' + x.id + '">编辑菜单/地址</button></div>';
-  }).join('') : '<div class="empty">还没有已公开的推荐店铺</div>';
-  document.querySelectorAll('#shoppub [data-pubex]').forEach(function(b){ b.onclick = async function(){
-    var x = pub.items.find(function(z){ return String(z.id)===b.dataset.pubex; }); if(!x) return;
-    var body=editShopExtras(x); if(!body) return;
-    await call('POST', '/api/admin/shop-recs/' + x.id + '/extras', body); msg('已保存菜单/地址', false); review();
-  }; });
-  await loadReviews();
 }
 async function loadReviews(){
-  var kind=document.getElementById('revkind').value, hid=document.getElementById('revhid').value;
-  var q='/api/admin/shop-reviews?';
+  var st=document.getElementById('revstatus').value, kind=document.getElementById('revkind').value, hid=document.getElementById('revhid').value;
+  var q='/api/admin/shop-reviews?status='+encodeURIComponent(st)+'&';
   if(kind) q+='kind='+encodeURIComponent(kind)+'&';
-  if(hid) q+='hidden='+encodeURIComponent(hid);
+  if(hid && hid!=='all') q+='hidden='+encodeURIComponent(hid);
   var d=await call('GET', q);
-  var KN={rec:'推荐店铺', chicken:'炸鸡'};
+  var pe=document.getElementById('revpend'); pe.textContent=d.pending+' 条待审'; pe.style.display=d.pending?'inline-block':'none';
+  var KN={rec:'推荐店铺', chicken:'炸鸡'}, SN={pending:'待审核', approved:'已通过', rejected:'未通过'};
   document.getElementById('revlist').innerHTML = d.items.length ? d.items.map(function(x){
-    return '<div class="cmt"><div class="who">#'+x.id+' · '+E(KN[x.shop_kind]||x.shop_kind)+' #'+x.shop_id+' · ★'+x.stars+(x.hidden?' <b style="color:#c62828">已隐藏</b>':'')+'</div>'+
-      '<div class="ct" style="color:var(--sub)">'+E(x.author||'')+'（编号 '+(x.member_no||'')+'）· '+E(x.time||'')+'</div>'+
-      '<div class="ct">'+E(x.body)+'</div>'+
-      '<button class="btn sm '+(x.hidden?'primary':'gray')+'" data-rvid="'+x.id+'" data-rvact="'+(x.hidden?'unhide':'hide')+'">'+(x.hidden?'取消隐藏':'隐藏')+'</button></div>';
-  }).join('') : '<div class="empty">没有评价</div>';
+    var btns=[];
+    if(x.status!=='approved') btns.push('<button class="btn sm primary" data-rvid="'+x.id+'" data-rvact="approve">通过</button>');
+    if(x.status!=='rejected') btns.push('<button class="btn sm gray" data-rvid="'+x.id+'" data-rvact="reject">拒绝</button>');
+    if(x.status==='approved') btns.push('<button class="btn sm '+(x.hidden?'primary':'gray')+'" data-rvid="'+x.id+'" data-rvact="'+(x.hidden?'unhide':'hide')+'">'+(x.hidden?'取消隐藏':'隐藏')+'</button>');
+    btns.push('<button class="btn sm gray" style="color:#c62828" data-rvid="'+x.id+'" data-rvact="delete">删除</button>');
+    return '<div class="rv"><div class="rvh"><span><span class="pill '+E(x.status)+'">'+E(SN[x.status]||x.status)+'</span>'+(x.hidden?' <span class="pill rejected">已隐藏</span>':'')+' #'+x.id+' · '+E(KN[x.shop_kind]||x.shop_kind)+' · '+E(x.shop_name||('#'+x.shop_id))+'</span><span>'+E(x.time||'')+'</span></div>'+
+      '<div style="margin-top:4px">'+LH.starsHtml(x.stars)+' <span class="tip">'+E(x.author||'')+'（编号 '+(x.member_no||'')+'）</span></div>'+
+      '<div class="rvb">'+E(x.body)+'</div>'+
+      (x.has_photo?'<a href="'+E(x.photo)+'" target="_blank" rel="noopener"><img alt="" src="'+E(x.photo_thumb)+'"></a>':'')+
+      '<div class="row" style="gap:6px;margin-top:8px;flex-wrap:wrap">'+btns.join('')+'</div></div>';
+  }).join('') : '<div class="empty">没有符合条件的评价</div>';
   document.querySelectorAll('#revlist [data-rvid]').forEach(function(b){ b.onclick=async function(){
+    if(b.dataset.rvact==='delete' && !confirm('删除这条评价？删除后无法恢复。')) return;
     await call('POST','/api/admin/shop-reviews/'+b.dataset.rvid,{action:b.dataset.rvact}); loadReviews();
   }; });
+}
+var M_AREAS=['明洞','弘大','江南','东大门','梨泰院','圣水','其他'], M_TYPES=['美食','美妆','购物','咖啡','避雷经验','其他'];
+function menuToText(menu){ return (menu||[]).map(function(m){return m.name+','+m.price_krw;}).join(';'); }
+function textToMenu(t){ return (t||'').split(/[;；\n]/).map(function(line,i){ var p=line.split(/[,，]/); return {id:'m'+(i+1), name:(p[0]||'').trim(), price_krw:parseInt((p[1]||'').replace(/[^\d]/g,''),10)||0}; }).filter(function(m){return m.name && m.price_krw>0;}); }
+function merchantForm(x){
+  x = x || {};
+  var opt=function(arr,v){ return arr.map(function(a){ return '<option'+(a===v?' selected':'')+'>'+E(a)+'</option>'; }).join(''); };
+  return '<div class="card" style="background:#fff8fa;box-shadow:none;border:1px solid var(--line)">'+
+    '<b>'+(x.id?('编辑 #'+x.id+' '+E(x.name)):'新增商家')+'</b>'+
+    '<input class="f" id="mf_name" maxlength="40" placeholder="商家名称" value="'+E(x.name||'')+'" style="margin-top:8px">'+
+    '<div class="row" style="gap:8px;margin-top:8px"><select class="f" id="mf_area" style="flex:1">'+opt(M_AREAS,x.area||'明洞')+'</select><select class="f" id="mf_type" style="flex:1">'+opt(M_TYPES,x.shop_type||'美食')+'</select></div>'+
+    '<textarea class="f" id="mf_desc" maxlength="500" rows="3" placeholder="简介（不要写网址、电话、微信）" style="margin-top:8px">'+E(x.description||'')+'</textarea>'+
+    '<input class="f" id="mf_addr" maxlength="120" placeholder="地址（韩文地址最准，例：서울 중구 명동길 14）" value="'+E(x.address||'')+'" style="margin-top:8px">'+
+    '<div class="row" style="gap:8px;margin-top:8px;align-items:center"><span class="tip" style="margin:0">人均 ₩</span><input class="f" id="mf_pmin" inputmode="numeric" placeholder="最低" value="'+(x.price_min!=null?x.price_min:'')+'" style="flex:1"><span>–</span><input class="f" id="mf_pmax" inputmode="numeric" placeholder="最高" value="'+(x.price_max!=null?x.price_max:'')+'" style="flex:1"></div>'+
+    '<input class="f" id="mf_pnote" maxlength="60" placeholder="价格说明（选填，例：含饮料；套餐另计）" value="'+E(x.price_note||'')+'" style="margin-top:8px">'+
+    '<textarea class="f" id="mf_menu" rows="2" placeholder="菜单/价目表：名称,价格韩元;名称,价格韩元" style="margin-top:8px">'+E(menuToText(x.menu))+'</textarea>'+
+    '<label class="tip" style="display:block"><input type="checkbox" id="mf_ex"'+(x.is_example?' checked':'')+'> 示例（前台标“示例”）</label>'+
+    '<div class="row" style="gap:8px;margin-top:8px"><button class="btn primary" id="mf_save" style="flex:1">保存</button><button class="btn gray" id="mf_cancel">取消</button></div></div>';
+}
+function readMerchantForm(){
+  var v=function(id){ return document.getElementById(id).value; };
+  return {name:v('mf_name'), area:v('mf_area'), type:v('mf_type'), description:v('mf_desc'), address:v('mf_addr'),
+          price_min:v('mf_pmin'), price_max:v('mf_pmax'), price_note:v('mf_pnote'), menu:textToMenu(v('mf_menu')),
+          is_example:document.getElementById('mf_ex').checked};
+}
+function openMerchantForm(x, host){
+  host.innerHTML = merchantForm(x); host.style.display='block';
+  document.getElementById('mf_cancel').onclick=function(){ host.innerHTML=''; host.style.display='none'; };
+  document.getElementById('mf_save').onclick=async function(){
+    var body=readMerchantForm();
+    if(x && x.id) await call('POST','/api/admin/shop-recs/'+x.id+'/extras', body);
+    else await call('POST','/api/admin/merchants', body);
+    msg('商家资料已保存', false); merchants();
+  };
+}
+async function merchants(){
+  var d = await call('GET','/api/admin/merchants?status=approved');
+  document.getElementById('mlist').innerHTML = d.items.length ? d.items.map(function(x){
+    var cover = x.cover ? '<img alt="" src="/api/admin/shop-photos/'+x.cover+'/img?t=1">' : '🏪';
+    return '<div class="mcard" style="flex-direction:column" id="mc'+x.id+'"><div style="display:flex;gap:12px">'+
+      '<div class="mimg">'+cover+'</div><div class="mbody">'+
+      '<h3>#'+x.id+' '+E(x.name)+'</h3>'+
+      '<div class="mline">'+(x.is_example?'<span class="tag ex">示例</span> ':'')+(x.official?'<span class="tag off">站方收录</span> ':'')+E(x.area)+' · '+E(x.shop_type)+'</div>'+
+      '<div class="mline">'+(x.price_text?('人均 '+E(x.price_text)):'未填价格')+' · 菜单 '+(x.menu||[]).length+' 项 · 照片 '+(x.photos||[]).length+'/8</div>'+
+      '<div class="mline">'+(x.address?E(x.address):'未填地址')+'</div>'+
+      '<div class="mline">'+(x.rating_count?('★ '+x.rating_avg+'（'+x.rating_count+' 条）'):'暂无公开评价')+(x.review_pending?(' · <b style="color:#8a5300">'+x.review_pending+' 条待审</b>'):'')+'</div>'+
+      '</div></div>'+
+      '<div class="row" style="gap:6px;margin-top:8px;flex-wrap:wrap"><button class="btn sm ghost" data-medit="'+x.id+'">编辑资料/价格</button><button class="btn sm ghost" data-mph="'+x.id+'">照片管理</button><a class="btn sm gray" href="/shops/'+x.id+'" target="_blank">前台查看</a></div>'+
+      '<div id="mx'+x.id+'"></div></div>';
+  }).join('') : '<div class="empty">还没有已公开的商家</div>';
+  document.querySelectorAll('#mlist [data-medit]').forEach(function(b){ b.onclick=function(){
+    var x=d.items.find(function(z){return String(z.id)===b.dataset.medit;}); openMerchantForm(x, document.getElementById('mx'+x.id));
+  }; });
+  document.querySelectorAll('#mlist [data-mph]').forEach(function(b){ b.onclick=function(){ photoPanel(+b.dataset.mph); }; });
+}
+async function photoPanel(sid){
+  var host=document.getElementById('mx'+sid);
+  var d=await call('GET','/api/admin/shop-photos?kind=rec&shop_id='+sid);
+  host.innerHTML='<div class="card" style="background:#fff8fa;box-shadow:none;border:1px solid var(--line);margin-top:8px"><b>照片 '+d.items.length+'/'+d.max+'</b>'+
+    '<div class="ph-row">'+d.items.map(function(p,i){
+      return '<div class="ph"><img alt="" src="/api/admin/shop-photos/'+p.id+'/img?t=1">'+(i===0?'<span class="pill approved" style="position:absolute;left:4px;top:4px">封面</span>':'<button class="btn sm ghost" data-pcov="'+p.id+'">设为封面</button>')+'<button class="btn sm gray" data-pdel="'+p.id+'">删除</button></div>';
+    }).join('')+'</div>'+
+    (d.items.length<d.max?'<label class="btn sm primary">＋ 上传照片（可多选）<input type="file" id="pup'+sid+'" accept="image/jpeg,image/png,image/webp" multiple style="display:none"></label>':'<div class="tip">已达上限，删掉旧照片才能再传。</div>')+
+    ' <button class="btn sm gray" data-pclose="1">收起</button></div>';
+  host.querySelector('[data-pclose]').onclick=function(){ host.innerHTML=''; merchants(); };
+  host.querySelectorAll('[data-pdel]').forEach(function(b){ b.onclick=async function(){ if(!confirm('删除这张照片？')) return; await call('POST','/api/admin/shop-photos/'+b.dataset.pdel,{action:'delete'}); photoPanel(sid); }; });
+  host.querySelectorAll('[data-pcov]').forEach(function(b){ b.onclick=async function(){ await call('POST','/api/admin/shop-photos/'+b.dataset.pcov,{action:'cover'}); photoPanel(sid); }; });
+  var up=document.getElementById('pup'+sid);
+  if(up) up.onchange=async function(){
+    var files=Array.prototype.slice.call(up.files||[]); if(!files.length) return;
+    var fd=new FormData(); fd.append('kind','rec'); fd.append('shop_id',String(sid));
+    for (var i=0;i<files.length;i++){ fd.append('images', await LH.compress(files[i]), 'p'+i+'.jpg'); }
+    msg('上传中…', false);
+    try { await call('POST','/api/admin/shop-photos', fd); msg('照片已上传', false); } catch(e){}
+    photoPanel(sid);
+  };
 }
 async function friends(){
   var d = await call('GET', '/api/admin/friends?s=' + encodeURIComponent(document.getElementById('fs').value));
@@ -587,6 +670,8 @@ async function chickenAdmin(){
 }
 document.getElementById('ckgo').onclick = chickenAdmin;
 document.getElementById('revgo').onclick = loadReviews;
+document.getElementById('revstatus').onchange = loadReviews;
+document.getElementById('madd').onclick = function(){ openMerchantForm(null, document.getElementById('mform')); };
 document.getElementById('ckadd').onclick = function(){
   var name=prompt('店铺名称'); if(!name) return;
   var area=prompt('地区','其他')||'其他';

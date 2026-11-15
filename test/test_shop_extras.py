@@ -92,6 +92,14 @@ def main():
             "nickname": "评价用户", "agree": True
         }, headers=H)
         check("register", r.status_code == 200, r.text)
+        adm = TestClient(app)
+        r = adm.post("/api/admin/login", json={"password": "test-admin-pw-1234"}, headers=H)
+        check("admin login (early)", r.status_code == 200, r.text)
+
+        def approve_pending():
+            # 评价先审后发：把待审核的评价全部通过
+            for it in adm.get("/api/admin/shop-reviews?status=pending").json()["items"]:
+                adm.post("/api/admin/shop-reviews/%s" % it["id"], json={"action": "approve"}, headers=H)
 
         r = cli.post("/api/shop-reviews", json={"kind": "chicken", "shop_id": ck_id, "stars": 6, "body": "味道不错值得再来"}, headers=H)
         check("stars out of range", r.status_code == 400, r.text)
@@ -111,6 +119,7 @@ def main():
         check("submit review", r.status_code == 200 and r.json().get("updated") is False, r.text)
         item = r.json()["item"]
         check("stored body keeps brackets as data", "<script>alert(1)</script>" in item["body"], item)
+        approve_pending()
         r = cli.get("/api/shop-reviews?kind=chicken&shop_id=%s" % ck_id)
         js = r.json()
         check("review listed", js["rating_count"] == 1 and js["rating_avg"] == 5.0, js)
@@ -121,6 +130,7 @@ def main():
             "body": "第二次来，味道一般般吧。"
         }, headers=H)
         check("update own review", r.status_code == 200 and r.json().get("updated") is True, r.text)
+        approve_pending()
         js = cli.get("/api/shop-reviews?kind=chicken&shop_id=%s" % ck_id).json()
         check("updated stars and single review", js["rating_count"] == 1 and js["rating_avg"] == 3.0 and js["items"][0]["stars"] == 3, js)
 
@@ -133,6 +143,7 @@ def main():
         check("second user", r.status_code == 200, r.text)
         r = cli2.post("/api/shop-reviews", json={"kind": "chicken", "shop_id": ck_id, "stars": 5, "body": "我觉得还不错再来一次"}, headers=H)
         check("second review", r.status_code == 200, r.text)
+        approve_pending()
         js = cli.get("/api/shop-reviews?kind=chicken&shop_id=%s" % ck_id).json()
         check("average 4.0", js["rating_count"] == 2 and js["rating_avg"] == 4.0, js)
 
@@ -153,9 +164,6 @@ def main():
 
         r = cli.get("/api/admin/shop-recs?status=pending")
         check("admin extras requires admin", r.status_code == 401, r.text)
-        adm = TestClient(app)
-        r = adm.post("/api/admin/login", json={"password": "test-admin-pw-1234"}, headers=H)
-        check("admin login", r.status_code == 200, r.text)
         r = adm.post("/api/admin/shop-recs/%s" % sid, json={"action": "approve"}, headers=H)
         check("approve rec", r.status_code == 200, r.text)
         r = adm.post("/api/admin/shop-recs/%s/extras" % sid, json={
@@ -169,6 +177,7 @@ def main():
         check("public rec map links", item["map_links"]["google"].startswith("https://www.google.com/maps/search"), item)
         r = cli.post("/api/shop-reviews", json={"kind": "rec", "shop_id": sid, "stars": 4, "body": "冷面很爽口，还会再去。"}, headers=H)
         check("review rec shop", r.status_code == 200, r.text)
+        approve_pending()
         pub = cli.get("/api/shops").json()
         item = next(x for x in pub["items"] if x["id"] == sid)
         check("rec rating attached", item["rating_count"] == 1 and item["rating_avg"] == 4.0, item)
@@ -200,7 +209,7 @@ def main():
 
         # admin page mentions reviews
         html = adm.get("/admin").text
-        check("admin has review tools", "店铺评价" in html and "编辑菜单/地址" in html and "奋韩" not in html)
+        check("admin has review tools", "评价审核" in html and "编辑菜单/地址" in html and "照片管理" in html and "奋韩" not in html)
 
         for rel in ("shop_extras.py", "points.py", "chicken.py", "static/shops.html", "static/chicken.html", "static/admin.html", "static/community.js"):
             txt = Path(ROOT, rel).read_text(encoding="utf-8")
