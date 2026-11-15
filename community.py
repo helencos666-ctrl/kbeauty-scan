@@ -17,31 +17,35 @@ from PIL import Image, ImageOps
 BASE = os.path.dirname(os.path.abspath(__file__))
 STATIC = os.path.join(BASE, "static")
 
-BOARDS = {
-    "pit": "踩坑经验",
-    "group": "组团同行",
-    "visa": "签证经验",
-    "study": "留学学校",
-    "friends": "交友",
-    "hotel": "酒店住宿",
-    "car": "租车包车",
-    "clinic": "医美皮肤科",
-    "news": "资讯",
-    "rent": "租房",
-    "used": "二手闲置",
-    "jobs": "招聘求职",
+BOARDS = {   # 键名（pit/group/...）已存库，不要改；只改右边显示名
+    "pit": "踩坑避雷",
+    "group": "结伴同行",
+    "visa": "签证问答",
+    "study": "留学打听",
+    "friends": "旅韩交友",
+    "hotel": "住宿推荐",
+    "car": "包车用车",
+    "clinic": "皮肤管理·医美",
+    "news": "出行提醒",
+    "rent": "租房找房",
+    "used": "闲置转让",
+    "jobs": "工作机会",
 }
-# “全部版块”页左侧分类（右侧为子版块）。可直接改这里调整分类
+# “全部频道”页的分组。可直接改这里调整分组
 BOARD_CATEGORIES = [
-    {"key": "travel", "name": "旅行", "icon": "✈️", "boards": ["pit", "group", "news"]},
-    {"key": "visa", "name": "签证留学", "icon": "🎓", "boards": ["visa", "study"]},
-    {"key": "life", "name": "在韩生活", "icon": "🏠", "boards": ["rent", "used", "jobs"]},
-    {"key": "friends", "name": "交友相亲", "icon": "💞", "boards": ["friends"]},
-    {"key": "biz", "name": "商家服务", "icon": "🏪", "boards": ["hotel", "car", "clinic"]},
+    {"key": "travel", "name": "旅途路上", "icon": "🧭", "boards": ["pit", "group", "news"]},
+    {"key": "visa", "name": "签证·留学", "icon": "🛂", "boards": ["visa", "study"]},
+    {"key": "life", "name": "住在韩国", "icon": "🏡", "boards": ["rent", "used", "jobs"]},
+    {"key": "friends", "name": "旅韩交友", "icon": "💗", "boards": ["friends"]},
+    {"key": "biz", "name": "商家专区", "icon": "🏷️", "boards": ["hotel", "car", "clinic"]},
 ]
-BOARD_ICONS = {"pit": "⚠️", "group": "🧳", "news": "📰", "visa": "🛂", "study": "🎓", "rent": "🏠", "used": "♻️",
-               "jobs": "💼", "friends": "💞", "hotel": "🏨", "car": "🚗", "clinic": "🏥"}
-NEWS_BOARDS = ["news", "visa", "study", "pit"]   # “资讯”标签包含的版块
+BOARD_ICONS = {"pit": "🚧", "group": "🧳", "news": "📣", "visa": "🛂", "study": "🎓", "rent": "🔑", "used": "♻️",
+               "jobs": "💼", "friends": "💗", "hotel": "🛏️", "car": "🚐", "clinic": "✨"}
+BOARD_DESCS = {"pit": "换钱、打车、购物被坑的真实经历", "group": "找人一起逛、一起拼车、AA 出行", "news": "天气、交通、闭馆等出行变化",
+               "visa": "各类签证、K-ETA 的个人经验", "study": "语学院、大学、生活费怎么选", "rent": "看房、合同、押金经验",
+               "used": "回国前转让、二手好物", "jobs": "合法打工与求职信息", "friends": "认识新朋友、找搭子、语言交换",
+               "hotel": "商家发布的住宿信息", "car": "商家发布的包车、租车信息", "clinic": "合法医疗机构发布的皮肤管理信息"}
+NEWS_BOARDS = ["news", "visa", "study", "pit"]   # “实用干货”标签包含的频道
 HOT_HOURS, HOT_FALLBACK_DAYS = 24, 7             # 24 小时热门；24 小时内没有帖子时退回近 7 天
 RECOMMEND_DAYS = 30
 MERCHANT_BOARDS = {"hotel", "car", "clinic"}   # 仅有效商家会员可发
@@ -712,7 +716,7 @@ def _post_out(r, full=False):
 def api_posts(req: Request, board: str = "", before: int = 0, limit_n: int = 20):
     limit_n = max(1, min(limit_n, 30))
     if board and board not in BOARDS:
-        raise HTTPException(400, "版块不存在")
+        raise HTTPException(400, "频道不存在")
     with db() as conn:
         u = current_user(conn, req)
         tier = u["tier"] if u else 0
@@ -740,14 +744,14 @@ FEED_TABS = ("recommend", "news", "hot", "latest", "follow")
 
 @router.get("/api/community/feed")
 def api_feed(req: Request, tab: str = "recommend", boards: str = "", offset: int = 0, limit_n: int = 20):
-    """首页信息流：推荐 / 资讯 / 24小时热门 / 最新 / 关注（关注=关注的用户 + 加入的版块）"""
+    """首页信息流：精选 / 实用干货 / 今日热议 / 刚发布 / 我关注的（关注=关注的用户 + 关注的频道）"""
     if tab not in FEED_TABS:
         raise HTTPException(400, "标签不存在")
     limit_n = max(1, min(limit_n, 30))
     offset = max(0, min(offset, 300))
     bl = [b for b in boards.split(",") if b][:12]
     if any(b not in BOARDS for b in bl):
-        raise HTTPException(400, "版块不存在")
+        raise HTTPException(400, "频道不存在")
     with db() as conn:
         u = current_user(conn, req)
         tier = u["tier"] if u else 0
@@ -805,9 +809,9 @@ def api_feed(req: Request, tab: str = "recommend", boards: str = "", offset: int
 
 @router.get("/api/community/boards")
 def api_boards(req: Request):
-    """全部版块：分类 + 子版块 + 当前用户已加入的版块（未配置数据库时也能返回分类）"""
+    """全部频道：分组 + 频道 + 当前用户已关注的频道（未配置数据库时也能返回分组）"""
     cats = [{"key": c["key"], "name": c["name"], "icon": c["icon"],
-             "boards": [{"key": b, "name": BOARDS[b], "icon": BOARD_ICONS.get(b, "📌"), "merchant": b in MERCHANT_BOARDS,
+             "boards": [{"key": b, "name": BOARDS[b], "icon": BOARD_ICONS.get(b, "📌"), "desc": BOARD_DESCS.get(b, ""), "merchant": b in MERCHANT_BOARDS,
                          "members_only": b in LOGIN_ONLY_BOARDS} for b in c["boards"]]} for c in BOARD_CATEGORIES]
     joined, counts = [], {}
     if _db_url():
@@ -827,7 +831,7 @@ def api_boards(req: Request):
 def api_board_join(req: Request, board: str):
     csrf(req)
     if board not in BOARDS:
-        raise HTTPException(404, "版块不存在")
+        raise HTTPException(404, "频道不存在")
     with db() as conn:
         u = need_user(conn, req)
         limit("bj:" + str(u["id"]), 60, 600)
@@ -873,9 +877,9 @@ def api_post(req: Request, pid: int):
         if not r or (r["status"] != "published" and not (u and u["id"] == r["user_id"])):
             raise HTTPException(404, "帖子不存在或已删除")
         if r["board"] in LOGIN_ONLY_BOARDS and not u:
-            raise HTTPException(401, "交友版需登录并开通会员后查看")
+            raise HTTPException(401, "旅韩交友频道需登录并开通会员后查看")
         if r["board"] in LOGIN_ONLY_BOARDS and u["tier"] < 1:
-            raise HTTPException(403, "交友版需开通会员（¥%s）后查看" % price(conn, "price_t1"))
+            raise HTTPException(403, "旅韩交友频道需开通会员（¥%s）后查看" % price(conn, "price_t1"))
         imgs = q(conn, "SELECT id,width,height FROM c_images WHERE post_id=%s ORDER BY pos", (pid,))
         cms = q(conn, """SELECT c.id,c.body,c.created_at,c.user_id,au.nickname,(CASE WHEN au.merchant_until>now() THEN 3 ELSE au.tier END) AS tier FROM c_comments c
                          JOIN c_users au ON au.id=c.user_id
@@ -900,7 +904,7 @@ async def api_new_post(req: Request, board: str = Form(...), title: str = Form(.
                        images: list[UploadFile] = File(default=[])):
     csrf(req)
     if board not in BOARDS:
-        raise HTTPException(400, "请选择版块")
+        raise HTTPException(400, "请选择频道")
     title = clean_text(title, 40, "标题", 4)
     body = clean_text(body, 3000, "正文", 10)
     images = [f for f in (images or []) if f and f.filename]
@@ -915,7 +919,7 @@ async def api_new_post(req: Request, board: str = Form(...), title: str = Form(.
         status, quota_kind, note = "published", None, None
         if board in MERCHANT_BOARDS:
             if not u["merchant"]:
-                raise HTTPException(403, f"{BOARDS[board]}版块仅限商家会员发布（月付 ¥{st['price_m_month']} / 年付 ¥{st['price_m_year']}），详见会员页")
+                raise HTTPException(403, f"{BOARDS[board]}频道仅限商家会员发布（月付 ¥{st['price_m_month']} / 年付 ¥{st['price_m_year']}），详见会员页")
             mq = merchant_quota(conn, u)
             if mq["left"] > 0:
                 quota_kind = "quota"
@@ -943,7 +947,7 @@ async def api_new_post(req: Request, board: str = Form(...), title: str = Form(.
     if status == "pending":
         return {"ok": True, "id": row["id"], "pending": True,
                 "message": "你的帖子含有商业推广类内容（如酒店预订、租车包车、医美、联系方式、代办等），已提交管理员审核，审核通过后才会公开。"
-                           "酒店住宿、租车包车、医美皮肤科等商业信息请开通商家会员后在对应商家版块发布。"}
+                           "住宿、包车用车、皮肤管理·医美等商业信息请开通商家会员后在商家专区发布。"}
     return {"ok": True, "id": row["id"]}
 
 @router.delete("/api/community/posts/{pid}")
@@ -989,7 +993,7 @@ async def api_comment(req: Request, pid: int):
         if not p:
             raise HTTPException(404, "帖子不存在或已删除")
         if p["board"] in LOGIN_ONLY_BOARDS and u["tier"] < 2:
-            raise HTTPException(403, "交友版评论需开通高级会员（¥%s）" % price(conn, "price_t2"))
+            raise HTTPException(403, "旅韩交友频道评论需开通高级会员（¥%s）" % price(conn, "price_t2"))
         limit("cm:" + str(u["id"]), 10, 300, "评论太频繁，请稍后再试")
         r = q(conn, "INSERT INTO c_comments(post_id,user_id,body) VALUES (%s,%s,%s) RETURNING id", (pid, u["id"], body), one=True)
         q(conn, "UPDATE c_posts SET comment_count=(SELECT count(*) FROM c_comments WHERE post_id=%s AND NOT deleted) WHERE id=%s", (pid, pid))
@@ -1495,7 +1499,7 @@ async def api_admin_review(req: Request, pid: int):
         need_admin(conn, req)
         r = q(conn, "UPDATE c_posts SET status=%s, review_note=%s WHERE id=%s AND status='pending' RETURNING id",
               ("published" if act == "approve" else "rejected",
-               None if act == "approve" else (clean_text(d.get("reason") or "不符合发帖规则", 100, "理由")), pid), one=True)
+               None if act == "approve" else (clean_text(d.get("reason") or "不符合社区约定", 100, "理由")), pid), one=True)
         if not r:
             raise HTTPException(404, "该帖子不在待审核队列")
     return {"ok": True}
