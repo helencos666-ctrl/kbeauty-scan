@@ -256,12 +256,12 @@ BACK_PROMPT = """把下面这句韩语忠实地直译成简体中文，不要润
 async def card(request: Request):
     rate_limit(request, "card", per_min=10, per_day=80)
     body = await request.json()
-    zh = str(body.get("text", "")).strip()[:120]
+    zh = str(body.get("text", "")).strip()[:600]
     if not zh: raise HTTPException(400, "请先输入中文")
-    res, _ = await chat([{"role": "user", "content": CARD_PROMPT + zh}], max_tokens=400)
+    res, _ = await chat([{"role": "user", "content": CARD_PROMPT + zh}], max_tokens=1600)
     ko = str(res.get("ko", "")).strip()
     if not ko: raise HTTPException(502, "翻译失败，请重试")
-    back, _ = await chat([{"role": "user", "content": BACK_PROMPT + ko}], max_tokens=300)
+    back, _ = await chat([{"role": "user", "content": BACK_PROMPT + ko}], max_tokens=1200)
     return {"zh": zh, "ko": ko, "roman": str(res.get("roman", "")), "back": str(back.get("zh", ""))}
 
 # ================= 韩语朗读（edge-tts）=================
@@ -271,7 +271,7 @@ HANGUL = re.compile(r"[\uac00-\ud7a3]")
 
 @app.get("/api/tts")
 async def tts(request: Request, text: str = ""):
-    text = text.strip()[:150]
+    text = text.strip()[:700]
     if not text or not HANGUL.search(text): raise HTTPException(400, "只能朗读韩文")
     h = hashlib.sha1(text.encode()).hexdigest()
     path = os.path.join(TTS_DIR, h + ".mp3")
