@@ -2,7 +2,7 @@
   "id": "/",
   "name": "旅韩助手",
   "short_name": "旅韩助手",
-  "description": "旅韩助手（Korea Travel Assistant）：韩妆拍照识别、地铁路线、韩文沟通卡与韩国免费景点指南，服务在韩中国游客。",
+  "description": "旅韩助手（Korea Travel Assistant）：韩妆拍照识别、地铁路线、韩文沟通卡与韩国景点介绍，服务在韩中国游客。",
   "start_url": "/",
   "scope": "/",
   "display": "standalone",
