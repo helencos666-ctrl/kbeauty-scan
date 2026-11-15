@@ -116,59 +116,109 @@ nav button.on,nav a.on{color:var(--pink);font-weight:700}
 .extra{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin:0 0 14px}
 .extra a{display:flex;align-items:center;gap:10px;background:#fff;border-radius:16px;padding:14px 12px;text-decoration:none;color:var(--ink);box-shadow:0 4px 16px rgba(255,79,123,.08);font-size:15px;font-weight:700;min-height:64px}
 .extra a span{display:block;font-size:12px;font-weight:500;color:var(--sub);margin-top:2px}
+
+/* ===== 新主页（home v2） ===== */
+[hidden]{display:none!important}
+body{background:#fff}
+main{margin:0 auto}
+header{display:none}
+.hero{padding:22px 20px 8px}
+.brand{display:flex;align-items:center;gap:8px;font-size:15px;font-weight:700;color:var(--ink)}
+.brand img{width:28px;height:28px;border-radius:50%}
+.hero h1{margin:18px 0 6px;font-size:30px;line-height:1.25;font-weight:800;letter-spacing:.5px}
+.hero p{margin:0;font-size:15px;color:var(--sub)}
+.search{position:relative;margin-top:16px}
+.search input{width:100%;border:0;border-radius:14px;background:#f4f5f7;padding:14px 14px 14px 42px;font-size:16px;font-family:inherit;outline:none}
+.search:before{content:"🔍";position:absolute;left:14px;top:13px;font-size:16px;opacity:.6}
+#qres{position:absolute;left:0;right:0;top:54px;background:#fff;border-radius:14px;box-shadow:0 8px 24px rgba(0,0,0,.12);z-index:20;overflow:hidden}
+#qres a{display:flex;align-items:center;gap:10px;padding:12px 14px;color:var(--ink);text-decoration:none;font-size:15px;border-top:1px solid #f2f2f2}
+#qres a:first-child{border-top:0}
+#qres .none{padding:12px 14px;color:var(--sub);font-size:14px}
+.bar{display:none;align-items:center;gap:6px;padding:12px 14px 4px}
+.bar a{font-size:28px;line-height:1;color:var(--ink);text-decoration:none;padding:0 8px 4px 2px}
+.bar b{font-size:19px}
+.bar-sub{display:none;margin:0 0 10px;padding:0 20px;font-size:13px;color:var(--sub)}
+body:not(.is-home) .hero{display:none}
+body:not(.is-home) .bar{display:flex}
+body:not(.is-home) .bar-sub{display:block}
+body:not(.is-home) main{padding-top:4px}
+.grid{display:grid;grid-template-columns:repeat(4,1fr);gap:18px 8px;padding:22px 6px 6px}
+.grid a{display:flex;flex-direction:column;align-items:center;gap:8px;text-decoration:none;color:var(--ink);font-size:13px;font-weight:600}
+.grid i{font-style:normal;font-size:28px;width:60px;height:60px;border-radius:20px;display:flex;align-items:center;justify-content:center;background:#f4f5f7}
+.chips{display:flex;gap:8px;align-items:center;overflow-x:auto;padding:14px 6px 4px;scrollbar-width:none}
+.chips span{flex:none;font-size:13px;color:var(--sub)}
+.chips a{flex:none;font-size:13px;color:var(--ink);text-decoration:none;padding:7px 12px;border-radius:16px;background:#f4f5f7}
+.promo-bar{display:flex;align-items:center;gap:10px;margin:16px 6px 0;padding:14px;border-radius:16px;background:#fff4e8;color:var(--ink);text-decoration:none}
+.promo-bar .pt{flex:1}.promo-bar b{display:block;font-size:15px}.promo-bar span{display:block;font-size:12px;color:var(--sub);margin-top:3px;line-height:1.5}
+.promo-bar em{font-style:normal;font-size:13px;font-weight:700;color:var(--pink);white-space:nowrap}
+.blk{margin:26px 6px 0}
+.bh{display:flex;align-items:baseline;justify-content:space-between;margin-bottom:12px}
+.bh h2{margin:0;font-size:18px}.bh a{font-size:13px;color:var(--sub);text-decoration:none}
+.hs{display:flex;gap:12px;overflow-x:auto;padding-bottom:4px;scrollbar-width:none;margin:0 -20px;padding-left:20px;padding-right:20px}
+.sc{flex:none;width:150px;text-decoration:none;color:var(--ink)}
+.sc .im{width:150px;height:112px;border-radius:14px;background:#f4f5f7 center/cover no-repeat;display:flex;align-items:center;justify-content:center;font-size:30px}
+.sc b{display:block;font-size:14px;margin-top:8px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.sc span{display:block;font-size:12px;color:var(--sub);margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.pi{display:block;text-decoration:none;color:var(--ink);padding:12px 0;border-top:1px solid #f0f1f3}
+.pi:first-child{border-top:0;padding-top:2px}
+.pi b{display:block;font-size:15px;line-height:1.45;font-weight:600}
+.pi span{display:block;font-size:12px;color:var(--sub);margin-top:4px}
+.grp{margin:8px 6px 22px}.grp h3{font-size:14px;color:var(--sub);font-weight:600;margin:0 0 10px}
+.ml{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.ml a{display:flex;align-items:center;gap:10px;padding:13px 12px;border-radius:14px;background:#f6f7f9;color:var(--ink);text-decoration:none;font-size:15px;font-weight:600}
+.ml a i{font-style:normal;font-size:20px}
+.foot{font-size:12px;color:#999;text-align:center;margin:28px 0 16px;line-height:1.7}
+.foot a{color:#888}
+nav{border-top:1px solid #f0f1f3}
+body.is-home .disclaimer{display:none}
+#p-cos .card,#p-sub .card,#p-card .card{box-shadow:none;border:1px solid #f0f1f3}
+
+/* 入口卡片 */
+.grid{background:#fff;border-radius:20px;margin-top:18px;padding:18px 6px;box-shadow:0 6px 24px rgba(31,35,48,.07)}
+.grid i{background:#fff1f4}
+.grid a:nth-child(2) i{background:#eef5ff}
+.grid a:nth-child(3) i{background:#f6efff}
+.grid a:nth-child(4) i{background:#eafaf1}
+.grid a:nth-child(5) i{background:#fff6e5}
+.grid a:nth-child(6) i{background:#fff0e8}
+.grid a:nth-child(7) i{background:#eaf8fb}
+.grid a:nth-child(8) i{background:#f2f3f5}
+
 </style>
 </head>
-<body>
-<header>
-  <h1 id="htitle">🇰🇷 旅韩助手</h1>
-  <p id="hsub">拍一下韩国化妆品包装，马上看中文名称、用法和规格</p>
-</header>
+<body class="is-home">
+<header></header>
+<div class="hero" id="hero">
+  <div class="brand"><img src="/static/icons/icon-192.png" alt="">旅韩助手</div>
+  <h1>来韩国，一个就够</h1>
+  <p>地铁 · 翻译 · 吃喝玩买，中文一站搞定</p>
+  <div class="search"><input id="q" type="search" placeholder="想找什么？如 地铁、炸鸡、退税" autocomplete="off" enterkeyhint="go" aria-label="搜索功能"><div id="qres" hidden></div></div>
+</div>
+<div class="bar"><a href="/" id="back" aria-label="返回首页">‹</a><b id="htitle">旅韩助手</b></div>
+<p class="bar-sub" id="hsub"></p>
 <main>
   <div class="err" id="err"></div>
 
-  <!-- 化妆品识别 -->
-  <section class="page on" id="p-cos">
+  <!-- 首页 -->
+  <section class="page on" id="p-home">
+    <div class="grid">
+      <a href="/?tab=sub" data-go="sub"><i>🚇</i>地铁路线</a>
+      <a href="/?tab=card" data-go="card"><i>💬</i>中韩翻译</a>
+      <a href="/?tab=cos" data-go="cos"><i>📷</i>拍照识妆</a>
+      <a href="/community/rate"><i>💱</i>汇率换算</a>
+      <a href="/food"><i>🍜</i>韩国美食</a>
+      <a href="/chicken"><i>🍗</i>炸鸡代点</a>
+      <a href="/attractions"><i>🏯</i>免费景点</a>
+      <a href="/?tab=more" data-go="more"><i>☰</i>全部功能</a>
+    </div>
+    <div class="chips"><span>出发前</span><a href="/visa">签证须知</a><a href="/tax-refund">退税</a><a href="/pay">支付</a><a href="/itineraries">路线卡</a><a href="/tips">攻略</a></div>
+    <a class="promo-bar" id="openPromo" href="/points" hidden></a>
+    <section class="blk" id="shopBlk" hidden><div class="bh"><h2>热门商家</h2><a href="/shops">全部 ›</a></div><div class="hs" id="shopList"></div></section>
+    <section class="blk" id="postBlk" hidden><div class="bh"><h2>韩友圈 · 最新</h2><a href="/community">进入 ›</a></div><div id="postList"></div></section>
+  </section>
 
-    <div class="card" id="openPromo" style="display:none;background:#fff8f0"></div>
-    <div class="tools">
-      <a class="tool" href="/community/rate"><i>💱</i>汇率</a>
-      <a class="tool" href="/?tab=sub"><i>🚇</i>地铁</a>
-      <a class="tool" href="/pay"><i>💳</i>支付</a>
-      <a class="tool" href="/tax-refund"><i>🧾</i>退税</a>
-    </div>
-    <div class="extra">
-      <a href="/itineraries">🗺️ 路线卡片<span>经典 / 购物 / 追星 / 美食</span></a>
-      <a href="/visa">🛂 签证须知<span>以官方为准，不代办</span></a>
-      <a href="/chicken">🍗 炸鸡代点<span>个人协助，先确认再付款</span></a>
-      <a href="/shops?type=避雷经验">⚠️ 避雷经验<span>审核后公开</span></a>
-    </div>
-    <div class="card">
-      <h2>🗺️ 韩国免费景点</h2>
-      <p style="margin:0 0 12px;font-size:15px;line-height:1.65">宫殿、寺庙、市场、自然风光和季节活动，面向中国游客的简短说明和交通提示。资料来自公开信息，不收费。</p>
-      <div class="btns"><a class="btn primary" href="/attractions" style="text-align:center;text-decoration:none">查看景点指南</a></div>
-    </div>
-    <div class="card">
-      <h2>🍜 韩国美食推荐</h2>
-      <p style="margin:0 0 12px;font-size:15px;line-height:1.65">首尔、釜山、济州等地的餐厅与小吃，优先收录米其林2026必比登和公开资料里有记载的店。营业情况请出行前再确认。</p>
-      <div class="btns"><a class="btn primary" href="/food" style="text-align:center;text-decoration:none">查看美食指南</a></div>
-    </div>
-    <div class="card">
-      <h2>🧭 韩友圈</h2>
-      <p style="margin:0 0 12px;font-size:15px;line-height:1.65">踩坑避雷、结伴同行、签证问答、留学打听和旅韩交友，去韩国前问问走过的人。免费注册即可浏览。</p>
-      <div class="btns"><a class="btn primary" href="/community" style="text-align:center;text-decoration:none">进入社区</a></div>
-    </div>
-    <div class="card">
-      <h2>📘 旅行指南</h2>
-      <p style="margin:0 0 12px;font-size:15px;line-height:1.65">签证入境、交通卡、紧急电话、购物退税和买妆注意事项，整理自官方公开信息。</p>
-      <div class="btns" style="flex-wrap:wrap">
-        <a class="btn ghost" href="/tips" style="text-align:center;text-decoration:none">攻略</a>
-        <a class="btn ghost" href="/visa" style="text-align:center;text-decoration:none">签证</a>
-        <a class="btn ghost" href="/faq" style="text-align:center;text-decoration:none">常见问题</a>
-        <a class="btn ghost" href="/tax-refund" style="text-align:center;text-decoration:none">退税</a>
-        <a class="btn ghost" href="/pay" style="text-align:center;text-decoration:none">支付</a>
-        <a class="btn ghost" href="/beauty" style="text-align:center;text-decoration:none">买妆</a>
-      </div>
-    </div>
+  <!-- 化妆品识别 -->
+  <section class="page" id="p-cos">
     <div class="card">
       <h2>📷 韩妆拍照识别</h2>
       <div class="btns"><button class="btn primary" data-pick="cos" data-cam="1">拍照识别</button><button class="btn ghost" data-pick="cos">从相册选</button></div>
@@ -229,18 +279,58 @@ nav button.on,nav a.on{color:var(--pink);font-weight:700}
     <div class="tip" style="text-align:center">点一句 → 全屏大字给对方看，🔊 可朗读。<br>韩国旅游咨询热线 1330，有中文服务。</div>
   </section>
 
+
+  <!-- 全部功能 -->
+  <section class="page" id="p-more">
+    <div class="grp"><h3>常用工具</h3><div class="ml">
+      <a href="/?tab=sub" data-go="sub" data-k="地铁 路线 换乘 站牌 subway"><i>🚇</i>地铁路线</a>
+      <a href="/?tab=card" data-go="card" data-k="翻译 沟通卡 韩语 说话 语音"><i>💬</i>中韩翻译</a>
+      <a href="/?tab=ph" data-go="ph" data-k="常用句 韩语 明洞 朗读"><i>🗣️</i>常用韩语</a>
+      <a href="/?tab=cos" data-go="cos" data-k="化妆品 识别 拍照 韩妆"><i>📷</i>拍照识妆</a>
+      <a href="/community/rate" data-k="汇率 换算 韩元 人民币"><i>💱</i>汇率换算</a>
+    </div></div>
+    <div class="grp"><h3>吃喝玩</h3><div class="ml">
+      <a href="/food" data-k="美食 餐厅 小吃 米其林 吃"><i>🍜</i>韩国美食</a>
+      <a href="/chicken" data-k="炸鸡 外卖 代点 点餐"><i>🍗</i>炸鸡代点</a>
+      <a href="/attractions" data-k="景点 免费 宫殿 玩"><i>🏯</i>免费景点</a>
+      <a href="/itineraries" data-k="路线卡 行程 追星 购物 美食"><i>🗺️</i>路线卡片</a>
+      <a href="/shops" data-k="商家 推荐 店铺 评价"><i>🏪</i>推荐商家</a>
+      <a href="/shops?type=避雷经验" data-k="避雷 踩坑 经验"><i>⚠️</i>避雷经验</a>
+    </div></div>
+    <div class="grp"><h3>出发前</h3><div class="ml">
+      <a href="/visa" data-k="签证 入境 K-ETA"><i>🛂</i>签证须知</a>
+      <a href="/tips" data-k="攻略 交通卡 紧急电话"><i>📘</i>旅行攻略</a>
+      <a href="/faq" data-k="常见问题 FAQ"><i>❓</i>常见问题</a>
+    </div></div>
+    <div class="grp"><h3>购物</h3><div class="ml">
+      <a href="/pay" data-k="支付 付款 支付宝 微信 银联"><i>💳</i>支付指南</a>
+      <a href="/tax-refund" data-k="退税 免税"><i>🧾</i>购物退税</a>
+      <a href="/shopping" data-k="购物 免税店 商场"><i>🛍️</i>购物攻略</a>
+      <a href="/beauty" data-k="买妆 化妆品 护肤"><i>💄</i>买妆须知</a>
+    </div></div>
+    <div class="grp"><h3>韩友圈与我的</h3><div class="ml">
+      <a href="/community" data-k="社区 韩友圈 经验 提问"><i>🧭</i>韩友圈</a>
+      <a href="/community/friends" data-k="交友 搭子 结伴"><i>🤝</i>旅韩交友</a>
+      <a href="/community/boards" data-k="频道 签证 留学 租房 工作"><i>📂</i>全部频道</a>
+      <a href="/points" data-k="签到 旅行豆 积分"><i>🫘</i>签到·旅行豆</a>
+      <a href="/coupons" data-k="优惠券 券"><i>🎟️</i>优惠券</a>
+      <a href="/member" data-k="会员 开通"><i>👑</i>会员</a>
+      <a href="/login" data-k="登录 注册 账号"><i>👤</i>登录 / 注册</a>
+      <a href="/promo" data-k="推广员 推广 佣金"><i>📣</i>推广员</a>
+    </div></div>
+  </section>
+
   <div class="disclaimer">⚠️ AI识别仅供参考。成分、用法、线路请以包装、官方标识和现场工作人员为准。</div>
 
-  <p style="font-size:12px;color:#888;text-align:center;margin:10px 0 16px;line-height:1.7">旅韩助手为个人运营的免费信息网站，内容仅供参考，不是旅行社，不代办签证。<br><a href="/terms" style="color:#2c7be5">用户协议与免责声明</a> · <a href="/privacy" style="color:#2c7be5">隐私政策</a> · <a href="/rules" style="color:#2c7be5">社区约定</a></p>
+  <p class="foot">旅韩助手为个人运营的免费信息网站，内容仅供参考，不是旅行社，不代办签证。<br><a href="/terms" style="color:#2c7be5">用户协议与免责声明</a> · <a href="/privacy" style="color:#2c7be5">隐私政策</a> · <a href="/rules" style="color:#2c7be5">社区约定</a></p>
 </main>
 
 <nav>
-  <button class="on" data-tab="cos"><i>💄</i>化妆品</button>
+  <button class="on" data-tab="home"><i>🏠</i>首页</button>
   <button data-tab="sub"><i>🚇</i>地铁</button>
-  <a href="/attractions"><i>🗺️</i>景点</a>
-  <a href="/food"><i>🍜</i>美食</a>
-  <button data-tab="card"><i>💬</i>沟通卡</button>
-  <button data-tab="ph"><i>📍</i>常用句</button>
+  <button data-tab="card"><i>💬</i>翻译</button>
+  <a href="/community"><i>🧭</i>韩友圈</a>
+  <button data-tab="more"><i>☰</i>全部</button>
 </nav>
 <input type="file" id="fCam" accept="image/*" capture="environment" hidden>
 <input type="file" id="fPick" accept="image/*" hidden>
@@ -255,12 +345,21 @@ nav button.on,nav a.on{color:var(--pink);font-weight:700}
 <script>
 const $=id=>document.getElementById(id);
 const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
-const SUBS={cos:'拍一下韩国化妆品包装，马上看中文名称、用法和规格',sub:'拍地铁站牌或线路图，也可输入起点终点查路线',card:'输入中文，生成大字韩文卡片，直接给店员或司机看',ph:'明洞常用韩语，一键大字展示并朗读'};
-document.querySelectorAll('nav button').forEach(b=>b.onclick=()=>{
-  document.querySelectorAll('nav button').forEach(x=>x.classList.toggle('on',x===b));
-  document.querySelectorAll('.page').forEach(p=>p.classList.toggle('on',p.id==='p-'+b.dataset.tab));
-  $('hsub').textContent=SUBS[b.dataset.tab];$('err').style.display='none';window.scrollTo(0,0);
-});
+const SUBS={home:'',cos:'拍一下韩国化妆品包装，马上看中文名称、用法和规格',sub:'拍地铁站牌或线路图，也可输入起点终点查路线',card:'输入中文，生成大字韩文卡片，直接给店员或司机看',ph:'明洞常用韩语，一键大字展示并朗读',more:'所有功能都在这里'};
+const TITLES={home:'旅韩助手',cos:'拍照识妆',sub:'地铁路线',card:'中韩翻译',ph:'常用韩语',more:'全部功能'};
+function showTab(t,push){
+  if(!TITLES[t]) t='home';
+  document.querySelectorAll('nav button').forEach(x=>x.classList.toggle('on',x.dataset.tab===t));
+  document.querySelectorAll('.page').forEach(p=>p.classList.toggle('on',p.id==='p-'+t));
+  document.body.classList.toggle('is-home',t==='home');
+  $('htitle').textContent=TITLES[t];$('hsub').textContent=SUBS[t]||'';$('err').style.display='none';window.scrollTo(0,0);
+  if(push){history.pushState({t:t},'',t==='home'?'/':'/?tab='+t)}
+}
+document.body.classList.add('is-home');
+document.querySelectorAll('nav button').forEach(b=>b.onclick=()=>showTab(b.dataset.tab,true));
+document.querySelectorAll('[data-go]').forEach(a=>a.addEventListener('click',e=>{e.preventDefault();showTab(a.dataset.go,true)}));
+$('back').onclick=e=>{e.preventDefault();if(history.state&&history.state.t){history.back()}else{showTab('home',true)}};
+window.addEventListener('popstate',()=>showTab(new URLSearchParams(location.search).get('tab')||'home',false));
 function showErr(m){$('err').textContent=m;$('err').style.display='block';window.scrollTo(0,0)}
 
 // ---------- 朗读 ----------
@@ -699,8 +798,7 @@ drawScenes();
   const q=new URLSearchParams(location.search);
   const tab=q.get('tab');
   if(tab){
-    const b=document.querySelector('nav button[data-tab="'+tab+'"]');
-    if(b) b.click();
+    showTab(tab,false);
   }
   const fr=q.get('from'), to=q.get('to');
   if(fr && $('rtFrom')) $('rtFrom').value=fr;
@@ -712,19 +810,59 @@ drawScenes();
 
 <script>
 (function(){
+  var E=function(x){return String(x==null?'':x).replace(/[&<>"']/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];});};
+  // 开业活动：只在后台开启时显示
   fetch('/api/opening-promo').then(function(r){ return r.json(); }).then(function(d){
     if (!d || !d.enabled) return;
-    var el = document.getElementById('openPromo');
-    if (!el) return;
-    var dates = (d.starts_at ? d.starts_at : '') + (d.ends_at ? (' 至 ' + d.ends_at) : '');
-    var slots = d.active ? ('还剩 ' + d.remaining + ' 个名额') : ('名额共 ' + d.cap + ' 个');
-    el.style.display = 'block';
-    el.innerHTML = '<h2>🎉 开业活动</h2><p style="margin:0 0 8px;line-height:1.7">' +
-      (d.active ? '<b>活动进行中。</b> ' : '<b>活动未开始或已结束。</b> ') +
-      (dates ? ('时间：' + dates + '。') : '') +
-      (d.active ? ('每日签到 <b>' + d.checkin_points + ' 旅行豆</b>（开业双倍）。活动期内前 ' + d.cap + ' 名新注册用户额外 +' + d.bonus_points + ' 旅行豆，' + slots + '。') : slots) +
-      ' 新用户获赠地铁攻略卡。</p><p class="tip" style="margin:0">' + (d.rules||'') + ' <a href="/points">去签到</a></p>';
+    var el = document.getElementById('openPromo'); if (!el) return;
+    var dates = (d.starts_at ? String(d.starts_at).slice(0,10) : '') + (d.ends_at ? (' 至 ' + String(d.ends_at).slice(0,10)) : '');
+    var line = d.active
+      ? ('签到 ' + d.checkin_points + ' 旅行豆（双倍）· 前 ' + d.cap + ' 名新用户 +' + d.bonus_points + ' · 还剩 ' + d.remaining + ' 名额')
+      : ('活动未开始或已结束 · 名额共 ' + d.cap + ' 个');
+    el.innerHTML = '<div class="pt"><b>🎉 开业活动' + (d.active ? '进行中' : '') + '</b><span>' + E(line) + (dates ? ('<br>' + E(dates)) : '') + '<br>新用户获赠地铁攻略卡</span></div><em>去签到 ›</em>';
+    el.title = d.rules || '';
+    el.hidden = false;
   }).catch(function(){});
+  // 热门商家：优先有照片的
+  fetch('/api/shops').then(function(r){ return r.json(); }).then(function(d){
+    var items = (d && d.items) || []; if (!items.length) return;
+    var withPh = items.filter(function(s){ return s.cover; }), noPh = items.filter(function(s){ return !s.cover; });
+    var list = withPh.concat(noPh).slice(0, 6);
+    document.getElementById('shopList').innerHTML = list.map(function(s){
+      var im = s.cover ? '<div class="im" style="background-image:url(/api/shop-photos/' + encodeURIComponent(s.cover) + '?t=1)"></div>' : '<div class="im">🏪</div>';
+      var sub = [s.area, s.price_text].filter(Boolean).join(' · ');
+      return '<a class="sc" href="/shops/' + encodeURIComponent(s.id) + '">' + im + '<b>' + E(s.name) + '</b><span>' + E(sub || s.shop_type) + '</span></a>';
+    }).join('');
+    document.getElementById('shopBlk').hidden = false;
+  }).catch(function(){});
+  // 韩友圈最新 3 帖
+  fetch('/api/community/posts?limit_n=3').then(function(r){ return r.json(); }).then(function(d){
+    var ps = (d && d.posts) || []; if (!ps.length) return;
+    document.getElementById('postList').innerHTML = ps.map(function(p){
+      var t = (p.time || '').slice(5, 10).replace('-', '/');
+      return '<a class="pi" href="/community/post/' + encodeURIComponent(p.id) + '"><b>' + E(p.title) + '</b><span>' + E(p.board_name) + (t ? (' · ' + E(t)) : '') + ' · ' + (p.comments || 0) + ' 评论</span></a>';
+    }).join('');
+    document.getElementById('postBlk').hidden = false;
+  }).catch(function(){});
+  // 首页搜索：从「全部功能」里找
+  var q = document.getElementById('q'), box = document.getElementById('qres');
+  var all = Array.prototype.map.call(document.querySelectorAll('#p-more .ml a'), function(a){
+    return {a: a, text: a.textContent.trim(), k: (a.textContent + ' ' + (a.dataset.k || '')).toLowerCase()};
+  });
+  function run(){
+    var v = q.value.trim().toLowerCase();
+    if (!v) { box.hidden = true; box.innerHTML = ''; return []; }
+    var hit = all.filter(function(x){ return x.k.indexOf(v) >= 0; }).slice(0, 6);
+    box.innerHTML = hit.length ? hit.map(function(x, i){ return '<a href="' + x.a.getAttribute('href') + '" data-i="' + all.indexOf(x) + '">' + x.a.innerHTML + '</a>'; }).join('') : '<div class="none">没找到，试试「全部功能」</div>';
+    box.hidden = false;
+    Array.prototype.forEach.call(box.querySelectorAll('a'), function(el){
+      el.addEventListener('click', function(e){ var src = all[+el.dataset.i].a; if (src.dataset.go) { e.preventDefault(); box.hidden = true; q.value=''; src.click(); } });
+    });
+    return hit;
+  }
+  q.addEventListener('input', run);
+  q.addEventListener('keydown', function(e){ if (e.key === 'Enter') { var h = run(); if (h.length) { e.preventDefault(); var f = box.querySelector('a'); if (f) f.click(); } } });
+  document.addEventListener('click', function(e){ if (!e.target.closest('.search')) box.hidden = true; });
 })();
 </script>
 </body>

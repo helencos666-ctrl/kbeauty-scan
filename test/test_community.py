@@ -361,7 +361,7 @@ for p in ["/", "/attractions", "/food", "/shopping", "/tips", "/beauty", "/sw.js
           "/community/messages", "/community/messages/1", "/community?tab=hot", "/community?board=rent"]:
     r = guest.get(p); check(f"GET {p} 200", r.status_code == 200, r.status_code)
 swt = guest.get("/sw.js").text
-check("sw.js cache bumped v24", "lvhan-shell-v24" in swt and "/rules" in swt and "/static/stations.json" in swt and "/community/friends" in swt and "/static/chat.html" in swt)
+check("sw.js cache bumped v25", "lvhan-shell-v25" in swt and "/rules" in swt and "/static/stations.json" in swt and "/community/friends" in swt and "/static/chat.html" in swt)
 stj = guest.get("/static/stations.json").json()["stations"]; check("stations.json coords", stj.get("강남역") and stj.get("홍대입구역") and stj.get("건대입구역"))
 mj = guest.get("/static/maps.js").text; check("maps.js naver+amap", "map.naver.com/p/directions/" in mj and "m.map.naver.com/?slng=" in mj and "uri.amap.com/navigation" in mj and "uri.amap.com/search" in mj)
 pages = "".join(guest.get(p).text for p in ["/", "/attractions", "/food", "/shopping", "/tips", "/beauty"])
