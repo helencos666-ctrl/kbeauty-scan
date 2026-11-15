@@ -2012,7 +2012,9 @@ def api_admin_promoters(req: Request, start: str = "", end: str = ""):
                            "paid": r["paid1"] + r["paid2"] + r["paid3"] + r["paid4"],
                            "commission_in_range": r["range_cents"] / 100,
                            "unsettled_members": r["unsettled"], "owed": r["owed_cents"] / 100,
-                           "settled_total": r["settled_cents"] / 100} for r in rows]}
+                           "settled_total": r["settled_cents"] / 100,
+                           "douyin_id": r.get("douyin_id") or "",
+                           "promo_method": r.get("promo_method") or ""} for r in rows]}
 
 def _cents(v):
     try:

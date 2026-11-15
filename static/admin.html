@@ -167,7 +167,8 @@
       <div class="card">
         <h2>推广员申请</h2>
         <div class="row"><select class="f" id="pappst" style="max-width:160px"><option value="pending">待审核</option><option value="all">全部</option><option value="approved">已通过</option><option value="rejected">已拒绝</option></select>
-          <button class="btn primary" id="pappgo">刷新</button></div>
+          <button class="btn primary" id="pappgo">刷新</button>
+          <a class="btn ghost" id="pappcsv" href="/api/admin/promo/applications.csv">导出 CSV</a></div>
         <div id="papplist" style="margin-top:8px"></div>
       </div>
       <div class="card">
@@ -310,8 +311,9 @@ document.getElementById('pmore').onclick = function(){ posts(false); };
 async function promo(){
   var q = '?start=' + (document.getElementById('d1').value || '') + '&end=' + (document.getElementById('d2').value || '');
   var d = await call('GET', '/api/admin/promoters' + q);
-  document.getElementById('prlist').innerHTML = d.promoters.length ? '<table class="adm"><tr><th>推广员</th><th>访问</th><th>注册</th><th>会员/高级/商家月/商家年</th><th>区间佣金</th><th>待结算</th><th>操作</th></tr>' + d.promoters.map(function(p){
+  document.getElementById('prlist').innerHTML = d.promoters.length ? '<table class="adm"><tr><th>推广员</th><th>抖音号</th><th>访问</th><th>注册</th><th>会员/高级/商家月/商家年</th><th>区间佣金</th><th>待结算</th><th>操作</th></tr>' + d.promoters.map(function(p){
     return '<tr><td><b>' + E(p.code) + '</b> ' + E(p.name) + (p.active ? '' : ' <small style="color:#c62828">已停用</small>') + '<br><small>会员 ¥' + p.commission + ' · 高级 ¥' + p.commission2 + ' · 商家月 ¥' + p.commission3 + ' · 商家年 ¥' + p.commission4 + ' · 已结 ¥' + p.settled_total + '</small></td>' +
+      '<td>' + E(p.douyin_id||'—') + (p.promo_method ? ('<br><small>' + E(p.promo_method) + '</small>') : '') + '</td>' +
       '<td>' + p.visits + '</td><td>' + p.regs + '</td><td>' + p.paid1 + ' / ' + p.paid2 + ' / ' + p.paid3 + ' / ' + p.paid4 + '</td><td>¥' + p.commission_in_range + '</td><td><b>¥' + p.owed + '</b><br><small>' + p.unsettled_members + ' 笔</small></td>' +
       '<td class="row"><button class="btn sm primary" data-st="' + E(p.code) + '"' + (p.unsettled_members ? '' : ' disabled') + '>标记已结算</button>' +
       '<button class="btn sm gray" data-cc="' + E(p.code) + '" data-c1="' + p.commission + '" data-c2="' + p.commission2 + '" data-c3="' + p.commission3 + '" data-c4="' + p.commission4 + '">改佣金</button>' +
@@ -340,10 +342,12 @@ async function promo(){
 document.getElementById('pq').onclick = promo;
 async function loadPromoApps(){
   var st = document.getElementById('pappst').value;
+  document.getElementById('pappcsv').href = '/api/admin/promo/applications.csv?status=' + encodeURIComponent(st);
   var d = await call('GET', '/api/admin/promo/applications?status=' + encodeURIComponent(st));
   document.getElementById('papplist').innerHTML = d.items.length ? d.items.map(function(x){
     return '<div class="cmt"><div class="who">#' + x.id + ' · 用户 #' + (x.member_no||x.user_id) + ' ' + E(x.nickname) + ' · ' + E(x.status) + '</div>' +
-      '<div class="ct">' + E(x.message||'') + (x.referrer ? ' · 其推荐人 ' + E(x.referrer) : '') + ' · ' + E(x.time||'') + (x.reject_reason?(' · '+E(x.reject_reason)):'') + '</div>' +
+      '<div class="ct">抖音号 ' + E(x.douyin_id||'—') + (x.promo_method ? (' · 推广方式 ' + E(x.promo_method)) : '') +
+      (x.message ? (' · ' + E(x.message)) : '') + (x.referrer ? ' · 其推荐人 ' + E(x.referrer) : '') + ' · ' + E(x.time||'') + (x.reject_reason?(' · '+E(x.reject_reason)):'') + '</div>' +
       (x.status==='pending' ? '<div class="row" style="margin-top:6px"><button class="btn sm primary" data-pa="'+x.id+'">通过并生成推广码</button><button class="btn sm gray" data-pr="'+x.id+'">拒绝</button></div>' : '') + '</div>';
   }).join('') : '<div class="empty">没有申请</div>';
   document.querySelectorAll('#papplist [data-pa]').forEach(function(b){ b.onclick=async function(){ var code=prompt('推广码（可留空自动生成）',''); if(code===null) return; await call('POST','/api/admin/promo/applications/'+b.dataset.pa,{action:'approve',code:code}); promo(); }; });

@@ -35,6 +35,8 @@ PROMO_TERMS = (
     "禁止骚扰、群发、虚假承诺和任何医疗效果保证；佣金以管理员核实到账的实付金额的 50% 计算，"
     "需过冻结期且未被退款后才可申请发放。本站只支持人工打款。"
 )
+PROMO_METHODS = ("户外直播", "短视频", "社群", "其他")
+DOUYIN_RE = re.compile("^[A-Za-z0-9_.\\-\u4e00-\u9fff]{2,40}$")
 
 MIGRATE_PROMO = """
 ALTER TABLE c_promoters ADD COLUMN IF NOT EXISTS user_id BIGINT REFERENCES c_users(id) ON DELETE SET NULL;
@@ -63,6 +65,11 @@ UPDATE c_commissions SET status='paid', paid_at=COALESCE(paid_at, settled_at)
   WHERE settled_at IS NOT NULL AND status='pending';
 UPDATE c_commissions SET status='payable', payable_at=COALESCE(payable_at, created_at)
   WHERE settled_at IS NULL AND status='pending' AND paid_amount_cents IS NULL;
+
+ALTER TABLE c_promo_applications ADD COLUMN IF NOT EXISTS douyin_id TEXT;
+ALTER TABLE c_promo_applications ADD COLUMN IF NOT EXISTS promo_method TEXT;
+ALTER TABLE c_promoters ADD COLUMN IF NOT EXISTS douyin_id TEXT;
+ALTER TABLE c_promoters ADD COLUMN IF NOT EXISTS promo_method TEXT;
 """
 
 
@@ -121,6 +128,28 @@ def mask_name(nick: str) -> str:
     return s[:1] + "*"
 
 
+def clean_douyin(v) -> str:
+    s = str(v or "").strip()
+    if not s:
+        raise HTTPException(400, "请填写抖音号")
+    if len(s) < 2:
+        raise HTTPException(400, "抖音号至少 2 个字")
+    if len(s) > 40:
+        raise HTTPException(400, "抖音号最多 40 个字")
+    if not DOUYIN_RE.fullmatch(s):
+        raise HTTPException(400, "抖音号只能包含字母、数字、下划线、点、短横线和中文")
+    return s
+
+
+def clean_promo_method(v) -> str:
+    s = str(v or "").strip()
+    if not s:
+        return ""
+    if s not in PROMO_METHODS:
+        raise HTTPException(400, "推广方式不正确")
+    return s
+
+
 def refresh_status(conn, row) -> str:
     """把到期的 pending 记为 payable；返回当前有效状态。"""
     st = row.get("status") or "pending"
@@ -160,7 +189,8 @@ def api_meta():
         days = hold_days(conn)
         bps = rate_bps(conn)
     return {"hold_days": days, "rate_percent": bps / 100.0, "terms": PROMO_TERMS,
-            "single_level": True, "disclaimer": PROMO_TERMS}
+            "single_level": True, "disclaimer": PROMO_TERMS,
+            "promo_methods": list(PROMO_METHODS), "douyin_required": True}
 
 
 @router.get("/api/promo/me")
@@ -174,7 +204,9 @@ def api_me(req: Request):
                "hold_days": days, "rate_percent": bps / 100.0, "application": None, "dashboard": None}
         if app:
             out["application"] = {"status": app["status"], "time": _ts(app["created_at"]),
-                                  "reject_reason": app.get("reject_reason")}
+                                  "reject_reason": app.get("reject_reason"),
+                                  "douyin_id": app.get("douyin_id") or "",
+                                  "promo_method": app.get("promo_method") or ""}
         if not p or not p["active"]:
             return out
         _refresh_code(conn, p["code"])
@@ -206,11 +238,13 @@ def api_me(req: Request):
 async def api_apply(req: Request):
     csrf(req)
     d = await _json(req)
-    if str(d.get("agree") or "") not in ("1", "true", "on", "yes", "True"):
-        raise HTTPException(400, "请先阅读并同意推广约定")
-    msg = clean_text(d.get("message") or "申请成为推广员", 200, "说明", 0)
     with db() as conn:
         u = need_user(conn, req)
+        if str(d.get("agree") or "") not in ("1", "true", "on", "yes", "True"):
+            raise HTTPException(400, "请先阅读并同意推广约定")
+        douyin = clean_douyin(d.get("douyin_id") or d.get("douyin"))
+        method = clean_promo_method(d.get("promo_method") or d.get("method"))
+        msg = clean_text(d.get("message") or "", 200, "说明", 0)
         if _promoter_of_user(conn, u["id"]):
             raise HTTPException(400, "你已经是推广员")
         app = q(conn, "SELECT * FROM c_promo_applications WHERE user_id=%s", (u["id"],), one=True)
@@ -221,10 +255,13 @@ async def api_apply(req: Request):
         limit("promoapp:" + str(u["id"]), 5, 86400, "今天申请次数已用完")
         limit("promoappip:" + ip_of(req), 20, 86400, "今天申请次数已用完")
         if app:
-            q(conn, """UPDATE c_promo_applications SET message=%s, status='pending', reject_reason=NULL, created_at=now(), reviewed_at=NULL
-                       WHERE user_id=%s""", (msg or None, u["id"]))
+            q(conn, """UPDATE c_promo_applications
+                       SET message=%s, douyin_id=%s, promo_method=%s, status='pending',
+                           reject_reason=NULL, created_at=now(), reviewed_at=NULL
+                       WHERE user_id=%s""", (msg or None, douyin, method or None, u["id"]))
         else:
-            q(conn, "INSERT INTO c_promo_applications(user_id,message,status) VALUES (%s,%s,'pending')", (u["id"], msg or None))
+            q(conn, """INSERT INTO c_promo_applications(user_id,message,douyin_id,promo_method,status)
+                       VALUES (%s,%s,%s,%s,'pending')""", (u["id"], msg or None, douyin, method or None))
     return {"ok": True, "message": "已提交申请，请等待管理员审核。"}
 
 
@@ -303,10 +340,7 @@ def api_admin_apps(req: Request, status: str = "pending"):
             sql += " WHERE a.status=%s"; args.append(status)
         sql += " ORDER BY a.id DESC LIMIT 200"
         rows = q(conn, sql, tuple(args))
-    return {"items": [{"id": r["id"], "user_id": r["user_id"], "member_no": r.get("member_no") or r["user_id"],
-                       "nickname": r["nickname"], "status": r["status"], "message": r.get("message") or "",
-                       "reject_reason": r.get("reject_reason"), "time": _ts(r["created_at"]),
-                       "referrer": r.get("referrer")} for r in rows]}
+    return {"items": [_app_out(r) for r in rows]}
 
 
 @router.post("/api/admin/promo/applications/{aid}")
@@ -335,11 +369,49 @@ async def api_admin_app_review(req: Request, aid: int):
         if q(conn, "SELECT code FROM c_promoters WHERE code=%s", (code,), one=True):
             raise HTTPException(409, "推广码已存在")
         # 不能把自己注册时的推荐码写成自己的码
-        q(conn, """INSERT INTO c_promoters(code,name,user_id,active) VALUES (%s,%s,%s,TRUE)""",
-          (code, (u["nickname"] or "推广员")[:30], u["id"]))
+        q(conn, """INSERT INTO c_promoters(code,name,user_id,active,douyin_id,promo_method)
+                   VALUES (%s,%s,%s,TRUE,%s,%s)""",
+          (code, (u["nickname"] or "推广员")[:30], u["id"],
+           row.get("douyin_id") or None, row.get("promo_method") or None))
         q(conn, "UPDATE c_promo_applications SET status='approved', reviewed_at=now() WHERE id=%s", (aid,))
         active_codes(conn)
     return {"ok": True, "status": "approved", "code": code}
+
+
+def _app_out(r):
+    return {"id": r["id"], "user_id": r["user_id"], "member_no": r.get("member_no") or r["user_id"],
+            "nickname": r["nickname"], "status": r["status"], "message": r.get("message") or "",
+            "douyin_id": r.get("douyin_id") or "", "promo_method": r.get("promo_method") or "",
+            "reject_reason": r.get("reject_reason"), "time": _ts(r["created_at"]),
+            "referrer": r.get("referrer")}
+
+
+@router.get("/api/admin/promo/applications.csv")
+def api_admin_apps_csv(req: Request, status: str = "all"):
+    status = (status or "all").strip()
+    if status not in ("pending", "approved", "rejected", "all"):
+        raise HTTPException(400, "状态不正确")
+    with db() as conn:
+        need_admin(conn, req)
+        sql = """SELECT a.*, u.nickname, u.member_no, u.promoter_code AS referrer
+                 FROM c_promo_applications a JOIN c_users u ON u.id=a.user_id"""
+        args = []
+        if status != "all":
+            sql += " WHERE a.status=%s"; args.append(status)
+        sql += " ORDER BY a.id DESC LIMIT 2000"
+        rows = q(conn, sql, tuple(args))
+    buf = io.StringIO()
+    w = csv.writer(buf)
+    w.writerow(["id", "user_id", "member_no", "nickname", "douyin_id", "promo_method",
+                "message", "status", "reject_reason", "time", "referrer"])
+    for r in rows:
+        o = _app_out(r)
+        w.writerow([o["id"], o["user_id"], o["member_no"], o["nickname"], o["douyin_id"],
+                    o["promo_method"], o["message"], o["status"], o.get("reject_reason") or "",
+                    o["time"] or "", o.get("referrer") or ""])
+    data = "\ufeff" + buf.getvalue()
+    return Response(data, media_type="text/csv; charset=utf-8",
+                    headers={"Content-Disposition": "attachment; filename=promo-applications.csv"})
 
 
 @router.get("/api/admin/promo/settings")

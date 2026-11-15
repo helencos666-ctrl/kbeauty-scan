@@ -72,6 +72,8 @@ def main():
             check("rules has %s" % w, w in r.text, w)
         r = guest.get("/promo")
         check("dashboard page 200", r.status_code == 200 and "推广" in r.text, r.status_code)
+        check("page has 抖音号 field", "抖音号" in r.text, "missing label")
+        check("page has 推广方式", "推广方式" in r.text, "missing method")
         check("apply needs auth", guest.post("/api/promo/apply", json={"agree": True}, headers=H).status_code == 401)
         check("apply needs csrf", ann.post("/api/promo/apply", json={"agree": True}).status_code in (401, 403))
 
@@ -88,16 +90,38 @@ def main():
 
         r = ann.post("/api/promo/apply", json={"agree": False, "message": "想推广"}, headers=H)
         check("apply needs agree", r.status_code == 400, r.text)
+        # douyin required (server-side)
         r = ann.post("/api/promo/apply", json={"agree": True, "message": "我会在旅韩群里分享，不群发骚扰"}, headers=H)
-        check("ann applies", r.status_code == 200, r.text)
-        r = ann.post("/api/promo/apply", json={"agree": True}, headers=H)
+        check("apply without douyin_id 400", r.status_code in (400, 422) and "抖音号" in r.text, r.text)
+        r = ann.post("/api/promo/apply", json={"agree": True, "douyin_id": "  ", "message": "x"}, headers=H)
+        check("apply blank douyin 400", r.status_code in (400, 422), r.text)
+        r = ann.post("/api/promo/apply", json={"agree": True, "douyin_id": "a"}, headers=H)
+        check("apply short douyin 400", r.status_code in (400, 422), r.text)
+        r = ann.post("/api/promo/apply", json={"agree": True, "douyin_id": "a" * 41}, headers=H)
+        check("apply long douyin 400", r.status_code in (400, 422), r.text)
+        r = ann.post("/api/promo/apply", json={"agree": True, "douyin_id": "bad name!"}, headers=H)
+        check("apply invalid douyin chars 400", r.status_code in (400, 422), r.text)
+        r = ann.post("/api/promo/apply", json={"agree": True, "douyin_id": "ann_ok", "promo_method": "传单"}, headers=H)
+        check("apply bad promo_method 400", r.status_code in (400, 422), r.text)
+        r = ann.post("/api/promo/apply", json={"agree": True, "douyin_id": " 旅韩小美.ok_1- ", "promo_method": "短视频"}, headers=H)
+        check("ann applies with douyin, message optional", r.status_code == 200, r.text)
+        r = ann.post("/api/promo/apply", json={"agree": True, "douyin_id": "ann_ok"}, headers=H)
         check("duplicate apply rejected", r.status_code == 400, r.text)
         apps = adm.get("/api/admin/promo/applications?status=pending").json()["items"]
         check("admin sees application", len(apps) == 1 and apps[0]["user_id"] == uid_a, apps)
+        check("admin sees douyin_id", apps[0].get("douyin_id") == "旅韩小美.ok_1-", apps)
+        check("admin sees promo_method", apps[0].get("promo_method") == "短视频", apps)
         aid = apps[0]["id"]
         r = adm.post(f"/api/admin/promo/applications/{aid}", json={"action": "approve"}, headers=H)
         check("approve ann", r.status_code == 200 and r.json().get("code"), r.text)
         code_a = r.json()["code"]
+        plist = [p for p in adm.get("/api/admin/promoters").json()["promoters"] if p["code"] == code_a]
+        check("promoter list has douyin", plist and plist[0].get("douyin_id") == "旅韩小美.ok_1-", plist)
+        check("promoter list has method", plist and plist[0].get("promo_method") == "短视频", plist)
+        csv_app = adm.get("/api/admin/promo/applications.csv")
+        check("applications csv 200", csv_app.status_code == 200 and "text/csv" in csv_app.headers.get("content-type", ""), csv_app.headers)
+        check("applications csv has douyin header and value", "douyin_id" in csv_app.text and "旅韩小美.ok_1-" in csv_app.text, csv_app.text[:400])
+        check("applications csv not public", guest.get("/api/admin/promo/applications.csv").status_code in (401, 403))
         me = ann.get("/api/promo/me").json()
         check("ann dashboard has code", me["is_promoter"] and me["dashboard"]["code"] == code_a, me)
         check("dashboard starts empty", me["dashboard"]["regs"] == 0 and me["dashboard"]["pending"] == 0, me)
@@ -149,7 +173,7 @@ def main():
         check("cannot void paid", r.status_code == 400, r.text)
 
         # single-level: bob applies, approved; cara referred by bob; payment goes to bob not ann
-        r = bob.post("/api/promo/apply", json={"agree": True, "message": "申请推广"}, headers=H)
+        r = bob.post("/api/promo/apply", json={"agree": True, "douyin_id": "bob_live", "promo_method": "户外直播", "message": "申请推广"}, headers=H)
         check("bob applies", r.status_code == 200, r.text)
         bid = adm.get("/api/admin/promo/applications?status=pending").json()["items"][0]["id"]
         code_b = adm.post(f"/api/admin/promo/applications/{bid}", json={"action": "approve"}, headers=H).json()["code"]
