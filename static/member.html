@@ -88,7 +88,7 @@
   if (!d || !d.user){ s.innerHTML = '<h2>我的状态</h2><p style="margin:0 0 12px">还没登录</p><a class="btn primary block" href="/login?mode=reg&next=/member">免费注册 / 登录</a>'; return; }
   var u = d.user, m = u.merchant_info, base = ['普通用户', '会员', '高级会员'][u.base_tier] || '普通用户';
   var html = '<h2>我的状态</h2><p style="margin:0;line-height:1.9">昵称：' + LH.esc(u.nickname) + LH.badge(u.display_tier) +
-    '<br>会员编号：<b style="font-size:18px;color:var(--pink)">' + u.id + '</b><br>登录账号：' + LH.esc(u.account) +
+    '<br>会员编号：<b style="font-size:18px;color:var(--pink)">' + u.member_no + '</b><br>登录账号：' + LH.esc(u.account) +
     '<br>会员档次：<b>' + base + '</b>';
   if (m){
     html += '<br>商家会员：<b style="color:#1565c0">有效（' + (m.plan === 'year' ? '年付' : '月付') + '）</b>，到期 ' + LH.esc(m.until) +

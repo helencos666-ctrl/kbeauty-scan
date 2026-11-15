@@ -116,7 +116,7 @@ async function boot(){
 async function users(){
   var d = await call('GET', '/api/admin/users?s=' + encodeURIComponent(document.getElementById('us').value));
   document.getElementById('ulist').innerHTML = d.users.length ? '<table class="adm"><tr><th>编号</th><th>昵称/账号</th><th>状态</th><th>操作</th></tr>' + d.users.map(function(u){
-    return '<tr><td>' + u.id + '</td><td>' + E(u.nickname) + '<br><small>' + E(u.account) + '</small><br><small>注册 ' + E(u.joined) + (u.promoter ? ' · 推广码 ' + E(u.promoter) : '') + '</small></td><td>' +
+    return '<tr><td>' + u.member_no + '</td><td>' + E(u.nickname) + '<br><small>' + E(u.account) + '</small><br><small>注册 ' + E(u.joined) + (u.promoter ? ' · 推广码 ' + E(u.promoter) : '') + '</small></td><td>' +
       ['普通', '<b style="color:#1b7a3d">会员</b>', '<b style="color:#8e44ff">高级会员</b>'][u.tier] + (u.merchant_active ? '<br><b style="color:#1565c0">商家·' + (u.merchant_plan === 'year' ? '年付' : '月付') + '</b><br><small>到期 ' + E(u.merchant_until) + '<br>增发次数 ' + u.merchant_credits + '</small>' : (u.merchant_until ? '<br><small style="color:#c62828">商家已到期 ' + E(u.merchant_until) + '</small>' : '')) +
       (u.is_banned ? '<br><b style="color:#c62828">已封禁</b>' : '') + (u.verified ? '<br><span class="vbadge">✔ 已认证</span>' : '') + '</td><td class="row">' +
       [0, 1, 2].filter(function(t){ return t !== u.tier; }).map(function(t){ return '<button class="btn sm ' + (t > u.tier ? 'primary' : 'gray') + '" data-u="' + u.id + '" data-a="set_tier" data-t="' + t + '">设为' + ['普通', '会员', '高级'][t] + '</button>'; }).join('') +
@@ -125,6 +125,7 @@ async function users(){
       (u.merchant_active ? '<button class="btn sm gray" data-u="' + u.id + '" data-a="credits">+增发次数</button><button class="btn sm gray" data-u="' + u.id + '" data-a="merchant_off">停商家</button>' : '') +
       (u.is_banned ? '<button class="btn sm gray" data-u="' + u.id + '" data-a="unban">解封</button>' : '<button class="btn sm gray" data-u="' + u.id + '" data-a="ban">封禁</button>') +
       '<button class="btn sm gray" data-u="' + u.id + '" data-a="' + (u.verified ? 'unverify">取消认证' : 'verify">标记已认证') + '</button>' +
+      (u.is_bot ? '' : '<button class="btn sm gray" data-u="' + u.id + '" data-a="set_member_no">改编号</button>') +
       '<button class="btn sm gray" data-u="' + u.id + '" data-a="purge">删全部内容</button><button class="btn sm gray" data-u="' + u.id + '" data-a="reset_pw">重置密码</button></td></tr>';
   }).join('') + '</table>' : '<div class="empty">没有用户</div>';
   document.querySelectorAll('#ulist [data-a]').forEach(function(b){
@@ -132,6 +133,16 @@ async function users(){
       var names = {set_tier: '设为' + ['普通用户', '会员', '高级会员'][+b.dataset.t || 0], merchant: '商家会员' + (b.dataset.plan === 'year' ? '年付（365 天）' : '月付（30 天）') + '开通/续费', merchant_off: '立即停用商家会员', credits: '增加增发次数', ban: '封禁', unban: '解封', verify: '标记“已认证”（请确认已人工核实）', unverify: '取消“已认证”', purge: '删除该用户全部帖子、评论、交友资料和私信', reset_pw: '重置密码'};
       var extra = {action: b.dataset.a, tier: +b.dataset.t || 0, plan: b.dataset.plan};
       if (b.dataset.a === 'credits'){ var n = prompt('增加几次增发（每次 = 1 篇，已收款后再加；负数为扣减）', '1'); if (!n) return; extra.n = parseInt(n, 10); }
+      else if (b.dataset.a === 'set_member_no'){
+        var n = prompt('请输入新的会员编号（正整数，不能与别人重复）', '');
+        if (n === null) return;
+        n = String(n).trim();
+        if (!/^[1-9]\d*$/.test(n)){ alert('编号须为正整数'); return; }
+        await call('POST', '/api/admin/users/' + b.dataset.u + '/member_no', {member_no: parseInt(n, 10)});
+        msg('会员编号已改为 ' + n, false);
+        users();
+        return;
+      }
       else if (!confirm('确定对用户 ' + b.dataset.u + ' 执行：' + names[b.dataset.a] + '？')) return;
       var r = await call('POST', '/api/admin/users/' + b.dataset.u, extra);
       if (r.merchant_until) msg('商家会员已生效，到期 ' + r.merchant_until, false);
@@ -167,7 +178,7 @@ async function posts(reset){
   var d = await call('GET', '/api/admin/posts' + (plast ? '?before=' + plast : ''));
   document.getElementById('plist').insertAdjacentHTML('beforeend', d.posts.map(function(p){
     return '<div class="cmt" id="ap' + p.id + '"><div class="who">#' + p.id + ' [' + E(p.board_name) + '] ' + E(p.title) + '</div>' +
-      '<div class="ct" style="color:var(--sub)">' + E(p.author) + '（编号 ' + p.user_id + '）· ' + E(p.time) + ' · 💬' + p.comments + '</div>' +
+      '<div class="ct" style="color:var(--sub)">' + E(p.author) + '（编号 ' + p.member_no + '）· ' + E(p.time) + ' · 💬' + p.comments + '</div>' +
       '<div class="row" style="margin-top:6px"><a class="btn sm ghost" target="_blank" href="/community/post/' + p.id + '">查看</a>' +
       '<button class="btn sm gray" data-cm="' + p.id + '">管理评论</button><button class="btn sm primary" data-dp="' + p.id + '">删除帖子</button></div><div data-cl="' + p.id + '"></div></div>';
   }).join(''));
@@ -219,7 +230,7 @@ async function review(){
   var d = await call('GET', '/api/admin/pending');
   document.getElementById('rvlist').innerHTML = d.posts.length ? d.posts.map(function(p){
     return '<div class="cmt" id="rv' + p.id + '"><div class="who">#' + p.id + ' [' + E(p.board_name) + '] ' + E(p.title) + '</div>' +
-      '<div class="ct" style="color:var(--sub)">' + E(p.author) + '（编号 ' + p.user_id + '）· ' + E(p.time) + ' · ' + E(p.note || '') + '</div>' +
+      '<div class="ct" style="color:var(--sub)">' + E(p.author) + '（编号 ' + p.member_no + '）· ' + E(p.time) + ' · ' + E(p.note || '') + '</div>' +
       '<div class="ct">' + E(p.body) + '</div>' +
       (p.images.length ? '<div class="thumbs">' + p.images.map(function(i){ return '<div><img src="/api/admin/img/' + i + '" alt=""></div>'; }).join('') + '</div>' : '') +
       '<div class="row" style="margin-top:8px"><button class="btn sm primary" data-ok="' + p.id + '">通过</button><button class="btn sm gray" data-no="' + p.id + '">拒绝</button>' +
@@ -234,7 +245,7 @@ async function review(){
 async function friends(){
   var d = await call('GET', '/api/admin/friends?s=' + encodeURIComponent(document.getElementById('fs').value));
   document.getElementById('flist').innerHTML = d.profiles.length ? d.profiles.map(function(p){
-    return '<div class="cmt"><div class="who">#' + p.uid + ' ' + E(p.nickname) + '（账号昵称 ' + E(p.account_nick) + '）' + (p.verified ? '<span class="vbadge">✔ 已认证</span>' : '') +
+    return '<div class="cmt"><div class="who">#' + p.member_no + ' ' + E(p.nickname) + '（账号昵称 ' + E(p.account_nick) + '）' + (p.verified ? '<span class="vbadge">✔ 已认证</span>' : '') +
       (p.hidden ? ' <b style="color:#c62828">已隐藏</b>' : '') + (!p.visible ? ' <small>用户设为不公开</small>' : '') + (p.banned ? ' <b style="color:#c62828">已封禁</b>' : '') + '</div>' +
       '<div class="ct" style="color:var(--sub)">' + E(p.gender_name + ' · ' + p.age + '岁 · ' + (p.height ? p.height + 'cm · ' : '') + p.city + (p.area ? '/' + p.area : '') + ' · ' + p.purpose_name + (p.visa ? ' · ' + p.visa : '')) +
       ' · 被举报 ' + p.reports + ' · 可疑私信 ' + p.flagged_msgs + ' · 24h 打招呼 ' + p.greets24 + ' · 更新 ' + E(p.updated) + '</div>' +
