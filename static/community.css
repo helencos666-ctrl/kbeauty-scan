@@ -185,3 +185,5 @@ header.thero{padding:18px 18px 34px}
 .chpills{display:flex;gap:6px;overflow-x:auto;margin:0 0 12px;scrollbar-width:none}
 .chpills::-webkit-scrollbar{display:none}
 .chpills a{flex:none;text-decoration:none;font-size:13px;padding:6px 12px;border-radius:16px;background:#fff;color:var(--pink);border:1px solid #ffc6d6;font-weight:600}
+
+.ai-tag{display:inline-block;font-size:11px;padding:1px 6px;border-radius:8px;background:linear-gradient(135deg,#3d5afe,#1565c0);color:#fff;font-weight:700;margin-left:4px;vertical-align:1px;letter-spacing:.5px}

@@ -95,7 +95,7 @@ async function load(){
   document.getElementById('ctitle').textContent = '评论 ' + p.comment_list.length;
   var cl = document.getElementById('clist');
   cl.innerHTML = p.comment_list.length ? p.comment_list.map(function(c){
-    return '<div class="cmt"><div class="row" style="justify-content:space-between"><span class="who">' + LH.esc(c.author) + LH.badge(c.author_tier) +
+    return '<div class="cmt"><div class="row" style="justify-content:space-between"><span class="who">' + LH.esc(c.author) + (c.is_bot ? '<span class="ai-tag">AI</span>' : LH.badge(c.author_tier)) +
       ' <span style="font-weight:400;color:var(--sub);font-size:12px">' + LH.esc(c.time) + '</span></span><span>' +
       (c.mine ? '<button class="linkbtn" data-delc="' + c.id + '">删除</button>' : '') + '<button class="linkbtn" data-repc="' + c.id + '">举报</button></span></div>' +
       '<div class="ct">' + LH.esc(c.body) + '</div></div>';

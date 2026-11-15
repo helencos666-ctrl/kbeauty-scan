@@ -34,7 +34,7 @@
       <div class="row" style="justify-content:space-between"><b id="stats">…</b><button class="btn sm gray" id="alogout">退出后台</button></div>
     </div>
     <div class="boards" id="tabs">
-      <button data-t="users" class="on">用户/会员</button><button data-t="reports">举报</button><button data-t="posts">帖子</button><button data-t="review">审核</button><button data-t="promo">推广统计</button><button data-t="settings">价格设置</button><button data-t="friends">交友</button>
+      <button data-t="users" class="on">用户/会员</button><button data-t="reports">举报</button><button data-t="posts">帖子</button><button data-t="review">审核</button><button data-t="promo">推广统计</button><button data-t="settings">设置</button><button data-t="friends">交友</button>
     </div>
     <div class="card" id="t-users">
       <div class="row"><input class="f" id="us" placeholder="搜索编号/昵称/手机号/邮箱" style="flex:1"><button class="btn primary" id="usgo">搜索</button></div>
@@ -57,10 +57,10 @@
       </div>
     </div>
     <div class="card" id="t-settings" style="display:none">
-      <h2>价格与汇率设置</h2>
+      <h2>价格、汇率与功能设置</h2>
       <div id="setlist"></div>
       <button class="btn primary block" id="setsave" style="margin-top:12px">保存</button>
-      <p class="tip">修改后会员页、社区约定页和提示文字立即使用新价格。已开通的会员不受影响。</p>
+      <p class="tip">修改后会员页、社区约定页和提示文字立即使用新价格。已开通的会员不受影响。关闭「AI 自动回复」后，旅韩小助手不再对新帖或评论自动回复。</p>
     </div>
     <div id="t-promo" style="display:none">
       <div class="card">
@@ -265,12 +265,16 @@ document.getElementById('fsgo').onclick = friends;
 async function settings(){
   var d = await call('GET', '/api/admin/settings');
   document.getElementById('setlist').innerHTML = d.settings.map(function(x){
+    if (x.type === 'bool' || x.key === 'ai_reply'){
+      return '<label class="f" style="display:flex;align-items:center;gap:8px;font-weight:600">' +
+        '<input type="checkbox" data-k="' + E(x.key) + '" data-bool="1"' + (String(x.value)==='1' ? ' checked' : '') + '>' + E(x.label) + '</label>';
+    }
     return '<label class="f">' + E(x.label) + '</label><input class="f" type="number" step="0.01" min="0" data-k="' + E(x.key) + '" value="' + E(x.value) + '">';
   }).join('');
 }
 document.getElementById('setsave').onclick = async function(){
-  var body = {}; document.querySelectorAll('#setlist [data-k]').forEach(function(i){ body[i.dataset.k] = i.value; });
-  await call('POST', '/api/admin/settings', body); msg('价格已保存', false); settings();
+  var body = {}; document.querySelectorAll('#setlist [data-k]').forEach(function(i){ body[i.dataset.k] = i.dataset.bool ? (i.checked ? '1' : '0') : i.value; });
+  await call('POST', '/api/admin/settings', body); msg('设置已保存', false); settings();
 };
 document.getElementById('padd').onclick = async function(){
   var r = await call('POST', '/api/admin/promoters', {name: document.getElementById('pname').value, code: document.getElementById('pcode').value, commission: document.getElementById('pcom').value || 3, commission2: document.getElementById('pcom2').value || 6, commission3: document.getElementById('pcom3').value || 20, commission4: document.getElementById('pcom4').value || 200});
