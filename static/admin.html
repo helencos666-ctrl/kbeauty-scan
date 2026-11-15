@@ -34,7 +34,7 @@
       <div class="row" style="justify-content:space-between"><b id="stats">…</b><button class="btn sm gray" id="alogout">退出后台</button></div>
     </div>
     <div class="boards" id="tabs">
-      <button data-t="users" class="on">用户/会员</button><button data-t="reports">举报</button><button data-t="posts">帖子</button><button data-t="review">审核</button><button data-t="chicken">代点</button><button data-t="promo">推广统计</button><button data-t="settings">设置</button><button data-t="friends">交友</button>
+      <button data-t="users" class="on">用户/会员</button><button data-t="reports">举报</button><button data-t="posts">帖子</button><button data-t="review">审核</button><button data-t="chicken">代点</button><button data-t="promo">推广统计</button><button data-t="settings">设置</button><button data-t="friends">交友</button><button data-t="idv">实名核验</button>
     </div>
     <div class="card" id="t-users">
       <div class="row"><input class="f" id="us" placeholder="搜索编号/昵称/手机号/邮箱" style="flex:1"><button class="btn primary" id="usgo">搜索</button></div>
@@ -64,7 +64,7 @@
             <option value="chicken">炸鸡店铺</option>
           </select>
           <select class="f" id="revhid" style="flex:1;min-width:120px">
-            <option value="">全部</option>
+            <option value="all">全部</option>
             <option value="0">仅显示中</option>
             <option value="1">仅已隐藏</option>
           </select>
@@ -77,13 +77,23 @@
       <div class="card">
         <h2>交友资料</h2>
         <div class="row"><input class="f" id="fs" placeholder="搜索编号/昵称" style="flex:1"><button class="btn primary" id="fsgo">搜索</button></div>
-        <p class="tip">被举报多的排在前面。“隐藏”后资料不再出现在旅韩交友；“已认证”需你人工核实后再打开（本站没有实名认证）。</p>
+        <p class="tip">被举报多的排在前面。“隐藏”后资料不再出现在旅韩交友；“已认证”是管理员人工核实（与“已实名”不同）。旅游搭子被举报满 3 次会自动隐藏，待你处理。也可在此限制用户使用搭子功能。</p>
         <div id="flist" style="margin-top:6px"></div>
       </div>
       <div class="card">
         <h2>可疑私信（自动标记）</h2>
         <p class="tip" style="margin-top:0">私信含转账、投资、虚拟币、借钱等词会自动标记，并在双方聊天里显示防骗提醒。</p>
         <div id="mlist"></div>
+      </div>
+    </div>
+
+    <div id="t-idv" style="display:none">
+      <div class="card">
+        <h2>旅游搭子实名核验队列</h2>
+        <p class="tip" style="margin-top:0">按韩国《个人信息保护法》，不要索要或保存完整住民登录号或护照号。只核验证件后四位和证件照片（可遮挡）。通过或拒绝后照片立即删除。</p>
+        <div class="row"><select class="f" id="idvst" style="max-width:160px"><option value="pending">待审核</option><option value="all">全部</option><option value="approved">已通过</option><option value="rejected">已拒绝</option></select>
+          <button class="btn primary" id="idvgo">刷新</button></div>
+        <div id="idvlist" style="margin-top:8px"></div>
       </div>
     </div>
 
@@ -158,7 +168,7 @@ document.getElementById('alogout').onclick = async function(){ await call('POST'
 document.querySelectorAll('#tabs button').forEach(function(b){
   b.onclick = function(){
     document.querySelectorAll('#tabs button').forEach(function(x){ x.className = x === b ? 'on' : ''; document.getElementById('t-' + x.dataset.t).style.display = x === b ? 'block' : 'none'; });
-    ({users: users, reports: reports, posts: function(){ posts(true); }, promo: promo, review: review, settings: settings, friends: friends, chicken: chickenAdmin})[b.dataset.t]();
+    ({users: users, reports: reports, posts: function(){ posts(true); }, promo: promo, review: review, settings: settings, friends: friends, chicken: chickenAdmin, idv: idvQueue})[b.dataset.t]();
   };
 });
 async function boot(){
@@ -368,7 +378,7 @@ async function loadReviews(){
 async function friends(){
   var d = await call('GET', '/api/admin/friends?s=' + encodeURIComponent(document.getElementById('fs').value));
   document.getElementById('flist').innerHTML = d.profiles.length ? d.profiles.map(function(p){
-    return '<div class="cmt"><div class="who">#' + p.member_no + ' ' + E(p.nickname) + '（账号昵称 ' + E(p.account_nick) + '）' + (p.verified ? '<span class="vbadge">✔ 已认证</span>' : '') +
+    return '<div class="cmt"><div class="who">#' + p.member_no + ' ' + E(p.nickname) + '（账号昵称 ' + E(p.account_nick) + '）' + (p.verified ? '<span class="vbadge">✔ 已认证</span>' : '') + (p.id_verified ? '<span class="vbadge">已实名</span>' : '') + (p.auto_hidden ? ' <b style="color:#c62828">举报自动隐藏</b>' : '') + (p.buddy_banned ? ' <b style="color:#c62828">搭子受限</b>' : '') +
       (p.hidden ? ' <b style="color:#c62828">已隐藏</b>' : '') + (!p.visible ? ' <small>用户设为不公开</small>' : '') + (p.banned ? ' <b style="color:#c62828">已封禁</b>' : '') + '</div>' +
       '<div class="ct" style="color:var(--sub)">' + E(p.gender_name + ' · ' + p.age + '岁 · ' + (p.height ? p.height + 'cm · ' : '') + p.city + (p.area ? '/' + p.area : '') + ' · ' + p.purpose_name + (p.visa ? ' · ' + p.visa : '')) +
       ' · 被举报 ' + p.reports + ' · 可疑私信 ' + p.flagged_msgs + ' · 24h 打招呼 ' + p.greets24 + ' · 更新 ' + E(p.updated) + '</div>' +
@@ -378,13 +388,18 @@ async function friends(){
       '<button class="btn sm ' + (p.hidden ? 'gray" data-fu="' + p.uid + '" data-fa="unhide">取消隐藏' : 'primary" data-fu="' + p.uid + '" data-fa="hide">隐藏资料') + '</button>' +
       '<button class="btn sm gray" data-fu="' + p.uid + '" data-fa="' + (p.verified ? 'unverify">取消认证' : 'verify">标记已认证') + '</button>' +
       '<a class="btn sm ghost" target="_blank" href="/community/friends/' + p.uid + '">查看</a>' +
-      (p.banned ? '' : '<button class="btn sm gray" data-fban="' + p.uid + '">封禁用户</button>') + '</div></div>';
+      (p.banned ? '' : '<button class="btn sm gray" data-fban="' + p.uid + '">封禁用户</button>') + (p.purpose === 'buddy' || p.id_verified || p.buddy_banned ? '<button class="btn sm gray" data-bb="' + p.uid + '" data-bact="' + (p.buddy_banned ? 'unban">解除搭子限制' : 'ban">限制搭子功能') + '</button>' : '') + '</div></div>';
   }).join('') : '<div class="empty">没有交友资料</div>';
   document.querySelectorAll('#flist [data-fa]').forEach(function(b){ b.onclick = async function(){
     var nm = {hide: '隐藏资料', unhide: '取消隐藏', verify: '标记已认证（请确认已人工核实）', unverify: '取消认证', delete_photo: '删除这张照片'}[b.dataset.fa];
     if (!confirm('确定' + nm + '？')) return;
     await call('POST', '/api/admin/friends/' + b.dataset.fu, {action: b.dataset.fa, photo: b.dataset.ph}); friends(); }; });
   document.querySelectorAll('#flist [data-fban]').forEach(function(b){ b.onclick = async function(){ if (!confirm('封禁该用户？')) return; await call('POST', '/api/admin/users/' + b.dataset.fban, {action: 'ban'}); friends(); }; });
+  document.querySelectorAll('#flist [data-bb]').forEach(function(b){ b.onclick = async function(){
+    if (b.dataset.bact === 'unban'){ if (!confirm('解除该用户的旅游搭子限制？')) return; await call('POST', '/api/admin/buddy-ban/' + b.dataset.bb, {action: 'unban'}); }
+    else { var days = prompt('限制天数（空=永久）', '7'); if (days === null) return; var reason = prompt('原因（用户可见）', '违反旅游搭子约定'); if (reason === null) return;
+      await call('POST', '/api/admin/buddy-ban/' + b.dataset.bb, {action: 'ban', days: days, reason: reason}); }
+    friends(); }; });
   var m = await call('GET', '/api/admin/flagged-messages');
   document.getElementById('mlist').innerHTML = m.messages.length ? m.messages.map(function(x){
     return '<div class="cmt"><div class="who">' + E(x.sender) + '（#' + x.sender_id + '）→ ' + E(x.recipient) + '（#' + x.recipient_id + '）· ' + E(x.time) + (x.deleted ? ' <small>已删除</small>' : '') + (x.sender_banned ? ' <b style="color:#c62828">发送者已封禁</b>' : '') + '</div>' +
@@ -396,6 +411,27 @@ async function friends(){
   document.querySelectorAll('#mlist [data-mban]').forEach(function(b){ b.onclick = async function(){ if (!confirm('封禁该用户？')) return; await call('POST', '/api/admin/users/' + b.dataset.mban, {action: 'ban'}); friends(); }; });
 }
 document.getElementById('fsgo').onclick = friends;
+
+async function idvQueue(){
+  var st = document.getElementById('idvst').value;
+  var d = await call('GET', '/api/admin/id-verify' + (st ? ('?status=' + encodeURIComponent(st)) : ''));
+  var IT = d.id_types || {};
+  document.getElementById('idvlist').innerHTML = d.items.length ? d.items.map(function(x){
+    var typ = IT[x.id_type] || x.id_type;
+    return '<div class="cmt"><div class="who">#' + x.id + ' · 用户 #' + (x.member_no||x.user_id) + ' ' + E(x.nickname||'') +
+      ' · ' + E(x.status) + '</div>' +
+      '<div class="ct">姓名 ' + E(x.real_name) + ' · 国籍 ' + E(x.nationality) + ' · ' + E(typ) + ' · 后四位 ' + E(x.last4) +
+      ' · 提交 ' + E(x.time||'') + (x.reviewed_at ? ' · 审核 ' + E(x.reviewed_at) : '') +
+      (x.reject_reason ? ' · 原因 ' + E(x.reject_reason) : '') + '</div>' +
+      (x.has_image ? '<div class="thumbs"><div><img src="/api/admin/id-verify/' + x.id + '/image" alt="证件" style="max-height:180px"></div></div>' : '<p class="tip">证件照片已删除或不存在</p>') +
+      (x.status==='pending' ? '<div class="row" style="margin-top:8px"><button class="btn sm primary" data-iva="'+x.id+'">通过</button><button class="btn sm gray" data-ivr="'+x.id+'">拒绝</button></div>' : '') +
+      '</div>';
+  }).join('') : '<div class="empty">没有记录</div>';
+  document.querySelectorAll('#idvlist [data-iva]').forEach(function(b){ b.onclick=async function(){ if(!confirm('通过核验？通过后证件照片将立即删除。')) return; await call('POST','/api/admin/id-verify/'+b.dataset.iva,{action:'approve'}); idvQueue(); }; });
+  document.querySelectorAll('#idvlist [data-ivr]').forEach(function(b){ b.onclick=async function(){ var why=prompt('拒绝理由（申请人可见）','照片不清晰或后四位无法核对'); if(why===null) return; await call('POST','/api/admin/id-verify/'+b.dataset.ivr,{action:'reject',reason:why}); idvQueue(); }; });
+}
+document.getElementById('idvgo').onclick = idvQueue;
+
 async function settings(){
   var d = await call('GET', '/api/admin/settings');
   document.getElementById('setlist').innerHTML = d.settings.map(function(x){

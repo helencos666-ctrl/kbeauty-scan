@@ -22,7 +22,8 @@
 <main>
   <div class="antiscam" id="anti"></div>
   <div id="box"><div class="card loading">加载中…</div></div>
-  <div class="disclaimer">本站未做实名认证。“已认证”仅表示管理员人工核实过部分资料，请自行判断。</div>
+  <div class="disclaimer" id="buddyDisc" style="background:#fff8f0">仅限结伴旅游，不是交友/约会平台，禁止色情、诈骗、金钱往来，注意人身安全。</div>
+  <div class="disclaimer">“已认证”表示管理员人工核实过部分资料；“已实名”表示已通过旅游搭子实名核验（只核验证件后四位）。请自行判断。</div>
 </main>
 <div class="actbar" id="act" style="display:none"></div>
 <div class="lightbox" id="lb"><img alt=""></div>
@@ -46,13 +47,19 @@ async function load(){
       (e.status === 403 ? '<a class="btn primary" href="/member">开通会员</a>' : '<a class="btn ghost" href="/community/friends">返回旅韩交友</a>')) + '</div>';
     return;
   }
+  if (P.disclaimer) document.getElementById('buddyDisc').textContent = P.disclaimer;
+  if (P.teaser || P.need_verify){
+    document.title = '旅游搭子 · 需实名核验';
+    box.innerHTML = '<div class="card empty"><b>该资料为旅游搭子，完成实名核验后可查看详情和联系对方。</b><p class="tip">' + E(P.disclaimer||'') + '</p><p>' + E(P.nickname||'') + ' · ' + E(P.city||'') + '</p><br><a class="btn primary" href="/community/friends/verify">去实名核验</a></div>';
+    return;
+  }
   document.title = P.nickname + ' · 交友资料';
   document.getElementById('h1').textContent = '💗 ' + P.nickname;
   var gal = P.photos.length ? '<div class="pgal">' + P.photos.map(function(id){ return '<img loading="lazy" alt="" src="/api/friends/photo/' + id + '" data-z="1">'; }).join('') + '</div>' :
     '<div class="ph0">' + (P.gender === 'f' ? '👩' : '👨') + '</div>';
   box.innerHTML = '<div class="card">' + gal +
     '<div class="author-row" style="margin:14px 0 8px">' + LH.avatar(P.uid, P.nickname, P.has_avatar, 'lg') +
-    '<div><h2 style="color:var(--ink);font-size:20px;margin:0 0 4px">' + E(P.nickname) + LH.vb(P.verified) + LH.badge(P.author_tier) + '</h2>' +
+    '<div><h2 style="color:var(--ink);font-size:20px;margin:0 0 4px">' + E(P.nickname) + LH.vb(P.verified) + (P.id_verified ? '<span class="vbadge">已实名</span>' : '') + LH.badge(P.author_tier) + '</h2>' +
     '<p style="margin:0;color:var(--sub);font-size:14px">会员编号 ' + P.member_no + '</p></div></div>' +
     '<div class="chips"><span class="chip ' + (P.gender === 'f' ? 'g-f">♀ 女' : 'g-m">♂ 男') + '</span><span class="chip">' + P.age + ' 岁</span>' +
     (P.height ? '<span class="chip">' + P.height + ' cm</span>' : '') + '<span class="chip">📍 ' + E(P.city + (P.area ? ' · ' + P.area : '')) + '</span>' +
@@ -67,7 +74,17 @@ async function load(){
     document.getElementById('bk').onclick = async function(){
       if (!P.blocked && !confirm('拉黑后双方互相看不到资料，对方也不能再给你发消息。确定拉黑？')) return;
       try { var r = await LH.api('POST', '/api/friends/block/' + uid, {}); if (r.blocked){ alert('已拉黑'); location.href = '/community/friends'; } else load(); } catch(e){ alert(e.message); } };
-    document.getElementById('rp').onclick = function(){ LH.report('profile', uid); };
+    document.getElementById('rp').onclick = async function(){
+      if (P.purpose === 'buddy'){
+        var reason = prompt('举报原因请填写其一：色情骚扰、诈骗或索要钱财、虚假资料、广告营销、其他');
+        if (!reason) return;
+        var detail = prompt('补充说明（选填，最多 200 字）','') || '';
+        try { await LH.api('POST', '/api/friends/buddy-report', {target_id: uid, reason: reason, detail: detail}); alert('已提交举报，我们会尽快核查。'); }
+        catch(e){ alert(e.message); }
+        return;
+      }
+      LH.report('profile', uid);
+    };
   }
   var act = document.getElementById('act');
   if (P.mine){ act.style.display = 'none'; return; }

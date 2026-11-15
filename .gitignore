@@ -6,3 +6,7 @@ venv/
 .env.*
 .pytest_cache/
 *.egg-info/
+
+# 实名核验证件照片（审核后删除；密钥也不入库）
+/data/
+

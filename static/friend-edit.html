@@ -36,6 +36,7 @@
       <div><label class="f">签证/身份（可不填）</label><select class="f" id="visa"><option value="">不填</option></select></div>
     </div>
     <label class="f">交友目的</label><select class="f" id="purpose"><option value="">请选择</option></select>
+    <div class="disclaimer" id="buddyTip" style="display:none;background:#fff8f0">仅限结伴旅游，不是交友/约会平台，禁止色情、诈骗、金钱往来，注意人身安全。发布「找搭子」资料前需先完成<a href="/community/friends/verify">实名核验</a>。</div>
     <label class="f">自我介绍（10–500 字，不要留联系方式）</label>
     <textarea class="f" id="intro" maxlength="500" placeholder="介绍一下自己：在韩国做什么、兴趣爱好、想认识什么样的朋友"></textarea>
     <label class="f" style="display:flex;align-items:center;gap:8px"><input type="checkbox" id="visible" checked> 公开我的资料（关闭后别人看不到你）</label>
@@ -103,6 +104,18 @@ $('del').onclick = async function(){ if (!confirm('删除后资料和照片都�
   $('city').value = p.city || ''; $('area').value = p.area || ''; $('visa').value = p.visa || ''; $('purpose').value = p.purpose || ''; $('intro').value = p.intro || '';
   $('visible').checked = p.visible !== false;
   if (!D.can_edit){ $('save').disabled = true; $('save').textContent = '高级会员到期，资料不能修改（可删除或在下方关闭公开）'; $('visible').onchange = async function(){ try { await LH.api('POST', '/api/friends/me/visible', {visible: this.checked}); } catch(e){ LH.showErr(err, e.message); } }; }
+  var me = m.user || {};
+  function syncBuddy(){
+    var isBuddy = $('purpose').value === 'buddy';
+    $('buddyTip').style.display = isBuddy ? 'block' : 'none';
+    if (o.disclaimer) $('buddyTip').innerHTML = LH.esc(o.disclaimer) + ' 发布前请先完成<a href="/community/friends/verify">实名核验</a>。';
+    if (isBuddy && !me.id_verified && D.can_edit){
+      $('save').disabled = true; $('save').textContent = '请先完成旅游搭子实名核验';
+    } else if (D.can_edit){
+      $('save').disabled = false; $('save').textContent = '保存资料';
+    }
+  }
+  $('purpose').onchange = syncBuddy; syncBuddy();
   $('form').style.display = 'block';
   if (D.profile){ photos(D.profile.photos); $('photoBox').style.display = 'block'; $('del').style.display = 'block'; }
 })();

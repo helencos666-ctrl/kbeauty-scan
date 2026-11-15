@@ -373,6 +373,8 @@ def db():
                         cur.execute(MIGRATE_CHICKEN)
                         from shop_extras import MIGRATE_SHOP_EXTRAS
                         cur.execute(MIGRATE_SHOP_EXTRAS)
+                        from buddy_verify import MIGRATE_BUDDY_VERIFY
+                        cur.execute(MIGRATE_BUDDY_VERIFY)
                     ensure_bot(conn)
                     from chicken import ensure_chicken_shops
                     ensure_chicken_shops(conn)
@@ -466,7 +468,8 @@ def current_user(conn, req: Request):
         return None
     u = q(conn, """SELECT u.id,u.nickname,u.tier,u.is_banned,u.phone,u.email,u.created_at,
                       u.merchant_until,u.merchant_started,u.merchant_plan,u.merchant_credits,u.verified,
-                      u.member_no, (u.avatar IS NOT NULL OR COALESCE(u.is_bot, FALSE)) AS has_avatar,
+                      u.member_no, u.id_verified, u.buddy_banned_until, u.buddy_ban_reason,
+                      (u.avatar IS NOT NULL OR COALESCE(u.is_bot, FALSE)) AS has_avatar,
                       (u.merchant_until IS NOT NULL AND u.merchant_until>now()) AS merchant
                       FROM c_sessions s JOIN c_users u ON u.id=s.user_id
                       WHERE s.token_hash=%s AND NOT s.is_admin AND s.expires_at>now() AND NOT u.is_banned""",
@@ -794,6 +797,9 @@ def p_friends(): return _page("friends.html", "/community/friends")
 @router.get("/community/friends/edit")
 def p_friend_edit(): return _page("friend-edit.html", "/community/friends/edit")
 
+@router.get("/community/friends/verify")
+def p_buddy_verify(): return _page("buddy-verify.html", "/community/friends/verify")
+
 @router.get("/community/friends/{uid}")
 def p_friend(uid: str):
     n = int(uid) if re.fullmatch(r"\d{1,12}", uid or "") else 0
@@ -827,7 +833,7 @@ def api_me(req: Request):
                          "merchant": bool(u["merchant"]), "merchant_info": merchant_quota(conn, u),
                          "merchant_expired": bool(u["merchant_until"] and not u["merchant"]),
                          "account": mask_account(u), "joined": _ts(u["created_at"]),
-                         "verified": bool(u.get("verified")), "unread": unread, "has_profile": has_profile,
+                         "verified": bool(u.get("verified")), "id_verified": bool(u.get("id_verified")), "unread": unread, "has_profile": has_profile,
                          "has_avatar": bool(u.get("has_avatar")),
                          "points_name": pts["name"], "points_balance": pts["balance"],
                          "points_streak": pts["streak"], "coupon_available": pts["coupon_available"]},
@@ -2201,3 +2207,5 @@ from guides import router as _guides_router   # noqa: E402
 router.include_router(_guides_router)
 from shop_extras import router as _shop_extras_router   # noqa: E402
 router.include_router(_shop_extras_router)
+from buddy_verify import router as _buddy_verify_router   # noqa: E402
+router.include_router(_buddy_verify_router)

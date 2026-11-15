@@ -62,9 +62,11 @@ def contact_hits(text):
     return hits
 
 def options():
+    from buddy_verify import BUDDY_DISCLAIMER, REPORT_REASONS
     return {"genders": GENDERS, "purposes": PURPOSES, "cities": CITIES, "visa_types": VISA_TYPES,
             "age_min": AGE_MIN, "age_max": AGE_MAX, "greet_daily_limit": GREET_DAILY_LIMIT, "max_photos": MAX_PROFILE_PHOTOS,
-            "tiers": {"view": FRIEND_VIEW_TIER, "create": FRIEND_CREATE_TIER, "message": FRIEND_MSG_TIER}}
+            "tiers": {"view": FRIEND_VIEW_TIER, "create": FRIEND_CREATE_TIER, "message": FRIEND_MSG_TIER},
+            "disclaimer": BUDDY_DISCLAIMER, "report_reasons": REPORT_REASONS}
 
 def _tier_msg(conn, tier, action):
     st = get_settings(conn)
@@ -81,18 +83,19 @@ def _photos(conn, uid):
 def _profile_out(r, photos, full=True):
     o = {"uid": r["user_id"], "member_no": r.get("member_no") or r["user_id"], "nickname": r["nickname"], "gender": r["gender"], "gender_name": GENDERS.get(r["gender"], ""),
          "age": r["age"], "height": r["height"], "city": r["city"], "area": r["area"] or "", "purpose": r["purpose"],
-         "purpose_name": PURPOSES.get(r["purpose"], ""), "verified": bool(r.get("verified")), "photos": photos,
+         "purpose_name": PURPOSES.get(r["purpose"], ""), "verified": bool(r.get("verified")),
+         "id_verified": bool(r.get("id_verified")), "photos": photos,
          "cover": photos[0] if photos else None, "has_avatar": bool(r.get("has_avatar"))}
     if full:
-        o.update({"visa": r["visa"] or "", "intro": r["intro"], "visible": r["visible"], "hidden": r["hidden_by_admin"],
+        o.update({"visa": r["visa"] or "", "intro": r["intro"], "visible": r["visible"], "hidden": r["hidden_by_admin"] or r.get("auto_hidden"), "auto_hidden": bool(r.get("auto_hidden")),
                   "updated": _ts(r["updated_at"])})
     return o
 
-LIST_SQL = """SELECT d.*, u.verified, u.member_no,
+LIST_SQL = """SELECT d.*, u.verified, u.id_verified, u.member_no, u.buddy_banned_until,
     (u.avatar IS NOT NULL OR COALESCE(u.is_bot, FALSE)) AS has_avatar,
     (SELECT id FROM c_dating_photos ph WHERE ph.user_id=d.user_id ORDER BY pos, id LIMIT 1) AS cover
     FROM c_dating_profiles d JOIN c_users u ON u.id=d.user_id
-    WHERE d.visible AND NOT d.hidden_by_admin AND NOT u.is_banned"""
+    WHERE d.visible AND NOT d.hidden_by_admin AND NOT COALESCE(d.auto_hidden, FALSE) AND NOT u.is_banned"""
 
 # ---------------- 交友卡片列表 ----------------
 @router.get("/api/friends/options")
@@ -138,9 +141,17 @@ def api_list(req: Request, gender: str = "", age_min: int = 0, age_max: int = 0,
         else:
             o = _profile_out(r, [r["cover"]] if r["cover"] else [], full=False)
             o["intro"] = r["intro"][:40]
-            cards.append(o)
+            if r.get("purpose") == "buddy" and not (u and (u["id"] == r["user_id"] or (u.get("id_verified") and not __import__("buddy_verify").buddy_ban_active(u)))):
+                from buddy_verify import BUDDY_DISCLAIMER, buddy_ban_active
+                cards.append({"teaser": True, "need_verify": True, "purpose": "buddy", "purpose_name": PURPOSES["buddy"],
+                              "city": r["city"], "gender": r["gender"], "gender_name": GENDERS.get(r["gender"], ""),
+                              "age": r["age"], "nickname": (r["nickname"][:1] + "**"),
+                              "id_verified": bool(r.get("id_verified")), "disclaimer": BUDDY_DISCLAIMER})
+            else:
+                cards.append(o)
+    from buddy_verify import BUDDY_DISCLAIMER
     return {"locked": locked, "login_required": not u, "tier_required": FRIEND_VIEW_TIER, "cards": cards, "more": more,
-            "next": offset + limit_n}
+            "next": offset + limit_n, "disclaimer": BUDDY_DISCLAIMER}
 
 @router.get("/api/friends/profile/{uid}")
 def api_profile(req: Request, uid: int):
@@ -148,14 +159,21 @@ def api_profile(req: Request, uid: int):
         u = current_user(conn, req)
         if not u:
             raise HTTPException(401, "请先登录，开通会员后查看交友资料")
-        r = q(conn, """SELECT d.*, u.verified, u.is_banned, u.member_no, (CASE WHEN u.merchant_until>now() THEN 3 ELSE u.tier END) AS tier,
+        r = q(conn, """SELECT d.*, u.verified, u.id_verified, u.is_banned, u.member_no, (CASE WHEN u.merchant_until>now() THEN 3 ELSE u.tier END) AS tier,
                               (u.avatar IS NOT NULL OR COALESCE(u.is_bot, FALSE)) AS has_avatar
                        FROM c_dating_profiles d JOIN c_users u ON u.id=d.user_id WHERE d.user_id=%s""", (uid,), one=True)
         mine = uid == u["id"]
         if not mine and u["tier"] < FRIEND_VIEW_TIER:
             raise HTTPException(403, _tier_msg(conn, FRIEND_VIEW_TIER, "查看交友资料"))
-        if not r or (not mine and (r["is_banned"] or not r["visible"] or r["hidden_by_admin"])):
+        if not r or (not mine and (r["is_banned"] or not r["visible"] or r["hidden_by_admin"] or r.get("auto_hidden"))):
             raise HTTPException(404, "资料不存在或已隐藏")
+        if r.get("purpose") == "buddy" and not mine:
+            from buddy_verify import is_id_verified, buddy_ban_active, BUDDY_DISCLAIMER
+            if buddy_ban_active(u) or not is_id_verified(u):
+                return {"teaser": True, "need_verify": True, "purpose": "buddy", "purpose_name": PURPOSES["buddy"],
+                        "city": r["city"], "gender": r.get("gender"), "age": r["age"],
+                        "nickname": (r["nickname"][:1] + "**"), "id_verified": bool(r.get("id_verified")),
+                        "disclaimer": BUDDY_DISCLAIMER, "can_message": False}
         i_blocked, they_blocked = blocked_between(conn, u["id"], uid)
         if they_blocked and not mine:
             raise HTTPException(404, "资料不存在或已隐藏")
@@ -224,6 +242,9 @@ async def api_save_profile(req: Request):
     visible = bool(d.get("visible", True))
     with db() as conn:
         u = need_tier(conn, req, FRIEND_CREATE_TIER, "开通高级会员（¥{t2}）后才能发布交友资料")
+        if purpose == "buddy":
+            from buddy_verify import require_buddy_ok
+            require_buddy_ok(u, "发布旅游搭子资料")
         limit("fp:" + str(u["id"]), 20, 3600, "保存太频繁，请稍后再试")
         q(conn, """INSERT INTO c_dating_profiles(user_id,nickname,gender,age,height,city,area,visa,purpose,intro,visible)
                    VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)
@@ -313,7 +334,7 @@ def api_photo(req: Request, pid: int, t: int = 0, blur: int = 0):
         cu = current_user(conn, req)
         if cu and cu["id"] == r["user_id"]:
             return Response(bytes(r["d"]), media_type="image/jpeg", headers={"Cache-Control": "private, no-store"})
-        if not r["visible"] or r["hidden_by_admin"] or r["is_banned"]:
+        if not r["visible"] or r["hidden_by_admin"] or r.get("auto_hidden") or r["is_banned"]:
             raise HTTPException(404, "照片不存在")
         if blur:
             limit("blur:" + ip_of(req), 240, 60)     # 模糊图要实时计算，限制频率防刷 CPU
@@ -356,10 +377,13 @@ async def api_greet(req: Request, uid: int):
         u = need_tier(conn, req, FRIEND_MSG_TIER, "开通高级会员（¥{t2}）后才能打招呼和私信")
         if uid == u["id"]:
             raise HTTPException(400, "不能和自己打招呼")
-        t = q(conn, """SELECT d.user_id FROM c_dating_profiles d JOIN c_users x ON x.id=d.user_id
-                       WHERE d.user_id=%s AND d.visible AND NOT d.hidden_by_admin AND NOT x.is_banned""", (uid,), one=True)
+        t = q(conn, """SELECT d.user_id, d.purpose FROM c_dating_profiles d JOIN c_users x ON x.id=d.user_id
+                       WHERE d.user_id=%s AND d.visible AND NOT d.hidden_by_admin AND NOT COALESCE(d.auto_hidden, FALSE) AND NOT x.is_banned""", (uid,), one=True)
         if not t:
             raise HTTPException(404, "资料不存在或已隐藏")
+        if t.get("purpose") == "buddy":
+            from buddy_verify import require_buddy_ok
+            require_buddy_ok(u, "查看和联系旅游搭子")
         i_blocked, they_blocked = blocked_between(conn, u["id"], uid)
         if i_blocked:
             raise HTTPException(403, "你已拉黑对方，解除拉黑后才能打招呼")
@@ -513,7 +537,8 @@ def api_admin_friends(req: Request, s: str = ""):
             cond = " WHERE u.member_no=%s OR d.nickname ILIKE %s OR u.nickname ILIKE %s"
             like = "%" + s.replace("%", "").replace("_", "") + "%"
             args = [int(s) if s.isdigit() and len(s) < 18 else -1, like, like]
-        rows = q(conn, """SELECT d.*, u.verified, u.is_banned, u.tier, u.member_no, u.nickname AS account_nick,
+        rows = q(conn, """SELECT d.*, u.verified, u.id_verified, u.is_banned, u.tier, u.member_no, u.nickname AS account_nick,
+                 u.buddy_banned_until, u.buddy_ban_reason,
                  (u.avatar IS NOT NULL OR COALESCE(u.is_bot, FALSE)) AS has_avatar,
                  (SELECT count(*) FROM c_reports r WHERE r.target_type='profile' AND r.target_id=d.user_id AND NOT r.resolved) AS reports,
                  (SELECT count(*) FROM c_messages m WHERE m.sender_id=d.user_id AND m.flagged) AS flagged_msgs,
@@ -528,6 +553,7 @@ def api_admin_friends(req: Request, s: str = ""):
     for r in rows:
         o = _profile_out(r, photos.get(r["user_id"], []))
         o.update({"account_nick": r["account_nick"], "banned": r["is_banned"], "tier": r["tier"], "reports": r["reports"],
+                  "id_verified": bool(r.get("id_verified")), "buddy_banned": bool(r.get("buddy_banned_until")),
                   "flagged_msgs": r["flagged_msgs"], "greets24": r["greets24"]})
         out.append(o)
     return {"profiles": out}
@@ -540,7 +566,10 @@ async def api_admin_friend_action(req: Request, uid: int):
     with db() as conn:
         C.need_admin(conn, req)
         if act in ("hide", "unhide"):
-            r = q(conn, "UPDATE c_dating_profiles SET hidden_by_admin=%s WHERE user_id=%s RETURNING user_id", (act == "hide", uid), one=True)
+            if act == "hide":
+                r = q(conn, "UPDATE c_dating_profiles SET hidden_by_admin=TRUE WHERE user_id=%s RETURNING user_id", (uid,), one=True)
+            else:
+                r = q(conn, "UPDATE c_dating_profiles SET hidden_by_admin=FALSE, auto_hidden=FALSE, report_count=0 WHERE user_id=%s RETURNING user_id", (uid,), one=True)
             if not r:
                 raise HTTPException(404, "资料不存在")
             if act == "hide":

@@ -127,6 +127,12 @@ var LH = (function(){
   function friendCard(c){
     var sub = [c.age ? c.age + '岁' : '', c.height ? c.height + 'cm' : '', c.city || ''].filter(Boolean).join(' · ');
     var g = '<span class="' + (c.gender === 'f' ? 'g-f">♀' : 'g-m">♂') + '</span> ';
+    var real = c.id_verified ? '<span class="vbadge">已实名</span>' : '';
+    if (c.teaser || c.need_verify){
+      return '<a class="fcard lk" href="/community/friends/verify"><div class="ph"></div><span class="lock">🪪</span>' +
+        (c.purpose_name ? '<span class="pp">' + esc(c.purpose_name) + '</span>' : '') +
+        '<div class="in"><div class="nm">' + g + esc(c.nickname) + '</div><div class="mt">' + esc(sub) + ' · 完成实名核验后可查看详情</div></div></a>';
+    }
     if (c.locked){
       var bg = c.blur ? ' style="background-image:url(/api/friends/photo/' + c.blur + '?blur=1)"' : '';
       return '<div class="fcard lk" data-lock="1"><div class="ph"' + bg + '></div><span class="lock">🔒</span>' +
@@ -136,7 +142,7 @@ var LH = (function(){
     var bg2 = c.cover ? ' style="background-image:url(/api/friends/photo/' + c.cover + '?t=1)"' : '';
     return '<a class="fcard" href="/community/friends/' + c.uid + '"><div class="ph"' + bg2 + '>' + (c.cover ? '' : (c.gender === 'f' ? '👩' : '👨')) + '</div>' +
       (c.purpose_name ? '<span class="pp">' + esc(c.purpose_name) + '</span>' : '') +
-      '<div class="in"><div class="nm">' + avatar(c.uid, c.nickname, c.has_avatar, 'sm') + g + esc(c.nickname) + vb(c.verified) + '</div><div class="mt">' + esc(sub) + '</div></div></a>';
+      '<div class="in"><div class="nm">' + avatar(c.uid, c.nickname, c.has_avatar, 'sm') + g + esc(c.nickname) + vb(c.verified) + real + '</div><div class="mt">' + esc(sub) + '</div></div></a>';
   }
   function lockedPrompt(){
     me().then(function(d){

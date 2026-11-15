@@ -159,6 +159,12 @@ PAGES = {
         "韩国交友,旅韩助手",
         False,
     ),
+    "/community/friends/verify": (
+        "旅游搭子实名核验 · 旅韩助手",
+        "旅游搭子实名核验：只收集证件号码后四位和可供遮挡的证件照片。",
+        "实名核验,旅韩助手",
+        False,
+    ),
     "/privacy": (
         "隐私政策 · 旅韩助手",
         "旅韩助手隐私政策：收集哪些个人信息、用途、保存期限、第三方处理、跨境传输，以及如何查询、更正和删除你的信息。",
@@ -204,6 +210,7 @@ FILE_PATHS = {
     "rules.html": "/rules",
     "friends.html": "/community/friends",
     "friend-edit.html": "/community/friends/edit",
+    "buddy-verify.html": "/community/friends/verify",
     "friend.html": "/community/friends/id",
     "messages.html": "/community/messages",
     "chat.html": "/community/messages",
@@ -219,6 +226,7 @@ NOINDEX_PREFIXES = (
     "/community/messages",
     "/community/new",
     "/community/friends/edit",
+    "/community/friends/verify",
     "/login",
     "/points",
     "/coupons",
@@ -504,6 +512,7 @@ def robots():
         "Disallow: /community/messages/\n"
         "Disallow: /community/new\n"
         "Disallow: /community/friends/edit\n"
+        "Disallow: /community/friends/verify\n"
         "Disallow: /login\n"
         "\n"
         f"Sitemap: {origin}/sitemap.xml\n"
