@@ -5,12 +5,12 @@
 数据存 Postgres（环境变量 DATABASE_URL），图片以 bytea 存库。
 密钥只从环境变量读取，不写入日志或前端。
 """
-import datetime, hashlib, hmac, io, os, re, secrets, threading, time
+import datetime, hashlib, hmac, html as html_lib, io, os, re, secrets, threading, time
 from collections import defaultdict, deque
 from contextlib import contextmanager
 
 from fastapi import APIRouter, Request, Response, HTTPException, UploadFile, File, Form
-from fastapi.responses import FileResponse
+from fastapi.responses import FileResponse, HTMLResponse
 from starlette.concurrency import run_in_threadpool
 from PIL import Image, ImageOps
 
@@ -68,6 +68,9 @@ TIER_NAMES = {0: "普通用户", 1: "会员", 2: "高级会员", 3: "商家会�
 MAX_IMAGES = 6
 MAX_IMG_BYTES = 6 * 1024 * 1024          # 单张原图上限（前端已压缩，正常远小于此）
 IMG_MAX_SIDE, THUMB_SIDE = 1280, 480
+AVATAR_MAX_BYTES = 5 * 1024 * 1024       # 头像原图上限
+AVATAR_SIDE = 256
+AVATAR_FMTS = {"JPEG", "PNG", "WEBP"}
 SESSION_DAYS = 30
 ADMIN_SESSION_HOURS = 12
 COOKIE, ADMIN_COOKIE = "lh_sess", "lh_admin"
@@ -305,6 +308,11 @@ UPDATE c_users SET member_no = id WHERE member_no IS NULL;
 CREATE UNIQUE INDEX IF NOT EXISTS c_users_member_no_uidx ON c_users(member_no);
 """
 
+# 第六期：用户头像（JPEG 存 bytea，与帖子图片一样放 Postgres，避免 Render 磁盘无持久化）
+MIGRATE6 = """
+ALTER TABLE c_users ADD COLUMN IF NOT EXISTS avatar BYTEA;
+"""
+
 BOT_NICK = "旅韩小助手"
 BOT_PW_HASH = "disabled"          # 非 scrypt 格式，check_pw 恒为失败，不能登录
 AI_TIMEOUT = 20
@@ -354,6 +362,7 @@ def db():
                         cur.execute(MIGRATE3)
                         cur.execute(MIGRATE4)
                         cur.execute(MIGRATE5)
+                        cur.execute(MIGRATE6)
                     ensure_bot(conn)
                     conn.commit()
                     _schema_ready = True
@@ -446,7 +455,7 @@ def current_user(conn, req: Request):
         return None
     u = q(conn, """SELECT u.id,u.nickname,u.tier,u.is_banned,u.phone,u.email,u.created_at,
                       u.merchant_until,u.merchant_started,u.merchant_plan,u.merchant_credits,u.verified,
-                      u.member_no,
+                      u.member_no, (u.avatar IS NOT NULL OR COALESCE(u.is_bot, FALSE)) AS has_avatar,
                       (u.merchant_until IS NOT NULL AND u.merchant_until>now()) AS merchant
                       FROM c_sessions s JOIN c_users u ON u.id=s.user_id
                       WHERE s.token_hash=%s AND NOT s.is_admin AND s.expires_at>now() AND NOT u.is_banned""",
@@ -589,51 +598,193 @@ def process_image(raw: bytes):
     th.convert("RGB").save(b2, "JPEG", quality=70, optimize=True)
     return b1.getvalue(), b2.getvalue(), big.width, big.height
 
+def _to_rgb(im):
+    if im.mode in ("RGB", "L"):
+        return im
+    bg = Image.new("RGB", im.size, (255, 255, 255))
+    if im.mode in ("RGBA", "LA", "P"):
+        im = im.convert("RGBA"); bg.paste(im, mask=im.split()[-1])
+    else:
+        bg.paste(im.convert("RGB"))
+    return bg
+
+def process_avatar(raw: bytes):
+    """校验格式与大小，按拍摄方向摆正、裁成正方形、缩到 256px，重编码为无 EXIF 的 JPEG。"""
+    if len(raw) > AVATAR_MAX_BYTES:
+        raise HTTPException(413, "头像不能超过 5MB，请换一张")
+    try:
+        im = Image.open(io.BytesIO(raw))
+        im.load()
+    except Exception:
+        raise HTTPException(400, "图片无法识别，请换 JPG、PNG 或 WebP")
+    fmt = (im.format or "").upper()
+    if fmt == "JPG":
+        fmt = "JPEG"
+    if fmt not in AVATAR_FMTS:
+        raise HTTPException(400, "头像只支持 JPG、PNG 或 WebP")
+    if im.width * im.height > 50_000_000:
+        raise HTTPException(400, "图片尺寸过大")
+    im = ImageOps.exif_transpose(im)
+    im = _to_rgb(im)
+    w, h = im.size
+    side = min(w, h)
+    if side < 1:
+        raise HTTPException(400, "图片尺寸过小")
+    left, top = (w - side) // 2, (h - side) // 2
+    im = im.crop((left, top, left + side, top + side))
+    im = im.resize((AVATAR_SIDE, AVATAR_SIDE), Image.Resampling.LANCZOS)
+    buf = io.BytesIO()
+    im.convert("RGB").save(buf, "JPEG", quality=85, optimize=True)  # 不写入 EXIF
+    return buf.getvalue()
+
+_bot_av = None
+def bot_default_avatar():
+    """旅韩小助手默认头像：站点图标裁成 256 正方形 JPEG；没有图标文件时用纯色块。"""
+    global _bot_av
+    if _bot_av:
+        return _bot_av
+    for name in ("icons/icon-192.png", "icons/icon-512.png", "icons/apple-touch-icon.png"):
+        path = os.path.join(STATIC, name)
+        if os.path.isfile(path):
+            try:
+                with open(path, "rb") as f:
+                    _bot_av = process_avatar(f.read())
+                return _bot_av
+            except Exception:
+                pass
+    im = Image.new("RGB", (AVATAR_SIDE, AVATAR_SIDE), (255, 107, 143))
+    buf = io.BytesIO()
+    im.save(buf, "JPEG", quality=85, optimize=True)
+    _bot_av = buf.getvalue()
+    return _bot_av
+
+def has_avatar_row(r):
+    return bool(r.get("has_avatar") or r.get("is_bot") or r.get("avatar"))
+
 # ---------------- 页面 ----------------
-def _page(name):
-    return FileResponse(os.path.join(STATIC, name), headers={"Cache-Control": "no-cache"})
+def _esc_html(s):
+    return html_lib.escape("" if s is None else str(s))
+
+def _page(name, url_path=None, extra=None, ssr_target=None, ssr_html=""):
+    from seo import html_file_response, FILE_PATHS
+    return html_file_response(name, url_path=url_path or FILE_PATHS.get(name), extra=extra,
+                              ssr_target=ssr_target, ssr_html=ssr_html)
+
+def sitemap_public_posts(origin):
+    """公开帖子（不含旅韩交友等登录可见频道）供 sitemap 使用。"""
+    out = []
+    if not _db_url():
+        return out
+    try:
+        with db() as conn:
+            rows = q(conn, """SELECT p.id, p.created_at FROM c_posts p JOIN c_users au ON au.id=p.user_id
+                              WHERE NOT p.deleted AND p.status='published' AND NOT au.is_banned
+                                AND p.board <> ALL(%s)
+                              ORDER BY p.id DESC LIMIT 2000""", (list(LOGIN_ONLY_BOARDS),))
+        for r in rows:
+            last = r["created_at"]
+            if last and getattr(last, "tzinfo", None):
+                last = last.astimezone(datetime.timezone.utc).date().isoformat()
+            elif last:
+                last = last.date().isoformat()
+            else:
+                last = datetime.datetime.now(datetime.timezone.utc).date().isoformat()
+            out.append((origin + f"/community/post/{r['id']}", last))
+    except Exception:
+        return out
+    return out
 
 @router.get("/community")
-def p_community(): return _page("community.html")
+def p_community():
+    ssr = ""
+    if _db_url():
+        try:
+            with db() as conn:
+                rows = q(conn, """SELECT p.id, p.title, p.body, au.nickname FROM c_posts p
+                                  JOIN c_users au ON au.id=p.user_id
+                                  WHERE NOT p.deleted AND p.status='published' AND NOT au.is_banned
+                                    AND p.board <> ALL(%s)
+                                  ORDER BY p.id DESC LIMIT 20""", (list(LOGIN_ONLY_BOARDS),))
+            items = []
+            for r in rows:
+                ex = (r["body"] or "").replace("\n", " ").strip()[:80]
+                items.append(
+                    f'<a class="post" href="/community/post/{r["id"]}"><div class="txt"><h3>{_esc_html(r["title"])}</h3>'
+                    f'<p class="ex">{_esc_html(ex)}</p><div class="meta">{_esc_html(r["nickname"])}</div></div></a>'
+                )
+            if items:
+                ssr = "".join(items)
+        except Exception:
+            ssr = ""
+    return _page("community.html", "/community", ssr_target="list", ssr_html=ssr)
 
 @router.get("/community/new")
-def p_new(): return _page("community-new.html")
+def p_new(): return _page("community-new.html", "/community/new")
 
 @router.get("/community/post/{pid}")
-def p_post(pid: str): return _page("community-post.html")
+def p_post(pid: str):
+    extra, ssr = None, ""
+    path = f"/community/post/{pid}"
+    try:
+        n = int(pid)
+    except Exception:
+        n = 0
+    if n and _db_url():
+        try:
+            with db() as conn:
+                r = q(conn, """SELECT p.title, p.body, p.created_at, au.nickname
+                               FROM c_posts p JOIN c_users au ON au.id=p.user_id
+                               WHERE p.id=%s AND NOT p.deleted AND p.status='published' AND NOT au.is_banned
+                                 AND p.board <> ALL(%s)""", (n, list(LOGIN_ONLY_BOARDS)), one=True)
+            if r:
+                desc = (r["body"] or "").replace("\n", " ").strip()[:140]
+                dt = r["created_at"]
+                date = dt.astimezone(datetime.timezone.utc).isoformat() if dt and getattr(dt, "tzinfo", None) else None
+                extra = {"title": f"{r['title']} · 同路社区 · 旅韩助手",
+                         "description": desc or "同路社区里关于韩国旅游的分享。",
+                         "keywords": "韩国旅游攻略,同路社区,旅韩助手",
+                         "schema_type": "DiscussionForumPosting",
+                         "author": r["nickname"], "date": date, "index": True}
+                body = _esc_html(r["body"] or "").replace("\n", "<br>")
+                ssr = (f'<h1>{_esc_html(r["title"])}</h1>'
+                       f'<p class="meta">{_esc_html(r["nickname"])} · {_esc_html(_ts(r["created_at"]))}</p>'
+                       f'<div class="body">{body}</div>')
+        except Exception:
+            extra, ssr = None, ""
+    return _page("community-post.html", path, extra=extra, ssr_target="post", ssr_html=ssr)
 
 @router.get("/login")
-def p_login(): return _page("login.html")
+def p_login(): return _page("login.html", "/login")
 
 @router.get("/member")
-def p_member(): return _page("member.html")
+def p_member(): return _page("member.html", "/member")
 
 @router.get("/rules")
-def p_rules(): return _page("rules.html")
+def p_rules(): return _page("rules.html", "/rules")
 
 @router.get("/admin")
-def p_admin(): return _page("admin.html")
+def p_admin(): return _page("admin.html", "/admin")
 
 @router.get("/community/boards")
-def p_boards(): return _page("community-boards.html")
+def p_boards(): return _page("community-boards.html", "/community/boards")
 
 @router.get("/community/rate")
-def p_rate(): return _page("rate.html")
+def p_rate(): return _page("rate.html", "/community/rate")
 
 @router.get("/community/friends")
-def p_friends(): return _page("friends.html")
+def p_friends(): return _page("friends.html", "/community/friends")
 
 @router.get("/community/friends/edit")
-def p_friend_edit(): return _page("friend-edit.html")
+def p_friend_edit(): return _page("friend-edit.html", "/community/friends/edit")
 
 @router.get("/community/friends/{uid}")
-def p_friend(uid: str): return _page("friend.html")
+def p_friend(uid: str): return _page("friend.html", f"/community/friends/{uid}", extra={"index": False})
 
 @router.get("/community/messages")
-def p_inbox(): return _page("messages.html")
+def p_inbox(): return _page("messages.html", "/community/messages")
 
 @router.get("/community/messages/{tid}")
-def p_chat(tid: str): return _page("chat.html")
+def p_chat(tid: str): return _page("chat.html", f"/community/messages/{tid}")
 
 # ---------------- 账号 API ----------------
 @router.get("/api/community/me")
@@ -653,7 +804,8 @@ def api_me(req: Request):
                          "merchant": bool(u["merchant"]), "merchant_info": merchant_quota(conn, u),
                          "merchant_expired": bool(u["merchant_until"] and not u["merchant"]),
                          "account": mask_account(u), "joined": _ts(u["created_at"]),
-                         "verified": bool(u.get("verified")), "unread": unread, "has_profile": has_profile},
+                         "verified": bool(u.get("verified")), "unread": unread, "has_profile": has_profile,
+                         "has_avatar": bool(u.get("has_avatar"))},
                 "boards": BOARDS, "merchant_boards": sorted(MERCHANT_BOARDS), "prices": st}
 
 @router.get("/api/community/prices")
@@ -670,6 +822,42 @@ def api_my_posts(req: Request):
                           WHERE user_id=%s AND NOT deleted ORDER BY id DESC LIMIT 50""", (u["id"],))
     return {"posts": [{"id": r["id"], "board_name": BOARDS.get(r["board"], ""), "title": r["title"], "status": r["status"],
                        "note": r["review_note"], "time": _ts(r["created_at"])} for r in rows]}
+
+@router.get("/api/community/avatar/{uid}")
+def api_avatar(uid: int):
+    """公开头像：有自定义图则返回 JPEG；旅韩小助手无自定义时用站点图标。"""
+    with db() as conn:
+        r = q(conn, "SELECT avatar, is_bot, is_banned FROM c_users WHERE id=%s", (uid,), one=True)
+    if not r or r["is_banned"]:
+        raise HTTPException(404, "没有头像")
+    data = bytes(r["avatar"]) if r["avatar"] else (bot_default_avatar() if r["is_bot"] else None)
+    if not data:
+        raise HTTPException(404, "没有头像")
+    return Response(data, media_type="image/jpeg", headers={"Cache-Control": "public, max-age=120"})
+
+@router.post("/api/community/avatar")
+async def api_set_avatar(req: Request, image: UploadFile = File(...)):
+    csrf(req)
+    raw = await image.read(AVATAR_MAX_BYTES + 1)
+    with db() as conn:
+        u = need_user(conn, req)
+        if is_bot_uid(conn, u["id"]):
+            raise HTTPException(403, "系统账号不可修改")
+        limit("av:" + str(u["id"]), 8, 3600, "更换头像太频繁，请一小时后再试")
+        limit("avip:" + ip_of(req), 20, 3600, "更换头像太频繁，请一小时后再试")
+        data = process_avatar(raw)
+        q(conn, "UPDATE c_users SET avatar=%s WHERE id=%s", (data, u["id"]))
+    return {"ok": True, "has_avatar": True}
+
+@router.delete("/api/community/avatar")
+def api_del_avatar(req: Request):
+    csrf(req)
+    with db() as conn:
+        u = need_user(conn, req)
+        if is_bot_uid(conn, u["id"]):
+            raise HTTPException(403, "系统账号不可修改")
+        q(conn, "UPDATE c_users SET avatar=NULL WHERE id=%s", (u["id"],))
+    return {"ok": True, "has_avatar": False}
 
 @router.post("/api/community/register")
 async def api_register(req: Request, resp: Response):
@@ -969,7 +1157,8 @@ def schedule_ai_reply(kind, post_id, trigger_user_id, comment_body=None):
 # ---------------- 帖子 API ----------------
 def _post_out(r, full=False):
     o = {"id": r["id"], "board": r["board"], "board_name": BOARDS.get(r["board"], ""), "title": r["title"],
-         "author": r["nickname"], "author_tier": r["tier"], "likes": r["like_count"],
+         "author": r["nickname"], "author_id": r.get("user_id") or r.get("author_id"),
+         "author_tier": r["tier"], "has_avatar": has_avatar_row(r), "likes": r["like_count"],
          "comments": r["comment_count"], "time": _ts(r["created_at"]),
          "merchant": bool(r.get("is_merchant")), "status": r.get("status", "published")}
     if full:
@@ -997,6 +1186,7 @@ def api_posts(req: Request, board: str = "", before: int = 0, limit_n: int = 20)
         if before > 0:
             cond.append("p.id<%s"); args.append(before)
         rows = q(conn, f"""SELECT p.*, au.nickname, (CASE WHEN au.merchant_until>now() THEN 3 ELSE au.tier END) AS tier,
+                 (au.avatar IS NOT NULL OR COALESCE(au.is_bot, FALSE)) AS has_avatar,
                  (SELECT id FROM c_images i WHERE i.post_id=p.id ORDER BY pos LIMIT 1) AS cover,
                  (SELECT count(*) FROM c_images i WHERE i.post_id=p.id) AS img_n
                  FROM c_posts p JOIN c_users au ON au.id=p.user_id
@@ -1048,6 +1238,7 @@ def api_feed(req: Request, tab: str = "recommend", boards: str = "", offset: int
 
         def run(extra, eargs):
             return q(conn, f"""SELECT p.*, au.nickname, au.verified, (CASE WHEN au.merchant_until>now() THEN 3 ELSE au.tier END) AS tier,
+                     (au.avatar IS NOT NULL OR COALESCE(au.is_bot, FALSE)) AS has_avatar,
                      {score} AS score,
                      (SELECT id FROM c_images i WHERE i.post_id=p.id ORDER BY pos LIMIT 1) AS cover,
                      (SELECT count(*) FROM c_images i WHERE i.post_id=p.id) AS img_n
@@ -1139,7 +1330,9 @@ def api_rate():
 def api_post(req: Request, pid: int):
     with db() as conn:
         u = current_user(conn, req)
-        r = q(conn, """SELECT p.*, au.nickname, au.verified, (CASE WHEN au.merchant_until>now() THEN 3 ELSE au.tier END) AS tier FROM c_posts p JOIN c_users au ON au.id=p.user_id
+        r = q(conn, """SELECT p.*, au.nickname, au.verified, (CASE WHEN au.merchant_until>now() THEN 3 ELSE au.tier END) AS tier,
+                              (au.avatar IS NOT NULL OR COALESCE(au.is_bot, FALSE)) AS has_avatar
+                       FROM c_posts p JOIN c_users au ON au.id=p.user_id
                        WHERE p.id=%s AND NOT p.deleted AND NOT au.is_banned""", (pid,), one=True)
         if not r or (r["status"] != "published" and not (u and u["id"] == r["user_id"])):
             raise HTTPException(404, "帖子不存在或已删除")
@@ -1148,7 +1341,10 @@ def api_post(req: Request, pid: int):
         if r["board"] in LOGIN_ONLY_BOARDS and u["tier"] < 1:
             raise HTTPException(403, "旅韩交友频道需开通会员（¥%s）后查看" % price(conn, "price_t1"))
         imgs = q(conn, "SELECT id,width,height FROM c_images WHERE post_id=%s ORDER BY pos", (pid,))
-        cms = q(conn, """SELECT c.id,c.body,c.created_at,c.user_id,au.nickname,au.is_bot,(CASE WHEN au.merchant_until>now() THEN 3 ELSE au.tier END) AS tier FROM c_comments c
+        cms = q(conn, """SELECT c.id,c.body,c.created_at,c.user_id,au.nickname,au.is_bot,
+                                 (CASE WHEN au.merchant_until>now() THEN 3 ELSE au.tier END) AS tier,
+                                 (au.avatar IS NOT NULL OR COALESCE(au.is_bot, FALSE)) AS has_avatar
+                         FROM c_comments c
                          JOIN c_users au ON au.id=c.user_id
                          WHERE c.post_id=%s AND NOT c.deleted AND NOT au.is_banned ORDER BY c.id LIMIT 500""", (pid,))
         liked = bool(u and q(conn, "SELECT 1 AS x FROM c_likes WHERE post_id=%s AND user_id=%s", (pid, u["id"]), one=True))
@@ -1162,7 +1358,8 @@ def api_post(req: Request, pid: int):
     o["mine"] = bool(u and u["id"] == r["user_id"])
     o["comment_tier"] = 2 if r["board"] in LOGIN_ONLY_BOARDS else 1
     o["review_note"] = r.get("review_note")
-    o["comment_list"] = [{"id": c["id"], "body": c["body"], "author": c["nickname"], "author_tier": c["tier"],
+    o["comment_list"] = [{"id": c["id"], "body": c["body"], "author": c["nickname"], "author_id": c["user_id"],
+                          "author_tier": c["tier"], "has_avatar": has_avatar_row(c),
                           "time": _ts(c["created_at"]), "mine": bool(u and u["id"] == c["user_id"]),
                           "is_bot": bool(c.get("is_bot"))} for c in cms]
     return o
@@ -1378,11 +1575,24 @@ def api_admin_users(req: Request, s: str = ""):
         s = s.strip()[:60]
         if s:
             like = "%" + s.replace("%", "").replace("_", "") + "%"
-            idq = int(s) if s.isdigit() and len(s) < 18 else -1
-            rows = q(conn, """SELECT * FROM c_users WHERE member_no=%s OR nickname ILIKE %s OR email ILIKE %s OR phone ILIKE %s
-                              ORDER BY id DESC LIMIT 50""", (idq, like, like, like))
+            # 纯数字按对外会员编号精确查找，避免命中邮箱/手机号里的数字片段
+            if s.isdigit() and len(s) < 18:
+                rows = q(conn, """SELECT id,phone,email,nickname,tier,is_banned,created_at,promoter_code,member_since,tier2_since,
+                                         merchant_until,merchant_plan,merchant_credits,last_login,verified,is_bot,member_no,
+                                         (avatar IS NOT NULL OR COALESCE(is_bot, FALSE)) AS has_avatar
+                                  FROM c_users WHERE member_no=%s
+                                  ORDER BY id DESC LIMIT 50""", (int(s),))
+            else:
+                rows = q(conn, """SELECT id,phone,email,nickname,tier,is_banned,created_at,promoter_code,member_since,tier2_since,
+                                         merchant_until,merchant_plan,merchant_credits,last_login,verified,is_bot,member_no,
+                                         (avatar IS NOT NULL OR COALESCE(is_bot, FALSE)) AS has_avatar
+                                  FROM c_users WHERE nickname ILIKE %s OR email ILIKE %s OR phone ILIKE %s
+                                  ORDER BY id DESC LIMIT 50""", (like, like, like))
         else:
-            rows = q(conn, "SELECT * FROM c_users ORDER BY id DESC LIMIT 50")
+            rows = q(conn, """SELECT id,phone,email,nickname,tier,is_banned,created_at,promoter_code,member_since,tier2_since,
+                                     merchant_until,merchant_plan,merchant_credits,last_login,verified,is_bot,member_no,
+                                     (avatar IS NOT NULL OR COALESCE(is_bot, FALSE)) AS has_avatar
+                              FROM c_users ORDER BY id DESC LIMIT 50""")
     return {"users": [{"id": r["id"], "member_no": r.get("member_no") or r["id"], "nickname": r["nickname"], "account": r["email"] or r["phone"],
                        "tier": r["tier"], "is_banned": r["is_banned"], "joined": _ts(r["created_at"]),
                        "promoter": r.get("promoter_code"),
@@ -1390,7 +1600,8 @@ def api_admin_users(req: Request, s: str = ""):
                        "merchant_until": _ts(r["merchant_until"]), "merchant_plan": r["merchant_plan"],
                        "merchant_active": bool(r["merchant_until"] and r["merchant_until"] > datetime.datetime.now(datetime.timezone.utc)),
                        "merchant_credits": r["merchant_credits"], "last_login": _ts(r["last_login"]),
-                       "verified": bool(r.get("verified")), "is_bot": bool(r.get("is_bot"))} for r in rows]}
+                       "verified": bool(r.get("verified")), "is_bot": bool(r.get("is_bot")),
+                       "has_avatar": has_avatar_row(r)} for r in rows]}
 
 @router.post("/api/admin/users/{uid}")
 async def api_admin_user_action(req: Request, uid: int):
@@ -1477,6 +1688,18 @@ async def api_admin_set_member_no(req: Request, uid: int):
             raise HTTPException(409, "这个编号已被占用")
         q(conn, "UPDATE c_users SET member_no=%s WHERE id=%s", (n, uid))
     return {"ok": True, "member_no": n}
+
+@router.post("/api/admin/users/{uid}/clear_avatar")
+def api_admin_clear_avatar(req: Request, uid: int):
+    csrf(req)
+    with db() as conn:
+        need_admin(conn, req)
+        if not q(conn, "SELECT id FROM c_users WHERE id=%s", (uid,), one=True):
+            raise HTTPException(404, "用户不存在")
+        if is_bot_uid(conn, uid):
+            raise HTTPException(403, "系统账号不可修改")
+        q(conn, "UPDATE c_users SET avatar=NULL WHERE id=%s", (uid,))
+    return {"ok": True}
 
 @router.get("/api/admin/posts")
 def api_admin_posts(req: Request, before: int = 0):

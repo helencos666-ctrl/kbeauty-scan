@@ -82,13 +82,14 @@ def _profile_out(r, photos, full=True):
     o = {"uid": r["user_id"], "member_no": r.get("member_no") or r["user_id"], "nickname": r["nickname"], "gender": r["gender"], "gender_name": GENDERS.get(r["gender"], ""),
          "age": r["age"], "height": r["height"], "city": r["city"], "area": r["area"] or "", "purpose": r["purpose"],
          "purpose_name": PURPOSES.get(r["purpose"], ""), "verified": bool(r.get("verified")), "photos": photos,
-         "cover": photos[0] if photos else None}
+         "cover": photos[0] if photos else None, "has_avatar": bool(r.get("has_avatar"))}
     if full:
         o.update({"visa": r["visa"] or "", "intro": r["intro"], "visible": r["visible"], "hidden": r["hidden_by_admin"],
                   "updated": _ts(r["updated_at"])})
     return o
 
 LIST_SQL = """SELECT d.*, u.verified, u.member_no,
+    (u.avatar IS NOT NULL OR COALESCE(u.is_bot, FALSE)) AS has_avatar,
     (SELECT id FROM c_dating_photos ph WHERE ph.user_id=d.user_id ORDER BY pos, id LIMIT 1) AS cover
     FROM c_dating_profiles d JOIN c_users u ON u.id=d.user_id
     WHERE d.visible AND NOT d.hidden_by_admin AND NOT u.is_banned"""
@@ -147,7 +148,8 @@ def api_profile(req: Request, uid: int):
         u = current_user(conn, req)
         if not u:
             raise HTTPException(401, "请先登录，开通会员后查看交友资料")
-        r = q(conn, """SELECT d.*, u.verified, u.is_banned, u.member_no, (CASE WHEN u.merchant_until>now() THEN 3 ELSE u.tier END) AS tier
+        r = q(conn, """SELECT d.*, u.verified, u.is_banned, u.member_no, (CASE WHEN u.merchant_until>now() THEN 3 ELSE u.tier END) AS tier,
+                              (u.avatar IS NOT NULL OR COALESCE(u.is_bot, FALSE)) AS has_avatar
                        FROM c_dating_profiles d JOIN c_users u ON u.id=d.user_id WHERE d.user_id=%s""", (uid,), one=True)
         mine = uid == u["id"]
         if not mine and u["tier"] < FRIEND_VIEW_TIER:
@@ -173,7 +175,9 @@ def api_profile(req: Request, uid: int):
 def api_my_profile(req: Request):
     with db() as conn:
         u = need_user(conn, req)
-        r = q(conn, "SELECT d.*, u.verified, u.member_no FROM c_dating_profiles d JOIN c_users u ON u.id=d.user_id WHERE d.user_id=%s",
+        r = q(conn, """SELECT d.*, u.verified, u.member_no,
+                              (u.avatar IS NOT NULL OR COALESCE(u.is_bot, FALSE)) AS has_avatar
+                       FROM c_dating_profiles d JOIN c_users u ON u.id=d.user_id WHERE d.user_id=%s""",
               (u["id"],), one=True)
         photos = _photos(conn, u["id"]) if r else []
         st = get_settings(conn)
@@ -412,6 +416,7 @@ def _names(conn, ids):
     if not ids:
         return {}
     rows = q(conn, """SELECT u.id, COALESCE(d.nickname, u.nickname) AS nick, u.verified, u.is_banned,
+                      (u.avatar IS NOT NULL OR COALESCE(u.is_bot, FALSE)) AS has_avatar,
                       (SELECT id FROM c_dating_photos ph WHERE ph.user_id=u.id ORDER BY pos, id LIMIT 1) AS cover,
                       (d.user_id IS NOT NULL AND d.visible AND NOT d.hidden_by_admin) AS has_profile
                       FROM c_users u LEFT JOIN c_dating_profiles d ON d.user_id=u.id WHERE u.id = ANY(%s)""", (list(ids),))
@@ -434,6 +439,7 @@ def api_threads(req: Request):
             continue
         n = names.get(r["other"], {})
         out.append({"id": r["id"], "other": r["other"], "nickname": n.get("nick", "用户"), "verified": bool(n.get("verified")),
+                    "has_avatar": bool(n.get("has_avatar")),
                     "cover": n.get("cover") if n.get("has_profile") else None, "last": r["last_body"][:40],
                     "time": _ts(r["last_at"]), "unread": 0 if r["other"] in blocked else r["unread"], "flagged": r["flagged"],
                     "blocked": r["other"] in blocked, "banned": bool(n.get("is_banned"))})
@@ -450,6 +456,7 @@ def api_thread(req: Request, tid: int):
         n = _names(conn, {th["other"]}).get(th["other"], {})
         i_blocked, they_blocked = blocked_between(conn, u["id"], th["other"])
     return {"id": tid, "other": th["other"], "nickname": n.get("nick", "用户"), "verified": bool(n.get("verified")),
+            "has_avatar": bool(n.get("has_avatar")),
             "cover": n.get("cover") if n.get("has_profile") else None, "has_profile": bool(n.get("has_profile")),
             "blocked": i_blocked, "banned": bool(n.get("is_banned")),
             "can_send": u["tier"] >= FRIEND_MSG_TIER and not i_blocked and not they_blocked and not n.get("is_banned"),
@@ -502,6 +509,7 @@ def api_admin_friends(req: Request, s: str = ""):
             like = "%" + s.replace("%", "").replace("_", "") + "%"
             args = [int(s) if s.isdigit() and len(s) < 18 else -1, like, like]
         rows = q(conn, """SELECT d.*, u.verified, u.is_banned, u.tier, u.member_no, u.nickname AS account_nick,
+                 (u.avatar IS NOT NULL OR COALESCE(u.is_bot, FALSE)) AS has_avatar,
                  (SELECT count(*) FROM c_reports r WHERE r.target_type='profile' AND r.target_id=d.user_id AND NOT r.resolved) AS reports,
                  (SELECT count(*) FROM c_messages m WHERE m.sender_id=d.user_id AND m.flagged) AS flagged_msgs,
                  (SELECT count(*) FROM c_messages m WHERE m.sender_id=d.user_id AND m.kind='greet' AND m.created_at>now()-interval '1 day') AS greets24

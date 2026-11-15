@@ -124,7 +124,9 @@ async def chat(messages, max_tokens=1500):
 app = FastAPI(docs_url=None, redoc_url=None, openapi_url=None)
 
 from community import router as community_router, ref_middleware
+from seo import router as seo_router, html_file_response
 app.include_router(community_router)
+app.include_router(seo_router)
 app.middleware("http")(ref_middleware)
 
 @app.middleware("http")
@@ -326,31 +328,31 @@ async def http_exc(request, exc):
 def healthz(): return {"ok": True}
 
 @app.get("/")
-def index(): return FileResponse(os.path.join(BASE, "static", "index.html"), headers={"Cache-Control": "no-cache"})
+def index(): return html_file_response("index.html", "/")
 
 @app.get("/attractions")
 def attractions():
-    return FileResponse(os.path.join(BASE, "static", "attractions.html"), headers={"Cache-Control": "no-cache"})
+    return html_file_response("attractions.html", "/attractions")
 
 @app.get("/food")
 def food():
-    return FileResponse(os.path.join(BASE, "static", "food.html"), headers={"Cache-Control": "no-cache"})
+    return html_file_response("food.html", "/food")
 
 @app.get("/shopping")
 def shopping():
-    return FileResponse(os.path.join(BASE, "static", "shopping.html"), headers={"Cache-Control": "no-cache"})
+    return html_file_response("shopping.html", "/shopping")
 
 @app.get("/tips")
 def tips():
-    return FileResponse(os.path.join(BASE, "static", "tips.html"), headers={"Cache-Control": "no-cache"})
+    return html_file_response("tips.html", "/tips")
 
 @app.get("/faq")
 def faq():
-    return FileResponse(os.path.join(BASE, "static", "faq.html"), headers={"Cache-Control": "no-cache"})
+    return html_file_response("faq.html", "/faq")
 
 @app.get("/beauty")
 def beauty():
-    return FileResponse(os.path.join(BASE, "static", "beauty.html"), headers={"Cache-Control": "no-cache"})
+    return html_file_response("beauty.html", "/beauty")
 
 @app.get("/manifest.webmanifest")
 def webmanifest():

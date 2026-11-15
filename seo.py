@@ -1,0 +1,445 @@
+"""旅韩助手 · 搜索引擎优化：把每页独特的中文标题、描述、canonical、
+Open Graph/Twitter、hreflang、JSON-LD 和站长验证标签写入 HTML；
+并提供 /robots.txt、/sitemap.xml 与 IndexNow 密钥文件。
+验证码只在对应环境变量有值时输出，不把密钥写进仓库。"""
+import datetime, html, os, re
+
+from fastapi import APIRouter, HTTPException
+from fastapi.responses import HTMLResponse, Response
+
+BASE = os.path.dirname(os.path.abspath(__file__))
+STATIC = os.path.join(BASE, "static")
+INDEXNOW_FILE = os.path.join(BASE, "indexnow.key")
+OG_PATH = "/static/og-cover.jpg"
+DEFAULT_SITE = "https://lvhanzhushou.com"
+
+# 路径 → (标题, 描述, 关键词, 是否索引)
+PAGES = {
+    "/": (
+        "旅韩助手｜韩国旅游攻略与首尔自由行",
+        "旅韩助手免费提供韩国旅游攻略、首尔自由行路线、韩国景点指南、韩妆识别、地铁换乘和同路社区交流，方便中国游客赴韩出行。",
+        "旅韩助手,韩国旅游攻略,首尔自由行,韩国景点,韩国交友",
+        True,
+    ),
+    "/attractions": (
+        "韩国景点指南｜免费景点与首尔名胜 · 旅韩助手",
+        "韩国景点与免费游览地指南：首尔宫殿、市场、自然风光与季节活动，适合首尔自由行和韩国旅游攻略参考。",
+        "韩国景点,首尔景点,韩国旅游攻略,旅韩助手",
+        True,
+    ),
+    "/food": (
+        "韩国美食指南｜首尔吃什么 · 旅韩助手",
+        "韩国美食与首尔吃喝指南：热门商圈、经典小吃和实用点餐提示，给首尔自由行做参考，信息来自公开资料与实地经验。",
+        "韩国美食,首尔美食,韩国旅游攻略,旅韩助手",
+        True,
+    ),
+    "/shopping": (
+        "韩国购物指南｜明洞药妆与退税须知 · 旅韩助手",
+        "韩国购物与明洞药妆实用提示：商圈路线、退税和沟通要点，帮助中国游客在韩国更顺利地购物。",
+        "韩国购物,明洞,韩国药妆,韩国旅游攻略,旅韩助手",
+        True,
+    ),
+    "/tips": (
+        "韩国旅游攻略｜签证交通安全与礼仪 · 旅韩助手",
+        "中国游客赴韩签证、交通、安全、礼仪与防骗提醒，资料来自官方网站，适合制定首尔自由行和韩国旅游攻略。",
+        "韩国旅游攻略,赴韩签证,首尔自由行,旅韩助手",
+        True,
+    ),
+    "/beauty": (
+        "韩国皮肤管理与医美须知 · 旅韩助手",
+        "赴韩皮肤管理、医美相关的中立须知与注意事项，帮助你自行了解与核实，不推荐具体机构，不承诺效果。",
+        "韩国皮肤管理,韩国医美,韩国旅游攻略,旅韩助手",
+        True,
+    ),
+    "/faq": (
+        "赴韩常见问题｜签证与出行解答 · 旅韩助手",
+        "赴韩签证、交通、手机上网和出行常见问题解答，信息仅供参考，请以官方说明为准。",
+        "赴韩签证,韩国旅游攻略,旅韩助手",
+        True,
+    ),
+    "/community": (
+        "同路社区｜韩国旅游经验与韩国交友 · 旅韩助手",
+        "旅韩助手同路社区：去韩国前问问走过的人。踩坑避雷、结伴同行、签证问答、留学打听、租房找房和韩国交友。",
+        "韩国交友,韩国旅游攻略,同路社区,旅韩助手",
+        True,
+    ),
+    "/community/boards": (
+        "同路社区频道｜踩坑避雷签证留学租房 · 旅韩助手",
+        "按主题浏览同路社区频道：踩坑避雷、结伴同行、签证问答、留学打听、租房找房、韩国交友和出行提醒。",
+        "韩国旅游攻略,韩国交友,同路社区,旅韩助手",
+        True,
+    ),
+    "/community/friends": (
+        "韩国交友｜旅韩交友与找搭子 · 旅韩助手",
+        "同路社区·旅韩交友：在韩国认识新朋友、找旅行搭子、语言交换。请注意防骗，不要转账或透露证件。",
+        "韩国交友,旅韩交友,旅韩助手",
+        True,
+    ),
+    "/community/rate": (
+        "人民币韩元汇率换算 · 旅韩助手",
+        "人民币与韩元参考汇率换算，方便制定韩国旅游攻略和出行预算。汇率仅供参考，请以实际成交为准。",
+        "韩元汇率,韩国旅游攻略,旅韩助手",
+        True,
+    ),
+    "/member": (
+        "同路社区会员说明 · 旅韩助手",
+        "了解旅韩助手同路社区会员、高级会员和商家会员的权限与开通方式，用于发帖、韩国交友和查阅资料。",
+        "同路社区,韩国交友,旅韩助手",
+        True,
+    ),
+    "/rules": (
+        "同路社区约定 · 旅韩助手",
+        "旅韩助手同路社区约定：真实分享、防骗、商家信息规范，以及签证留学内容仅供参考、本站不代办。",
+        "同路社区,旅韩助手,韩国交友",
+        True,
+    ),
+    "/login": (
+        "登录或注册 · 旅韩助手",
+        "登录或注册旅韩助手同路社区，参与韩国旅游经验交流和韩国交友。",
+        "旅韩助手,同路社区",
+        False,
+    ),
+    "/community/new": (
+        "发帖 · 同路社区 · 旅韩助手",
+        "在旅韩助手同路社区发布图文帖子，分享韩国旅游经验。",
+        "同路社区,旅韩助手",
+        False,
+    ),
+    "/community/friends/edit": (
+        "编辑交友资料 · 旅韩助手",
+        "编辑你在同路社区的旅韩交友资料。",
+        "韩国交友,旅韩助手",
+        False,
+    ),
+    "/admin": (
+        "管理后台 · 旅韩助手",
+        "旅韩助手管理后台",
+        "旅韩助手",
+        False,
+    ),
+}
+
+FILE_PATHS = {
+    "index.html": "/",
+    "attractions.html": "/attractions",
+    "food.html": "/food",
+    "shopping.html": "/shopping",
+    "tips.html": "/tips",
+    "beauty.html": "/beauty",
+    "faq.html": "/faq",
+    "community.html": "/community",
+    "community-boards.html": "/community/boards",
+    "community-new.html": "/community/new",
+    "community-post.html": "/community/post",
+    "login.html": "/login",
+    "member.html": "/member",
+    "rules.html": "/rules",
+    "friends.html": "/community/friends",
+    "friend-edit.html": "/community/friends/edit",
+    "friend.html": "/community/friends/id",
+    "messages.html": "/community/messages",
+    "chat.html": "/community/messages",
+    "rate.html": "/community/rate",
+    "admin.html": "/admin",
+}
+
+NOINDEX_PREFIXES = (
+    "/admin",
+    "/api/",
+    "/community/messages",
+    "/community/new",
+    "/community/friends/edit",
+    "/login",
+)
+
+SITEMAP_PATHS = [
+    "/", "/attractions", "/food", "/shopping", "/tips", "/beauty", "/faq",
+    "/community", "/community/boards", "/community/rate", "/community/friends",
+    "/rules", "/member",
+]
+
+router = APIRouter()
+
+
+def site_origin() -> str:
+    return (os.environ.get("PUBLIC_BASE_URL") or os.environ.get("SITE_URL") or DEFAULT_SITE).rstrip("/")
+
+
+def indexnow_key() -> str:
+    if os.path.isfile(INDEXNOW_FILE):
+        k = open(INDEXNOW_FILE, encoding="utf-8").read().strip()
+        if re.fullmatch(r"[A-Za-z0-9\-]+", k) and 8 <= len(k) <= 128:
+            return k
+    raise RuntimeError("missing indexnow key")
+
+
+def _esc(s) -> str:
+    return html.escape("" if s is None else str(s), quote=True)
+
+
+def page_meta(url_path: str, extra=None):
+    extra = extra or {}
+    path = url_path.split("?")[0] or "/"
+    if not path.startswith("/"):
+        path = "/" + path
+    base = PAGES.get(path)
+    if not base:
+        for pref, data in PAGES.items():
+            if pref != "/" and path.startswith(pref + "/"):
+                base = data
+                break
+    title = extra.get("title") or (base[0] if base else "旅韩助手｜韩国旅游攻略")
+    desc = extra.get("description") or (base[1] if base else "旅韩助手：韩国旅游攻略、首尔自由行、韩国景点和同路社区。")
+    keys = extra.get("keywords") or (base[2] if base else "旅韩助手,韩国旅游攻略,首尔自由行,韩国景点,韩国交友")
+    indexable = extra["index"] if "index" in extra else (base[3] if base else not any(path.startswith(p) for p in NOINDEX_PREFIXES))
+    if any(path.startswith(p) for p in NOINDEX_PREFIXES):
+        indexable = False
+    return title, desc, keys, indexable, path
+
+
+def verification_tags() -> str:
+    tags = []
+    g = (os.environ.get("GOOGLE_SITE_VERIFICATION") or "").strip()
+    b = (os.environ.get("BAIDU_SITE_VERIFICATION") or "").strip()
+    n = (os.environ.get("NAVER_SITE_VERIFICATION") or "").strip()
+    if g:
+        tags.append(f'<meta name="google-site-verification" content="{_esc(g)}">')
+    if b:
+        tags.append(f'<meta name="baidu-site-verification" content="{_esc(b)}">')
+    if n:
+        tags.append(f'<meta name="naver-site-verification" content="{_esc(n)}">')
+    return "\n".join(tags)
+
+
+def json_ld(origin, title, desc, path, extra=None):
+    extra = extra or {}
+    org = {
+        "@type": "Organization",
+        "@id": origin + "/#org",
+        "name": "旅韩助手",
+        "url": origin + "/",
+        "logo": origin + "/static/icons/icon-512.png",
+    }
+    website = {
+        "@type": "WebSite",
+        "@id": origin + "/#website",
+        "name": "旅韩助手",
+        "alternateName": ["Korea Travel Assistant", "同路社区"],
+        "url": origin + "/",
+        "inLanguage": "zh-CN",
+        "description": "韩国旅游攻略、首尔自由行、韩国景点与同路社区交流。",
+        "publisher": {"@id": origin + "/#org"},
+    }
+    page = {
+        "@type": extra.get("schema_type") or "WebPage",
+        "@id": origin + path + "#webpage",
+        "url": origin + path,
+        "name": title,
+        "description": desc,
+        "inLanguage": "zh-CN",
+        "isPartOf": {"@id": origin + "/#website"},
+    }
+    if extra.get("date"):
+        page["datePublished"] = extra["date"]
+    if extra.get("author"):
+        page["author"] = {"@type": "Person", "name": extra["author"]}
+    graph = [org, website, page]
+    import json
+    return '<script type="application/ld+json">' + json.dumps({"@context": "https://schema.org", "@graph": graph}, ensure_ascii=False, separators=(",", ":")) + "</script>"
+
+
+def head_extra(url_path: str, extra=None) -> str:
+    title, desc, keys, indexable, path = page_meta(url_path, extra)
+    origin = site_origin()
+    canon = origin + (path if path != "/" else "/")
+    if path == "/":
+        canon = origin + "/"
+    og_img = origin + OG_PATH
+    robots = "index,follow" if indexable else "noindex,nofollow"
+    parts = [
+        f'<link rel="canonical" href="{_esc(canon)}">',
+        f'<link rel="alternate" hreflang="zh-CN" href="{_esc(canon)}">',
+        f'<link rel="alternate" hreflang="zh" href="{_esc(canon)}">',
+        f'<link rel="alternate" hreflang="x-default" href="{_esc(canon)}">',
+        f'<meta name="robots" content="{robots}">',
+        f'<meta name="keywords" content="{_esc(keys)}">',
+        f'<meta property="og:type" content="{"article" if extra and extra.get("schema_type") else "website"}">',
+        f'<meta property="og:site_name" content="旅韩助手">',
+        f'<meta property="og:locale" content="zh_CN">',
+        f'<meta property="og:title" content="{_esc(title)}">',
+        f'<meta property="og:description" content="{_esc(desc)}">',
+        f'<meta property="og:url" content="{_esc(canon)}">',
+        f'<meta property="og:image" content="{_esc(og_img)}">',
+        f'<meta property="og:image:width" content="1200">',
+        f'<meta property="og:image:height" content="630">',
+        f'<meta name="twitter:card" content="summary_large_image">',
+        f'<meta name="twitter:title" content="{_esc(title)}">',
+        f'<meta name="twitter:description" content="{_esc(desc)}">',
+        f'<meta name="twitter:image" content="{_esc(og_img)}">',
+        json_ld(origin, title, desc, path if path != "/" else "/", extra),
+    ]
+    v = verification_tags()
+    if v:
+        parts.append(v)
+    return "\n".join(parts)
+
+
+def _ensure_lang(html_text: str) -> str:
+    if re.search(r"<html[^>]*lang=", html_text, re.I):
+        return re.sub(r"(<html\b[^>]*\blang=)['\"][^'\"]*['\"]", r'\1"zh-CN"', html_text, count=1, flags=re.I)
+    return re.sub(r"<html\b", '<html lang="zh-CN"', html_text, count=1, flags=re.I)
+
+
+def _replace_or_insert_meta(html_text, title, desc):
+    if re.search(r"<title>[^<]*</title>", html_text, re.I):
+        html_text = re.sub(r"<title>[^<]*</title>", f"<title>{_esc(title)}</title>", html_text, count=1, flags=re.I)
+    else:
+        html_text = re.sub(r"<head[^>]*>", lambda m: m.group(0) + f"\n<title>{_esc(title)}</title>", html_text, count=1, flags=re.I)
+    desc_tag = f'<meta name="description" content="{_esc(desc)}">'
+    if re.search(r'<meta\s+name=["\']description["\']', html_text, re.I):
+        html_text = re.sub(r'<meta\s+name=["\']description["\'][^>]*>', desc_tag, html_text, count=1, flags=re.I)
+    else:
+        html_text = html_text.replace("</title>", "</title>\n" + desc_tag, 1)
+    return html_text
+
+
+def _inject_ssr(html_text, target, inner):
+    if not target or not inner:
+        return html_text
+    # 替换 id 容器里原本的“加载中…”，方便爬虫直接读到正文
+    pat = re.compile(rf'(<(?:div|section)[^>]*\bid=["\']{re.escape(target)}["\'][^>]*>)(.*?)(</(?:div|section)>)', re.I | re.S)
+    m = pat.search(html_text)
+    if not m:
+        return html_text
+    # 只替换最浅层：加载中占位通常没有嵌套复杂结构
+    return html_text[:m.start()] + m.group(1) + inner + m.group(3) + html_text[m.end():]
+
+
+def inject_page(html_text: str, url_path: str, extra=None, ssr_target=None, ssr_html=""):
+    extra = extra or {}
+    title, desc, keys, indexable, path = page_meta(url_path, extra)
+    html_text = _ensure_lang(html_text)
+    html_text = _replace_or_insert_meta(html_text, title, desc)
+    # 去掉旧的 canonical / og / 重复 robots，避免叠加
+    html_text = re.sub(r'\n?<link rel="canonical"[^>]*>', "", html_text, flags=re.I)
+    html_text = re.sub(r'\n?<link rel="alternate" hreflang=[^>]*>', "", html_text, flags=re.I)
+    html_text = re.sub(r'\n?<meta property="og:[^"]+"[^>]*>', "", html_text, flags=re.I)
+    html_text = re.sub(r'\n?<meta name="twitter:[^"]+"[^>]*>', "", html_text, flags=re.I)
+    html_text = re.sub(r'\n?<meta name="keywords"[^>]*>', "", html_text, flags=re.I)
+    html_text = re.sub(r'\n?<script type="application/ld\+json">.*?</script>', "", html_text, flags=re.I | re.S)
+    if not re.search(r'<meta\s+name=["\']robots["\']', html_text, re.I):
+        pass
+    else:
+        html_text = re.sub(r'<meta\s+name=["\']robots["\'][^>]*>', "", html_text, count=1, flags=re.I)
+    html_text = re.sub(r"<meta name=\"google-site-verification\"[^>]*>", "", html_text, flags=re.I)
+    html_text = re.sub(r"<meta name=\"baidu-site-verification\"[^>]*>", "", html_text, flags=re.I)
+    html_text = re.sub(r"<meta name=\"naver-site-verification\"[^>]*>", "", html_text, flags=re.I)
+    extra_head = head_extra(url_path, extra)
+    if re.search(r"</head>", html_text, re.I):
+        html_text = re.sub(r"</head>", extra_head + "\n</head>", html_text, count=1, flags=re.I)
+    html_text = _inject_ssr(html_text, ssr_target, ssr_html)
+    return html_text
+
+
+def html_file_response(filename: str, url_path=None, extra=None, ssr_target=None, ssr_html=""):
+    path = os.path.join(STATIC, filename)
+    if not os.path.isfile(path):
+        # 兼容测试目录只放部分静态文件：回退到同级已部署静态目录
+        for alt in (os.path.join(os.path.dirname(BASE), "kbeauty-scan", "static", filename),
+                    os.path.join("/workspace/kbeauty-scan/static", filename)):
+            if os.path.isfile(alt):
+                path = alt
+                break
+    with open(path, encoding="utf-8") as f:
+        html_text = f.read()
+    url_path = url_path or FILE_PATHS.get(filename, "/")
+    html_text = inject_page(html_text, url_path, extra=extra, ssr_target=ssr_target, ssr_html=ssr_html)
+    return HTMLResponse(html_text, headers={"Cache-Control": "no-cache"})
+
+
+def _iso(dt):
+    if not dt:
+        return datetime.datetime.now(datetime.timezone.utc).date().isoformat()
+    if getattr(dt, "tzinfo", None):
+        return dt.astimezone(datetime.timezone.utc).date().isoformat()
+    return dt.date().isoformat() if hasattr(dt, "date") else str(dt)[:10]
+
+
+def _static_lastmod(filename):
+    for folder in (STATIC, os.path.join("/workspace/kbeauty-scan/static")):
+        p = os.path.join(folder, filename)
+        if os.path.isfile(p):
+            return datetime.datetime.fromtimestamp(os.path.getmtime(p), datetime.timezone.utc).date().isoformat()
+    return datetime.datetime.now(datetime.timezone.utc).date().isoformat()
+
+
+FILE_FOR_PATH = {v: k for k, v in FILE_PATHS.items()}
+
+
+def build_sitemap_body(extra_urls=None) -> str:
+    origin = site_origin()
+    items = []
+    for path in SITEMAP_PATHS:
+        fn = FILE_FOR_PATH.get(path) or ("index.html" if path == "/" else path.strip("/") + ".html")
+        last = _static_lastmod(fn)
+        items.append((origin + (path if path != "/" else "/"), last, "weekly"))
+    for url, last in extra_urls or []:
+        items.append((url, last, "weekly"))
+    lines = ['<?xml version="1.0" encoding="UTF-8"?>',
+             '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">']
+    seen = set()
+    for loc, last, freq in items:
+        if loc in seen:
+            continue
+        seen.add(loc)
+        lines.append("  <url>")
+        lines.append(f"    <loc>{_esc(loc)}</loc>")
+        lines.append(f"    <lastmod>{_esc(last)}</lastmod>")
+        lines.append(f"    <changefreq>{freq}</changefreq>")
+        lines.append("  </url>")
+    lines.append("</urlset>")
+    return "\n".join(lines) + "\n"
+
+
+@router.get("/robots.txt")
+def robots():
+    origin = site_origin()
+    body = (
+        "User-agent: *\n"
+        "Allow: /\n"
+        "\n"
+        "Disallow: /admin\n"
+        "Disallow: /api/\n"
+        "Disallow: /community/messages\n"
+        "Disallow: /community/messages/\n"
+        "Disallow: /community/new\n"
+        "Disallow: /community/friends/edit\n"
+        "Disallow: /login\n"
+        "\n"
+        f"Sitemap: {origin}/sitemap.xml\n"
+    )
+    return Response(body, media_type="text/plain; charset=utf-8", headers={"Cache-Control": "public, max-age=3600"})
+
+
+@router.get("/sitemap.xml")
+def sitemap():
+    extra = []
+    try:
+        import community as C
+        extra = C.sitemap_public_posts(site_origin())
+    except Exception:
+        extra = []
+    return Response(build_sitemap_body(extra), media_type="application/xml; charset=utf-8",
+                    headers={"Cache-Control": "public, max-age=600"})
+
+
+@router.get("/{key}.txt")
+def indexnow_key_file(key: str):
+    try:
+        expect = indexnow_key()
+    except Exception:
+        raise HTTPException(404, "Not Found")
+    if key != expect:
+        raise HTTPException(404, "Not Found")
+    return Response(expect + "\n", media_type="text/plain; charset=utf-8",
+                    headers={"Cache-Control": "public, max-age=86400"})
