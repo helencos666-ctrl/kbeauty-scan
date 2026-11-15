@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <title>韩国美食推荐 · 旅韩助手</title>
-<meta name="description" content="旅韩助手美食指南：首尔、釜山、济州等地的餐厅与小吃，资料来自米其林必比登与官方旅游介绍。">
+<meta name="description" content="旅韩助手美食指南：按城市和弘大、明洞、江南、广安里、西面等热门区域查看餐厅，资料来自米其林指南与官方旅游介绍。">
 
 <meta name="theme-color" content="#ff6b8f">
 <meta name="mobile-web-app-capable" content="yes">
@@ -35,6 +35,9 @@ nav a.on{color:var(--pink);font-weight:700}
 .chips button{flex:none;border:0;border-radius:20px;padding:7px 13px;font-size:14px;background:#fff;color:var(--ink);box-shadow:0 2px 6px rgba(0,0,0,.05)}
 .chips button.on{background:var(--pink);color:#fff}
 .lab{font-size:12px;color:var(--sub);margin:10px 0 0;font-weight:600}
+#areaWrap{display:none}
+#areaWrap.show{display:block}
+.area-intro{font-size:13px;color:var(--sub);margin:8px 0 0;line-height:1.65}
 #count{font-size:13px;color:var(--sub);margin:4px 0 10px}
 .place{background:var(--card);border-radius:16px;padding:16px;box-shadow:0 4px 16px rgba(255,79,123,.08);margin-bottom:12px}
 .place .name-zh{font-size:18px;font-weight:700;margin:0}
@@ -58,7 +61,7 @@ nav a.on{color:var(--pink);font-weight:700}
 <body>
 <header>
   <h1>🇰🇷 旅韩助手</h1>
-  <p>韩国美食推荐，按城市和类型查看</p>
+  <p>韩国美食推荐，按城市、区域和类型查看</p>
 </header>
 <main>
   <div class="gbar">
@@ -74,9 +77,15 @@ nav a.on{color:var(--pink);font-weight:700}
     <input id="q" type="search" enterkeyhint="search" placeholder="搜索店名、菜式或区域" autocomplete="off">
     <div class="lab">城市</div>
     <div class="chips" id="cityChips"></div>
+    <div id="areaWrap">
+      <div class="lab">区域</div>
+      <div class="chips" id="areaChips"></div>
+      <div class="area-intro" id="areaIntro" hidden></div>
+    </div>
     <div class="lab">类型</div>
     <div class="chips" id="catChips"></div>
     <div class="tip" id="priceTip" style="margin-top:8px"></div>
+    <div class="tip" id="areaHint">先选城市，再按弘大、明洞、广安里、西面这些热门打卡区域筛选。</div>
   </div>
   <div id="count"></div>
   <div id="list"><div class="loading"><div class="spin"></div>正在载入餐厅…</div></div>
@@ -104,8 +113,11 @@ var STN={}; LHMap.stations().then(function(s){ STN=s; if(DATA.items&&DATA.items.
 const $=id=>document.getElementById(id);
 const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const CAT_ZH={bbq:'韩式烤肉',street:'街头小吃',traditional:'传统韩食',cafe:'咖啡甜点',chicken:'炸鸡啤酒',seafood:'海鲜',chinese_fav:'华人常去'};
-let DATA={items:[],categories:[],cities:[],sources:[],disclaimer:''};
-let city='', cat='', q='';
+let DATA={items:[],categories:[],cities:[],areas:[],sources:[],disclaimer:''};
+let city='', area='', cat='', q='';
+function areaMeta(id){
+  return (DATA.areas||[]).find(a=>a.id===id) || (id==='other'?{id:'other',zh:'其他',intro:'这些店有公开资料可查，但不在上面的热门打卡区域内。'}:null);
+}
 function chipBar(el, opts, current, onpick){
   el.innerHTML=opts.map(([id,zh])=>`<button type="button" class="${id===current?'on':''}" data-id="${esc(id)}">${esc(zh)}</button>`).join('');
   el.querySelectorAll('button').forEach(b=>b.onclick=()=>onpick(b.dataset.id));
@@ -114,32 +126,42 @@ function filtered(){
   const k=q.trim().toLowerCase();
   return DATA.items.filter(it=>{
     if(city && it.city_zh!==city) return false;
+    if(area && (it.area_id||'')!==area) return false;
     if(cat && it.category!==cat && !(cat==='chinese_fav' && (it.tags||[]).includes('chinese_fav'))) return false;
     if(!k) return true;
-    const blob=[it.name_zh,it.name_ko,it.area,it.city_zh,it.cuisine,it.desc,it.transport,(it.tips||[]).join(' ')].join(' ').toLowerCase();
+    const blob=[it.name_zh,it.name_ko,it.area,it.area_id,it.city_zh,it.cuisine,it.desc,it.transport,it.address,(it.tips||[]).join(' ')].join(' ').toLowerCase();
+    const am=areaMeta(it.area_id);
+    if(am && (am.zh.toLowerCase().includes(k) || (am.intro||'').toLowerCase().includes(k))) return true;
     return blob.includes(k);
   });
 }
 function render(){
   const arr=filtered();
-  $('count').textContent=arr.length?`共 ${arr.length} 条`:'没有符合条件的餐厅，试试改筛选或关键词。';
+  const am=area?areaMeta(area):null;
+  const where=[city||'', am?am.zh:''].filter(Boolean).join(' · ');
+  $('count').textContent=arr.length?(where?`${where}，共 ${arr.length} 条`:`共 ${arr.length} 条`):'没有符合条件的餐厅，试试改筛选或关键词。';
   if(!arr.length){ $('list').innerHTML='<div class="empty">没有符合条件的餐厅</div>'; return; }
   $('list').innerHTML=arr.map(it=>{
+    const amItem=areaMeta(it.area_id);
     const badges=[
       `<span class="badge">${esc(it.city_zh)}</span>`,
       `<span class="badge gray">${esc(CAT_ZH[it.category]||it.category)}</span>`
     ];
     if(it.cuisine) badges.push(`<span class="badge gray">${esc(it.cuisine)}</span>`);
+    if(amItem) badges.push(`<span class="badge gray">${esc(amItem.zh)}</span>`);
     if(it.area) badges.push(`<span class="badge gray">${esc(it.area)}</span>`);
     if(it.price) badges.push(`<span class="badge">${esc(it.price)}</span>`);
     if((it.tags||[]).includes('bib2026')) badges.push(`<span class="badge">米其林2026必比登</span>`);
     if((it.tags||[]).includes('chinese_fav') && it.category!=='chinese_fav') badges.push(`<span class="badge">华人常去</span>`);
     const rows=[];
+    if(it.address) rows.push(`<h3>地址</h3><p>${esc(it.address)}</p>`);
     rows.push(`<h3>怎么去</h3><p>${esc(it.transport)}</p>`);
     if(it.tips&&it.tips.length) rows.push(`<h3>实用提示</h3><ul>${it.tips.map(t=>`<li>${esc(t)}</li>`).join('')}</ul>`);
     const go=it.station?`<a class="go" href="/?tab=sub&to=${encodeURIComponent(it.station)}">用地铁查到这里</a>`:'';
     const c=it.station&&STN[it.station]||null;
-    const maps=LHMap.buttons(LHMap.naverSearch(it.name_ko||it.name_zh), LHMap.amapSearch(it.name_zh||it.name_ko, c));
+    const nq=it.map_query||it.name_ko||it.name_zh;
+    const aq=it.name_zh||it.name_ko;
+    const maps=LHMap.buttons(LHMap.naverSearch(nq), LHMap.amapSearch(aq, c));
     return `<article class="place">
       <div class="name-zh">${esc(it.name_zh)}</div>
       <div class="name-ko">${esc(it.name_ko)}</div>
@@ -153,9 +175,28 @@ function render(){
 }
 function drawFilters(){
   const cities=[['', '全部']].concat((DATA.cities||[]).map(c=>[c,c]));
-  chipBar($('cityChips'), cities, city, id=>{city=id;drawFilters();render();});
+  chipBar($('cityChips'), cities, city, id=>{city=id; area=''; drawFilters(); render();});
+  const wrap=$('areaWrap'), hint=$('areaHint'), intro=$('areaIntro');
+  if(!city){
+    wrap.classList.remove('show');
+    intro.hidden=true;
+    intro.textContent='';
+    hint.style.display='';
+  }else{
+    wrap.classList.add('show');
+    hint.style.display='none';
+    const featured=(DATA.areas||[]).filter(a=>a.city_zh===city);
+    const hasOther=(DATA.items||[]).some(it=>it.city_zh===city && it.area_id==='other');
+    const opts=[['', '全部']].concat(featured.map(a=>[a.id,a.zh]));
+    if(hasOther) opts.push(['other','其他']);
+    if(area && !opts.some(([id])=>id===area)) area='';
+    chipBar($('areaChips'), opts, area, id=>{area=id; drawFilters(); render();});
+    const am=area?areaMeta(area):null;
+    if(am && am.intro){ intro.hidden=false; intro.textContent=am.intro; }
+    else { intro.hidden=true; intro.textContent=''; }
+  }
   const cats=[['', '全部']].concat((DATA.categories||[]).map(c=>[c.id,c.zh]));
-  chipBar($('catChips'), cats, cat, id=>{cat=id;drawFilters();render();});
+  chipBar($('catChips'), cats, cat, id=>{cat=id; drawFilters(); render();});
 }
 fetch('/static/food.json')
   .then(r=>{if(!r.ok) throw new Error('load'); return r.json()})

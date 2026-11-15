@@ -1,7 +1,7 @@
 {
   "updated": "2026-11-15",
   "title": "韩国美食推荐",
-  "disclaimer": "本页只收录公开资料中有记载、近期仍见诸米其林指南或官方/百科旅游介绍的餐厅与市场。营业状态、菜单和价格可能随时变化，请出发前用地图或电话再确认。米其林必比登是「性价比」标注，其符号并不等同本页的人均₩档；没有把握的人均价格已省略。信息可能变化，请出行前核实。",
+  "disclaimer": "本页只收录公开资料中有记载、近期仍见诸米其林指南或官方/百科旅游介绍的餐厅与市场。营业状态、菜单和价格可能随时变化，请出发前用地图或电话再确认。米其林必比登是「性价比」标注，其符号并不等同本页的人均₩档；没有把握的人均价格已省略。信息可能变化，请出行前核实。餐厅已按游客常去的打卡区域归类，具体门牌以各条地址和地图为准；不在热门区域内、但资料可靠的店会放在「其他」。",
   "price_legend": [
     {
       "id": "₩",
@@ -50,6 +50,36 @@
     {
       "name": "济州旅游 VisitJeju",
       "url": "https://www.visitjeju.net",
+      "checked": "2026-11-15"
+    },
+    {
+      "name": "首尔旅游官网 VisitSeoul 餐厅与美食100选",
+      "url": "https://korean.visitseoul.net/restaurants",
+      "checked": "2026-11-15"
+    },
+    {
+      "name": "2026首尔美食100选",
+      "url": "https://tasteofseoul.visitseoul.net/restaurants/list",
+      "checked": "2026-11-15"
+    },
+    {
+      "name": "韩国旅游发展局 VisitKorea",
+      "url": "https://english.visitkorea.or.kr",
+      "checked": "2026-11-15"
+    },
+    {
+      "name": "韩国旅游公社 无障碍旅游（열린관광）餐厅页",
+      "url": "https://access.visitkorea.or.kr",
+      "checked": "2026-11-15"
+    },
+    {
+      "name": "首尔市多누林（Seoul Danurim）旅游信息",
+      "url": "https://www.seouldanurim.net",
+      "checked": "2026-11-15"
+    },
+    {
+      "name": "韩国中小企业部 百年商店",
+      "url": "https://www.sbiz.or.kr/hdst/main/ohndMarketListSmba.do",
       "checked": "2026-11-15"
     }
   ],
@@ -112,7 +142,10 @@
       "station": "을지로4가역",
       "tags": [
         "bib2026"
-      ]
+      ],
+      "area_id": "other",
+      "source_note": "米其林指南2026必比登（或指南官网当前页面）。营业与菜单请出行前再确认。",
+      "source_url": "https://guide.michelin.com/kr/ko/seoul-capital-area/restaurants/bib-gourmand"
     },
     {
       "id": "pildong-myeonok",
@@ -132,7 +165,10 @@
       "station": "충무로역",
       "tags": [
         "bib2026"
-      ]
+      ],
+      "area_id": "other",
+      "source_note": "米其林指南2026必比登（或指南官网当前页面）。营业与菜单请出行前再确认。",
+      "source_url": "https://guide.michelin.com/kr/ko/seoul-capital-area/restaurants/bib-gourmand"
     },
     {
       "id": "koong",
@@ -152,7 +188,10 @@
       "station": "안국역",
       "tags": [
         "bib2026"
-      ]
+      ],
+      "area_id": "bukchon",
+      "source_note": "米其林指南2026必比登（或指南官网当前页面）。营业与菜单请出行前再确认。",
+      "source_url": "https://guide.michelin.com/kr/ko/seoul-capital-area/restaurants/bib-gourmand"
     },
     {
       "id": "mijin",
@@ -172,7 +211,10 @@
       "station": "광화문역",
       "tags": [
         "bib2026"
-      ]
+      ],
+      "area_id": "bukchon",
+      "source_note": "米其林指南2026必比登（或指南官网当前页面）。营业与菜单请出行前再确认。",
+      "source_url": "https://guide.michelin.com/kr/ko/seoul-capital-area/restaurants/bib-gourmand"
     },
     {
       "id": "yurimmyeon",
@@ -192,7 +234,10 @@
       "station": "시청역",
       "tags": [
         "bib2026"
-      ]
+      ],
+      "area_id": "other",
+      "source_note": "米其林指南2026必比登（或指南官网当前页面）。营业与菜单请出行前再确认。",
+      "source_url": "https://guide.michelin.com/kr/ko/seoul-capital-area/restaurants/bib-gourmand"
     },
     {
       "id": "geumdwaeji",
@@ -213,7 +258,10 @@
       "tags": [
         "bib2026",
         "chinese_fav"
-      ]
+      ],
+      "area_id": "other",
+      "source_note": "米其林指南2026必比登（或指南官网当前页面）。营业与菜单请出行前再确认。",
+      "source_url": "https://guide.michelin.com/kr/ko/seoul-capital-area/restaurants/bib-gourmand"
     },
     {
       "id": "ggupdang",
@@ -233,7 +281,10 @@
       "station": "신사역",
       "tags": [
         "bib2026"
-      ]
+      ],
+      "area_id": "gangnam",
+      "source_note": "米其林指南2026必比登（或指南官网当前页面）。营业与菜单请出行前再确认。",
+      "source_url": "https://guide.michelin.com/kr/ko/seoul-capital-area/restaurants/bib-gourmand"
     },
     {
       "id": "hwangsaengga",
@@ -253,7 +304,10 @@
       "station": "경복궁역",
       "tags": [
         "bib2026"
-      ]
+      ],
+      "area_id": "bukchon",
+      "source_note": "米其林指南2026必比登（或指南官网当前页面）。营业与菜单请出行前再确认。",
+      "source_url": "https://guide.michelin.com/kr/ko/seoul-capital-area/restaurants/bib-gourmand"
     },
     {
       "id": "jinjin",
@@ -273,7 +327,10 @@
       "station": "합정역",
       "tags": [
         "bib2026"
-      ]
+      ],
+      "area_id": "hongdae",
+      "source_note": "米其林指南2026必比登（或指南官网当前页面）。营业与菜单请出行前再确认。",
+      "source_url": "https://guide.michelin.com/kr/ko/seoul-capital-area/restaurants/bib-gourmand"
     },
     {
       "id": "mapo-ok",
@@ -293,7 +350,10 @@
       "station": "마포역",
       "tags": [
         "bib2026"
-      ]
+      ],
+      "area_id": "other",
+      "source_note": "米其林指南2026必比登（或指南官网当前页面）。营业与菜单请出行前再确认。",
+      "source_url": "https://guide.michelin.com/kr/ko/seoul-capital-area/restaurants/bib-gourmand"
     },
     {
       "id": "yukjeon",
@@ -313,7 +373,10 @@
       "station": "공덕역",
       "tags": [
         "bib2026"
-      ]
+      ],
+      "area_id": "other",
+      "source_note": "米其林指南2026必比登（或指南官网当前页面）。营业与菜单请出行前再确认。",
+      "source_url": "https://guide.michelin.com/kr/ko/seoul-capital-area/restaurants/bib-gourmand"
     },
     {
       "id": "sujebi",
@@ -333,7 +396,10 @@
       "station": "안국역",
       "tags": [
         "bib2026"
-      ]
+      ],
+      "area_id": "bukchon",
+      "source_note": "米其林指南2026必比登（或指南官网当前页面）。营业与菜单请出行前再确认。",
+      "source_url": "https://guide.michelin.com/kr/ko/seoul-capital-area/restaurants/bib-gourmand"
     },
     {
       "id": "jaha-mandu",
@@ -353,7 +419,10 @@
       "station": "경복궁역",
       "tags": [
         "bib2026"
-      ]
+      ],
+      "area_id": "bukchon",
+      "source_note": "米其林指南2026必比登（或指南官网当前页面）。营业与菜单请出行前再确认。",
+      "source_url": "https://guide.michelin.com/kr/ko/seoul-capital-area/restaurants/bib-gourmand"
     },
     {
       "id": "okdongsik",
@@ -373,7 +442,10 @@
       "station": "합정역",
       "tags": [
         "bib2026"
-      ]
+      ],
+      "area_id": "hongdae",
+      "source_note": "米其林指南2026必比登（或指南官网当前页面）。营业与菜单请出行前再确认。",
+      "source_url": "https://guide.michelin.com/kr/ko/seoul-capital-area/restaurants/bib-gourmand"
     },
     {
       "id": "hapjeongok",
@@ -393,7 +465,10 @@
       "station": "합정역",
       "tags": [
         "bib2026"
-      ]
+      ],
+      "area_id": "hongdae",
+      "source_note": "米其林指南2026必比登（或指南官网当前页面）。营业与菜单请出行前再确认。",
+      "source_url": "https://guide.michelin.com/kr/ko/seoul-capital-area/restaurants/bib-gourmand"
     },
     {
       "id": "3rd-samgyetang",
@@ -413,7 +488,10 @@
       "station": "교대역",
       "tags": [
         "bib2026"
-      ]
+      ],
+      "area_id": "other",
+      "source_note": "米其林指南2026必比登（或指南官网当前页面）。营业与菜单请出行前再确认。",
+      "source_url": "https://guide.michelin.com/kr/ko/seoul-capital-area/restaurants/bib-gourmand"
     },
     {
       "id": "tosokchon",
@@ -433,7 +511,9 @@
       "station": "경복궁역",
       "tags": [
         "chinese_fav"
-      ]
+      ],
+      "area_id": "bukchon",
+      "source_note": "公开旅游资料与百科/官方介绍整理，请出行前再确认营业。"
     },
     {
       "id": "myeongdong-kyoja",
@@ -453,7 +533,9 @@
       "station": "명동역",
       "tags": [
         "chinese_fav"
-      ]
+      ],
+      "area_id": "myeongdong",
+      "source_note": "公开旅游资料与百科/官方介绍整理，请出行前再确认营业。"
     },
     {
       "id": "hadongkwan",
@@ -461,16 +543,21 @@
       "name_ko": "하동관",
       "city": "seoul",
       "city_zh": "首尔",
-      "area": "中区 明洞 / 乙支路",
+      "area": "中区 明洞",
       "category": "traditional",
       "cuisine": "牛骨汤",
       "desc": "历史很长的牛骨汤专门店，常出现在首尔饮食介绍中。以清汤牛肉和简单配菜为主，午餐时段本地客人很多。",
-      "transport": "地铁4号线明洞站或2号线乙支路入口站，出站后按地图走向河东馆本店。",
+      "transport": "地铁2号线乙支路入口站（을지로입구역）4号出口步行约4分钟，也可从明洞站走过去。",
       "tips": [
         "部分老店较早上门、下午休息，出发前先确认营业时间。",
         "座位风格传统，高峰可能拼桌或候位。"
       ],
-      "station": "명동역"
+      "station": "명동역",
+      "area_id": "myeongdong",
+      "address": "서울 중구 명동9길 12 (명동1가)",
+      "map_query": "하동관 명동9길",
+      "source_note": "首尔旅游官网 VisitSeoul（2026-09-28更新）：1939年开业的牛骨汤老店，现址在明洞9街12；只卖牛骨汤和熟肉，晚上不营业，周日休息。",
+      "source_url": "https://korean.visitseoul.net/area/%ED%95%98%EB%8F%99%EA%B4%80/KOP005614"
     },
     {
       "id": "imun",
@@ -487,7 +574,9 @@
         "老店可能有迁址或分号，请以当日营业的地址为准。",
         "通常较早上门，过午是否营业请先确认。"
       ],
-      "station": "종각역"
+      "station": "종각역",
+      "area_id": "other",
+      "source_note": "公开旅游资料与百科/官方介绍整理，请出行前再确认营业。"
     },
     {
       "id": "cheongjinok",
@@ -504,7 +593,9 @@
         "营业时段与普通午餐店不同，请先查当日时间。",
         "内脏类汤品若不吃，可先看菜单再决定是否进店。"
       ],
-      "station": "종각역"
+      "station": "종각역",
+      "area_id": "other",
+      "source_note": "公开旅游资料与百科/官方介绍整理，请出行前再确认营业。"
     },
     {
       "id": "yonggeumok",
@@ -524,7 +615,10 @@
       "station": "경복궁역",
       "tags": [
         "bib2026"
-      ]
+      ],
+      "area_id": "bukchon",
+      "source_note": "米其林指南2026必比登（或指南官网当前页面）。营业与菜单请出行前再确认。",
+      "source_url": "https://guide.michelin.com/kr/ko/seoul-capital-area/restaurants/bib-gourmand"
     },
     {
       "id": "daesungjip",
@@ -544,7 +638,10 @@
       "station": "독립문역",
       "tags": [
         "bib2026"
-      ]
+      ],
+      "area_id": "other",
+      "source_note": "米其林指南2026必比登（或指南官网当前页面）。营业与菜单请出行前再确认。",
+      "source_url": "https://guide.michelin.com/kr/ko/seoul-capital-area/restaurants/bib-gourmand"
     },
     {
       "id": "limbyungjoo",
@@ -564,7 +661,10 @@
       "station": "양재역",
       "tags": [
         "bib2026"
-      ]
+      ],
+      "area_id": "other",
+      "source_note": "米其林指南2026必比登（或指南官网当前页面）。营业与菜单请出行前再确认。",
+      "source_url": "https://guide.michelin.com/kr/ko/seoul-capital-area/restaurants/bib-gourmand"
     },
     {
       "id": "hwanggeum-kongbat",
@@ -584,7 +684,10 @@
       "station": "애오개역",
       "tags": [
         "bib2026"
-      ]
+      ],
+      "area_id": "other",
+      "source_note": "米其林指南2026必比登（或指南官网当前页面）。营业与菜单请出行前再确认。",
+      "source_url": "https://guide.michelin.com/kr/ko/seoul-capital-area/restaurants/bib-gourmand"
     },
     {
       "id": "jungin-myeonok",
@@ -596,7 +699,7 @@
       "category": "traditional",
       "cuisine": "平壤冷面",
       "desc": "汝矣岛的平壤冷面店，入选米其林指南首尔2026必比登。逛汉江公园或在汝矣岛办事时，是方便的一餐。",
-      "transport": "地铁5、9号线汝矣岛站或5号线汝矣渡口站（여의나루역），再按地图步行。",
+      "transport": "地铁5、9号线汝矣岛或汝矣渡口站出站后，按地图前往国会大路76街10。",
       "tips": [
         "周末汉江公园游客多，用餐时间可能要候位。",
         "冷面店通常也供应烤肉或汤类，以当日菜单为准。"
@@ -604,7 +707,12 @@
       "station": "여의나루역",
       "tags": [
         "bib2026"
-      ]
+      ],
+      "area_id": "yeouido",
+      "address": "서울 영등포구 국회대로76길 10",
+      "map_query": "정인면옥 여의도",
+      "source_note": "米其林指南收录的平壤冷面店，地址为永登浦区国会大路76街10。",
+      "source_url": "https://guide.michelin.com/kr/ko/seoul-capital-area/kr-seoul/restaurant/jungin-myeonok"
     },
     {
       "id": "gomtang-lab",
@@ -624,7 +732,10 @@
       "station": "삼성역",
       "tags": [
         "bib2026"
-      ]
+      ],
+      "area_id": "gangnam",
+      "source_note": "米其林指南2026必比登（或指南官网当前页面）。营业与菜单请出行前再确认。",
+      "source_url": "https://guide.michelin.com/kr/ko/seoul-capital-area/restaurants/bib-gourmand"
     },
     {
       "id": "gwangjang-bindaetteok",
@@ -645,7 +756,9 @@
       "price": "₩",
       "tags": [
         "chinese_fav"
-      ]
+      ],
+      "area_id": "dongdaemun",
+      "source_note": "公开旅游资料与百科/官方介绍整理，请出行前再确认营业。"
     },
     {
       "id": "gwangjang-gimbap",
@@ -666,7 +779,9 @@
       "price": "₩",
       "tags": [
         "chinese_fav"
-      ]
+      ],
+      "area_id": "dongdaemun",
+      "source_note": "公开旅游资料与百科/官方介绍整理，请出行前再确认营业。"
     },
     {
       "id": "gyerim",
@@ -683,7 +798,9 @@
         "辣度较高，可先说明能接受的程度。",
         "更适合两人或以上；是否需候位看当晚。"
       ],
-      "station": "종로3가역"
+      "station": "종로3가역",
+      "area_id": "other",
+      "source_note": "公开旅游资料与百科/官方介绍整理，请出行前再确认营业。"
     },
     {
       "id": "kyochon-myeongdong",
@@ -703,7 +820,9 @@
       "station": "명동역",
       "tags": [
         "chinese_fav"
-      ]
+      ],
+      "area_id": "myeongdong",
+      "source_note": "公开旅游资料与百科/官方介绍整理，请出行前再确认营业。"
     },
     {
       "id": "euljiro-nogari",
@@ -720,7 +839,9 @@
         "先看每桌最低消费和是否限时，再入座。",
         "晚上人多嘈杂，注意账单是否按实际点单。"
       ],
-      "station": "을지로3가역"
+      "station": "을지로3가역",
+      "area_id": "other",
+      "source_note": "公开旅游资料与百科/官方介绍整理，请出行前再确认营业。"
     },
     {
       "id": "cafe-onion-seongsu",
@@ -737,7 +858,9 @@
         "周末上午就开始排队，取餐后注意座位是共享还是限时。",
         "以咖啡和面包为主，不要按正餐餐厅去期待。"
       ],
-      "station": "서울숲역"
+      "station": "서울숲역",
+      "area_id": "seongsu",
+      "source_note": "公开旅游资料与百科/官方介绍整理，请出行前再确认营业。"
     },
     {
       "id": "london-bagel-anguk",
@@ -757,7 +880,9 @@
       "station": "안국역",
       "tags": [
         "chinese_fav"
-      ]
+      ],
+      "area_id": "bukchon",
+      "source_note": "公开旅游资料与百科/官方介绍整理，请出行前再确认营业。"
     },
     {
       "id": "anthracite",
@@ -774,7 +899,9 @@
         "周末下午座位紧张。",
         "附近还有文来洞、望远市场，可一起安排。"
       ],
-      "station": "합정역"
+      "station": "합정역",
+      "area_id": "hongdae",
+      "source_note": "公开旅游资料与百科/官方介绍整理，请出行前再确认营业。"
     },
     {
       "id": "maple-tree",
@@ -786,12 +913,17 @@
       "category": "bbq",
       "cuisine": "韩牛烤肉",
       "desc": "梨泰院知名的韩牛烤肉店，长期出现在英语、中文旅游介绍中，外国客人比例较高。环境相对整齐，价格通常高于一般猪肉烤肉店。",
-      "transport": "地铁6号线梨泰院站（이태원역）出站步行前往，请用地图确认分店。",
+      "transport": "地铁6号线梨泰院站（이태원역）1号出口步行约2分钟，汉密尔顿酒店别馆附近。",
       "tips": [
         "建议查询是否可预约，旺季晚上较难排。",
         "先看清是哪一档牛肉再点，不要只按「韩牛」两个字下单。"
       ],
-      "station": "이태원역"
+      "station": "이태원역",
+      "area_id": "itaewon",
+      "address": "서울 용산구 이태원로27가길 26 (이태원동)",
+      "map_query": "단풍나무집 이태원",
+      "source_note": "首尔旅游官网 VisitSeoul（2026-05-05更新）梨泰院店页面。",
+      "source_url": "https://korean.visitseoul.net/restaurants/%EB%8B%A8%ED%92%8D%EB%82%98%EB%AC%B4%EC%A7%91%EC%9D%B4%ED%83%9C%EC%9B%90%EC%A0%90-KR/KOP006582"
     },
     {
       "id": "jinokhwa",
@@ -808,7 +940,9 @@
         "一份通常适合多人，单人前往前先问能否点小份。",
         "出锅后还有加面的吃法，以店员说明为准。"
       ],
-      "station": "동대문역"
+      "station": "동대문역",
+      "area_id": "dongdaemun",
+      "source_note": "公开旅游资料与百科/官方介绍整理，请出行前再确认营业。"
     },
     {
       "id": "noryangjin-fish",
@@ -825,7 +959,9 @@
         "先问清以斤还是以条计价，以及加工费、辅料是否另计。",
         "不吃生鱼也可以要求加热烹制，请当场说清楚。"
       ],
-      "station": "노량진역"
+      "station": "노량진역",
+      "area_id": "other",
+      "source_note": "公开旅游资料与百科/官方介绍整理，请出行前再确认营业。"
     },
     {
       "id": "bongpyeong",
@@ -842,7 +978,9 @@
         "有多个分店，菜单和排队情况可能不同。",
         "冷面和烤肉可分着点，先问清份量。"
       ],
-      "station": "올림픽공원역"
+      "station": "올림픽공원역",
+      "area_id": "jamsil",
+      "source_note": "公开旅游资料与百科/官方介绍整理，请出行前再确认营业。"
     },
     {
       "id": "hapcheon-gukbap",
@@ -850,18 +988,23 @@
       "name_ko": "합천 국밥집",
       "city": "busan",
       "city_zh": "釜山",
-      "area": "南区",
+      "area": "南区 龙湖",
       "category": "traditional",
       "cuisine": "猪肉汤饭",
       "desc": "釜山猪肉汤饭代表店之一，入选米其林指南釜山2026必比登。汤饭是釜山最日常的早餐和午餐之一，这店常被本地人提起。",
-      "transport": "请在地图搜索「합천국밥집」，多乘坐地铁后转公交或出租车；位置不在海云台沙滩上。",
+      "transport": "在南区龙湖路235，请按地图前往，不是西面或海云台。",
       "tips": [
         "此类店往往很早上门，过午可能休息或售罄。",
         "点餐时可说明要瘦肉或肥肉，以店内选项为准。"
       ],
       "tags": [
         "bib2026"
-      ]
+      ],
+      "area_id": "other",
+      "address": "부산 남구 용호로 235",
+      "map_query": "합천국밥집 용호",
+      "source_note": "米其林指南釜山：南区龙湖路235，猪肉汤饭。中午11–13点通常不接受单人用餐。",
+      "source_url": "https://guide.michelin.com/kr/ko/busan-region/busan_1025838/restaurant/hapcheon-gukbapjip"
     },
     {
       "id": "jeongjitgan",
@@ -873,14 +1016,19 @@
       "category": "traditional",
       "cuisine": "猪肉汤饭",
       "desc": "入选米其林指南釜山2026必比登的猪肉汤饭店。沙下区不在南浦、海云台核心游客区，更偏本地用餐。",
-      "transport": "需从西面或沙下一带转乘公交或地铁后再步行，请以地图中的「정짓간」为准。",
+      "transport": "在沙下区飞凤路6，请按地图前往。",
       "tips": [
         "不要和海云台行程挤在同一小时，预留跨区交通。",
         "营业时间可能较早，出发前先确认。"
       ],
       "tags": [
         "bib2026"
-      ]
+      ],
+      "area_id": "other",
+      "address": "부산 사하구 비봉로 6",
+      "map_query": "정짓간 사하",
+      "source_note": "米其林指南釜山：沙下区飞凤路6，猪肉汤饭，页面写24小时经营，请出行前再确认。",
+      "source_url": "https://guide.michelin.com/kr/ko/busan-region/busan_1025838/restaurant/jeongjitgan"
     },
     {
       "id": "hanwolgwan",
@@ -888,11 +1036,11 @@
       "name_ko": "한월관",
       "city": "busan",
       "city_zh": "釜山",
-      "area": "寿营区",
+      "area": "寿营区 广安里",
       "category": "traditional",
       "cuisine": "牛骨汤",
       "desc": "寿营区的牛骨汤店，入选米其林指南釜山2026必比登。离广安里比海云台更近一些，适合在看广安大桥前后用餐。",
-      "transport": "地铁2号线广安站或寿营一带出站后按地图前往。",
+      "transport": "地铁2号线广安站（광안역）出站，步行前往广安路62号街10。",
       "tips": [
         "可与广安里海边安排在同一区域，减少来回奔波。",
         "汤饭店座位周转通常较快。"
@@ -900,7 +1048,12 @@
       "station": "광안역",
       "tags": [
         "bib2026"
-      ]
+      ],
+      "area_id": "gwangalli",
+      "address": "부산 수영구 광안로62번길 10",
+      "map_query": "한월관 광안리",
+      "source_note": "米其林指南釜山：寿营区广安路62号街10，牛骨汤。",
+      "source_url": "https://guide.michelin.com/kr/en/busan-region/busan_1025838/restaurant/hanwolgwan"
     },
     {
       "id": "anmok-busan",
@@ -908,11 +1061,11 @@
       "name_ko": "안목",
       "city": "busan",
       "city_zh": "釜山",
-      "area": "寿营区",
+      "area": "寿营区 广安里",
       "category": "traditional",
       "cuisine": "猪肉汤饭",
       "desc": "入选米其林指南釜山2026必比登的猪肉汤饭店。注意不要和江陵的安木海边搞混，这是釜山的餐厅。",
-      "transport": "位于寿营区，请在地图搜索釜山「안목」餐厅，不要导航到江陵安木海边。",
+      "transport": "地铁2号线广安站出站，按地图搜索釜山「안목」，地址是广南路22号街3。不要导航到江陵的安木海边。",
       "tips": [
         "店名较短，搜索时加上「부산」以免找错城市。",
         "建议作为正餐，而不是海边咖啡行程的一部分。"
@@ -920,27 +1073,37 @@
       "station": "광안역",
       "tags": [
         "bib2026"
-      ]
+      ],
+      "area_id": "gwangalli",
+      "address": "부산 수영구 광남로22번길 3",
+      "map_query": "안목 광안리 돼지국밥",
+      "source_note": "米其林指南釜山：寿营区广南路22号街3，猪肉汤饭。",
+      "source_url": "https://guide.michelin.com/kr/ko/busan-region/busan_1025838/restaurant/anmok"
     },
     {
       "id": "1001-pyeongnaeng",
-      "name_zh": "100.1平冷",
-      "name_ko": "100.1.평냉",
+      "name_zh": "百日平冷",
+      "name_ko": "백일평냉",
       "city": "busan",
       "city_zh": "釜山",
-      "area": "寿营区",
+      "area": "寿营区 南川",
       "category": "traditional",
       "cuisine": "冷面",
-      "desc": "寿营区的冷面店，入选米其林指南釜山2026必比登。在广安里、寿营一带想吃冷面时可以作为选择。",
-      "transport": "地铁2号线广安或寿营一带出站后按地图搜索「100.1.평냉」。",
+      "desc": "南川的平壤冷面店，入选米其林指南釜山。店名取「백일」，地图里有时也写成100.1。离广安里海滩不远。",
+      "transport": "地铁2号线金莲山或广安站出站后，按地图搜索「백일평냉」，地址是南川海路10号街29。",
       "tips": [
-        "店名是数字组合，在地图里用韩文搜索更准确。",
-        "夏天和周末可能需要候位。"
+        "店名在地图里可能显示为백일평냉或100.1，请核对南川这家地址。",
+        "可与广安里海边安排在同一区域。"
       ],
       "station": "광안역",
       "tags": [
         "bib2026"
-      ]
+      ],
+      "area_id": "gwangalli",
+      "address": "부산 수영구 남천바다로10번길 29",
+      "map_query": "백일평냉 남천",
+      "source_note": "米其林指南釜山页面店名为「백일평냉」，地址为寿营区南川海路10号街29。",
+      "source_url": "https://guide.michelin.com/kr/ko/busan-region/busan_1025838/restaurant/100-1-pyeongnaeng"
     },
     {
       "id": "buda-myeonok",
@@ -948,19 +1111,24 @@
       "name_ko": "부다면옥",
       "city": "busan",
       "city_zh": "釜山",
-      "area": "海云台区",
+      "area": "海云台区 中洞",
       "category": "traditional",
       "cuisine": "冷面",
       "desc": "海云台的冷面店，入选米其林指南釜山2026必比登。住在海云台时，不必专程跑到西区也能吃到评分不错的冷面。",
-      "transport": "地铁2号线海云台站出站后按地图前往。",
+      "transport": "地铁2号线海云台站出站，按地图前往中洞1路36，2层。",
       "tips": [
-        "海云台餐厅周末晚上较忙，冷面店相对还好，仍建议避开饭点高峰。",
-        "可与沙滩步行结合。"
+        "米其林指南页面目前标注的营业日请出行前再确认，不要按默认每天都开门来安排。",
+        "同名或旧址说法较多，请核对海云台中洞这家。"
       ],
       "station": "해운대역",
       "tags": [
         "bib2026"
-      ]
+      ],
+      "area_id": "haeundae",
+      "address": "부산 해운대구 중동1로 36, 2층",
+      "map_query": "부다면옥 해운대",
+      "source_note": "米其林指南釜山：海云台区中洞1路36，2层，平壤冷面。",
+      "source_url": "https://guide.michelin.com/kr/ko/busan-region/busan_1025838/restaurant/buda-myeonoak"
     },
     {
       "id": "pyeongyangjip-busan",
@@ -968,18 +1136,23 @@
       "name_ko": "평양집",
       "city": "busan",
       "city_zh": "釜山",
-      "area": "釜山镇区一带",
+      "area": "北区 金谷",
       "category": "traditional",
       "cuisine": "饺子",
-      "desc": "入选米其林指南釜山2026必比登的饺子店。以北方式饺子为主要看点，适合想在釜山吃一顿面点的人。",
-      "transport": "请在地图搜索釜山「평양집」，确认地址后再出发，避免与其他同名店混淆。",
+      "desc": "入选米其林指南釜山的饺子店，做的是北方风格饺子和绿豆饼，不是西面或海云台那一带。店在釜山北区金谷，同名店不少，一定要按地址找。",
+      "transport": "不在西面。请在地图搜索「평양집 금곡」或北区金谷大路20号街21，再确认出发路线。",
       "tips": [
-        "同名餐厅不少，请核对准必比登那一家的地址。",
-        "是否供应冷面以当日菜单为准。"
+        "同名餐厅很多，请核对准米其林指南里北区金谷这一家。",
+        "周日休息，目前页面标注大约10:30–15:30，出行前再确认。"
       ],
       "tags": [
         "bib2026"
-      ]
+      ],
+      "area_id": "other",
+      "address": "부산 북구 금곡대로20번길 21",
+      "map_query": "평양집 금곡",
+      "source_note": "米其林指南釜山：北区金谷大路20号街21，饺子；此前有资料误写在釜山镇区，已按官方地址改正。",
+      "source_url": "https://guide.michelin.com/kr/ko/busan-region/busan_1025838/restaurant/pyeongyangjip"
     },
     {
       "id": "bibijae",
@@ -987,11 +1160,11 @@
       "name_ko": "비비재",
       "city": "busan",
       "city_zh": "釜山",
-      "area": "寿营区",
+      "area": "寿营区 南川",
       "category": "traditional",
       "cuisine": "拌饭",
       "desc": "寿营区的拌饭店，入选米其林指南釜山2026必比登。想吃石锅或传统拌饭、又希望是指南收录店时可以考虑。",
-      "transport": "位于寿营区，地铁2号线沿线出站后按地图前往。",
+      "transport": "地铁2号线金莲山或广安站出站后，按地图前往南川海路10号街45，和百日平冷在同一条小巷。",
       "tips": [
         "石锅容器很烫，小心桌面和勺子。",
         "可与广安里行程安排在同一区域。"
@@ -999,7 +1172,12 @@
       "station": "광안역",
       "tags": [
         "bib2026"
-      ]
+      ],
+      "area_id": "gwangalli",
+      "address": "부산 수영구 남천바다로10번길 45",
+      "map_query": "비비재 남천",
+      "source_note": "米其林指南釜山：寿营区南川海路10号街45，拌饭，星期四休息。",
+      "source_url": "https://guide.michelin.com/kr/ko/busan-region/busan_1025838/restaurant/bibijae"
     },
     {
       "id": "ssiat-hotteok",
@@ -1020,7 +1198,9 @@
       "price": "₩",
       "tags": [
         "chinese_fav"
-      ]
+      ],
+      "area_id": "nampo",
+      "source_note": "公开旅游资料与百科/官方介绍整理，请出行前再确认营业。"
     },
     {
       "id": "samjin-eomuk",
@@ -1038,7 +1218,9 @@
         "买伴手礼注意保质期和是否需要冷藏。"
       ],
       "station": "자갈치역",
-      "price": "₩"
+      "price": "₩",
+      "area_id": "nampo",
+      "source_note": "公开旅游资料与百科/官方介绍整理，请出行前再确认营业。"
     },
     {
       "id": "jagalchi-seafood",
@@ -1058,7 +1240,9 @@
       "station": "자갈치역",
       "tags": [
         "chinese_fav"
-      ]
+      ],
+      "area_id": "nampo",
+      "source_note": "公开旅游资料与百科/官方介绍整理，请出行前再确认营业。"
     },
     {
       "id": "ujin-haejangguk",
@@ -1066,18 +1250,23 @@
       "name_ko": "우진해장국",
       "city": "jeju",
       "city_zh": "济州",
-      "area": "济州市",
+      "area": "济州市 西门十字路",
       "category": "chinese_fav",
       "cuisine": "解肠汤 / 牛肉汤饭",
       "desc": "济州市区最广为人知的汤饭店之一，长期出现在济州美食名单和旅客行程里，午餐经常排队。也是很多中国游客会专程去的一站。",
-      "transport": "位于济州市区，无地铁。从济州机场乘公交或出租车，按地图前往「우진해장국」。",
+      "transport": "济州市区西沙路11，靠近西门十字路口，从济州机场乘公交或出租车到市区后再按地图走。",
       "tips": [
         "午市排队很长，建议错峰或早到。",
         "这是济州市区店，不要和西归浦的行程卡得太紧。"
       ],
       "tags": [
         "chinese_fav"
-      ]
+      ],
+      "area_id": "jejusi",
+      "address": "제주특별자치도 제주시 서사로 11",
+      "map_query": "우진해장국 서사로",
+      "source_note": "韩国旅游发展局 VisitKorea：济州市西沙路11，以蕨菜解肠汤出名。",
+      "source_url": "https://english.visitkorea.or.kr/svc/contents/contentsView.do?vcontsId=52937"
     },
     {
       "id": "olle-guksu",
@@ -1089,11 +1278,16 @@
       "category": "traditional",
       "cuisine": "面条",
       "desc": "济州市区著名的面条店，常出现在济州美食介绍中。店面不大，本地客人和游客都有，常需等候。",
-      "transport": "济州市区，无地铁，公交或出租车前往「올래국수」。",
+      "transport": "济州市归雅朗路24，请按地图前往。VisitKorea写周日休息，上午开、下午三点左右结束，请提前安排。",
       "tips": [
         "排队是常态，可先看店外等候方式。",
         "营业结束可能较早，请先确认时间。"
-      ]
+      ],
+      "area_id": "jejusi",
+      "address": "제주특별자치도 제주시 귀아랑길 24",
+      "map_query": "올래국수 귀아랑길",
+      "source_note": "韩国旅游发展局 VisitKorea：济州市归雅朗路24，肉面；周日休息，约08:20–15:00。",
+      "source_url": "https://english.visitkorea.or.kr/svc/contents/contentsView.do?vcontsId=194250"
     },
     {
       "id": "donsadon",
@@ -1101,15 +1295,20 @@
       "name_ko": "돈사돈",
       "city": "jeju",
       "city_zh": "济州",
-      "area": "济州市一带",
+      "area": "济州市 友平路",
       "category": "bbq",
       "cuisine": "济州黑猪肉",
       "desc": "济州很有名的黑猪肉烤肉店之一，常被列入访济旅客的晚餐名单。以近郊或市区门店供应黑猪烤肉而知名。",
-      "transport": "无地铁。需乘公交、租车或出租车，出发前用地图确认要去的那一家分店。",
+      "transport": "济州市友平路19，在市区靠机场一侧，不是东门市场里。请按地图前往。",
       "tips": [
         "黑猪价位通常高于普通猪肉，点菜前看清部位和份量。",
         "晚餐高峰建议先问是否排队或可否预约。"
-      ]
+      ],
+      "area_id": "jejusi",
+      "address": "제주특별자치도 제주시 우평로 19",
+      "map_query": "돈사돈 우평로",
+      "source_note": "韩国旅游发展局 VisitKorea：济州市友平路19，济州黑猪烤肉；页面写周二休息。",
+      "source_url": "https://english.visitkorea.or.kr/svc/contents/contentsView.do?vcontsId=53553"
     },
     {
       "id": "myeongjin-jeonbok",
@@ -1117,15 +1316,20 @@
       "name_ko": "명진전복",
       "city": "jeju",
       "city_zh": "济州",
-      "area": "旧左 / 东线一带",
+      "area": "旧左邑 东线海边",
       "category": "seafood",
       "cuisine": "鲍鱼粥 / 鲍鱼料理",
       "desc": "济州东线广为人知的鲍鱼料理店，常出现在城山、牛岛行程的用餐推荐里。以鲍鱼粥和相关料理为主要看点。",
-      "transport": "位于济州东部，需从城山或东线公交、租车前往，请以地图为准。",
+      "transport": "在济州东部旧左邑迎日出海岸路1282，需从城山或东线公交、租车前往，请以地图为准。",
       "tips": [
         "在东线景点之间预留到达和排队时间。",
         "鲍鱼料理价格通常不低，先看菜单再点。"
-      ]
+      ],
+      "area_id": "seongsan",
+      "address": "제주특별자치도 제주시 구좌읍 해맞이해안로 1282",
+      "map_query": "명진전복 구좌",
+      "source_note": "韩国旅游发展局 VisitKorea：旧左邑迎日出海岸路1282，鲍鱼石锅饭等；页面写周二休息。",
+      "source_url": "https://english.visitkorea.or.kr/svc/whereToGo/locIntrdn/rgnContentsView.do?vcontsId=53388"
     },
     {
       "id": "dongmun-jeju-food",
@@ -1142,7 +1346,9 @@
         "海鲜和熟食先问价，注意保鲜和托运规定。",
         "人多路滑，看管好行李。"
       ],
-      "price": "₩"
+      "price": "₩",
+      "area_id": "jejusi",
+      "source_note": "公开旅游资料与百科/官方介绍整理，请出行前再确认营业。"
     },
     {
       "id": "veteran-jeonju",
@@ -1158,7 +1364,9 @@
       "tips": [
         "韩屋村主街店常排队，可先看分店或错峰。",
         "吃完可继续走韩屋村和南市场。"
-      ]
+      ],
+      "area_id": "jeonju-hanok",
+      "source_note": "公开旅游资料与百科/官方介绍整理，请出行前再确认营业。"
     },
     {
       "id": "hangukjip",
@@ -1174,7 +1382,9 @@
       "tips": [
         "传统拌饭可能包含多种配菜，有饮食忌口请先说明。",
         "旺季请预留候位时间。"
-      ]
+      ],
+      "area_id": "jeonju-hanok",
+      "source_note": "公开旅游资料与百科/官方介绍整理，请出行前再确认营业。"
     },
     {
       "id": "hwangnam-bread",
@@ -1191,7 +1401,9 @@
         "买伴手礼注意保质期和包装。",
         "本店和车站、市场的销售点可能不同，以当时货源为准。"
       ],
-      "price": "₩"
+      "price": "₩",
+      "area_id": "gyeongju",
+      "source_note": "公开旅游资料与百科/官方介绍整理，请出行前再确认营业。"
     },
     {
       "id": "gyori-gimbap",
@@ -1208,7 +1420,9 @@
         "热门时段可能售罄或排队。",
         "以简单快速餐为主，不必按正餐厅等候太久。"
       ],
-      "price": "₩"
+      "price": "₩",
+      "area_id": "gyeongju",
+      "source_note": "公开旅游资料与百科/官方介绍整理，请出行前再确认营业。"
     },
     {
       "id": "chodang-sundubu",
@@ -1224,7 +1438,9 @@
       "tips": [
         "多家店铺口味和价格不同，可先看菜单再进。",
         "这里没有地铁，请确认回程公交。"
-      ]
+      ],
+      "area_id": "gangneung-chodang",
+      "source_note": "公开旅游资料与百科/官方介绍整理，请出行前再确认营业。"
     },
     {
       "id": "abai-sundae",
@@ -1240,7 +1456,9 @@
       "tips": [
         "摆渡可能收取少量费用，以现场为准。",
         "若不吃血肠，也可选择村内其他海鲜或家常菜。"
-      ]
+      ],
+      "area_id": "sokcho-abai",
+      "source_note": "公开旅游资料与百科/官方介绍整理，请出行前再确认营业。"
     },
     {
       "id": "suwon-galbi",
@@ -1257,7 +1475,9 @@
         "请在地图选好具体店名，不同「水原排骨」店价位和部位差异很大。",
         "可与水原华城安排在同一下午或晚上。"
       ],
-      "station": "수원역"
+      "station": "수원역",
+      "area_id": "suwon",
+      "source_note": "公开旅游资料与百科/官方介绍整理，请出行前再确认营业。"
     },
     {
       "id": "sinpo-dakgangjeong",
@@ -1275,7 +1495,9 @@
         "和中国城、开港场安排在同一趟步行即可。"
       ],
       "station": "인천역",
-      "price": "₩"
+      "price": "₩",
+      "area_id": "incheon-chinatown",
+      "source_note": "公开旅游资料与百科/官方介绍整理，请出行前再确认营业。"
     },
     {
       "id": "incheon-chinatown-jajang",
@@ -1292,7 +1514,819 @@
         "店与店差别大，先看卫生、菜单和价格再进。",
         "这里是韩国式中华料理，口感可能和国内不同。"
       ],
-      "station": "인천역"
+      "station": "인천역",
+      "area_id": "incheon-chinatown",
+      "source_note": "公开旅游资料与百科/官方介绍整理，请出行前再确认营业。"
+    },
+    {
+      "id": "hongdae-dakgalbi",
+      "name_zh": "申美庆弘大炒鸡",
+      "name_ko": "신미경 홍대닭갈비",
+      "city": "seoul",
+      "city_zh": "首尔",
+      "area": "麻浦区 弘大",
+      "area_id": "hongdae",
+      "category": "traditional",
+      "cuisine": "铁板炒鸡",
+      "desc": "弘大的炒鸡店，首尔旅游官网介绍为三十年来的奶酪火锅炒鸡。用大铁板现场炒，也有蔬菜炒鸡。外国人常见，有中文说明。",
+      "transport": "地铁2号线、机场铁路、京义中央线弘大入口站（홍대입구역）9号出口，步行前往瓦雨山路21街31-10。",
+      "source_note": "首尔旅游官网 VisitSeoul（2026-01-05更新）「신미경 홍대닭갈비」页面。",
+      "address": "서울 마포구 와우산로21길 31-10, 1층",
+      "map_query": "신미경 홍대닭갈비 와우산로21길",
+      "station": "홍대입구역",
+      "price": "₩₩",
+      "tips": [
+        "分店不只这一家，请按弘大这个地址找。",
+        "两人以上比较合适，铁板很烫。"
+      ],
+      "source_url": "https://korean.visitseoul.net/restaurants/hongdaedak/KOP2flbke"
+    },
+    {
+      "id": "gongi-hannam",
+      "name_zh": "空气",
+      "name_ko": "공기",
+      "city": "seoul",
+      "city_zh": "首尔",
+      "area": "龙山区 汉南",
+      "area_id": "itaewon",
+      "category": "traditional",
+      "cuisine": "现代韩食",
+      "desc": "汉南的韩食店，韩国旅游发展局介绍为用时令食材做的现代韩食，有艾草排骨饼、水芹虾饼和辣椒大酱烤猪颈等。也可点小份套餐。周日休息，下午有休息时间。",
+      "transport": "在梨泰院路45街4，靠近汉南、梨泰院之间。可从梨泰院站或汉南一带按地图前往。",
+      "source_note": "韩国旅游发展局 VisitKorea「Skip the Wait at Hannam-dong’s Best Restaurants」一文（页面注明2024年7月核对，出行前请再确认）。",
+      "address": "서울 용산구 이태원로45길 4",
+      "map_query": "공기 이태원로45길",
+      "station": "이태원역",
+      "tips": [
+        "周日休息，下午通常有歇业时段，建议先查预约。",
+        "汉南和梨泰院步行可连着走。"
+      ],
+      "source_url": "https://english.visitkorea.or.kr/svc/contents/infoHtmlView.do?vcontsId=200255"
+    },
+    {
+      "id": "monks-butcher-itaewon",
+      "name_zh": "蒙克斯屠夫（梨泰院）",
+      "name_ko": "몽크스부처 이태원",
+      "city": "seoul",
+      "city_zh": "首尔",
+      "area": "龙山区 梨泰院",
+      "area_id": "itaewon",
+      "category": "traditional",
+      "cuisine": "素食",
+      "desc": "梨泰院的全素餐厅，韩国旅游发展局有介绍，有意式面和植物肉汉堡等。想在梨泰院吃一顿不是烤肉、也不是喝酒的饭，可以考虑这里。平日傍晚开门，周末更早。",
+      "transport": "地铁6号线梨泰院站出站，按地图前往梨泰院路228-1。",
+      "source_note": "韩国旅游发展局 VisitKorea 汉南/梨泰院餐厅介绍，地址为梨泰院路228-1。",
+      "address": "서울 용산구 이태원로 228-1",
+      "map_query": "몽크스부처 이태원",
+      "station": "이태원역",
+      "price": "₩₩",
+      "tips": [
+        "是全素餐厅，不是烤肉店。",
+        "平日和周末营业时间不同，请先确认。"
+      ],
+      "source_url": "https://english.visitkorea.or.kr/svc/contents/infoHtmlView.do?vcontsId=200255"
+    },
+    {
+      "id": "jaein-itaewon",
+      "name_zh": "再仁甜品",
+      "name_ko": "재인",
+      "city": "seoul",
+      "city_zh": "首尔",
+      "area": "龙山区 梨泰院",
+      "area_id": "itaewon",
+      "category": "cafe",
+      "cuisine": "甜点",
+      "desc": "梨泰院的甜点店，入选2026首尔美食100选。位置在梨泰院路54街，周一、周二休息，下午营业。适合逛完梨泰院、汉南后坐下来吃甜品。",
+      "transport": "在梨泰院路54街48，2层，汉南和梨泰院之间，请按地图前往。",
+      "source_note": "首尔旅游官方「2026首尔美食100选」甜点&咖啡分类收录。",
+      "address": "서울 용산구 이태원로54길 48 2층",
+      "map_query": "재인 이태원로54길",
+      "station": "이태원역",
+      "tips": [
+        "周一、周二休息，座位不多，想去先看当天是否开门。",
+        "主要是甜品，不是正餐。"
+      ],
+      "source_url": "https://tasteofseoul.visitseoul.net/restaurants/list"
+    },
+    {
+      "id": "gobong-samgyetang",
+      "name_zh": "高峰参鸡汤（明洞店）",
+      "name_ko": "고봉삼계탕 명동점",
+      "city": "seoul",
+      "city_zh": "首尔",
+      "area": "中区 明洞",
+      "area_id": "myeongdong",
+      "category": "traditional",
+      "cuisine": "参鸡汤",
+      "desc": "明洞步行街里的参鸡汤店，首尔多누林旅游信息写在明洞7街21。除了参鸡汤，也常见鲍鱼鸡粥。位置好找，逛完明洞可以直接吃。",
+      "transport": "地铁2号线乙支路入口站或4号线明洞站出站，步行至明洞7街21。",
+      "source_note": "首尔市官方无障碍旅游站点 Seoul Danurim 收录，地址为中区明洞7街21。",
+      "address": "서울 중구 명동7길 21 (을지로2가)",
+      "map_query": "고봉삼계탕 명동점",
+      "station": "명동역",
+      "price": "₩₩",
+      "tips": [
+        "明洞店和光化门店不是同一家，请按明洞7街这个地址找。",
+        "参鸡汤偏热，夏天也可点鸡粥。"
+      ],
+      "tags": [
+        "chinese_fav"
+      ],
+      "source_url": "https://www.seouldanurim.net/restaurants/D/TOURINFOTYPE3/35730"
+    },
+    {
+      "id": "samwon-garden",
+      "name_zh": "三园花园",
+      "name_ko": "삼원가든",
+      "city": "seoul",
+      "city_zh": "首尔",
+      "area": "江南区 狎鸥亭 / 新沙",
+      "area_id": "gangnam",
+      "category": "bbq",
+      "cuisine": "韩牛烤肉",
+      "desc": "狎鸥亭的大型韩牛烤肉园，首尔旅游官网列为百年商店，米其林指南也有收录。庭院和包间适合家庭或多人用餐，价格明显高于普通猪肉烤肉店。",
+      "transport": "地铁3号线狎鸥亭站（압구정역）3号出口步行约8–10分钟，地址是彦州路835。",
+      "source_note": "首尔旅游官网 VisitSeoul 百年商店页面（2026-08-27更新），地址为江南区彦州路835；米其林指南亦有页面。",
+      "address": "서울 강남구 언주로 835 (신사동)",
+      "map_query": "삼원가든 언주로",
+      "station": "압구정역",
+      "price": "₩₩₩",
+      "tips": [
+        "建议先看价格再点部位，不要只按「韩牛」下单。",
+        "多人用餐更合适，可先问是否需要预约。"
+      ],
+      "source_url": "https://korean.visitseoul.net/restaurants/%EC%82%BC%EC%9B%90%EA%B0%80%EB%93%A0--Samwongarden/KOP002488"
+    },
+    {
+      "id": "jinmi-naengmyeon",
+      "name_zh": "珍味平壤冷面",
+      "name_ko": "진미 평양냉면",
+      "city": "seoul",
+      "city_zh": "首尔",
+      "area": "江南区 论岘",
+      "area_id": "gangnam",
+      "category": "traditional",
+      "cuisine": "平壤冷面",
+      "desc": "论岘的平壤冷面店，米其林指南有收录。除了冷面，也有片肉、炒猪肉、火锅拼盘和饺子。在江南区厅、论岘一带，不必专程跑到市区北边吃冷面。",
+      "transport": "在江南区鹤洞路305-3，可从地铁7号线江南区厅站或学东站出站后按地图走。",
+      "source_note": "米其林指南首尔：江南区鹤洞路305-3，冷面。",
+      "address": "서울 강남구 학동로 305-3",
+      "map_query": "진미 평양냉면 학동로",
+      "station": "강남구청역",
+      "price": "₩₩",
+      "tips": [
+        "冷面口味清淡，是平壤冷面常见风格。",
+        "可和片肉、饺子一起点。"
+      ],
+      "source_url": "https://guide.michelin.com/kr/ko/seoul-capital-area/kr-seoul/restaurant/jinmi-pyungyang-naengmyeon"
+    },
+    {
+      "id": "daelim-changgo",
+      "name_zh": "大林仓库",
+      "name_ko": "대림창고",
+      "city": "seoul",
+      "city_zh": "首尔",
+      "area": "城东区 圣水",
+      "area_id": "seongsu",
+      "category": "cafe",
+      "cuisine": "咖啡 / 复合空间",
+      "desc": "圣水洞由旧碾米厂改成的展览和咖啡空间，首尔旅游官网有介绍。红砖和钢结构还在，除了咖啡也有酒和简单餐食，常和圣水洞拍照行程安排在一起。",
+      "transport": "地铁2号线圣水站（성수역）3号出口步行约5分钟，地址是圣水以路78。",
+      "source_note": "首尔旅游官网 VisitSeoul（2026-08-30更新）圣水洞大林仓库页面。",
+      "address": "서울 성동구 성수이로 78",
+      "map_query": "대림창고 성수",
+      "station": "성수역",
+      "price": "₩₩",
+      "tips": [
+        "先看是来喝咖啡还是看展览，部分座位和停车要另计。",
+        "周末人多，想拍照可错开中午。"
+      ],
+      "source_url": "https://korean.visitseoul.net/restaurants/daelimchanggo/KOPf8jiyc"
+    },
+    {
+      "id": "hau-seongsu",
+      "name_zh": "夏雨（圣水本店）",
+      "name_ko": "하우 성수본점",
+      "city": "seoul",
+      "city_zh": "首尔",
+      "area": "城东区 圣水",
+      "area_id": "seongsu",
+      "category": "traditional",
+      "cuisine": "猪肉骨汤 / 冷面",
+      "desc": "圣水的清汤猪肉骨汤店，首尔旅游官网介绍店名「夏雨」取清爽之意。除了骨汤，也有平壤式冷面和脸颊肉海带汤。下午有休息时间。",
+      "transport": "地铁2号线圣水站1号出口步行约6分钟，地址是阿且山路7街36，1层2号。",
+      "source_note": "首尔旅游官网 VisitSeoul（2026-09-04更新）「돼지곰탕 하우 성수본점」页面。",
+      "address": "서울 성동구 아차산로7길 36 1층 2호",
+      "map_query": "하우 성수본점",
+      "station": "성수역",
+      "price": "₩₩",
+      "tips": [
+        "请认准圣水本店。",
+        "下午通常有歇业时段，别卡在休息时间到。"
+      ],
+      "source_url": "https://korean.visitseoul.net/restaurants/hau/KOP2aitm6"
+    },
+    {
+      "id": "doksuri-dabang",
+      "name_zh": "老鹰茶房",
+      "name_ko": "독수리다방",
+      "city": "seoul",
+      "city_zh": "首尔",
+      "area": "西大门区 新村",
+      "area_id": "sinchon",
+      "category": "cafe",
+      "cuisine": "咖啡 / 茶房",
+      "desc": "新村的老茶房，首尔旅游官网介绍它曾是1970–80年代大学生聚会的地方，2005年关过、2013年由创始人孙辈再开，现为首尔未来遗产。在延世路36号老鹰大楼8层，适合喝杯咖啡、看看旧照片。",
+      "transport": "地铁2号线新村站（신촌역）3号出口步行约5分钟，延世路36，8层。",
+      "source_note": "首尔旅游官网 VisitSeoul（2026-09-28更新），并注明为首尔未来遗产。",
+      "address": "서울 서대문구 연세로 36 독수리빌딩 8층",
+      "map_query": "독수리다방 연세로",
+      "station": "신촌역",
+      "price": "₩",
+      "tips": [
+        "在8层，先找老鹰大楼再乘电梯。",
+        "以咖啡和空间为主，不是正餐。"
+      ],
+      "source_url": "https://korean.visitseoul.net/restaurants/%EB%8F%85%EC%88%98%EB%A6%AC%EB%8B%A4%EB%B0%A9/KOP028329"
+    },
+    {
+      "id": "nanhyang-sinchon",
+      "name_zh": "兰香",
+      "name_ko": "난향",
+      "city": "seoul",
+      "city_zh": "首尔",
+      "area": "西大门区 新村",
+      "area_id": "sinchon",
+      "category": "chinese_fav",
+      "cuisine": "韩国式中华料理",
+      "desc": "新村的中华料理店，首尔旅游官网写1993年开业，曾被韩国旅游公社等评为卫生餐厅。店面较大，有炸酱面、汤面和糖醋肉等，也承接家庭或团体聚餐。",
+      "transport": "地铁2号线新村站1号出口步行约4分钟，地址是新村路67。",
+      "source_note": "首尔旅游官网 VisitSeoul（2026-06-25更新），地址为西大门区新村路67。",
+      "address": "서울 서대문구 신촌로 67",
+      "map_query": "난향 신촌로",
+      "station": "신촌역",
+      "price": "₩₩",
+      "tips": [
+        "是韩国式中华料理，口味可能和国内不同。",
+        "每月第二个周一和节日可能休息，请先确认。"
+      ],
+      "source_url": "https://korean.visitseoul.net/restaurants/%EB%82%9C%ED%96%A5/KOP000446"
+    },
+    {
+      "id": "gobawoo-sinchon",
+      "name_zh": "高鲍乌",
+      "name_ko": "고바우",
+      "city": "seoul",
+      "city_zh": "首尔",
+      "area": "西大门区 新村",
+      "area_id": "sinchon",
+      "category": "bbq",
+      "cuisine": "炭火烤肉",
+      "desc": "新村大学街的炭火烤肉店，首尔旅游官网介绍以前用蜂窝煤铁板烤肉，现在改用盐烤猪肉和韩牛。傍晚常有人来喝一杯，周日休息。",
+      "transport": "地铁2号线新村站3号出口步行约5分钟，地址是名物1街22。",
+      "source_note": "首尔旅游官网 VisitSeoul（2026-06-15更新），地址为西大门区名物1街22。",
+      "address": "서울 서대문구 명물1길 22 (창천동)",
+      "map_query": "고바우 명물1길",
+      "station": "신촌역",
+      "price": "₩₩",
+      "tips": [
+        "下午4点左右才开门，周日和节日休息。",
+        "店在小巷里，用地图比按路牌找更省事。"
+      ],
+      "source_url": "https://korean.visitseoul.net/restaurants/%EA%B3%A0%EB%B0%94%EC%9A%B0/KOP010893"
+    },
+    {
+      "id": "cheil-jemyunso-ifc",
+      "name_zh": "第一制面所（汝矣岛IFC店）",
+      "name_ko": "제일제면소 여의도IFC몰점",
+      "city": "seoul",
+      "city_zh": "首尔",
+      "area": "永登浦区 汝矣岛 IFC",
+      "area_id": "yeouido",
+      "category": "traditional",
+      "cuisine": "刀切面 / 火锅",
+      "desc": "汝矣岛IFC商场里的面店，首尔旅游官网2026年4月介绍有刀切面、火锅、牛腱熟肉和肉煎。商场里好找，也有多语言菜单，适合在汝矣岛办事或逛街时吃一顿热面。",
+      "transport": "地铁5、9号线汝矣岛站3号出口向IFC商场，国际金融路10，IFC Mall L3层。",
+      "source_note": "首尔旅游官网 VisitSeoul（2026-04-10发布）汝矣岛IFC店页面。",
+      "address": "서울 영등포구 국제금융로 10 IFC몰 L3층",
+      "map_query": "제일제면소 여의도 IFC",
+      "station": "여의도역",
+      "price": "₩₩",
+      "tips": [
+        "这是连锁店的汝矣岛分店，请在IFC商场3层按店名找。",
+        "商场营业时间可能影响最晚点餐。"
+      ],
+      "source_url": "https://korean.visitseoul.net/restaurants/cheiljemyunso-IFC/KOPxsrld7"
+    },
+    {
+      "id": "seogeulleongtang",
+      "name_zh": "西格楞汤",
+      "name_ko": "서글렁탕",
+      "city": "seoul",
+      "city_zh": "首尔",
+      "area": "永登浦区 汝矣岛",
+      "area_id": "yeouido",
+      "category": "bbq",
+      "cuisine": "酱腌五花肉烤肉",
+      "desc": "汝矣岛开了二十多年的烤肉店，名字容易被听成雪浓汤，其实卖的是酱油腌的薄切五花肉，用炭火烤。首尔旅游官网也介绍解肠汤。晚上附近上班族多，可能要等。",
+      "transport": "地铁9号线、新林线赛江站（샛강역）3号出口步行约6分钟，汝矣大方路394。",
+      "source_note": "首尔旅游官网 VisitSeoul（2026-06-10更新），地址为永登浦区汝矣大方路394。",
+      "address": "서울 영등포구 여의대방로 394 (여의도동)",
+      "map_query": "서글렁탕 여의도",
+      "station": "샛강역",
+      "price": "₩₩",
+      "tips": [
+        "不是雪浓汤店，请按「서글렁탕」搜索。",
+        "烟气较重，衣服会沾味。"
+      ],
+      "source_url": "https://korean.visitseoul.net/restaurants/%EC%84%9C%EA%B8%80%EB%A0%81%ED%83%95/KOP006324"
+    },
+    {
+      "id": "songpanaru",
+      "name_zh": "松坡津",
+      "name_ko": "송파나루",
+      "city": "seoul",
+      "city_zh": "首尔",
+      "area": "松坡区 石村湖",
+      "area_id": "jamsil",
+      "category": "seafood",
+      "cuisine": "烤鱼 / 鱼汤",
+      "desc": "石村湖边的海鲜店，首尔旅游官网介绍有带鱼、青花鱼、鲽鱼和银鳕鱼等，也有首尔较少见的海鳗解肠汤。逛完石村湖或乐天世界可以就近吃鱼。",
+      "transport": "地铁8、9号线石村站（석촌역）8号出口步行约8分钟，石村湖路234。",
+      "source_note": "首尔旅游官网 VisitSeoul（2026-06-03更新），地址为松坡区石村湖路234。",
+      "address": "서울 송파구 석촌호수로 234 (석촌동)",
+      "map_query": "송파나루 석촌호수",
+      "station": "석촌역",
+      "price": "₩₩",
+      "tips": [
+        "以海鲜为主，不是烤肉。",
+        "可与石村湖散步安排在一起。"
+      ],
+      "source_url": "https://korean.visitseoul.net/restaurants/%EC%86%A1%ED%8C%8C%EB%82%98%EB%A3%A8/KOP012340"
+    },
+    {
+      "id": "neulpureun-mokjang",
+      "name_zh": "常青牧场",
+      "name_ko": "늘푸른목장",
+      "city": "seoul",
+      "city_zh": "首尔",
+      "area": "松坡区 蚕室",
+      "area_id": "jamsil",
+      "category": "bbq",
+      "cuisine": "韩牛烤肉",
+      "desc": "蚕室的韩牛烤肉店，首尔旅游官网列出韩牛、排骨肉、生排骨和肉脍等。在蚕室新川站附近，看完乐天世界或石村湖后可以过来吃烤肉。",
+      "transport": "地铁2号线蚕室新川站（잠실새내역）4号出口步行约6分钟，百济古坟路9街34。",
+      "source_note": "首尔旅游官网 VisitSeoul（2026-06-09更新），地址为松坡区百济古坟路9街34。",
+      "address": "서울 송파구 백제고분로9길 34 (잠실동)",
+      "map_query": "늘푸른목장 잠실",
+      "station": "잠실새내역",
+      "price": "₩₩₩",
+      "tips": [
+        "先看清部位和价格再点。",
+        "新川站和蚕室站不是同一站，请按新川站出。"
+      ],
+      "source_url": "https://korean.visitseoul.net/restaurants/%EB%8A%98%ED%91%B8%EB%A5%B8%EB%AA%A9%EC%9E%A5-KR/KOP007019"
+    },
+    {
+      "id": "jangsu-sikdang",
+      "name_zh": "长寿食堂",
+      "name_ko": "장수식당",
+      "city": "seoul",
+      "city_zh": "首尔",
+      "area": "松坡区 蚕室",
+      "area_id": "jamsil",
+      "category": "bbq",
+      "cuisine": "泡菜五花肉",
+      "desc": "蚕室的泡菜五花肉店，首尔旅游官网介绍点菜后会把泡菜围在五花肉中间一起煎，也可再炒饭。周日、公休日和节日休息，店在住宅巷里，要靠地图找。",
+      "transport": "地铁9号线三田站（삼전역）1号出口步行约5分钟，三田路95。离蚕室站还有一小段。",
+      "source_note": "首尔旅游官网 VisitSeoul（2026-06-10更新），地址为松坡区三田路95。",
+      "address": "서울 송파구 삼전로 95 (잠실동)",
+      "map_query": "장수식당 삼전로",
+      "station": "삼전역",
+      "price": "₩₩",
+      "tips": [
+        "周日和公休日休息。",
+        "店面不大，饭点可能要等。"
+      ],
+      "source_url": "https://korean.visitseoul.net/restaurants/%EC%9E%A5%EC%88%98%EC%8B%9D%EB%8B%B9/KOP013854"
+    },
+    {
+      "id": "dolphin-sikhyeong",
+      "name_zh": "海豚食堂",
+      "name_ko": "돌고래식당",
+      "city": "busan",
+      "city_zh": "釜山",
+      "area": "釜山镇区 西面",
+      "area_id": "seomyeon",
+      "category": "seafood",
+      "cuisine": "河豚汤",
+      "desc": "西面釜田洞的河豚汤店，中小企业部「百年商店」介绍为两代河豚汤店，用河豚做汤，豆子芽拌饭也常被提起。店名是「海豚」，卖的是河豚汤，不要搞混。周日休息。",
+      "transport": "在西面站周边，釜山镇区西田路10号街31-9（釜田洞）。请按地图搜索「돌고래식당」。",
+      "source_note": "韩国中小企业部「百年商店」官方介绍页，地址为釜山镇区西田路10号街31-9。",
+      "address": "부산 부산진구 서전로10번길 31-9 (부전동)",
+      "map_query": "돌고래식당 서면 부전동",
+      "station": "서면역",
+      "price": "₩₩",
+      "tips": [
+        "店名是海豚，菜是河豚汤。",
+        "周日休息。对河豚过敏或忌口的人不要点。"
+      ],
+      "source_url": "https://www.sbiz.or.kr/hdst/main/ohndMarketDetailSmba.do?rcpnNo=HND002222"
+    },
+    {
+      "id": "marathon-jip",
+      "name_zh": "马拉松店",
+      "name_ko": "마라톤집",
+      "city": "busan",
+      "city_zh": "釜山",
+      "area": "釜山镇区 西面",
+      "area_id": "seomyeon",
+      "category": "seafood",
+      "cuisine": "海鲜煎饼 / 下酒菜",
+      "desc": "西面釜田洞的老酒吧式小店，中小企业部「百年商店」介绍有六十多年历史。招牌是把牡蛎、蛤蜊、扇贝等剁碎后和蔬菜、鸡蛋一起烙的海鲜煎饼。下午4点后营业，周日休息。",
+      "transport": "釜山镇区伽倻大路784号街54（釜田洞），在西面站往伽倻大路一侧，请按地图前往。",
+      "source_note": "韩国中小企业部「百年商店」官方介绍页，地址为釜山镇区伽倻大路784号街54。",
+      "address": "부산 부산진구 가야대로784번길 54 (부전동)",
+      "map_query": "마라톤집 부전동",
+      "station": "서면역",
+      "price": "₩₩",
+      "tips": [
+        "下午较晚才开门，周日休息。",
+        "偏下酒菜，不一定当正餐。"
+      ],
+      "source_url": "https://www.sbiz.or.kr/hdst/main/ohndMarketDetailSmba.do?rcpnNo=HND002227"
+    },
+    {
+      "id": "haeundae-amso-galbi",
+      "name_zh": "海云台母牛排骨店",
+      "name_ko": "해운대암소갈비집",
+      "city": "busan",
+      "city_zh": "釜山",
+      "area": "海云台区 中洞",
+      "area_id": "haeundae",
+      "category": "bbq",
+      "cuisine": "烤牛肉排骨",
+      "desc": "海云台海滩路边的烤排骨老店，米其林指南介绍自1964年传到第三代，卖生排骨和腌排骨，生排骨常卖完。是海云台很常被提起的一餐，价格不低。",
+      "transport": "海云台海滩路333，靠近海滩。可从地铁2号线海云台站或中洞站出站后按地图走。",
+      "source_note": "米其林指南釜山：海云台区海云台海滩路333，烧烤；指南介绍1964年开业。",
+      "address": "부산 해운대구 해운대해변로 333",
+      "map_query": "해운대암소갈비집",
+      "station": "해운대역",
+      "price": "₩₩₩",
+      "tips": [
+        "生排骨可能提前卖完，想吃可先问是否还要预约。",
+        "人均通常明显高于普通猪肉烤肉。"
+      ],
+      "source_url": "https://guide.michelin.com/en/busan-region/busan_1025838/restaurant/haeundae-rib-barbecue-restaurant"
+    },
+    {
+      "id": "haemok-haeundae",
+      "name_zh": "海木",
+      "name_ko": "해목",
+      "city": "busan",
+      "city_zh": "釜山",
+      "area": "海云台区 中洞",
+      "area_id": "haeundae",
+      "category": "traditional",
+      "cuisine": "鳗鱼饭 / 日式料理",
+      "desc": "海云台的日式料理店，米其林指南介绍以熏鳗鱼饭（hitsumabushi）最出名，也有盖饭、生鱼片和天妇罗。蓝墙和榻榻米座位很好认。釜山是本店，首尔另有分店。",
+      "transport": "海云台区区南路24号街8，中洞一带。从海云台站出站后按地图走。",
+      "source_note": "米其林指南釜山：海云台区区南路24号街8，日式料理。",
+      "address": "부산 해운대구 구남로24번길 8",
+      "map_query": "해목 해운대 구남로",
+      "station": "해운대역",
+      "price": "₩₩",
+      "tips": [
+        "请认准海云台本店。",
+        "鳗鱼饭是招牌，饭点可能要等。"
+      ],
+      "source_url": "https://guide.michelin.com/kr/ko/busan-region/busan_1025838/restaurant/haemok"
+    },
+    {
+      "id": "cor-pasta-bar",
+      "name_zh": "科尔意面吧",
+      "name_ko": "코르 파스타바",
+      "city": "busan",
+      "city_zh": "釜山",
+      "area": "釜山镇区 田浦",
+      "area_id": "jeonpo",
+      "category": "traditional",
+      "cuisine": "意大利面",
+      "desc": "田浦巷子二楼的意面店，米其林指南介绍座位不多，面是自己做的，有海鲜汤面、鱼子面和韩牛肉酱面等。点餐通常要各点一份酒，适合想在田浦吃一顿不是韩食的饭。周一休息。",
+      "transport": "釜山镇区东城路25号街13，2层。从西面站往田浦走，或按地图搜索「코르 파스타바」。",
+      "source_note": "米其林指南釜山：釜山镇区东城路25号街13，2层，意大利菜；文中写在田浦巷。",
+      "address": "부산 부산진구 동성로25번길 13, 2층",
+      "map_query": "코르 파스타바 전포",
+      "station": "서면역",
+      "price": "₩₩",
+      "tips": [
+        "周一休息。座位很少，可能要等。",
+        "指南写明通常要1人1酒，请先看店内说明。"
+      ],
+      "source_url": "https://guide.michelin.com/kr/ko/busan-region/busan_1025838/restaurant/cor-pasta-bar"
+    },
+    {
+      "id": "bao-haus-jeonpo",
+      "name_zh": "包豪斯（台湾料理）",
+      "name_ko": "바오하우스",
+      "city": "busan",
+      "city_zh": "釜山",
+      "area": "釜山镇区 田浦",
+      "area_id": "jeonpo",
+      "category": "chinese_fav",
+      "cuisine": "台湾小吃",
+      "desc": "田浦的台湾小吃店，米其林指南介绍有割包、卤肉饭、麻婆豆腐和鱼香茄子等。店面不大，不接受预约，忙的时候要在外面等。",
+      "transport": "釜山镇区西田路38号街62-9，田浦咖啡街附近。从西面站往南走或按地图前往。",
+      "source_note": "米其林指南釜山：釜山镇区西田路38号街62-9，台湾料理。该路段属于田浦咖啡街一带。",
+      "address": "부산 부산진구 서전로38번길 62-9",
+      "map_query": "바오하우스 전포",
+      "station": "서면역",
+      "price": "₩₩",
+      "tips": [
+        "不接受预约，去了可能要等。",
+        "是台湾风味小吃，不是韩食。"
+      ],
+      "source_url": "https://guide.michelin.com/kr/ko/busan-region/busan_1025838/restaurant/bao-haus"
+    },
+    {
+      "id": "zandunga-jeonpo",
+      "name_zh": "赞敦加",
+      "name_ko": "잔둔가",
+      "city": "busan",
+      "city_zh": "釜山",
+      "area": "釜山镇区 田浦",
+      "area_id": "jeonpo",
+      "category": "traditional",
+      "cuisine": "墨西哥菜",
+      "desc": "田浦的墨西哥餐厅，米其林指南介绍玉米饼每天早上现做，招牌有猪肉塔可。周一、周二休息。想在田浦换换口味时可以考虑。",
+      "transport": "釜山镇区东川路108号街41，请按地图搜索「잔둔가」。",
+      "source_note": "米其林指南釜山：釜山镇区东川路108号街41，墨西哥菜。",
+      "address": "부산 부산진구 동천로108번길 41",
+      "map_query": "잔둔가 전포",
+      "station": "서면역",
+      "price": "₩₩",
+      "tips": [
+        "周一、周二休息。",
+        "不是韩食，以塔可等墨西哥菜为主。"
+      ],
+      "source_url": "https://guide.michelin.com/kr/ko/busan-region/busan_1025838/restaurant/zandunga-1243638"
+    },
+    {
+      "id": "good-morning-hongkong",
+      "name_zh": "早安香港",
+      "name_ko": "굿모닝홍콩",
+      "city": "busan",
+      "city_zh": "釜山",
+      "area": "釜山镇区 田浦",
+      "area_id": "jeonpo",
+      "category": "chinese_fav",
+      "cuisine": "香港茶餐厅",
+      "desc": "田浦的茶餐厅风味店，米其林指南介绍口味按韩国客人做了些调整，有番茄汤面、甜面包和奶茶、柠檬茶等。周六、周日关得比较早。",
+      "transport": "釜山镇区西田路47号街19，田浦西田路一带，请按地图前往。",
+      "source_note": "米其林指南釜山：釜山镇区西田路47号街19，中华料理/茶餐厅。",
+      "address": "부산 부산진구 서전로47번길 19",
+      "map_query": "굿모닝홍콩 전포",
+      "station": "서면역",
+      "price": "₩₩",
+      "tips": [
+        "周末可能下午就结束营业，请先确认。",
+        "是港式茶餐厅风格，不是韩食。"
+      ],
+      "source_url": "https://guide.michelin.com/kr/ko/busan-region/busan_1025838/restaurant/good-morning-hongkong"
+    },
+    {
+      "id": "ojo-haenyeo",
+      "name_zh": "五照海女之家",
+      "name_ko": "오조해녀의집",
+      "city": "jeju",
+      "city_zh": "济州",
+      "area": "西归浦市 城山邑 五照里",
+      "area_id": "seongsan",
+      "category": "seafood",
+      "cuisine": "海女海鲜 / 鲍鱼粥",
+      "desc": "城山日出峰附近由五照里渔村经营的海女食堂，韩国旅游公社无障碍旅游站点介绍从日出峰往济州方向过防波堤就能看到白房子。菜单以鲍鱼、海螺、海参等海鲜名称为主，最常点的是鲍鱼粥，也有生食和烧烤。",
+      "transport": "西归浦市城山邑韩道路141-13，在城山日出峰西侧五照里。请按地图前往，不要和岛上其他「海女之家」搞混。",
+      "source_note": "韩国旅游公社「열린관광 모두의 여행」页面（2026-11-10更新），地址为西归浦市城山邑韩道路141-13。",
+      "address": "제주특별자치도 서귀포시 성산읍 한도로 141-13",
+      "map_query": "오조해녀의집 성산",
+      "price": "₩₩₩",
+      "tips": [
+        "同名或类似店名不少，请核对城山邑五照里这个地址。",
+        "海鲜价格不低，先看菜单再点。"
+      ],
+      "source_url": "https://access.visitkorea.or.kr/food/detail.do?cotId=3fa43649-a111-4308-939f-7ace3c8d504c"
+    },
+    {
+      "id": "seogwipo-heukdwaeji",
+      "name_zh": "西归浦黑猪名家",
+      "name_ko": "서귀포흑돼지명가",
+      "city": "jeju",
+      "city_zh": "济州",
+      "area": "西归浦市 好近洞",
+      "area_id": "seogwipo",
+      "category": "bbq",
+      "cuisine": "济州黑猪 / 乡土料理",
+      "desc": "西归浦市区的乡土料理店，韩国旅游公社介绍传承五十多年，有济州黑猪排骨、套餐、海鲜汤和带鱼炖等，不用化学调味料，还有庭院可以饭后走走。",
+      "transport": "西归浦市太平路122（好近洞），在西归浦市区，请按地图前往。",
+      "source_note": "韩国旅游公社「열린관광 모두의 여행」页面（2026-11-10更新），地址为西归浦市太平路122。",
+      "address": "제주특별자치도 서귀포시 태평로 122 (호근동)",
+      "map_query": "서귀포흑돼지명가 태평로",
+      "price": "₩₩₩",
+      "tips": [
+        "黑猪和套餐价格先问清楚再点。",
+        "和中文观光团地不是同一处，要从西归浦市区走。"
+      ],
+      "source_url": "https://access.visitkorea.or.kr/food/detail.do?cotId=306e7b45-b17d-4247-8423-68b851aa6ac4"
+    },
+    {
+      "id": "seogwipo-gwendangne",
+      "name_zh": "西归浦惯当家",
+      "name_ko": "서귀포괸당네",
+      "city": "jeju",
+      "city_zh": "济州",
+      "area": "西归浦市 七十里饮食街",
+      "area_id": "seogwipo",
+      "category": "seafood",
+      "cuisine": "银带鱼炖 / 带鱼生鱼片",
+      "desc": "西归浦七十里饮食街的带鱼店，韩国旅游公社介绍招牌是济州银带鱼炖和带鱼生鱼片。店面两层，座位较多，旺季建议先预约。",
+      "transport": "西归浦市七十里路123，在七十里饮食特色街，请按地图前往。",
+      "source_note": "韩国旅游公社「열린관광 모두의 여행」页面（2026-11-10更新），地址为西归浦市七十里路123。",
+      "address": "제주특별자치도 서귀포시 칠십리로 123",
+      "map_query": "서귀포괸당네 칠십리로",
+      "price": "₩₩₩",
+      "tips": [
+        "旺季请先预约。",
+        "「괸당」是济州话里亲戚的意思，按店名加「칠십리」搜索更准。"
+      ],
+      "source_url": "https://access.visitkorea.or.kr/food/detail.do?cotId=080e180a-6df1-4376-9b33-e2fdfb71e9e6"
+    },
+    {
+      "id": "gajok-hoegwan",
+      "name_zh": "家族会馆",
+      "name_ko": "가족회관",
+      "city": "jeonju",
+      "city_zh": "全罗",
+      "area": "全州市 前罗监营",
+      "area_id": "jeonju-hanok",
+      "category": "traditional",
+      "cuisine": "全州拌饭",
+      "desc": "全州的拌饭店，韩国旅游发展局介绍1970年代开业，在韩屋里做全州拌饭，也有肉脍拌饭和套餐。店在前罗监营附近，和韩屋村步行可连着走。",
+      "transport": "全州市完山区前罗监营5街17，可与韩屋村安排在同一趟，请按地图确认。",
+      "source_note": "韩国旅游发展局 VisitKorea 餐厅页，地址为全州市完山区前罗监营5街17。",
+      "address": "전북특별자치도 전주시 완산구 전라감영5길 17",
+      "map_query": "가족회관 전주 전라감영",
+      "price": "₩₩",
+      "tips": [
+        "在前罗监营附近，不是韩屋村最中心，但步行可达。",
+        "拌饭套餐内容以当日菜单为准。"
+      ],
+      "source_url": "https://english.visitkorea.or.kr/svc/contents/contentsView.do?vcontsId=192083"
+    }
+  ],
+  "areas": [
+    {
+      "id": "hongdae",
+      "zh": "弘大",
+      "city_zh": "首尔",
+      "intro": "弘大、延南和合井一带，逛街、看演出之后最常找晚饭的地方。"
+    },
+    {
+      "id": "itaewon",
+      "zh": "梨泰院",
+      "city_zh": "首尔",
+      "intro": "梨泰院和汉南一带，国际化餐饮多，也适合晚上走走。"
+    },
+    {
+      "id": "myeongdong",
+      "zh": "明洞",
+      "city_zh": "首尔",
+      "intro": "购物核心区，老店和新店都挤在步行街附近，中午和晚饭常要排队。"
+    },
+    {
+      "id": "gangnam",
+      "zh": "江南",
+      "city_zh": "首尔",
+      "intro": "江南站、新沙、狎鸥亭和COEX一带，逛街、看病、看演出都可以就近吃饭。"
+    },
+    {
+      "id": "dongdaemun",
+      "zh": "东大门",
+      "city_zh": "首尔",
+      "intro": "东大门商圈和广藏市场一带，逛夜市、买衣服时最方便解决餐饮。"
+    },
+    {
+      "id": "seongsu",
+      "zh": "圣水洞",
+      "city_zh": "首尔",
+      "intro": "旧厂房改成的咖啡和餐厅很多，适合和首尔林安排在同一趟。"
+    },
+    {
+      "id": "sinchon",
+      "zh": "新村",
+      "city_zh": "首尔",
+      "intro": "大学街，价格相对亲民，晚上烧烤和小吃最多。"
+    },
+    {
+      "id": "yeouido",
+      "zh": "汝矣岛",
+      "city_zh": "首尔",
+      "intro": "国会和金融区，中午上班族多；傍晚可顺路去汉江公园。"
+    },
+    {
+      "id": "jamsil",
+      "zh": "蚕室",
+      "city_zh": "首尔",
+      "intro": "乐天世界、石村湖和奥林匹克公园一带，适合游玩后就近用餐。"
+    },
+    {
+      "id": "bukchon",
+      "zh": "景福宫·北村韩屋村",
+      "city_zh": "首尔",
+      "intro": "景福宫、北村、三清洞、西村和仁寺洞步行范围内，逛完故宫最方便吃饭。"
+    },
+    {
+      "id": "gwangalli",
+      "zh": "广安里",
+      "city_zh": "釜山",
+      "intro": "广安里海滩和南川一带，看广安大桥前后可以就近吃饭。"
+    },
+    {
+      "id": "seomyeon",
+      "zh": "西面",
+      "city_zh": "釜山",
+      "intro": "釜山交通和购物中心，老店多在西面站周边的釜田洞巷子里。"
+    },
+    {
+      "id": "haeundae",
+      "zh": "海云台",
+      "city_zh": "釜山",
+      "intro": "海云台海滩和中洞一带，住在这边时不必再跑去西区吃饭。"
+    },
+    {
+      "id": "nampo",
+      "zh": "南浦洞/札嘎其",
+      "city_zh": "釜山",
+      "intro": "南浦洞、BIFF广场和札嘎其市场，海鲜和小吃最集中。"
+    },
+    {
+      "id": "jeonpo",
+      "zh": "田浦",
+      "city_zh": "釜山",
+      "intro": "西面往南走十几分钟的咖啡和餐厅街，比西面站门口安静一些。"
+    },
+    {
+      "id": "jejusi",
+      "zh": "济州市",
+      "city_zh": "济州",
+      "intro": "济州市区、东门市场和塔洞一带，落地第一顿常在这里解决。"
+    },
+    {
+      "id": "seongsan",
+      "zh": "城山·旧左",
+      "city_zh": "济州",
+      "intro": "城山日出峰和旧左东线海边，以海鲜、鲍鱼和海女料理出名。"
+    },
+    {
+      "id": "seogwipo",
+      "zh": "西归浦",
+      "city_zh": "济州",
+      "intro": "岛南的西归浦市区，黑猪和银带鱼是常点的本地菜。"
+    },
+    {
+      "id": "jeonju-hanok",
+      "zh": "全州韩屋村",
+      "city_zh": "全罗",
+      "intro": "全州韩屋村和前罗监营一带，拌饭和刀切面最常被提起。"
+    },
+    {
+      "id": "gyeongju",
+      "zh": "庆州市区",
+      "city_zh": "庆州",
+      "intro": "皇南、大陵苑和市内步行范围内，面包和紫菜包饭是常见点心。"
+    },
+    {
+      "id": "gangneung-chodang",
+      "zh": "江陵草堂",
+      "city_zh": "江原",
+      "intro": "江陵草堂嫩豆腐村，以当地海水豆腐出名。"
+    },
+    {
+      "id": "sokcho-abai",
+      "zh": "束草阿拜村",
+      "city_zh": "江原",
+      "intro": "要坐小船过港，村内以阿拜血肠出名。"
+    },
+    {
+      "id": "suwon",
+      "zh": "水原",
+      "city_zh": "京畿",
+      "intro": "水原华城一带以烤排骨闻名，请选好有明确地址的老店再去。"
+    },
+    {
+      "id": "incheon-chinatown",
+      "zh": "新浦·中国城",
+      "city_zh": "仁川",
+      "intro": "仁川站出来就是中国城和新浦市场，炸酱面和炸鸡块最常被提起。"
     }
   ]
 }
