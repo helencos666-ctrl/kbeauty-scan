@@ -388,6 +388,8 @@ def db():
                         cur.execute(MIGRATE_PROMO)
                         from opening_promo import MIGRATE_OPENING_PROMO
                         cur.execute(MIGRATE_OPENING_PROMO)
+                        from pay_proof import MIGRATE_PAY_PROOF
+                        cur.execute(MIGRATE_PAY_PROOF)
                     ensure_bot(conn)
                     from chicken import ensure_chicken_shops
                     ensure_chicken_shops(conn)
@@ -2219,3 +2221,5 @@ from promo import router as _promo_router   # noqa: E402
 router.include_router(_promo_router)
 from opening_promo import router as _opening_promo_router   # noqa: E402
 router.include_router(_opening_promo_router)
+from pay_proof import router as _pay_proof_router   # noqa: E402
+router.include_router(_pay_proof_router)

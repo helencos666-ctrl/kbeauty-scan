@@ -14,6 +14,17 @@
 <link rel="icon" type="image/png" sizes="192x192" href="/static/icons/icon-192.png">
 <link rel="stylesheet" href="/static/pwa.css">
 <link rel="stylesheet" href="/static/community.css">
+<style>
+.paybox{display:flex;gap:12px;margin-top:12px}
+.payq{flex:1;min-width:0;text-align:center;display:flex;flex-direction:column;gap:8px;align-items:stretch}
+.payq img{width:100%;border-radius:12px}
+.payq b{font-size:15px}
+.paylink{font-size:12px;color:#888;line-height:1.5}
+a.paylink{color:#2c7be5}
+.pst{display:flex;justify-content:space-between;gap:8px;padding:10px 0;border-top:1px solid #f0f1f3;font-size:14px}
+.pst em{font-style:normal;font-weight:700}
+.pst .pending{color:#e67e22}.pst .approved{color:#2e7d32}.pst .rejected{color:#c62828}
+</style>
 </head>
 <body>
 <header>
@@ -53,19 +64,53 @@
     </table>
     <p class="tip">商家须具备合法经营资格，价格和服务描述真实，医美内容只能由合法医疗机构发布。商家信息由商家自行负责，详见<a href="/rules#r3" style="color:#2c7be5">社区约定·商家怎么发</a>。到期后可续费，有效期内续费顺延。</p>
   </div>
-  <div class="card">
-    <h2>开通步骤（人工开通）</h2>
+  <div class="card" id="paycard">
+    <h2>开通步骤</h2>
     <ol class="steps">
-      <li>先<a href="/login?mode=reg&next=/member" style="color:#2c7be5">注册</a>并登录，记下“我的状态”里的<b>会员编号</b>。</li>
-      <li>扫码支付对应金额：会员 ¥<span data-p="price_t1">9.9</span>，高级会员 ¥<span data-p="price_t2">19.9</span>（会员升级补差价），商家会员月付 ¥<span data-p="price_m_month">99</span> / 年付 ¥<span data-p="price_m_year">999</span>，商家增发 ¥<span data-p="price_extra">19.9</span>/篇。付款备注填写会员编号和项目。</li>
-      <li>付款后<b>截图发给管理员</b>，管理员核对后为你开通。</li>
-      <li>开通后刷新本页即可生效。</li>
+      <li>先<a href="/login?mode=reg&next=/member" style="color:#2c7be5">注册</a>并登录（会员编号会自动带上）。</li>
+      <li>付款：会员 ¥<span data-p="price_t1">9.9</span>，高级会员 ¥<span data-p="price_t2">19.9</span>（会员升级补差价），商家会员月付 ¥<span data-p="price_m_month">99</span> / 年付 ¥<span data-p="price_m_year">999</span>，商家增发每篇 ¥<span data-p="price_extra">19.9</span>。</li>
+      <li>付款后在下方<b>上传付款截图</b>，管理员核对后开通，开通后刷新本页即可生效。</li>
     </ol>
-        <div class="row" style="margin-top:12px;justify-content:center;gap:10px;flex-wrap:wrap" id="payqr">
-      <figure style="flex:1;min-width:140px;max-width:260px;margin:0;text-align:center"><img src="/static/pay-wechat.jpg" alt="微信收款码" loading="lazy" style="width:100%;border-radius:10px"><figcaption style="font-size:13px;color:#666">微信扫码支付</figcaption></figure>
-      <figure style="flex:1;min-width:140px;max-width:260px;margin:0;text-align:center"><img src="/static/pay-alipay.jpg" alt="支付宝收款码" loading="lazy" style="width:100%;border-radius:10px"><figcaption style="font-size:13px;color:#666">支付宝扫码支付</figcaption></figure>
+    <div class="paybox">
+      <div class="payq">
+        <img src="/static/pay-alipay.jpg" alt="支付宝收款码" loading="lazy">
+        <b>支付宝</b>
+        <a class="btn primary block" id="aliOpen" href="alipays://platformapi/startapp?saId=10000007&qrcode=https%3A%2F%2Fqr.alipay.com%2F2m619444mz5ng9cjig2qjc7">打开支付宝付款</a>
+        <a class="paylink" href="https://qr.alipay.com/2m619444mz5ng9cjig2qjc7" rel="noopener">打不开？点这里</a>
+      </div>
+      <div class="payq">
+        <img src="/static/pay-wechat.jpg" alt="微信收款码" loading="lazy">
+        <b>微信</b>
+        <a class="btn ghost block" href="/static/pay-wechat.jpg" download="旅韩助手-微信收款码.jpg">保存收款码</a>
+        <span class="paylink">保存后打开微信 → 扫一扫 → 右上角「相册」选这张图</span>
+      </div>
     </div>
-    <p class="tip">手机上可长按收款码保存或识别。付款时请在备注里写上会员编号和开通项目。若你有新人券，请同时告知管理员，由人工抵扣；收款码金额不会自动变化。把 ¥9.9 新人券用于 ¥9.9 会员档时，该档相当于免费，需人工确认。</p>
+    <p class="tip">也可以长按收款码保存或识别。收款码金额不会自动变化，请按所选项目输入金额。有新人券请在上传时备注，由人工抵扣。</p>
+
+    <div class="upbox" id="upbox">
+      <h2 style="margin-top:18px">📤 上传付款截图</h2>
+      <div id="upGate"><p class="tip">登录后才能上传截图。<a href="/login?next=/member" style="color:#2c7be5">去登录</a></p></div>
+      <div id="upForm" style="display:none">
+        <label class="f">开通项目</label>
+        <select class="f" id="pkind">
+          <option value="t1">会员</option>
+          <option value="t2">高级会员</option>
+          <option value="m_month">商家会员月付</option>
+          <option value="m_year">商家会员年付</option>
+          <option value="extra">商家增发帖</option>
+        </select>
+        <div id="pnWrap" style="display:none"><label class="f">增发篇数</label><input class="f" id="pn" type="number" min="1" max="20" value="1"></div>
+        <label class="f">付款截图（JPG/PNG，最大 6MB，会自动压缩）</label>
+        <input type="file" id="pimg" accept="image/jpeg,image/png,image/webp">
+        <img id="pprev" alt="" style="display:none;max-width:160px;border-radius:10px;margin-top:8px">
+        <label class="f">备注（选填，如新人券、付款人昵称）</label>
+        <input class="f" id="pnote" maxlength="100" placeholder="选填">
+        <p class="tip" id="pmno"></p>
+        <div class="err" id="perr" style="display:none"></div>
+        <button class="btn primary block" type="button" id="psend" style="margin-top:10px">提交截图</button>
+      </div>
+      <div id="plist"></div>
+    </div>
     <p class="tip">费用用于网站服务器与社区维护。虚拟服务一经开通不支持退款；因违规被删帖或封禁的不退费。开通即表示同意<a href="/rules" style="color:#2c7be5">《社区约定》</a>。</p>
   </div>
   <div class="card" id="mine" style="display:none"><h2>我的帖子</h2><div id="mylist"></div></div>
@@ -74,10 +119,10 @@
 </main>
 <nav>
   <a href="/"><i>🏠</i>首页</a>
-  <a href="/attractions"><i>🗺️</i>景点</a>
-  <a href="/tips"><i>📘</i>攻略</a>
-  <a href="/community"><i>💬</i>社区</a>
-  <a href="/member" class="on"><i>👑</i>会员</a>
+  <a href="/?tab=sub"><i>🚇</i>地铁</a>
+  <a href="/?tab=card"><i>💬</i>翻译</a>
+  <a href="/community"><i>🧭</i>韩友圈</a>
+  <a href="/?tab=more"><i>☰</i>全部</a>
 </nav>
 <script src="/static/community.js"></script>
 <script>
@@ -137,6 +182,59 @@
       }).join('');
     }
   } catch(e){}
+})();
+</script>
+<script>
+(function(){
+  var ST = {pending: '已提交，等待开通', approved: '已开通', rejected: '未通过'};
+  function drawList(items){
+    var el = document.getElementById('plist');
+    if (!items || !items.length){ el.innerHTML = ''; return; }
+    el.innerHTML = '<h3 style="font-size:15px;margin:16px 0 4px">我的付款记录</h3>' + items.map(function(p){
+      return '<div class="pst"><span>' + LH.esc(p.kind_label) + (p.kind === 'extra' ? ' ×' + p.extra_n : '') + ' · ' + LH.esc(p.time) +
+        (p.admin_note && p.status === 'rejected' ? '<br><small style="color:#888">' + LH.esc(p.admin_note) + '</small>' : '') +
+        '</span><em class="' + p.status + '">' + (ST[p.status] || p.status) + '</em></div>';
+    }).join('');
+  }
+  async function load(){
+    var d; try { d = await LH.me(); } catch(e){ return; }
+    if (!d || !d.user) return;
+    document.getElementById('upGate').style.display = 'none';
+    document.getElementById('upForm').style.display = 'block';
+    document.getElementById('pmno').textContent = '会员编号 ' + d.user.member_no + ' 会随截图自动提交，无需手写。';
+    var ks = document.getElementById('pkind');
+    if (d.user.base_tier >= 1) ks.value = 't2';
+    try { drawList((await LH.api('GET', '/api/pay-proof/mine')).items); } catch(e){}
+  }
+  var file = null;
+  document.getElementById('pkind').addEventListener('change', function(){
+    document.getElementById('pnWrap').style.display = this.value === 'extra' ? 'block' : 'none';
+  });
+  document.getElementById('pimg').addEventListener('change', async function(){
+    var f = this.files && this.files[0]; if (!f) return;
+    if (!/^image\/(jpeg|png|webp)$/.test(f.type)){ alert('只能上传 JPG、PNG 或 WebP 图片'); this.value = ''; return; }
+    if (f.size > 15 * 1024 * 1024){ alert('图片太大了，请换一张'); this.value = ''; return; }
+    file = await LH.compress(f);
+    var pv = document.getElementById('pprev'); pv.src = URL.createObjectURL(file); pv.style.display = 'block';
+  });
+  document.getElementById('psend').addEventListener('click', async function(){
+    var err = document.getElementById('perr'); LH.showErr(err, '');
+    if (!file){ LH.showErr(err, '请先选择付款截图'); return; }
+    var fd = new FormData();
+    fd.append('kind', document.getElementById('pkind').value);
+    fd.append('extra_n', document.getElementById('pn').value || '1');
+    fd.append('note', document.getElementById('pnote').value);
+    fd.append('image', file, 'pay.jpg');
+    var b = this; b.disabled = true; b.textContent = '提交中…';
+    try {
+      await LH.api('POST', '/api/pay-proof', fd);
+      file = null; document.getElementById('pimg').value = ''; document.getElementById('pprev').style.display = 'none'; document.getElementById('pnote').value = '';
+      b.textContent = '✅ 已提交，等待开通';
+      drawList((await LH.api('GET', '/api/pay-proof/mine')).items);
+      setTimeout(function(){ b.disabled = false; b.textContent = '提交截图'; }, 4000);
+    } catch(e){ LH.showErr(err, e.message); b.disabled = false; b.textContent = '提交截图'; }
+  });
+  load();
 })();
 </script>
 <script src="/static/pwa.js" defer></script>

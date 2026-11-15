@@ -34,11 +34,17 @@
       <div class="row" style="justify-content:space-between"><b id="stats">…</b><button class="btn sm gray" id="alogout">退出后台</button></div>
     </div>
     <div class="boards" id="tabs">
-      <button data-t="users" class="on">用户/会员</button><button data-t="reports">举报</button><button data-t="posts">帖子</button><button data-t="review">审核</button><button data-t="merchants">商家/评价</button><button data-t="chicken">代点</button><button data-t="promo">推广统计</button><button data-t="settings">设置</button><button data-t="friends">交友</button><button data-t="idv">实名核验</button><button data-t="opening">开业活动</button>
+      <button data-t="users" class="on">用户/会员</button><button data-t="payproofs">付款审核<span id="pppend"></span></button><button data-t="reports">举报</button><button data-t="posts">帖子</button><button data-t="review">审核</button><button data-t="merchants">商家/评价</button><button data-t="chicken">代点</button><button data-t="promo">推广统计</button><button data-t="settings">设置</button><button data-t="friends">交友</button><button data-t="idv">实名核验</button><button data-t="opening">开业活动</button>
     </div>
     <div class="card" id="t-users">
       <div class="row"><input class="f" id="us" placeholder="搜索编号/昵称/手机号/邮箱" style="flex:1"><button class="btn primary" id="usgo">搜索</button></div>
       <div id="ulist" style="margin-top:10px;overflow-x:auto"></div>
+    </div>
+    <div class="card" id="t-payproofs" style="display:none">
+      <h2>付款审核</h2>
+      <p class="tip" style="margin-top:0">用户在会员页上传的付款截图。先核对微信/支付宝到账记录，再点「开通」：会员/高级/商家会自动开通并按实付金额记推广佣金；增发帖会给商家加相应次数。驳回时填写理由（用户可见）。</p>
+      <div class="row" style="gap:8px;margin-bottom:8px"><select class="f" id="ppst" style="flex:1"><option value="pending">待审核</option><option value="approved">已开通</option><option value="rejected">已驳回</option><option value="all">全部</option></select><button class="btn primary" id="ppgo">刷新</button></div>
+      <div id="pplist"></div>
     </div>
     <div class="card" id="t-reports" style="display:none"><div id="rlist"></div></div>
     <div class="card" id="t-posts" style="display:none"><div id="plist"></div><button class="btn ghost block" id="pmore" style="margin-top:10px">加载更多</button></div>
@@ -209,9 +215,30 @@ document.getElementById('alogout').onclick = async function(){ await call('POST'
 document.querySelectorAll('#tabs button').forEach(function(b){
   b.onclick = function(){
     document.querySelectorAll('#tabs button').forEach(function(x){ x.className = x === b ? 'on' : ''; document.getElementById('t-' + x.dataset.t).style.display = x === b ? 'block' : 'none'; });
-    ({users: users, reports: reports, posts: function(){ posts(true); }, promo: promo, review: review, settings: settings, friends: friends, chicken: chickenAdmin, idv: idvQueue, opening: openingPromo, merchants: function(){ loadReviews(); merchants(); }})[b.dataset.t]();
+    ({users: users, reports: reports, posts: function(){ posts(true); }, promo: promo, review: review, settings: settings, friends: friends, chicken: chickenAdmin, idv: idvQueue, opening: openingPromo, payproofs: payProofs, merchants: function(){ loadReviews(); merchants(); }})[b.dataset.t]();
   };
 });
+async function payProofs(){
+  var d = await call('GET', '/api/admin/pay-proofs?status=' + encodeURIComponent(document.getElementById('ppst').value));
+  document.getElementById('pppend').textContent = d.pending ? ' (' + d.pending + ')' : '';
+  var ST = {pending: '待审核', approved: '已开通', rejected: '已驳回'};
+  document.getElementById('pplist').innerHTML = d.items.length ? d.items.map(function(x){
+    return '<div class="cmt" style="display:block" id="pp' + x.id + '"><div class="who">#' + x.id + ' · 编号 ' + E(String(x.member_no || x.user_id)) + ' ' + E(x.nickname) + ' · <b>' + E(x.kind_label) + (x.kind === 'extra' ? ' ×' + x.extra_n : '') + '</b> · 应付 ¥' + x.expect + ' · ' + (ST[x.status] || E(x.status)) + '</div>' +
+      '<div class="ct" style="color:var(--sub)">' + E(x.account) + ' · ' + E(x.time) + (x.note ? ' · 备注：' + E(x.note) : '') + (x.paid != null ? ' · 实收 ¥' + x.paid : '') + (x.admin_note ? ' · ' + E(x.admin_note) : '') + '</div>' +
+      '<a href="' + x.img + '" target="_blank" rel="noopener"><img src="' + x.thumb + '" alt="付款截图" style="max-width:180px;border-radius:8px;margin-top:6px"></a>' +
+      (x.status === 'pending' ? '<div class="row" style="margin-top:8px"><button class="btn sm primary" data-ppok="' + x.id + '" data-exp="' + x.expect + '">开通</button><button class="btn sm gray" data-ppno="' + x.id + '">驳回</button></div>' : '') + '</div>';
+  }).join('') : '<div class="empty">没有记录</div>';
+  document.querySelectorAll('#pplist [data-ppok]').forEach(function(b){ b.onclick = async function(){
+    var amt = prompt('核对到账后填写实收金额（元）', b.dataset.exp); if (amt === null) return;
+    try { await call('POST', '/api/admin/pay-proofs/' + b.dataset.ppok, {action: 'approve', amount: amt}); msg('已开通 #' + b.dataset.ppok, false); payProofs(); } catch(e){}
+  }; });
+  document.querySelectorAll('#pplist [data-ppno]').forEach(function(b){ b.onclick = async function(){
+    var why = prompt('驳回理由（用户可见）', '未核对到这笔付款，请联系管理员'); if (why === null) return;
+    try { await call('POST', '/api/admin/pay-proofs/' + b.dataset.ppno, {action: 'reject', note: why}); payProofs(); } catch(e){}
+  }; });
+}
+document.getElementById('ppgo').onclick = payProofs;
+document.getElementById('ppst').onchange = payProofs;
 async function boot(){
   var s;
   try { s = await LH.api('GET', '/api/admin/overview'); } catch(e){ if (e.status === 401) return showLogin(); return msg(e.message, true); }
