@@ -31,16 +31,19 @@ QTY_MAX = 20
 
 SEED_SHOPS = [
     {"name": "明洞炸鸡（示例）", "area": "明洞", "is_example": True, "sort_order": 1,
+     "address": "서울 중구 명동길 14（示例地址，非真实店铺）",
      "notes": "示例店铺，不是真实商家，仅用于演示下单流程。",
      "menu": [{"id": "m1", "name": "原味炸鸡（示例）", "price_krw": 18000},
               {"id": "m2", "name": "洋酿炸鸡（示例）", "price_krw": 19000},
               {"id": "m3", "name": "鸡块（示例）", "price_krw": 14000}]},
     {"name": "弘大炸鸡（示例）", "area": "弘大", "is_example": True, "sort_order": 2,
+     "address": "서울 마포구 어울마당로 14（示例地址，非真实店铺）",
      "notes": "示例店铺，不是真实商家，仅用于演示下单流程。",
      "menu": [{"id": "h1", "name": "辣味炸鸡（示例）", "price_krw": 19000},
               {"id": "h2", "name": "蜂蜜蒜味（示例）", "price_krw": 20000},
               {"id": "h3", "name": "鸡翅（示例）", "price_krw": 15000}]},
     {"name": "江南炸鸡（示例）", "area": "江南", "is_example": True, "sort_order": 3,
+     "address": "서울 강남구 강남대로 396（示例地址，非真实店铺）",
      "notes": "示例店铺，不是真实商家，仅用于演示下单流程。",
      "menu": [{"id": "g1", "name": "半半炸鸡（示例）", "price_krw": 23000},
               {"id": "g2", "name": "芝士炸鸡（示例）", "price_krw": 24000},
@@ -91,9 +94,9 @@ def ensure_chicken_shops(conn):
     if n:
         return
     for s in SEED_SHOPS:
-        q(conn, """INSERT INTO c_chicken_shops(name,area,is_example,menu,notes,active,sort_order)
-                   VALUES (%s,%s,%s,%s::jsonb,%s,TRUE,%s)""",
-          (s["name"], s["area"], s["is_example"], json.dumps(s["menu"], ensure_ascii=False), s["notes"], s["sort_order"]))
+        q(conn, """INSERT INTO c_chicken_shops(name,area,is_example,menu,notes,active,sort_order,address)
+                   VALUES (%s,%s,%s,%s::jsonb,%s,TRUE,%s,%s)""",
+          (s["name"], s["area"], s["is_example"], json.dumps(s["menu"], ensure_ascii=False), s["notes"], s["sort_order"], s.get("address") or None))
 
 
 def _menu(raw):
@@ -121,7 +124,8 @@ def _menu(raw):
 def _shop_out(r):
     return {"id": r["id"], "name": r["name"], "area": r.get("area") or "", "is_example": bool(r["is_example"]),
             "notes": r.get("notes") or "", "active": bool(r.get("active", True)),
-            "sort_order": r.get("sort_order") or 0, "menu": _menu(r.get("menu"))}
+            "sort_order": r.get("sort_order") or 0, "menu": _menu(r.get("menu")),
+            "address": (r.get("address") or "").strip()}
 
 
 def _fee(conn):
@@ -216,7 +220,10 @@ def api_chicken_shops():
         fee = _fee(conn)
         rate, rate_time = _rate_info(conn)
         rows = q(conn, "SELECT * FROM c_chicken_shops WHERE active ORDER BY sort_order, id")
-    return {"shops": [_shop_out(r) for r in rows], "fee_krw": fee, "rate_cny_krw": rate,
+        shops = [_shop_out(r) for r in rows]
+        from shop_extras import attach_public
+        attach_public(conn, "chicken", shops, rate)
+    return {"shops": shops, "fee_krw": fee, "rate_cny_krw": rate,
             "rate_time": rate_time, "rate_source": "manual",
             "notice": NOTICE, "allergy": ALLERGY,
             "confirm_note": "金额为参考估算，最终以客服确认为准。付款在客服确认后再扫网站收款码，由人工核对。"}
@@ -287,9 +294,11 @@ async def api_admin_chicken_shop_save(req: Request):
     csrf(req)
     from community import _json, clean_text
     d = await _json(req)
+    from shop_extras import clean_address
     name = clean_text(d.get("name"), NAME_MAX, "店铺名称", 2)
     area = clean_text(d.get("area") or "其他", 20, "地区", 1)
     notes = clean_text(d.get("notes") or " ", NOTE_MAX, "说明", 0) if d.get("notes") else ""
+    address = clean_address(d.get("address"))
     menu = _menu(d.get("menu"))
     if not menu:
         raise HTTPException(400, "请至少添加一个菜品")
@@ -303,15 +312,15 @@ async def api_admin_chicken_shop_save(req: Request):
         need_admin(conn, req)
         sid = d.get("id")
         if sid:
-            row = q(conn, """UPDATE c_chicken_shops SET name=%s,area=%s,is_example=%s,menu=%s::jsonb,notes=%s,active=%s,sort_order=%s
+            row = q(conn, """UPDATE c_chicken_shops SET name=%s,area=%s,is_example=%s,menu=%s::jsonb,notes=%s,active=%s,sort_order=%s,address=%s
                              WHERE id=%s RETURNING *""",
-                    (name, area, is_example, json.dumps(menu, ensure_ascii=False), notes, active, sort_order, int(sid)), one=True)
+                    (name, area, is_example, json.dumps(menu, ensure_ascii=False), notes, active, sort_order, address or None, int(sid)), one=True)
             if not row:
                 raise HTTPException(404, "找不到店铺")
         else:
-            row = q(conn, """INSERT INTO c_chicken_shops(name,area,is_example,menu,notes,active,sort_order)
-                             VALUES (%s,%s,%s,%s::jsonb,%s,%s,%s) RETURNING *""",
-                    (name, area, is_example, json.dumps(menu, ensure_ascii=False), notes, active, sort_order), one=True)
+            row = q(conn, """INSERT INTO c_chicken_shops(name,area,is_example,menu,notes,active,sort_order,address)
+                             VALUES (%s,%s,%s,%s::jsonb,%s,%s,%s,%s) RETURNING *""",
+                    (name, area, is_example, json.dumps(menu, ensure_ascii=False), notes, active, sort_order, address or None), one=True)
     return {"ok": True, "shop": _shop_out(row)}
 
 

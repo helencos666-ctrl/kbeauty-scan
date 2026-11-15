@@ -31,7 +31,7 @@ POINT_RULES = {
     "shop_approve": {"points": 10, "daily_cap": 0, "label": "推荐店铺通过审核"},
 }
 USER_EVENT_KINDS = ("share", "subway", "card", "profile")
-SHARE_TARGET_TYPES = ("post", "shop", "merchant", "trip", "card", "subway")
+SHARE_TARGET_TYPES = ("post", "shop", "merchant", "trip", "card", "subway", "chicken")
 
 REDEEM_CATALOG = [
     {"id": "member_discount", "title": "会员折扣", "cost": 100, "status": "即将上线", "note": "计划用于会员开通抵扣，尚未上线。"},
@@ -391,6 +391,7 @@ def api_coupons(req: Request):
 
 
 def _shop_out(r, *, mine=False, admin=False):
+    from shop_extras import parse_menu
     o = {
         "id": r["id"],
         "name": r["name"],
@@ -399,6 +400,8 @@ def _shop_out(r, *, mine=False, admin=False):
         "description": r["description"],
         "status": r["status"],
         "time": _ts(r["created_at"]),
+        "menu": parse_menu(r.get("menu")),
+        "address": (r.get("address") or "").strip(),
     }
     if mine or admin:
         o["review_note"] = r.get("review_note")
@@ -426,7 +429,7 @@ def api_shops_public(req: Request, area: str = "", shop_type: str = ""):
         raise HTTPException(400, "地区不正确")
     if shop_type and shop_type not in SHOP_TYPES:
         raise HTTPException(400, "类型不正确")
-    sql = "SELECT id,name,area,shop_type,description,status,created_at FROM c_shop_recs WHERE status='approved'"
+    sql = "SELECT id,name,area,shop_type,description,status,created_at,menu,address FROM c_shop_recs WHERE status='approved'"
     args = []
     if area:
         sql += " AND area=%s"; args.append(area)
@@ -435,14 +438,19 @@ def api_shops_public(req: Request, area: str = "", shop_type: str = ""):
     sql += " ORDER BY id DESC LIMIT 100"
     with db() as conn:
         rows = q(conn, sql, tuple(args))
-    return {"items": [_shop_out(r) for r in rows], "areas": SHOP_AREAS, "types": SHOP_TYPES}
+        from shop_extras import attach_public, rate_info
+        rate, rate_time = rate_info(conn)
+        items = [_shop_out(r) for r in rows]
+        attach_public(conn, "rec", items, rate)
+    return {"items": items, "areas": SHOP_AREAS, "types": SHOP_TYPES,
+            "rate_cny_krw": rate, "rate_time": rate_time, "rate_source": "manual"}
 
 
 @router.get("/api/shops/mine")
 def api_shops_mine(req: Request):
     with db() as conn:
         u = need_user(conn, req)
-        rows = q(conn, """SELECT id,name,area,shop_type,description,status,review_note,points_awarded,created_at
+        rows = q(conn, """SELECT id,name,area,shop_type,description,status,review_note,points_awarded,created_at,menu,address
                           FROM c_shop_recs WHERE user_id=%s ORDER BY id DESC LIMIT 50""", (u["id"],))
     return {"items": [_shop_out(r, mine=True) for r in rows]}
 
@@ -452,10 +460,14 @@ async def api_shops_submit(req: Request):
     csrf(req)
     from community import _json, clean_text
     d = await _json(req)
+    from shop_extras import clean_address, parse_menu
+    import json as _jsonlib
     name = clean_text(d.get("name"), SHOP_NAME_MAX, "店铺名称", 2)
     area = str(d.get("area") or "").strip()
     shop_type = str(d.get("type") or d.get("shop_type") or "").strip()
     desc = clean_text(d.get("description"), SHOP_DESC_MAX, "简介", 4)
+    address = clean_address(d.get("address"))
+    menu = parse_menu(d.get("menu")) if d.get("menu") is not None else []
     if area not in SHOP_AREAS:
         raise HTTPException(400, "请选择所在地区")
     if shop_type not in SHOP_TYPES:
@@ -471,9 +483,10 @@ async def api_shops_submit(req: Request):
               (u["id"], day), one=True)["n"]
         if n >= SHOP_DAILY_CAP:
             raise HTTPException(429, "今天提交已达 %d 条，请明天再试" % SHOP_DAILY_CAP)
-        row = q(conn, """INSERT INTO c_shop_recs(user_id,name,area,shop_type,description,status)
-                         VALUES (%s,%s,%s,%s,%s,'pending') RETURNING id,name,area,shop_type,description,status,created_at,review_note,points_awarded""",
-                (u["id"], name, area, shop_type, desc), one=True)
+        row = q(conn, """INSERT INTO c_shop_recs(user_id,name,area,shop_type,description,status,menu,address)
+                         VALUES (%s,%s,%s,%s,%s,'pending',%s::jsonb,%s)
+                         RETURNING id,name,area,shop_type,description,status,created_at,review_note,points_awarded,menu,address""",
+                (u["id"], name, area, shop_type, desc, _jsonlib.dumps(menu, ensure_ascii=False), address or None), one=True)
     return {"ok": True, "item": _shop_out(row, mine=True), "message": "已提交，审核通过后会公开，并通过后发放 10 旅行豆。避雷经验同样需要审核。"}
 
 

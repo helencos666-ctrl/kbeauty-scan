@@ -27,6 +27,7 @@
   <div class="ok" id="ok" style="display:none"></div>
   <div class="card">
     <h2>已公开的推荐</h2>
+    <p class="tip" style="margin-top:0">通过后可看到菜单价格（韩元，并按手动汇率约算人民币）、地址；可复制地址或在 Naver / Kakao / Google 地图中搜索，也可评价（1–5 星）。</p>
     <div class="row" id="typechips" style="gap:8px;flex-wrap:wrap;margin-bottom:10px"></div>
     <div class="row" style="gap:8px;flex-wrap:wrap;margin-bottom:10px">
       <select class="f" id="farea" style="flex:1;min-width:120px"><option value="">全部地区</option></select>
@@ -87,15 +88,18 @@
       meta.areas = r.areas || meta.areas; meta.types = r.types || meta.types;
       var box = document.getElementById('list');
       if (!r.items.length){ box.innerHTML = '<div class="empty">还没有公开的推荐，欢迎你来分享。</div>'; return; }
+      var rate = r.rate_cny_krw;
       box.innerHTML = r.items.map(function(s){
-        return '<div class="cmt"><div class="who">' + LH.esc(s.name) + '</div>' +
-          '<div class="meta"><span class="tag">' + LH.esc(s.shop_type) + '</span><span>' + LH.esc(s.area) + '</span><span>' + LH.esc(s.time) + '</span></div>' +
-          '<p style="margin:8px 0 10px;line-height:1.7">' + LH.esc(s.description) + '</p>' +
-          '<button class="btn sm ghost" type="button" data-share="' + s.id + '" data-name="' + LH.esc(s.name) + '">分享</button></div>';
+        return '<div class="cmt" id="s' + s.id + '"><div class="who">' + LH.esc(s.name) + '</div>' +
+          '<div class="meta"><span class="tag">' + LH.esc(s.shop_type) + '</span><span>' + LH.esc(s.area) + '</span><span>' + LH.esc(s.time) + '</span> ' + LH.ratingText(s) + '</div>' +
+          '<p style="margin:8px 0 6px;line-height:1.7">' + LH.esc(s.description) + '</p>' +
+          LH.menuHtml(s.menu, rate) + LH.locHtml(s, {targetType:'shop'}) +
+          '<div class="rev" id="rev' + s.id + '" style="margin-top:8px"></div></div>';
       }).join('');
-      box.querySelectorAll('[data-share]').forEach(function(b){
-        b.onclick = function(){ LH.share({title: '推荐店铺：' + b.dataset.name, text: '旅韩助手上的店铺推荐', url: location.origin + '/shops#s' + b.dataset.share, targetType: 'shop', targetId: b.dataset.share}); };
-      });
+      LH.bindShopExtras(box, {onShare: function(b){
+        LH.share({title: '推荐店铺：' + b.dataset.name, text: '旅韩助手上的店铺推荐', url: location.origin + '/shops#s' + b.dataset.share, targetType: b.dataset.kind || 'shop', targetId: b.dataset.share});
+      }});
+      r.items.forEach(function(s){ renderReviews(s.id, 'rec'); });
     } catch(e){ document.getElementById('list').innerHTML = '<p>' + LH.esc(e.message) + '</p>'; }
   }
   document.getElementById('farea').onchange = loadList;
@@ -109,7 +113,9 @@
   }
   fb.innerHTML = '<input class="f" id="sname" maxlength="40" placeholder="店铺或事项名称">' +
     '<div class="row" style="gap:8px;margin-top:8px"><select class="f" id="sarea" style="flex:1"></select><select class="f" id="stype" style="flex:1"></select></div>' +
+    '<input class="f" id="saddr" maxlength="120" placeholder="地址（选填，审核通过后展示）" style="margin-top:8px">' +
     '<textarea class="f" id="sdesc" maxlength="200" rows="4" placeholder="简短描述（最多 200 字，不要写网址、电话或微信）" style="margin-top:8px;min-height:90px"></textarea>' +
+    '<input class="f" id="smenu" maxlength="400" placeholder="菜单/价格（选填，格式：名称,价格韩元;名称,价格韩元）" style="margin-top:8px">' +
     '<button class="btn primary block" type="button" id="ssub" style="margin-top:10px">提交审核</button>';
   fillSel('sarea', meta.areas, '选择地区');
   fillSel('stype', meta.types, '选择类型');
@@ -123,7 +129,12 @@
   document.getElementById('ssub').onclick = async function(){
     show(err, ''); show(ok, '');
     try {
-      var r = await LH.api('POST', '/api/shops', {name: document.getElementById('sname').value, area: document.getElementById('sarea').value, type: document.getElementById('stype').value, description: document.getElementById('sdesc').value});
+      var menuRaw = document.getElementById('smenu').value || '';
+      var menu = menuRaw.split(';').map(function(line,i){
+        var p=line.split(',');
+        return {id:'m'+(i+1), name:(p[0]||'').trim(), price_krw:parseInt((p[1]||'').trim(),10)||0};
+      }).filter(function(m){return m.name && m.price_krw>0;});
+      var r = await LH.api('POST', '/api/shops', {name: document.getElementById('sname').value, area: document.getElementById('sarea').value, type: document.getElementById('stype').value, description: document.getElementById('sdesc').value, address: document.getElementById('saddr').value, menu: menu});
       show(ok, r.message || '已提交');
       document.getElementById('sdesc').value = '';
       document.getElementById('sname').value = '';
@@ -141,6 +152,31 @@
           (s.review_note ? '<p class="tip" style="margin:6px 0 0">' + LH.esc(s.review_note) + '</p>' : '') + '</div>';
       }).join('');
     } catch(e){}
+  }
+  async function renderReviews(sid, kind){
+    var box = document.getElementById('rev' + sid);
+    if (!box) return;
+    try {
+      var r = await LH.api('GET', '/api/shop-reviews?kind=' + encodeURIComponent(kind) + '&shop_id=' + sid);
+      var list = (r.items||[]).map(function(it){
+        return '<div class="tip" style="margin:6px 0;line-height:1.6">★' + it.stars + ' · ' + LH.esc(it.author) + ' · ' + LH.esc(it.time||'') + '<br>' + LH.esc(it.body) + '</div>';
+      }).join('') || '<div class="tip">还没有评价</div>';
+      var form = (!d || !d.user) ? '<a class="btn sm ghost" href="/login?next=/shops">登录后可评价</a>' :
+        '<div class="row" style="gap:8px;margin-top:8px;align-items:center">' +
+        '<select class="f" id="st' + sid + '" style="width:90px"><option value="5">5 星</option><option value="4">4 星</option><option value="3">3 星</option><option value="2">2 星</option><option value="1">1 星</option></select>' +
+        '<input class="f" id="sb' + sid + '" maxlength="200" placeholder="短评（4–200 字）" style="flex:1">' +
+        '<button class="btn sm primary" type="button" data-rev="' + sid + '">发布评价</button></div>';
+      box.innerHTML = list + form;
+      var btn = box.querySelector('[data-rev]');
+      if (btn) btn.onclick = async function(){
+        show(err,''); show(ok,'');
+        try {
+          var res = await LH.api('POST', '/api/shop-reviews', {kind: kind, shop_id: sid, stars: parseInt(document.getElementById('st'+sid).value,10), body: document.getElementById('sb'+sid).value});
+          show(ok, res.message || '已发布');
+          await loadList();
+        } catch(e){ show(err, e.message); }
+      };
+    } catch(e){ box.innerHTML = '<p class="tip">' + LH.esc(e.message) + '</p>'; }
   }
   await loadMine();
 })();

@@ -66,7 +66,7 @@ check("login links terms+privacy", 'href="/terms"' in lg and 'href="/privacy"' i
 check("home footer links legal", 'href="/privacy"' in g.get("/").text and 'href="/terms"' in g.get("/").text)
 sm = g.get("/sitemap.xml").text
 check("sitemap has privacy/terms", "/privacy</loc>" in sm and "/terms</loc>" in sm)
-check("sw v21 caches legal pages", "lvhan-shell-v21" in g.get("/sw.js").text and "'/privacy'" in g.get("/sw.js").text)
+check("sw v22 caches legal pages", "lvhan-shell-v22" in g.get("/sw.js").text and "'/privacy'" in g.get("/sw.js").text)
 
 # ---- 3. CSRF / 同源 ----
 r = g.post("/api/community/login", json={"account": "a@b.cc", "password": "x" * 8}, headers={**H, "origin": "https://evil.example"})

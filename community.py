@@ -371,6 +371,8 @@ def db():
                         cur.execute(MIGRATE_POINTS)
                         from chicken import MIGRATE_CHICKEN
                         cur.execute(MIGRATE_CHICKEN)
+                        from shop_extras import MIGRATE_SHOP_EXTRAS
+                        cur.execute(MIGRATE_SHOP_EXTRAS)
                     ensure_bot(conn)
                     from chicken import ensure_chicken_shops
                     ensure_chicken_shops(conn)
@@ -2197,3 +2199,5 @@ from chicken import router as _chicken_router   # noqa: E402
 router.include_router(_chicken_router)
 from guides import router as _guides_router   # noqa: E402
 router.include_router(_guides_router)
+from shop_extras import router as _shop_extras_router   # noqa: E402
+router.include_router(_shop_extras_router)

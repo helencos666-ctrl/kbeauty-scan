@@ -176,6 +176,65 @@ var LH = (function(){
     }
     return {ok: true};
   }
+  function mapLinks(address){
+    var q = encodeURIComponent(address || '');
+    return {
+      naver: 'https://map.naver.com/p/search/' + q,
+      kakao: 'https://map.kakao.com/?q=' + q,
+      google: 'https://www.google.com/maps/search/?api=1&query=' + q
+    };
+  }
+  function copyText(text, okMsg){
+    text = String(text || '');
+    function done(){ if (okMsg) alert(okMsg); }
+    if (navigator.clipboard && navigator.clipboard.writeText){
+      return navigator.clipboard.writeText(text).then(done).catch(function(){ prompt('复制下面的内容', text); });
+    }
+    prompt('复制下面的内容', text);
+  }
+  function krwCny(krw, rate){
+    if (!rate) return '';
+    return '（约 ¥' + (Number(krw) / Number(rate)).toFixed(2) + '）';
+  }
+  function menuHtml(menu, rate){
+    menu = menu || [];
+    if (!menu.length) return '';
+    return '<ul class="shop-menu" style="margin:8px 0;padding-left:18px;font-size:14px;line-height:1.7">' +
+      menu.map(function(m){
+        var cny = m.price_cny != null ? ('（约 ¥' + m.price_cny + '）') : krwCny(m.price_krw, rate);
+        return '<li>' + esc(m.name) + ' · ' + m.price_krw + ' 韩元' + cny + '</li>';
+      }).join('') + '</ul>';
+  }
+  function locHtml(shop, opts){
+    opts = opts || {};
+    var addr = shop.address || '';
+    if (!addr) return '';
+    var links = shop.map_links || mapLinks(addr);
+    var sid = shop.id, typ = opts.targetType || 'shop';
+    return '<div class="shop-loc" style="margin:8px 0 4px"><div class="tip" style="margin:0 0 6px">地址：' + esc(addr) + '</div>' +
+      '<button class="btn sm ghost" type="button" data-copy-addr="' + esc(addr) + '">复制地址</button>' +
+      '<a class="btn sm ghost" href="' + esc(links.naver) + '" target="_blank" rel="noopener noreferrer">Naver 地图</a>' +
+      '<a class="btn sm ghost" href="' + esc(links.kakao) + '" target="_blank" rel="noopener noreferrer">Kakao 地图</a>' +
+      '<a class="btn sm ghost" href="' + esc(links.google) + '" target="_blank" rel="noopener noreferrer">Google 地图</a>' +
+      (opts.share === false ? '' : '<button class="btn sm ghost" type="button" data-share="' + sid + '" data-kind="' + typ + '" data-name="' + esc(shop.name || '') + '">分享</button>') +
+      '</div>';
+  }
+  function ratingText(shop){
+    if (!shop.rating_count) return '<span class="tip" style="margin:0">暂无评价</span>';
+    return '<span>★ ' + shop.rating_avg + '（' + shop.rating_count + ' 条评价）</span>';
+  }
+  function bindShopExtras(root, opts){
+    opts = opts || {};
+    root.querySelectorAll('[data-copy-addr]').forEach(function(b){
+      b.onclick = function(){ copyText(b.getAttribute('data-copy-addr'), '地址已复制'); };
+    });
+    if (opts.onShare){
+      root.querySelectorAll('[data-share]').forEach(function(b){
+        b.onclick = function(){ opts.onShare(b); };
+      });
+    }
+  }
   return {prices: prices, esc: esc, api: api, me: me, badge: badge, showErr: showErr, qs: qs, compress: compress, userbar: userbar, report: report,
-          vb: vb, avatar: avatar, pickAvatar: pickAvatar, postItem: postItem, friendCard: friendCard, lockedPrompt: lockedPrompt, ANTISCAM: ANTISCAM, share: share};
+          vb: vb, avatar: avatar, pickAvatar: pickAvatar, postItem: postItem, friendCard: friendCard, lockedPrompt: lockedPrompt, ANTISCAM: ANTISCAM, share: share,
+          mapLinks: mapLinks, copyText: copyText, krwCny: krwCny, menuHtml: menuHtml, locHtml: locHtml, ratingText: ratingText, bindShopExtras: bindShopExtras};
 })();

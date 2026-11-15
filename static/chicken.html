@@ -49,6 +49,9 @@ nav a.on{color:var(--pink);font-weight:700}
 .chips{display:flex;gap:8px;overflow-x:auto;padding:2px 0 8px;-webkit-overflow-scrolling:touch}
 .chips button{flex:none;border:0;border-radius:20px;padding:7px 13px;font-size:14px;background:#fff;color:var(--ink);box-shadow:0 2px 6px rgba(0,0,0,.05)}
 .chips button.on{background:var(--pink);color:#fff}
+.shop-card{border-top:1px solid var(--line);padding:12px 0}
+.shop-card:first-child{border-top:0;padding-top:0}
+.shop-menu{margin:6px 0;padding-left:18px;font-size:14px;line-height:1.7}
 </style>
 </head>
 <body>
@@ -65,6 +68,11 @@ nav a.on{color:var(--pink);font-weight:700}
   <div class="card userbar" id="ub">加载中…</div>
   <div class="err" id="err" style="display:none;background:#fff0f0;color:#c0392b;border-radius:12px;padding:12px;font-size:14px;margin-bottom:14px"></div>
   <div class="ok" id="ok" style="display:none;background:#eefaf0;color:#1e7a3a;border-radius:12px;padding:12px;font-size:14px;margin-bottom:14px"></div>
+  <div class="card" id="shopcards">
+    <h2>代点店铺</h2>
+    <div id="shoplist">加载中…</div>
+    <p class="tip">价格为韩元，人民币为按当前手动汇率的约算，最终以客服确认为准。有地址时可复制地址，或用 Naver / Kakao / Google 地图搜索。登录后可评价。</p>
+  </div>
   <div class="card" id="formcard">
     <h2>填写代点信息</h2>
     <div id="formbox">加载中…</div>
@@ -90,11 +98,51 @@ nav a.on{color:var(--pink);font-weight:700}
   var cfg;
   try { cfg = await LH.api('GET','/api/chicken/shops'); }
   catch(e){ document.getElementById('formbox').textContent = e.message; return; }
+  var shops = cfg.shops||[];
+  var rate = cfg.rate_cny_krw;
+  function renderShopCards(){
+    var box = document.getElementById('shoplist');
+    if (!shops.length){ box.innerHTML = '<div class="tip">暂无店铺</div>'; return; }
+    box.innerHTML = shops.map(function(s){
+      return '<div class="shop-card" id="cks'+s.id+'"><div><b>'+LH.esc(s.name)+'</b>'+(s.is_example?' <span class="badge">示例</span>':'')+(s.area?(' · '+LH.esc(s.area)):'')+'</div>'+
+        (s.notes?('<p class="tip" style="margin:4px 0">'+LH.esc(s.notes)+'</p>'):'')+
+        '<div class="tip" style="margin:0 0 4px">'+(s.rating_count?('★ '+s.rating_avg+'（'+s.rating_count+' 条评价）'):'暂无评价')+'</div>'+
+        LH.menuHtml(s.menu, rate)+LH.locHtml(s,{targetType:'chicken'})+
+        '<div class="rev" id="revc'+s.id+'"></div></div>';
+    }).join('');
+    LH.bindShopExtras(box, {onShare: function(b){
+      LH.share({title: '炸鸡代点：'+b.dataset.name, text: '旅韩助手炸鸡代点', url: location.origin+'/chicken#cks'+b.dataset.share, targetType:'chicken', targetId:b.dataset.share});
+    }});
+    shops.forEach(function(s){ renderReviews(s.id); });
+  }
+  async function renderReviews(sid){
+    var box = document.getElementById('revc'+sid);
+    if (!box) return;
+    try{
+      var r = await LH.api('GET','/api/shop-reviews?kind=chicken&shop_id='+sid);
+      var list=(r.items||[]).map(function(it){
+        return '<p class="tip" style="margin:6px 0">★'+it.stars+' · '+LH.esc(it.author)+' · '+LH.esc(it.time||'')+'<br>'+LH.esc(it.body)+'</p>';
+      }).join('') || '<p class="tip">还没有评价</p>';
+      var form = (!d||!d.user) ? '<a class="btn sm ghost" href="/login?next=/chicken">登录后可评价</a>' :
+        '<div class="row" style="margin-top:8px"><select class="f" id="cst'+sid+'" style="width:90px"><option value="5">5 星</option><option value="4">4 星</option><option value="3">3 星</option><option value="2">2 星</option><option value="1">1 星</option></select>'+
+        '<input class="f" id="csb'+sid+'" maxlength="200" placeholder="短评（4–200 字）" style="flex:1">'+
+        '<button class="btn sm" type="button" data-crev="'+sid+'">发布评价</button></div>';
+      box.innerHTML = list+form;
+      var btn=box.querySelector('[data-crev]');
+      if(btn) btn.onclick=async function(){
+        show(err,''); show(ok,'');
+        try{
+          var res=await LH.api('POST','/api/shop-reviews',{kind:'chicken',shop_id:sid,stars:parseInt(document.getElementById('cst'+sid).value,10),body:document.getElementById('csb'+sid).value});
+          show(ok,res.message||'已发布'); renderShopCards();
+        }catch(e){ show(err,e.message); }
+      };
+    }catch(e){ box.textContent=e.message; }
+  }
+  renderShopCards();
   if (!d || !d.user){
     document.getElementById('formbox').innerHTML = '<p>登录后才能提交代点。</p><a class="btn" href="/login?next=/chicken">去登录</a>';
     return;
   }
-  var shops = cfg.shops||[];
   var box = document.getElementById('formbox');
   box.innerHTML =
     '<label>店铺</label><select class="f" id="shop"></select>'+
@@ -115,7 +163,7 @@ nav a.on{color:var(--pink);font-weight:700}
     var s = shop();
     document.getElementById('shopnote').textContent = s && s.notes ? s.notes : '';
     document.getElementById('menu').innerHTML = (s.menu||[]).map(function(m){
-      return '<div class="menu-row"><div><b>'+LH.esc(m.name)+'</b><div class="tip" style="margin:0">'+m.price_krw+' 韩元</div></div>'+
+      return '<div class="menu-row"><div><b>'+LH.esc(m.name)+'</b><div class="tip" style="margin:0">'+m.price_krw+' 韩元'+(m.price_cny!=null?('（约 ¥'+m.price_cny+'）'):LH.krwCny(m.price_krw, rate))+'</div></div>'+
         '<input class="qty" type="number" min="0" max="20" value="0" data-id="'+m.id+'"></div>';
     }).join('');
     box.querySelectorAll('.qty').forEach(function(i){ i.oninput = quote; });

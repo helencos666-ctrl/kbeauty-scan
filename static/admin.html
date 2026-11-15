@@ -49,6 +49,29 @@
         <p class="tip" style="margin-top:0">用户提交的店铺推荐和避雷经验。通过后公开，并向提交人发放 10 旅行豆；拒绝后仅提交人可见理由。简介不得含网址、电话或联系方式。</p>
         <div id="shoplist"></div>
       </div>
+      <div class="card">
+        <h2>已公开推荐店铺（菜单 / 地址）</h2>
+        <p class="tip" style="margin-top:0">可补充菜单价格（韩元）和地址。地址会用于复制和打开 Naver / Kakao / Google 地图搜索，不使用地图 API 密钥。</p>
+        <div id="shoppub"></div>
+      </div>
+      <div class="card">
+        <h2>店铺评价</h2>
+        <p class="tip" style="margin-top:0">用户对推荐店铺和炸鸡店铺的评价。隐藏后前台不再展示，不删除记录。</p>
+        <div class="row" style="gap:8px;margin-bottom:8px">
+          <select class="f" id="revkind" style="flex:1;min-width:120px">
+            <option value="">全部类型</option>
+            <option value="rec">推荐店铺</option>
+            <option value="chicken">炸鸡店铺</option>
+          </select>
+          <select class="f" id="revhid" style="flex:1;min-width:120px">
+            <option value="">全部</option>
+            <option value="0">仅显示中</option>
+            <option value="1">仅已隐藏</option>
+          </select>
+          <button class="btn primary" id="revgo">刷新</button>
+        </div>
+        <div id="revlist"></div>
+      </div>
     </div>
     <div id="t-friends" style="display:none">
       <div class="card">
@@ -284,15 +307,63 @@ async function review(){
     await call('POST', '/api/admin/posts/' + b.dataset.no + '/review', {action: 'reject', reason: why}); document.getElementById('rv' + b.dataset.no).remove(); }; });
   document.querySelectorAll('#rvlist [data-banu]').forEach(function(b){ b.onclick = async function(){ if (!confirm('封禁该用户？')) return; await call('POST', '/api/admin/users/' + b.dataset.banu, {action: 'ban'}); msg('已封禁', false); }; });
   var sh = await call('GET', '/api/admin/shop-recs?status=pending');
+  function shopExtraLine(x){
+    var menu = (x.menu||[]).map(function(m){ return E(m.name)+' '+m.price_krw+'韩元'; }).join('、');
+    return '<p class="tip" style="margin:6px 0">地址：' + E(x.address||'未填') + (menu?(' · 菜单：'+menu):' · 尚未填写菜单') + '</p>';
+  }
+  function editShopExtras(x){
+    var addr=prompt('地址（可留空）', x.address||''); if(addr===null) return null;
+    var menu=prompt('菜单，格式：名称,价格韩元;名称,价格韩元（可留空）', (x.menu||[]).map(function(m){return m.name+','+m.price_krw;}).join(';'));
+    if(menu===null) return null;
+    var items=menu?menu.split(';').map(function(line,i){
+      var p=line.split(',');
+      return {id:'m'+(i+1), name:(p[0]||'').trim(), price_krw:parseInt((p[1]||'').trim(),10)||0};
+    }).filter(function(m){return m.name && m.price_krw>0;}):[];
+    return {address:addr, menu:items};
+  }
   document.getElementById('shoplist').innerHTML = sh.items.length ? sh.items.map(function(x){
     return '<div class="cmt" id="shop' + x.id + '"><div class="who">#' + x.member_no + ' ' + E(x.nickname) + ' · ' + E(x.name) + '</div>' +
       '<div class="meta"><span class="tag">' + E(x.shop_type) + '</span><span>' + E(x.area) + '</span><span>' + E(x.time) + '</span></div>' +
-      '<p style="margin:8px 0;line-height:1.7">' + E(x.description) + '</p>' +
+      '<p style="margin:8px 0;line-height:1.7">' + E(x.description) + '</p>' + shopExtraLine(x) +
       '<div class="row" style="gap:8px"><button class="btn sm primary" data-shopok="' + x.id + '">通过（+10旅行豆）</button>' +
-      '<button class="btn sm gray" data-shopno="' + x.id + '">拒绝</button></div></div>';
+      '<button class="btn sm gray" data-shopno="' + x.id + '">拒绝</button>' +
+      '<button class="btn sm ghost" data-shopex="' + x.id + '">编辑菜单/地址</button></div></div>';
   }).join('') : '<div class="empty">没有待审核的店铺推荐</div>';
-  document.querySelectorAll('#shoplist [data-shopok]').forEach(function(b){ b.onclick = async function(){ var r = await call('POST', '/api/admin/shop-recs/' + b.dataset.shopok, {action: 'approve'}); document.getElementById('shop' + b.dataset.shopok).remove(); msg(r.awarded ? ('已通过，旅行豆 +' + r.awarded) : '已通过', false); }; });
+  document.querySelectorAll('#shoplist [data-shopok]').forEach(function(b){ b.onclick = async function(){ var r = await call('POST', '/api/admin/shop-recs/' + b.dataset.shopok, {action: 'approve'}); document.getElementById('shop' + b.dataset.shopok).remove(); msg(r.awarded ? ('已通过，旅行豆 +' + r.awarded) : '已通过', false); review(); }; });
   document.querySelectorAll('#shoplist [data-shopno]').forEach(function(b){ b.onclick = async function(){ var why = prompt('拒绝理由（提交人可见）', '信息不足或不符合约定'); if (why === null) return; await call('POST', '/api/admin/shop-recs/' + b.dataset.shopno, {action: 'reject', reason: why}); document.getElementById('shop' + b.dataset.shopno).remove(); }; });
+  document.querySelectorAll('#shoplist [data-shopex]').forEach(function(b){ b.onclick = async function(){
+    var x = sh.items.find(function(z){ return String(z.id)===b.dataset.shopex; }); if(!x) return;
+    var body=editShopExtras(x); if(!body) return;
+    await call('POST', '/api/admin/shop-recs/' + x.id + '/extras', body); msg('已保存菜单/地址', false); review();
+  }; });
+  var pub = await call('GET', '/api/admin/shop-recs?status=approved');
+  document.getElementById('shoppub').innerHTML = pub.items.length ? pub.items.map(function(x){
+    return '<div class="cmt"><div class="who">#' + x.id + ' ' + E(x.name) + ' · ' + E(x.area) + ' · ' + E(x.shop_type) + '</div>' +
+      shopExtraLine(x) + '<button class="btn sm ghost" data-pubex="' + x.id + '">编辑菜单/地址</button></div>';
+  }).join('') : '<div class="empty">还没有已公开的推荐店铺</div>';
+  document.querySelectorAll('#shoppub [data-pubex]').forEach(function(b){ b.onclick = async function(){
+    var x = pub.items.find(function(z){ return String(z.id)===b.dataset.pubex; }); if(!x) return;
+    var body=editShopExtras(x); if(!body) return;
+    await call('POST', '/api/admin/shop-recs/' + x.id + '/extras', body); msg('已保存菜单/地址', false); review();
+  }; });
+  await loadReviews();
+}
+async function loadReviews(){
+  var kind=document.getElementById('revkind').value, hid=document.getElementById('revhid').value;
+  var q='/api/admin/shop-reviews?';
+  if(kind) q+='kind='+encodeURIComponent(kind)+'&';
+  if(hid) q+='hidden='+encodeURIComponent(hid);
+  var d=await call('GET', q);
+  var KN={rec:'推荐店铺', chicken:'炸鸡'};
+  document.getElementById('revlist').innerHTML = d.items.length ? d.items.map(function(x){
+    return '<div class="cmt"><div class="who">#'+x.id+' · '+E(KN[x.shop_kind]||x.shop_kind)+' #'+x.shop_id+' · ★'+x.stars+(x.hidden?' <b style="color:#c62828">已隐藏</b>':'')+'</div>'+
+      '<div class="ct" style="color:var(--sub)">'+E(x.author||'')+'（编号 '+(x.member_no||'')+'）· '+E(x.time||'')+'</div>'+
+      '<div class="ct">'+E(x.body)+'</div>'+
+      '<button class="btn sm '+(x.hidden?'primary':'gray')+'" data-rvid="'+x.id+'" data-rvact="'+(x.hidden?'unhide':'hide')+'">'+(x.hidden?'取消隐藏':'隐藏')+'</button></div>';
+  }).join('') : '<div class="empty">没有评价</div>';
+  document.querySelectorAll('#revlist [data-rvid]').forEach(function(b){ b.onclick=async function(){
+    await call('POST','/api/admin/shop-reviews/'+b.dataset.rvid,{action:b.dataset.rvact}); loadReviews();
+  }; });
 }
 async function friends(){
   var d = await call('GET', '/api/admin/friends?s=' + encodeURIComponent(document.getElementById('fs').value));
@@ -368,6 +439,7 @@ async function chickenAdmin(){
   document.getElementById('ckshops').innerHTML = s.shops.map(function(x){
     return '<div class="cmt" id="cks'+x.id+'"><div class="who">'+E(x.name)+(x.is_example?'（示例）':'')+(x.active?'':' · 已下架')+' · '+E(x.area||'')+'</div>'+
       '<div class="ct">'+(x.menu||[]).map(function(m){return E(m.name)+' '+m.price_krw+'韩元';}).join('、')+'</div>'+
+      (x.address?('<div class="ct" style="color:var(--sub)">地址：'+E(x.address)+'</div>'):'')+
       '<button class="btn sm ghost" data-edits="'+x.id+'">编辑</button></div>';
   }).join('') || '<div class="empty">还没有店铺</div>';
   document.querySelectorAll('#ckshops [data-edits]').forEach(function(b){
@@ -376,6 +448,7 @@ async function chickenAdmin(){
       if(!x) return;
       var name=prompt('店铺名称', x.name); if(name===null) return;
       var area=prompt('地区', x.area||''); if(area===null) return;
+      var address=prompt('地址（可留空）', x.address||''); if(address===null) return;
       var menu=prompt('菜单，格式：名称,价格韩元;名称,价格韩元', (x.menu||[]).map(function(m){return m.name+','+m.price_krw;}).join(';'));
       if(menu===null) return;
       var notes=prompt('说明', x.notes||''); if(notes===null) return;
@@ -385,21 +458,23 @@ async function chickenAdmin(){
         var p=line.split(',');
         return {id:'m'+(i+1), name:(p[0]||'').trim(), price_krw:parseInt((p[1]||'').trim(),10)||0};
       }).filter(function(m){return m.name && m.price_krw>0;});
-      call('POST','/api/admin/chicken/shops',{id:x.id,name:name,area:area,menu:items,notes:notes,is_example:ex,active:active,sort_order:x.sort_order||0}).then(function(){ msg('店铺已保存', false); chickenAdmin(); });
+      call('POST','/api/admin/chicken/shops',{id:x.id,name:name,area:area,address:address,menu:items,notes:notes,is_example:ex,active:active,sort_order:x.sort_order||0}).then(function(){ msg('店铺已保存', false); chickenAdmin(); });
     };
   });
 }
 document.getElementById('ckgo').onclick = chickenAdmin;
+document.getElementById('revgo').onclick = loadReviews;
 document.getElementById('ckadd').onclick = function(){
   var name=prompt('店铺名称'); if(!name) return;
   var area=prompt('地区','其他')||'其他';
+  var address=prompt('地址（可留空）','')||'';
   var menu=prompt('菜单，格式：名称,价格韩元;名称,价格韩元','原味炸鸡,18000');
   if(!menu) return;
   var items=menu.split(';').map(function(line,i){
     var p=line.split(',');
     return {id:'m'+(i+1), name:(p[0]||'').trim(), price_krw:parseInt((p[1]||'').trim(),10)||0};
   }).filter(function(m){return m.name && m.price_krw>0;});
-  call('POST','/api/admin/chicken/shops',{name:name,area:area,menu:items,notes:'',is_example:true,active:true,sort_order:0}).then(function(){ msg('已新增', false); chickenAdmin(); });
+  call('POST','/api/admin/chicken/shops',{name:name,area:area,address:address,menu:items,notes:'',is_example:true,active:true,sort_order:0}).then(function(){ msg('已新增', false); chickenAdmin(); });
 };
 document.getElementById('padd').onclick = async function(){
   var r = await call('POST', '/api/admin/promoters', {name: document.getElementById('pname').value, code: document.getElementById('pcode').value, commission: document.getElementById('pcom').value || 3, commission2: document.getElementById('pcom2').value || 6, commission3: document.getElementById('pcom3').value || 20, commission4: document.getElementById('pcom4').value || 200});
