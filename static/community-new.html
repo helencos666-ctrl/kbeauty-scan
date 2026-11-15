@@ -40,6 +40,10 @@
         <option value="hotel">🛏️ 住宿推荐</option>
         <option value="car">🚐 包车用车</option>
         <option value="clinic">✨ 皮肤管理·医美</option>
+        <option value="agency">🏫 留学机构</option>
+        <option value="daigou">🛍️ 代购商家</option>
+        <option value="guide">🙋 地陪</option>
+        <option value="kpop">🎤 追星活动</option>
       </optgroup>
     </select>
     <div class="tip" id="quota" style="display:none"></div>
@@ -72,8 +76,13 @@ var WARN = {visa: '签证问答仅限个人经验分享，禁止发布代办广�
   rent: '租房请写清区域、房型、押金月租和入住时间；中介/房东商业广告会进入审核。', used: '二手请写清物品、成色、价格和交易地点，建议当面交易。',
   jobs: '招聘请写清岗位、要求的签证类型和工作地点，严禁招聘无工作资格人员和“先交费”类信息。', news: '出行提醒请注明信息来源，不要转载未经核实的消息。', group: '结伴请写清行程和 AA 方式，禁止收取定金类商业拼团。',
   hotel: '商家专区：请写清店名、地址、房型与价格，确保已办理合法住宿业登记。', car: '商家专区：请写清车型、服务范围与收费，确保具备租赁或客运资质。',
-  clinic: '商家专区：仅限合法医疗机构发布，不得承诺效果，不得使用术前术后对比图招揽。'};
-var MB = {hotel: 1, car: 1, clinic: 1}, ME = null;
+  clinic: '商家专区：仅限合法医疗机构发布，不得承诺效果，不得使用术前术后对比图招揽。',
+  agency: '商家专区：仅限正规留学机构发布，写清机构名称、服务内容与收费，不得承诺录取或签证结果。',
+  daigou: '商家专区：请写清代购品类、价格与发货方式，不得销售假货、违禁品或逃避海关的商品。',
+  guide: '商家专区：请写清服务范围、时长与收费，确保具备合法从业资质，不得发布色情陪同等违法内容。',
+  kpop: '商家专区：演出、应援、见面会信息请注明主办方与信息来源，严禁倒卖门票和代抢票。',
+};
+var MB = {hotel: 1, car: 1, clinic: 1, agency: 1, daigou: 1, guide: 1, kpop: 1}, ME = null;
 var NORMAL_HINT = '普通频道里含酒店预订、租车包车、医美、微信号、代办等商业内容的帖子会先进入人工审核。';
 var files = [];
 document.getElementById('board').onchange = function(){
@@ -90,7 +99,7 @@ document.getElementById('board').onchange = function(){
   var gate = document.getElementById('gate'), d;
   try { d = ME = await LH.me(); } catch(e){ gate.innerHTML = '<div class="empty">' + LH.esc(e.message) + '</div>'; return; }
   if (!d.user){ gate.innerHTML = '<div class="empty">请先登录<br><br><a class="btn primary" href="/login?next=/community/new">登录 / 注册</a></div>'; return; }
-  if (d.user.tier < 2){ gate.innerHTML = '<div class="empty">开通高级会员（¥' + d.prices.price_t2 + '）后即可在所有频道发帖（含旅韩交友）；住宿、包车用车、医美商家请开通商家会员<br><br><a class="btn primary" href="/member">' + (d.user.tier === 1 ? '升级高级会员' : '了解会员') + '</a></div>'; return; }
+  if (d.user.tier < 2){ gate.innerHTML = '<div class="empty">开通高级会员（¥' + d.prices.price_t2 + '）后即可在所有频道发帖（含旅韩交友）；住宿、包车、医美、留学机构、代购、地陪、追星活动等商家请开通商家会员<br><br><a class="btn primary" href="/member">' + (d.user.tier === 1 ? '升级高级会员' : '了解会员') + '</a></div>'; return; }
   gate.style.display = 'none'; document.getElementById('form').style.display = 'block';
   var b = LH.qs('board'); if (b) document.getElementById('board').value = b;
   document.getElementById('board').onchange();

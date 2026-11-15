@@ -26,6 +26,10 @@ BOARDS = {   # 键名（pit/group/...）已存库，不要改；只改右边显�
     "hotel": "住宿推荐",
     "car": "包车用车",
     "clinic": "皮肤管理·医美",
+    "agency": "留学机构",
+    "daigou": "代购商家",
+    "guide": "地陪",
+    "kpop": "追星活动",
     "news": "出行提醒",
     "rent": "租房找房",
     "used": "闲置转让",
@@ -37,25 +41,28 @@ BOARD_CATEGORIES = [
     {"key": "visa", "name": "签证·留学", "icon": "🛂", "boards": ["visa", "study"]},
     {"key": "life", "name": "住在韩国", "icon": "🏡", "boards": ["rent", "used", "jobs"]},
     {"key": "friends", "name": "旅韩交友", "icon": "💗", "boards": ["friends"]},
-    {"key": "biz", "name": "商家专区", "icon": "🏷️", "boards": ["hotel", "car", "clinic"]},
+    {"key": "biz", "name": "商家专区", "icon": "🏷️", "boards": ["hotel", "car", "clinic", "agency", "daigou", "guide", "kpop"]},
 ]
 BOARD_ICONS = {"pit": "🚧", "group": "🧳", "news": "📣", "visa": "🛂", "study": "🎓", "rent": "🔑", "used": "♻️",
-               "jobs": "💼", "friends": "💗", "hotel": "🛏️", "car": "🚐", "clinic": "✨"}
+               "jobs": "💼", "friends": "💗", "hotel": "🛏️", "car": "🚐", "clinic": "✨",
+               "agency": "🏫", "daigou": "🛍️", "guide": "🙋", "kpop": "🎤"}
 BOARD_DESCS = {"pit": "换钱、打车、购物被坑的真实经历", "group": "找人一起逛、一起拼车、AA 出行", "news": "天气、交通、闭馆等出行变化",
                "visa": "各类签证、K-ETA 的个人经验", "study": "语学院、大学、生活费怎么选", "rent": "看房、合同、押金经验",
                "used": "回国前转让、二手好物", "jobs": "合法打工与求职信息", "friends": "认识新朋友、找搭子、语言交换",
-               "hotel": "商家发布的住宿信息", "car": "商家发布的包车、租车信息", "clinic": "合法医疗机构发布的皮肤管理信息"}
+               "hotel": "商家发布的住宿信息", "car": "商家发布的包车、租车信息", "clinic": "合法医疗机构发布的皮肤管理信息",
+               "agency": "正规留学机构发布的招生与咨询信息", "daigou": "商家发布的代购服务信息",
+               "guide": "商家发布的地陪、向导服务信息", "kpop": "演出、应援、见面会等追星活动信息"}
 NEWS_BOARDS = ["news", "visa", "study", "pit"]   # “实用干货”标签包含的频道
 HOT_HOURS, HOT_FALLBACK_DAYS = 24, 7             # 24 小时热门；24 小时内没有帖子时退回近 7 天
 RECOMMEND_DAYS = 30
-MERCHANT_BOARDS = {"hotel", "car", "clinic"}   # 仅有效商家会员可发
+MERCHANT_BOARDS = {"hotel", "car", "clinic", "agency", "daigou", "guide", "kpop"}   # 仅有效商家会员可发
 MERCHANT_QUOTA = 10                            # 每 30 天周期 10 篇
 CYCLE_DAYS = 30
 PLAN_DAYS = {"month": 30, "year": 365}
 # 普通版块里非商家发布的明显商业信息 → 待审核
 COMMERCIAL_WORDS = ["酒店预订", "订酒店", "订房", "民宿预订", "租车", "包车", "接送机", "接机服务", "医美", "皮肤科", "整形", "整容",
                     "微整", "报价", "优惠价", "微信号", "加微", "加v", "vx", "wx:", "wx：", "私信我", "私聊", "代办", "办签",
-                    "代购", "联系方式", "电话咨询", "kakao id", "kakaotalk id", "line id"]
+                    "代购", "地陪", "留学中介", "留学机构", "门票代抢", "代抢票", "联系方式", "电话咨询", "kakao id", "kakaotalk id", "line id"]
 PRICE_KEYS = ("price_t1", "price_t2", "price_m_month", "price_m_year", "price_extra", "rate_cny_krw")
 BOOL_SETTINGS = {"ai_reply"}
 DEFAULT_SETTINGS = {"price_t1": "9.9", "price_t2": "19.9", "price_m_month": "99", "price_m_year": "999", "price_extra": "19.9",
@@ -1501,7 +1508,7 @@ async def api_new_post(req: Request, board: str = Form(...), title: str = Form(.
     if status == "pending":
         return {"ok": True, "id": row["id"], "pending": True,
                 "message": "你的帖子含有商业推广类内容（如酒店预订、租车包车、医美、联系方式、代办等），已提交管理员审核，审核通过后才会公开。"
-                           "住宿、包车用车、皮肤管理·医美等商业信息请开通商家会员后在商家专区发布。"}
+                           "住宿、包车用车、皮肤管理·医美、留学机构、代购、地陪、追星活动等商业信息请开通商家会员后在商家专区发布。"}
     schedule_ai_reply("post", row["id"], u["id"])
     return {"ok": True, "id": row["id"]}
 

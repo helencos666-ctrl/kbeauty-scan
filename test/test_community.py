@@ -361,7 +361,7 @@ for p in ["/", "/attractions", "/food", "/shopping", "/tips", "/beauty", "/sw.js
           "/community/messages", "/community/messages/1", "/community?tab=hot", "/community?board=rent"]:
     r = guest.get(p); check(f"GET {p} 200", r.status_code == 200, r.status_code)
 swt = guest.get("/sw.js").text
-check("sw.js cache bumped v26", "lvhan-shell-v26" in swt and "/rules" in swt and "/static/stations.json" in swt and "/community/friends" in swt and "/static/chat.html" in swt)
+check("sw.js cache bumped v27", "lvhan-shell-v27" in swt and "/rules" in swt and "/static/stations.json" in swt and "/community/friends" in swt and "/static/chat.html" in swt)
 stj = guest.get("/static/stations.json").json()["stations"]; check("stations.json coords", stj.get("강남역") and stj.get("홍대입구역") and stj.get("건대입구역"))
 mj = guest.get("/static/maps.js").text; check("maps.js naver+amap", "map.naver.com/p/directions/" in mj and "m.map.naver.com/?slng=" in mj and "uri.amap.com/navigation" in mj and "uri.amap.com/search" in mj)
 pages = "".join(guest.get(p).text for p in ["/", "/attractions", "/food", "/shopping", "/tips", "/beauty"])
@@ -730,6 +730,28 @@ check("merchant normal-board post not held", r.status_code == 200 and not r.json
 hp = guest.get(f"/api/community/posts/{pid_h}").json(); check("merchant label + badge", hp["merchant"] is True and hp["author_tier"] == 3, hp)
 check("hotel board list", any(p["id"] == pid_h and p["merchant"] for p in guest.get("/api/community/posts?board=hotel").json()["posts"]))
 check("quota 9 left", dave.get("/api/community/me").json()["user"]["merchant_info"]["left"] == 9)
+# 新增 4 个商家频道：留学机构 / 代购商家 / 地陪 / 追星活动（用两个新商家号，避开每人 10 分钟 3 帖的频率限制）
+NEWB = {"agency": "留学机构", "daigou": "代购商家", "guide": "地陪", "kpop": "追星活动"}
+bl = guest.get("/api/community/boards").json()
+allb = {x["key"]: x for c in bl.get("categories", []) for x in c.get("boards", [])}
+check("new merchant boards listed", all(k in allb and allb[k]["merchant"] and allb[k]["name"] == v for k, v in NEWB.items()), list(allb))
+mers = []
+for nm in ("fay", "gil"):
+    cm = httpx.Client(base_url=BASE)
+    r = cm.post("/api/community/register", json={"account": f"{nm}{rnd}@ex.com", "password": "Passw0rd!xyz", "nickname": "商家" + nm, "agree": True}, headers=H)
+    check(f"merchant {nm} registers", r.status_code == 200, r.text)
+    uid_m = admin.get("/api/admin/users", params={"s": f"{nm}{rnd}"}).json()["users"][0]["id"]
+    check(f"activate {nm}", admin.post(f"/api/admin/users/{uid_m}", json={"action": "merchant", "plan": "month"}, headers=H).status_code == 200)
+    mers.append(cm)
+for i, k in enumerate(NEWB):
+    r = eve.post("/api/community/posts", data={"board": k, "title": "测试商家信息发布", "body": "这是一条测试用的商家信息正文内容。"}, headers=H)
+    check(f"tier2 non-merchant cannot post {k}", r.status_code == 403 and "商家会员" in r.json()["detail"], r.text)
+    cm = mers[0] if i < 3 else mers[1]
+    r = cm.post("/api/community/posts", data={"board": k, "title": "测试商家信息发布", "body": "这是一条测试用的商家信息正文内容。"}, headers=H)
+    check(f"merchant posts {k}", r.status_code == 200 and not r.json().get("pending"), r.text)
+    if r.status_code == 200:
+        check(f"{k} board list", any(p["id"] == r.json()["id"] and p["merchant"] and p["board_name"] == NEWB[k] for p in guest.get(f"/api/community/posts?board={k}").json()["posts"]))
+check("new boards share quota (7 left after 3 posts)", mers[0].get("/api/community/me").json()["user"]["merchant_info"]["left"] == 7)
 import psycopg
 with psycopg.connect(os.environ["DATABASE_URL"]) as pc:
     for i in range(9):
