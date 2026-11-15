@@ -17,7 +17,23 @@ nav a{flex:1;border:0;background:none;font-size:11px;color:var(--sub);display:fl
 nav a i{font-style:normal;font-size:20px}
 nav a.on{color:var(--pink);font-weight:700}
 .userbar{display:flex;align-items:center;justify-content:space-between;gap:8px;font-size:14px}
-.userbar .who{font-weight:600}
+.userbar .who{font-weight:600;display:flex;align-items:center;gap:8px;min-width:0}
+.av{position:relative;display:inline-flex;align-items:center;justify-content:center;border-radius:50%;overflow:hidden;flex:none;color:#fff;font-weight:700;line-height:1;user-select:none;background:#e86b8a}
+.av-sm{width:42px;height:42px;font-size:16px}
+.av-md{width:48px;height:48px;font-size:18px}
+.av-lg{width:56px;height:56px;font-size:22px}
+.av img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;z-index:1;background:#f3eef0}
+.av-letter{position:relative;z-index:0}
+.av.fb img{display:none}
+.author-row{display:flex;align-items:center;gap:10px;margin-top:8px}
+.author-row .who-txt{min-width:0}
+.me-av{display:flex;align-items:flex-start;gap:14px;margin:0 0 12px}
+.fcard .nm{display:flex;align-items:center;gap:6px;flex-wrap:wrap}
+.fcard .nm .av-sm{width:28px;height:28px;font-size:12px}
+.cmt{display:flex;gap:10px;align-items:flex-start}
+.cmt-main{flex:1;min-width:0}
+.chat-hd{display:flex;align-items:center;gap:10px}
+.avwrap{position:relative;flex:none}
 .btn{display:inline-block;border:0;border-radius:12px;padding:11px 16px;font-size:15px;font-weight:700;font-family:inherit;text-decoration:none;text-align:center;cursor:pointer}
 .btn.primary{background:var(--pink);color:#fff}
 .btn.ghost{background:#ffe8ee;color:var(--pink)}
@@ -49,7 +65,7 @@ textarea.f{min-height:160px;resize:vertical;line-height:1.6}
 .gallery.one{grid-template-columns:1fr}
 .gallery img{width:100%;aspect-ratio:1;object-fit:cover;border-radius:10px;background:#f3eef0;cursor:zoom-in}
 .gallery.one img{aspect-ratio:auto;max-height:480px;object-fit:contain}
-.cmt{border-top:1px solid var(--line);padding:10px 0}
+.cmt{border-top:1px solid var(--line);padding:10px 0;display:flex;gap:10px;align-items:flex-start}
 .cmt .who{font-size:13px;font-weight:600}
 .cmt .ct{font-size:14px;line-height:1.6;margin:4px 0 0;white-space:pre-wrap;word-break:break-word}
 .linkbtn{border:0;background:none;color:var(--sub);font-size:12px;padding:0 4px;cursor:pointer;font-family:inherit}
@@ -131,7 +147,7 @@ table.tiers .mbadge{white-space:nowrap;margin:0}
 .jbtn{flex:none;border:1px solid var(--pink);background:#fff;color:var(--pink);border-radius:16px;padding:4px 12px;font-size:13px;font-family:inherit;cursor:pointer}
 .jbtn.on{background:#f3f3f5;color:#999;border-color:#e0e0e5}
 .thr{display:flex;gap:10px;align-items:center;padding:12px 0;border-bottom:1px solid var(--line);text-decoration:none;color:inherit}
-.thr .av{flex:none;width:48px;height:48px;border-radius:50%;background:#f6e9ee center/cover;display:flex;align-items:center;justify-content:center;font-size:22px;position:relative}
+.thr .avwrap .dot{top:-4px;right:-4px}
 .thr .tx{flex:1;min-width:0}
 .thr .tx b{font-size:15px}
 .thr .tx p{margin:3px 0 0;font-size:13px;color:var(--sub);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}

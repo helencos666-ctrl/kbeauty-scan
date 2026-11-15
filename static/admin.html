@@ -116,7 +116,8 @@ async function boot(){
 async function users(){
   var d = await call('GET', '/api/admin/users?s=' + encodeURIComponent(document.getElementById('us').value));
   document.getElementById('ulist').innerHTML = d.users.length ? '<table class="adm"><tr><th>编号</th><th>昵称/账号</th><th>状态</th><th>操作</th></tr>' + d.users.map(function(u){
-    return '<tr><td>' + u.member_no + '</td><td>' + E(u.nickname) + '<br><small>' + E(u.account) + '</small><br><small>注册 ' + E(u.joined) + (u.promoter ? ' · 推广码 ' + E(u.promoter) : '') + '</small></td><td>' +
+    return '<tr><td>' + u.member_no + '</td><td>' + (u.has_avatar ? '<img src="/api/community/avatar/' + u.id + '" alt="" width="36" height="36" style="width:36px;height:36px;border-radius:50%;object-fit:cover;vertical-align:middle;margin-right:6px">' : '') +
+      E(u.nickname) + '<br><small>' + E(u.account) + '</small><br><small>注册 ' + E(u.joined) + (u.promoter ? ' · 推广码 ' + E(u.promoter) : '') + '</small></td><td>' +
       ['普通', '<b style="color:#1b7a3d">会员</b>', '<b style="color:#8e44ff">高级会员</b>'][u.tier] + (u.merchant_active ? '<br><b style="color:#1565c0">商家·' + (u.merchant_plan === 'year' ? '年付' : '月付') + '</b><br><small>到期 ' + E(u.merchant_until) + '<br>增发次数 ' + u.merchant_credits + '</small>' : (u.merchant_until ? '<br><small style="color:#c62828">商家已到期 ' + E(u.merchant_until) + '</small>' : '')) +
       (u.is_banned ? '<br><b style="color:#c62828">已封禁</b>' : '') + (u.verified ? '<br><span class="vbadge">✔ 已认证</span>' : '') + '</td><td class="row">' +
       [0, 1, 2].filter(function(t){ return t !== u.tier; }).map(function(t){ return '<button class="btn sm ' + (t > u.tier ? 'primary' : 'gray') + '" data-u="' + u.id + '" data-a="set_tier" data-t="' + t + '">设为' + ['普通', '会员', '高级'][t] + '</button>'; }).join('') +
@@ -126,6 +127,7 @@ async function users(){
       (u.is_banned ? '<button class="btn sm gray" data-u="' + u.id + '" data-a="unban">解封</button>' : '<button class="btn sm gray" data-u="' + u.id + '" data-a="ban">封禁</button>') +
       '<button class="btn sm gray" data-u="' + u.id + '" data-a="' + (u.verified ? 'unverify">取消认证' : 'verify">标记已认证') + '</button>' +
       (u.is_bot ? '' : '<button class="btn sm gray" data-u="' + u.id + '" data-a="set_member_no">改编号</button>') +
+      (u.has_avatar && !u.is_bot ? '<button class="btn sm gray" data-u="' + u.id + '" data-a="clear_avatar">移除头像</button>' : '') +
       '<button class="btn sm gray" data-u="' + u.id + '" data-a="purge">删全部内容</button><button class="btn sm gray" data-u="' + u.id + '" data-a="reset_pw">重置密码</button></td></tr>';
   }).join('') + '</table>' : '<div class="empty">没有用户</div>';
   document.querySelectorAll('#ulist [data-a]').forEach(function(b){
@@ -140,6 +142,12 @@ async function users(){
         if (!/^[1-9]\d*$/.test(n)){ alert('编号须为正整数'); return; }
         await call('POST', '/api/admin/users/' + b.dataset.u + '/member_no', {member_no: parseInt(n, 10)});
         msg('会员编号已改为 ' + n, false);
+        users();
+        return;
+      } else if (b.dataset.a === 'clear_avatar'){
+        if (!confirm('确定移除该用户的头像？')) return;
+        await call('POST', '/api/admin/users/' + b.dataset.u + '/clear_avatar', {});
+        msg('已移除头像', false);
         users();
         return;
       }

@@ -87,7 +87,8 @@
   if (LH.qs('new')){ var ok = document.getElementById('okmsg'); ok.textContent = '🎉 注册成功！现在可以浏览社区了。'; ok.style.display = 'block'; }
   if (!d || !d.user){ s.innerHTML = '<h2>我的状态</h2><p style="margin:0 0 12px">还没登录</p><a class="btn primary block" href="/login?mode=reg&next=/member">免费注册 / 登录</a>'; return; }
   var u = d.user, m = u.merchant_info, base = ['普通用户', '会员', '高级会员'][u.base_tier] || '普通用户';
-  var html = '<h2>我的状态</h2><p style="margin:0;line-height:1.9">昵称：' + LH.esc(u.nickname) + LH.badge(u.display_tier) +
+  var html = '<h2>我的状态</h2><div class="me-av">' + LH.avatar(u.id, u.nickname, u.has_avatar, 'lg') +
+    '<div><p style="margin:0;line-height:1.9">昵称：' + LH.esc(u.nickname) + LH.badge(u.display_tier) +
     '<br>会员编号：<b style="font-size:18px;color:var(--pink)">' + u.member_no + '</b><br>登录账号：' + LH.esc(u.account) +
     '<br>会员档次：<b>' + base + '</b>';
   if (m){
@@ -96,10 +97,17 @@
   } else if (u.merchant_expired){
     html += '<br>商家会员：<b style="color:#c62828">已到期</b>，续费后恢复商家专区发帖';
   }
-  html += '</p>';
+  html += '</p><div class="row" style="margin-top:10px"><button class="btn sm primary" type="button" id="setAv">' + (u.has_avatar ? '更换头像' : '设置头像') + '</button>' +
+    (u.has_avatar ? '<button class="btn sm gray" type="button" id="delAv">删除头像</button>' : '') + '</div></div></div>';
   if (u.tier >= 2) html += '<a class="btn primary block" style="margin-top:12px" href="/community/new">去发帖</a>';
   else if (u.tier === 1) html += '<p class="tip">升级高级会员补差价即可发帖、交友和在旅韩交友帖子下评论。</p>';
   s.innerHTML = html;
+  document.getElementById('setAv').onclick = function(){ LH.pickAvatar(function(){ location.reload(); }); };
+  var da = document.getElementById('delAv');
+  if (da) da.onclick = async function(){
+    if (!confirm('确定删除当前头像？')) return;
+    try { await LH.api('DELETE', '/api/community/avatar', {}); location.reload(); } catch(e){ alert(e.message); }
+  };
   try {
     var mp = await LH.api('GET', '/api/community/my-posts');
     if (mp.posts.length){

@@ -43,7 +43,7 @@ async function load(){
     document.getElementById('msgs').innerHTML = '<div class="card empty">' + E(e.message) + (e.status === 401 ? '<br><br><a class="btn primary" href="/login?next=' + encodeURIComponent(location.pathname) + '">登录</a>' : '') + '</div>';
     return;
   }
-  document.getElementById('h1').innerHTML = '💬 ' + E(T.nickname) + LH.vb(T.verified);
+  document.getElementById('h1').innerHTML = '<span class="chat-hd">' + LH.avatar(T.other, T.nickname, T.has_avatar, 'lg', T.cover ? ('/api/friends/photo/' + T.cover + '?t=1') : '') + '<span>' + E(T.nickname) + LH.vb(T.verified) + '</span></span>';
   document.getElementById('hlinks').innerHTML = (T.has_profile ? ' · <a href="/community/friends/' + T.other + '">查看资料</a>' : '') +
     ' · <a href="#" id="blk">' + (T.blocked ? '解除拉黑' : '拉黑') + '</a>';
   document.getElementById('blk').onclick = async function(ev){

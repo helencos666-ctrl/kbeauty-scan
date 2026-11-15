@@ -51,8 +51,9 @@ async function load(){
   var gal = P.photos.length ? '<div class="pgal">' + P.photos.map(function(id){ return '<img loading="lazy" alt="" src="/api/friends/photo/' + id + '" data-z="1">'; }).join('') + '</div>' :
     '<div class="ph0">' + (P.gender === 'f' ? '👩' : '👨') + '</div>';
   box.innerHTML = '<div class="card">' + gal +
-    '<h2 style="color:var(--ink);font-size:20px;margin:14px 0 6px">' + E(P.nickname) + LH.vb(P.verified) + LH.badge(P.author_tier) + '</h2>' +
-    '<p style="margin:0 0 8px;color:var(--sub);font-size:14px">会员编号 ' + P.member_no + '</p>' +
+    '<div class="author-row" style="margin:14px 0 8px">' + LH.avatar(P.uid, P.nickname, P.has_avatar, 'lg') +
+    '<div><h2 style="color:var(--ink);font-size:20px;margin:0 0 4px">' + E(P.nickname) + LH.vb(P.verified) + LH.badge(P.author_tier) + '</h2>' +
+    '<p style="margin:0;color:var(--sub);font-size:14px">会员编号 ' + P.member_no + '</p></div></div>' +
     '<div class="chips"><span class="chip ' + (P.gender === 'f' ? 'g-f">♀ 女' : 'g-m">♂ 男') + '</span><span class="chip">' + P.age + ' 岁</span>' +
     (P.height ? '<span class="chip">' + P.height + ' cm</span>' : '') + '<span class="chip">📍 ' + E(P.city + (P.area ? ' · ' + P.area : '')) + '</span>' +
     (P.visa ? '<span class="chip">🪪 ' + E(P.visa) + '</span>' : '') + '<span class="chip" style="background:#ffe3eb;color:var(--pink)">🎯 ' + E(P.purpose_name) + '</span></div>' +

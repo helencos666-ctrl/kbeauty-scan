@@ -47,9 +47,12 @@ var LH = (function(){
     try {
       var d = await me();
       if (d.user){
-        el.innerHTML = '<span class="who">👤 ' + esc(d.user.nickname) + badge(d.user.display_tier) + '</span>' +
-          '<span class="row"><a class="btn sm ghost" href="/community/messages" style="position:relative">✉️ 私信' + (d.user.unread ? '<span class="dot">' + (d.user.unread > 99 ? '99+' : d.user.unread) + '</span>' : '') + '</a>' + (d.user.tier >= 2 ? '' : '<a class="btn sm primary" href="/member">' + (d.user.tier === 1 ? '升级高级会员' : '开通会员') + '</a>') +
+        el.innerHTML = '<span class="who">' + avatar(d.user.id, d.user.nickname, d.user.has_avatar, 'lg') +
+          '<span>' + esc(d.user.nickname) + badge(d.user.display_tier) + '</span></span>' +
+          '<span class="row"><button class="btn sm ghost" type="button" id="lhAv">设置头像</button>' +
+          '<a class="btn sm ghost" href="/community/messages" style="position:relative">✉️ 私信' + (d.user.unread ? '<span class="dot">' + (d.user.unread > 99 ? '99+' : d.user.unread) + '</span>' : '') + '</a>' + (d.user.tier >= 2 ? '' : '<a class="btn sm primary" href="/member">' + (d.user.tier === 1 ? '升级高级会员' : '开通会员') + '</a>') +
           '<button class="btn sm gray" id="lhLogout">退出</button></span>';
+        el.querySelector('#lhAv').onclick = function(){ pickAvatar(function(){ _me = null; userbar(el); }); };
         el.querySelector('#lhLogout').onclick = async function(){ await api('POST', '/api/community/logout', {}); location.reload(); };
       } else {
         el.innerHTML = '<span class="who">游客</span><span class="row"><a class="btn sm primary" href="/login?next=' + encodeURIComponent(location.pathname + location.search) + '">登录 / 注册</a></span>';
@@ -70,10 +73,41 @@ var LH = (function(){
     catch(e){ alert(e.message); }
   }
   function vb(v){ return v ? '<span class="vbadge">✔ 已认证</span>' : ''; }
+  function initial(nick){ var s = String(nick || '').trim(); return s ? s.charAt(0) : '?'; }
+  function avColor(s){
+    var h = 0, t = String(s || '');
+    for (var i = 0; i < t.length; i++) h = (h * 31 + t.charCodeAt(i)) >>> 0;
+    return ['#e86b8a','#5b7fd6','#2f9e7a','#d4a017','#8e6bb8','#e07a5f','#4a9aa3','#c06c84'][h % 8];
+  }
+  // size: sm 42px（帖子/评论） / md 48px（私信列表） / lg 56px（资料/顶栏）
+  // has 为真时用社区头像；否则用 fallbackUrl（如交友封面）或彩色首字
+  function avatar(uid, nick, has, size, fallbackUrl){
+    size = size || 'sm';
+    var src = (has && uid) ? ('/api/community/avatar/' + uid) : (fallbackUrl || '');
+    var img = src ? '<img src="' + src + '" alt="" onerror="this.style.display=\'none\';this.parentNode.classList.add(\'fb\')">' : '';
+    return '<span class="av av-' + size + (src ? '' : ' fb') + '" style="background:' + avColor(uid || nick) + '">' +
+      img + '<span class="av-letter">' + esc(initial(nick)) + '</span></span>';
+  }
+  function pickAvatar(onOk){
+    var inp = document.createElement('input');
+    inp.type = 'file'; inp.accept = 'image/jpeg,image/png,image/webp';
+    inp.onchange = async function(){
+      var f = inp.files && inp.files[0]; if (!f) return;
+      if (f.size > 5 * 1024 * 1024){ alert('头像不能超过 5MB，请换一张'); return; }
+      try {
+        var fd = new FormData(); fd.append('image', f);
+        await api('POST', '/api/community/avatar', fd);
+        _me = null;
+        if (onOk) onOk(); else location.reload();
+      } catch(e){ alert(e.message); }
+    };
+    inp.click();
+  }
   // 帖子列表项（rank 为排名序号，可选）
   function postItem(p, rank){
     var cover = p.cover ? '<img class="cover" loading="lazy" alt="" src="/api/community/img/' + p.cover + '?t=1">' : '';
     return '<a class="post" href="/community/post/' + p.id + '">' + (rank ? '<span class="rank' + (rank <= 3 ? ' t' : '') + '">' + rank + '</span>' : '') +
+      avatar(p.author_id, p.author, p.has_avatar, 'sm') +
       '<div class="txt"><h3>' + esc(p.title) + '</h3><p class="ex">' + esc(p.excerpt) + '</p><div class="meta">' +
       (p.merchant ? '<span class="tag biz">商家</span>' : '') + '<span class="tag">' + esc(p.board_name) + '</span>' +
       '<span>' + esc(p.author) + badge(p.author_tier) + vb(p.author_verified) + '</span><span>' + esc(p.time) + '</span>' +
@@ -93,7 +127,7 @@ var LH = (function(){
     var bg2 = c.cover ? ' style="background-image:url(/api/friends/photo/' + c.cover + '?t=1)"' : '';
     return '<a class="fcard" href="/community/friends/' + c.uid + '"><div class="ph"' + bg2 + '>' + (c.cover ? '' : (c.gender === 'f' ? '👩' : '👨')) + '</div>' +
       (c.purpose_name ? '<span class="pp">' + esc(c.purpose_name) + '</span>' : '') +
-      '<div class="in"><div class="nm">' + g + esc(c.nickname) + vb(c.verified) + '</div><div class="mt">' + esc(sub) + '</div></div></a>';
+      '<div class="in"><div class="nm">' + avatar(c.uid, c.nickname, c.has_avatar, 'sm') + g + esc(c.nickname) + vb(c.verified) + '</div><div class="mt">' + esc(sub) + '</div></div></a>';
   }
   function lockedPrompt(){
     me().then(function(d){
@@ -103,5 +137,5 @@ var LH = (function(){
   }
   var ANTISCAM = '🛡️ 防骗提示：交友不谈钱。任何以投资、理财、虚拟币、借钱、垫付、“微信转账”等为由要钱的，一律是骗子；不要提供验证码、证件和银行卡；第一次见面请选人多的公共场所，并告诉朋友行程。遇到可疑账号请点“举报”。';
   return {prices: prices, esc: esc, api: api, me: me, badge: badge, showErr: showErr, qs: qs, compress: compress, userbar: userbar, report: report,
-          vb: vb, postItem: postItem, friendCard: friendCard, lockedPrompt: lockedPrompt, ANTISCAM: ANTISCAM};
+          vb: vb, avatar: avatar, pickAvatar: pickAvatar, postItem: postItem, friendCard: friendCard, lockedPrompt: lockedPrompt, ANTISCAM: ANTISCAM};
 })();

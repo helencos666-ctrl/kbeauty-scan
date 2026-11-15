@@ -45,7 +45,8 @@ var E = LH.esc;
   try {
     var d = await LH.api('GET', '/api/friends/threads');
     box.innerHTML = d.threads.length ? d.threads.map(function(t){
-      return '<a class="thr" href="/community/messages/' + t.id + '"><span class="av"' + (t.cover ? ' style="background-image:url(/api/friends/photo/' + t.cover + '?t=1)"' : '') + '>' + (t.cover ? '' : '🙂') +
+      return '<a class="thr" href="/community/messages/' + t.id + '"><span class="avwrap">' +
+        LH.avatar(t.other, t.nickname, t.has_avatar, 'md', t.cover ? ('/api/friends/photo/' + t.cover + '?t=1') : '') +
         (t.unread ? '<span class="dot">' + t.unread + '</span>' : '') + '</span><span class="tx"><b>' + E(t.nickname) + '</b>' + LH.vb(t.verified) +
         (t.blocked ? ' <small style="color:#c62828">已拉黑</small>' : '') + (t.flagged ? ' <small style="color:#8a5300">⚠️ 含敏感词</small>' : '') +
         '<p>' + E(t.last) + '</p></span><span class="tm">' + E((t.time || '').slice(5)) + '</span></a>';
