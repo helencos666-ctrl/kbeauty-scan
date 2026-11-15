@@ -5,7 +5,7 @@
 数据存 Postgres（环境变量 DATABASE_URL），图片以 bytea 存库。
 密钥只从环境变量读取，不写入日志或前端。
 """
-import datetime, hashlib, hmac, html as html_lib, io, os, re, secrets, threading, time
+import asyncio, datetime, hashlib, hmac, html as html_lib, io, os, re, secrets, threading, time
 from collections import defaultdict, deque
 from contextlib import contextmanager
 
@@ -70,7 +70,10 @@ MAX_IMG_BYTES = 6 * 1024 * 1024          # 单张原图上限（前端已压缩�
 IMG_MAX_SIDE, THUMB_SIDE = 1280, 480
 AVATAR_MAX_BYTES = 5 * 1024 * 1024       # 头像原图上限
 AVATAR_SIDE = 256
-AVATAR_FMTS = {"JPEG", "PNG", "WEBP"}
+AVATAR_FMTS = {"JPEG", "PNG", "WEBP", "MPO"}
+POST_IMG_FMTS = ("JPEG", "PNG", "WEBP", "GIF", "BMP", "MPO")   # 只启用这些解码器，其它格式一律拒绝
+MAX_PIXELS = 50_000_000
+Image.MAX_IMAGE_PIXELS = MAX_PIXELS     # 超过直接抛 DecompressionBombError，防“解压炸弹”耗尽内存
 SESSION_DAYS = 30
 ADMIN_SESSION_HOURS = 12
 COOKIE, ADMIN_COOKIE = "lh_sess", "lh_admin"
@@ -399,9 +402,8 @@ def limit(key: str, n: int, window: int, msg="操作太频繁，请稍后再试"
         dq.append(now)
 
 def ip_of(req: Request):
-    h = req.headers
-    xff = (h.get("x-forwarded-for") or "").split(",")[0].strip()
-    return h.get("true-client-ip") or h.get("cf-connecting-ip") or xff or (req.client.host if req.client else "?")
+    from security import client_ip     # 只信任 Cloudflare 写入的 IP，防止伪造 X-Forwarded-For 绕过限流
+    return client_ip(req)
 
 # ---------------- 密码与会话 ----------------
 def hash_pw(pw: str) -> str:
@@ -573,16 +575,26 @@ def mask_account(u):
 def _ts(dt):
     return dt.astimezone(datetime.timezone(datetime.timedelta(hours=9))).strftime("%Y-%m-%d %H:%M") if dt else None
 
+def _open_image(raw: bytes, formats, bad_msg):
+    """只用白名单解码器打开；先看尺寸再解码，避免超大像素图片耗尽内存。"""
+    try:
+        im = Image.open(io.BytesIO(raw), formats=list(formats))
+    except Exception:
+        raise HTTPException(400, bad_msg)
+    if im.width * im.height > MAX_PIXELS or im.width > 20000 or im.height > 20000:
+        raise HTTPException(400, "图片尺寸过大")
+    try:
+        im.load()
+    except Exception:
+        raise HTTPException(400, bad_msg)
+    return im
+
 def process_image(raw: bytes):
     if len(raw) > MAX_IMG_BYTES:
         raise HTTPException(413, "单张图片太大，请换一张")
-    try:
-        im = Image.open(io.BytesIO(raw))
-        im.load()
-    except Exception:
+    if len(raw) < 50:
         raise HTTPException(400, "有图片无法识别，请换 JPG/PNG")
-    if im.width * im.height > 50_000_000:
-        raise HTTPException(400, "图片尺寸过大")
+    im = _open_image(raw, POST_IMG_FMTS, "有图片无法识别，请换 JPG/PNG")
     im = ImageOps.exif_transpose(im)          # 按拍摄方向摆正，并丢弃 EXIF（含定位）
     if im.mode not in ("RGB", "L"):
         bg = Image.new("RGB", im.size, (255, 255, 255))
@@ -612,11 +624,7 @@ def process_avatar(raw: bytes):
     """校验格式与大小，按拍摄方向摆正、裁成正方形、缩到 256px，重编码为无 EXIF 的 JPEG。"""
     if len(raw) > AVATAR_MAX_BYTES:
         raise HTTPException(413, "头像不能超过 5MB，请换一张")
-    try:
-        im = Image.open(io.BytesIO(raw))
-        im.load()
-    except Exception:
-        raise HTTPException(400, "图片无法识别，请换 JPG、PNG 或 WebP")
+    im = _open_image(raw, POST_IMG_FMTS, "图片无法识别，请换 JPG、PNG 或 WebP")
     fmt = (im.format or "").upper()
     if fmt == "JPG":
         fmt = "JPEG"
@@ -724,11 +732,11 @@ def p_new(): return _page("community-new.html", "/community/new")
 @router.get("/community/post/{pid}")
 def p_post(pid: str):
     extra, ssr = None, ""
-    path = f"/community/post/{pid}"
     try:
-        n = int(pid)
+        n = int(pid) if re.fullmatch(r"\d{1,12}", pid or "") else 0
     except Exception:
         n = 0
+    path = f"/community/post/{n}"
     if n and _db_url():
         try:
             with db() as conn:
@@ -778,13 +786,17 @@ def p_friends(): return _page("friends.html", "/community/friends")
 def p_friend_edit(): return _page("friend-edit.html", "/community/friends/edit")
 
 @router.get("/community/friends/{uid}")
-def p_friend(uid: str): return _page("friend.html", f"/community/friends/{uid}", extra={"index": False})
+def p_friend(uid: str):
+    n = int(uid) if re.fullmatch(r"\d{1,12}", uid or "") else 0
+    return _page("friend.html", f"/community/friends/{n}", extra={"index": False})
 
 @router.get("/community/messages")
 def p_inbox(): return _page("messages.html", "/community/messages")
 
 @router.get("/community/messages/{tid}")
-def p_chat(tid: str): return _page("chat.html", f"/community/messages/{tid}")
+def p_chat(tid: str):
+    n = int(tid) if re.fullmatch(r"\d{1,12}", tid or "") else 0
+    return _page("chat.html", f"/community/messages/{n}")
 
 # ---------------- 账号 API ----------------
 @router.get("/api/community/me")
@@ -838,6 +850,8 @@ def api_avatar(uid: int):
 @router.post("/api/community/avatar")
 async def api_set_avatar(req: Request, image: UploadFile = File(...)):
     csrf(req)
+    with db() as conn:
+        need_user(conn, req)
     raw = await image.read(AVATAR_MAX_BYTES + 1)
     with db() as conn:
         u = need_user(conn, req)
@@ -862,10 +876,12 @@ def api_del_avatar(req: Request):
 @router.post("/api/community/register")
 async def api_register(req: Request, resp: Response):
     csrf(req)
-    limit("reg:" + ip_of(req), 20, 3600, "注册太频繁，请一小时后再试")
-    d = await req.json()
-    kind, acct = parse_account(d.get("account"))
-    pw = d.get("password") or ""
+    limit("reg:" + ip_of(req), 5, 3600, "注册太频繁，请一小时后再试")
+    limit("reg-day:" + ip_of(req), 10, 86400, "今天注册次数太多，请明天再试")
+    limit("reg-global", 300, 3600, "注册人数太多，请稍后再试")
+    d = await _json(req)
+    kind, acct = parse_account(str(d.get("account") or ""))
+    pw = str(d.get("password") or "")
     if len(pw) < 8 or len(pw) > 128:
         raise HTTPException(400, "密码需 8–128 位")
     if pw.isdigit() and len(set(pw)) <= 2:
@@ -890,9 +906,9 @@ async def api_register(req: Request, resp: Response):
 async def api_login(req: Request, resp: Response):
     csrf(req)
     limit("login:" + ip_of(req), 10, 600, "登录尝试太多，请十分钟后再试")
-    d = await req.json()
-    kind, acct = parse_account(d.get("account"))
-    pw = d.get("password") or ""
+    d = await _json(req)
+    kind, acct = parse_account(str(d.get("account") or ""))
+    pw = str(d.get("password") or "")[:256]
     limit("login-acct:" + acct, 8, 900, "这个账号尝试次数太多，请 15 分钟后再试")
     with db() as conn:
         u = q(conn, f"SELECT id,pw_hash,is_banned,is_bot FROM c_users WHERE {kind}=%s", (acct,), one=True)
@@ -920,19 +936,53 @@ def api_logout(req: Request, resp: Response):
 @router.post("/api/community/password")
 async def api_change_pw(req: Request):
     csrf(req)
-    d = await req.json()
+    d = await _json(req)
     with db() as conn:
         u = need_user(conn, req)
         limit("pw:" + str(u["id"]), 5, 3600)
         row = q(conn, "SELECT pw_hash FROM c_users WHERE id=%s", (u["id"],), one=True)
-        if not check_pw(d.get("old") or "", row["pw_hash"]):
+        if not check_pw(str(d.get("old") or "")[:256], row["pw_hash"]):
             raise HTTPException(400, "原密码不对")
-        new = d.get("new") or ""
+        new = str(d.get("new") or "")
         if len(new) < 8 or len(new) > 128:
             raise HTTPException(400, "新密码需 8–128 位")
+        if new.isdigit() and len(set(new)) <= 2:
+            raise HTTPException(400, "密码太简单，请换一个")
         q(conn, "UPDATE c_users SET pw_hash=%s WHERE id=%s", (hash_pw(new), u["id"]))
         q(conn, "DELETE FROM c_sessions WHERE user_id=%s AND token_hash<>%s", (u["id"], _th(req.cookies.get(COOKIE))))
     return {"ok": True}
+
+
+@router.post("/api/community/account/delete")
+async def api_delete_account(req: Request, resp: Response):
+    """用户自助注销：验证密码后彻底删除账号及其帖子、评论、图片、交友资料、私信、头像和登录会话。"""
+    csrf(req)
+    d = await _json(req)
+    if str(d.get("confirm") or "") != "注销":
+        raise HTTPException(400, "请输入“注销”两个字确认")
+    with db() as conn:
+        u = need_user(conn, req)
+        limit("del:" + str(u["id"]), 5, 3600, "尝试太多，请稍后再试")
+        if is_bot_uid(conn, u["id"]):
+            raise HTTPException(403, "系统账号不可注销")
+        row = q(conn, "SELECT pw_hash FROM c_users WHERE id=%s", (u["id"],), one=True)
+        if not check_pw(str(d.get("password") or "")[:256], row["pw_hash"]):
+            raise HTTPException(400, "密码不对")
+        delete_user_data(conn, u["id"])
+    resp.delete_cookie(COOKIE, path="/")
+    return {"ok": True}
+
+def delete_user_data(conn, uid):
+    """彻底删除（不是隐藏）：外键 ON DELETE CASCADE 会删掉帖子、图片、评论、点赞、交友资料、照片、私信、会话；
+    举报和推广佣金记录里的用户 ID 置空，只保留不含个人信息的统计。"""
+    pids = q(conn, "SELECT DISTINCT post_id FROM c_comments WHERE user_id=%s", (uid,))
+    liked = q(conn, "SELECT DISTINCT post_id FROM c_likes WHERE user_id=%s", (uid,))
+    q(conn, "DELETE FROM c_users WHERE id=%s", (uid,))
+    for p in pids:
+        _recount(conn, p["post_id"])
+    for p in liked:
+        q(conn, "UPDATE c_posts SET like_count=(SELECT count(*) FROM c_likes WHERE post_id=%s) WHERE id=%s",
+          (p["post_id"], p["post_id"]))
 
 
 # ---------------- 旅韩小助手（AI 自动回复）----------------
@@ -1151,6 +1201,7 @@ def schedule_ai_reply(kind, post_id, trigger_user_id, comment_body=None):
     th = threading.Thread(target=_ai_job, args=(kind, post_id, trigger_user_id, comment_body),
                           name="ai-reply", daemon=True)
     with _ai_threads_lock:
+        _ai_threads[:] = [t for t in _ai_threads if t.is_alive()]   # 清理已结束线程，避免列表无限增长
         _ai_threads.append(th)
     th.start()
 
@@ -1375,9 +1426,11 @@ async def api_new_post(req: Request, board: str = Form(...), title: str = Form(.
     images = [f for f in (images or []) if f and f.filename]
     if len(images) > MAX_IMAGES:
         raise HTTPException(400, f"最多 {MAX_IMAGES} 张图片")
+    with db() as conn:     # 先确认身份再处理图片，未登录者不能消耗服务器算力
+        need_tier(conn, req, 2, "开通高级会员（¥{t2}）后才能发帖")
     processed = []
     for f in images:
-        processed.append(process_image(await f.read()))
+        processed.append(process_image(await f.read(MAX_IMG_BYTES + 1)))
     with db() as conn:
         u = need_tier(conn, req, 2, "开通高级会员（¥{t2}）后才能发帖")
         st = get_settings(conn)
@@ -1451,7 +1504,7 @@ def api_img(req: Request, iid: int, t: int = 0):
 @router.post("/api/community/posts/{pid}/comments")
 async def api_comment(req: Request, pid: int):
     csrf(req)
-    d = await req.json()
+    d = await _json(req)
     body = clean_text(d.get("body"), 500, "评论")
     with db() as conn:
         u = need_tier(conn, req, 1, "开通会员（¥{t1}）后才能评论")
@@ -1503,7 +1556,7 @@ def api_like(req: Request, pid: int):
 @router.post("/api/community/report")
 async def api_report(req: Request):
     csrf(req)
-    d = await req.json()
+    d = await _json(req)
     tt = d.get("type")
     if tt not in ("post", "comment", "profile", "message"):
         raise HTTPException(400, "举报对象无效")
@@ -1524,18 +1577,60 @@ async def api_report(req: Request):
     return {"ok": True}
 
 # ---------------- 管理员 API ----------------
+ADMIN_FAIL_IP = (5, 900)        # 同一 IP 15 分钟内失败 5 次 → 锁 15 分钟
+ADMIN_FAIL_GLOBAL = (20, 3600)  # 全站 1 小时内失败 20 次 → 全部锁 1 小时（防换 IP 爆破）
+_adm_fail = defaultdict(deque)
+
+def _adm_window(key, window, now):
+    dq = _adm_fail[key]
+    while dq and now - dq[0] > window:
+        dq.popleft()
+    return dq
+
+def _admin_locked(ip):
+    now = time.time()
+    with _rl_lock:
+        if len(_adm_window("ip:" + ip, ADMIN_FAIL_IP[1], now)) >= ADMIN_FAIL_IP[0]:
+            raise HTTPException(429, "密码错误次数太多，请 15 分钟后再试")
+        if len(_adm_window("global", ADMIN_FAIL_GLOBAL[1], now)) >= ADMIN_FAIL_GLOBAL[0]:
+            raise HTTPException(429, "后台登录已临时锁定，请 1 小时后再试")
+
+def _admin_fail(ip):
+    now = time.time()
+    with _rl_lock:
+        _adm_window("ip:" + ip, ADMIN_FAIL_IP[1], now).append(now)
+        _adm_window("global", ADMIN_FAIL_GLOBAL[1], now).append(now)
+
+def _admin_ok(ip):
+    with _rl_lock:
+        _adm_fail.pop("ip:" + ip, None)
+
+async def _json(req: Request) -> dict:
+    try:
+        d = await req.json()
+    except Exception:
+        raise HTTPException(400, "请求格式不正确")
+    if not isinstance(d, dict):
+        raise HTTPException(400, "请求格式不正确")
+    return d
+
 @router.post("/api/admin/login")
 async def api_admin_login(req: Request, resp: Response):
     csrf(req)
-    limit("adm:" + ip_of(req), 5, 900, "尝试太多，请 15 分钟后再试")
-    limit("adm-global", 30, 3600, "尝试太多，请稍后再试")
+    ip = ip_of(req)
+    limit("adm:" + ip, 10, 900, "尝试太多，请 15 分钟后再试")          # 每 IP 总尝试
+    _admin_locked(ip)                                                  # 失败次数锁定
     expected = os.environ.get("ADMIN_PASSWORD", "")
     if len(expected) < 12:
-        raise HTTPException(503, "管理员后台未启用（服务器未设置 ADMIN_PASSWORD 或长度不足 12 位）")
-    d = await req.json()
-    given = (d.get("password") or "").encode()
+        raise HTTPException(503, "管理员后台暂未启用")
+    d = await _json(req)
+    given = str(d.get("password") or "")[:256].encode()
     if not hmac.compare_digest(hashlib.sha256(given).digest(), hashlib.sha256(expected.encode()).digest()):
+        _admin_fail(ip)
+        await asyncio.sleep(0.5)  # 拖慢逐个试密码（不阻塞其他请求）
+        print("admin login failed", flush=True)   # 只记录事件，不记录密码或 IP
         raise HTTPException(401, "密码不对")
+    _admin_ok(ip)
     with db() as conn:
         new_session(conn, resp, req, admin=True)
     return {"ok": True}
@@ -1606,7 +1701,7 @@ def api_admin_users(req: Request, s: str = ""):
 @router.post("/api/admin/users/{uid}")
 async def api_admin_user_action(req: Request, uid: int):
     csrf(req)
-    d = await req.json()
+    d = await _json(req)
     act = d.get("action")
     with db() as conn:
         need_admin(conn, req)
@@ -1655,6 +1750,10 @@ async def api_admin_user_action(req: Request, uid: int):
             q(conn, "DELETE FROM c_dating_photos WHERE user_id=%s", (uid,))
             q(conn, "DELETE FROM c_dating_profiles WHERE user_id=%s", (uid,))
             q(conn, "UPDATE c_messages SET deleted=TRUE WHERE sender_id=%s", (uid,))
+        elif act == "delete_account":   # 处理用户的删除个人信息请求：彻底删除账号及全部内容
+            delete_user_data(conn, uid)
+            print("admin deleted account", flush=True)
+            return {"ok": True, "deleted": True}
         elif act == "reset_pw":
             tmp = secrets.token_urlsafe(8)
             q(conn, "UPDATE c_users SET pw_hash=%s WHERE id=%s", (hash_pw(tmp), uid))
@@ -1667,7 +1766,7 @@ async def api_admin_user_action(req: Request, uid: int):
 @router.post("/api/admin/users/{uid}/member_no")
 async def api_admin_set_member_no(req: Request, uid: int):
     csrf(req)
-    d = await req.json()
+    d = await _json(req)
     try:
         n = int(d.get("member_no"))
     except Exception:
@@ -1808,8 +1907,11 @@ async def ref_middleware(request: Request, call_next):
 
 def _log_ref(request, resp, code):
         if code in active_codes():
-            visitor = hashlib.sha256((ip_of(request) + "|" + (request.headers.get("user-agent") or "")[:200]).encode()).hexdigest()[:32]
             day = datetime.datetime.now(datetime.timezone(datetime.timedelta(hours=9))).date()
+            # 带密钥的哈希（密钥由服务器配置派生、按天变化）：不保存原始 IP，也无法靠穷举 IP 反推
+            vkey = hashlib.sha256(("lh-ref-visitor|" + _db_url() + "|" + day.isoformat()).encode()).digest()
+            visitor = hmac.new(vkey, (ip_of(request) + "|" + (request.headers.get("user-agent") or "")[:200]).encode(),
+                               hashlib.sha256).hexdigest()[:32]
             with db() as conn:
                 q(conn, """INSERT INTO c_ref_visits(code,visitor,day,path) VALUES (%s,%s,%s,%s)
                            ON CONFLICT (code,visitor,day) DO NOTHING""", (code, visitor, day, request.url.path[:100]))
@@ -1885,7 +1987,7 @@ def _cents(v):
 @router.post("/api/admin/promoters")
 async def api_admin_new_promoter(req: Request):
     csrf(req)
-    d = await req.json()
+    d = await _json(req)
     code = norm_code(d.get("code"))
     if not code:
         raise HTTPException(400, "推广码只能是 2–12 位字母或数字，例如 A08")
@@ -1906,7 +2008,7 @@ async def api_admin_new_promoter(req: Request):
 @router.post("/api/admin/promoters/{code}")
 async def api_admin_promoter_action(req: Request, code: str):
     csrf(req)
-    d = await req.json()
+    d = await _json(req)
     code = norm_code(code)
     act = d.get("action")
     with db() as conn:
@@ -2015,7 +2117,7 @@ def api_admin_img(req: Request, iid: int):
 @router.post("/api/admin/posts/{pid}/review")
 async def api_admin_review(req: Request, pid: int):
     csrf(req)
-    d = await req.json()
+    d = await _json(req)
     act = d.get("action")
     if act not in ("approve", "reject"):
         raise HTTPException(400, "未知操作")
@@ -2042,7 +2144,7 @@ def api_admin_settings(req: Request):
 @router.post("/api/admin/settings")
 async def api_admin_settings_save(req: Request):
     csrf(req)
-    d = await req.json()
+    d = await _json(req)
     vals = {}
     for k in DEFAULT_SETTINGS:
         if k in d:

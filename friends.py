@@ -11,7 +11,7 @@ from fastapi import APIRouter, Request, Response, HTTPException, UploadFile, Fil
 from PIL import Image, ImageFilter
 
 import community as C
-from community import db, q, csrf, limit, need_user, need_tier, current_user, clean_text, process_image, get_settings, _ts
+from community import db, q, csrf, limit, need_user, need_tier, current_user, clean_text, process_image, get_settings, _ts, ip_of, MAX_IMG_BYTES, _json
 
 router = APIRouter()
 
@@ -198,7 +198,7 @@ def _int(v, field, lo, hi, required=True):
 @router.post("/api/friends/me")
 async def api_save_profile(req: Request):
     csrf(req)
-    d = await req.json()
+    d = await _json(req)
     nick = clean_text(d.get("nickname"), 16, "昵称", 2)
     if re.search(r"管理员|官方|admin", nick, re.I):
         raise HTTPException(400, "昵称不能包含“管理员/官方”")
@@ -237,7 +237,7 @@ async def api_save_profile(req: Request):
 async def api_profile_visible(req: Request):
     """公开/隐藏自己的资料（降级为会员后也可以随时隐藏）"""
     csrf(req)
-    d = await req.json()
+    d = await _json(req)
     with db() as conn:
         u = need_user(conn, req)
         r = q(conn, "UPDATE c_dating_profiles SET visible=%s WHERE user_id=%s RETURNING visible", (bool(d.get("visible")), u["id"]), one=True)
@@ -257,7 +257,9 @@ def api_delete_profile(req: Request):
 @router.post("/api/friends/me/photos")
 async def api_add_photo(req: Request, image: UploadFile = File(...)):
     csrf(req)
-    big, th, w, h = process_image(await image.read())
+    with db() as conn:     # 先确认身份再处理图片
+        need_tier(conn, req, FRIEND_CREATE_TIER, "开通高级会员（¥{t2}）后才能上传交友照片")
+    big, th, w, h = process_image(await image.read(MAX_IMG_BYTES + 1))
     with db() as conn:
         u = need_tier(conn, req, FRIEND_CREATE_TIER, "开通高级会员（¥{t2}）后才能上传交友照片")
         if not q(conn, "SELECT 1 AS x FROM c_dating_profiles WHERE user_id=%s", (u["id"],), one=True):
@@ -314,6 +316,7 @@ def api_photo(req: Request, pid: int, t: int = 0, blur: int = 0):
         if not r["visible"] or r["hidden_by_admin"] or r["is_banned"]:
             raise HTTPException(404, "照片不存在")
         if blur:
+            limit("blur:" + ip_of(req), 240, 60)     # 模糊图要实时计算，限制频率防刷 CPU
             return Response(_blurred(bytes(r["d"])), media_type="image/jpeg", headers={"Cache-Control": "public, max-age=3600"})
         if not cu or cu["tier"] < FRIEND_VIEW_TIER:
             raise HTTPException(403, "开通会员后查看")
@@ -345,6 +348,8 @@ async def api_greet(req: Request, uid: int):
     try:
         d = await req.json()
     except Exception:
+        d = {}
+    if not isinstance(d, dict):
         d = {}
     body = clean_text(d.get("body") or DEFAULT_GREETING, 100, "招呼语")
     with db() as conn:
@@ -385,7 +390,7 @@ def _thread(conn, tid, uid):
 @router.post("/api/friends/threads/{tid}/messages")
 async def api_send(req: Request, tid: int):
     csrf(req)
-    d = await req.json()
+    d = await _json(req)
     body = clean_text(d.get("body"), 500, "消息")
     with db() as conn:
         u = need_tier(conn, req, FRIEND_MSG_TIER, "开通高级会员（¥{t2}）后才能发私信")
@@ -530,7 +535,7 @@ def api_admin_friends(req: Request, s: str = ""):
 @router.post("/api/admin/friends/{uid}")
 async def api_admin_friend_action(req: Request, uid: int):
     csrf(req)
-    d = await req.json()
+    d = await _json(req)
     act = d.get("action")
     with db() as conn:
         C.need_admin(conn, req)

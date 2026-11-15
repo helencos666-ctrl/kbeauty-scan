@@ -111,6 +111,18 @@ PAGES = {
         "韩国交友,旅韩助手",
         False,
     ),
+    "/privacy": (
+        "隐私政策 · 旅韩助手",
+        "旅韩助手隐私政策：收集哪些个人信息、用途、保存期限、第三方处理、跨境传输，以及如何查询、更正和删除你的信息。",
+        "隐私政策,旅韩助手",
+        True,
+    ),
+    "/terms": (
+        "用户协议与免责声明 · 旅韩助手",
+        "旅韩助手用户协议：服务内容、账号规则、会员付费、内容责任、举报删除和免责声明。本站信息仅供参考，不是旅行社，不代办签证。",
+        "用户协议,免责声明,旅韩助手",
+        True,
+    ),
     "/admin": (
         "管理后台 · 旅韩助手",
         "旅韩助手管理后台",
@@ -141,6 +153,8 @@ FILE_PATHS = {
     "chat.html": "/community/messages",
     "rate.html": "/community/rate",
     "admin.html": "/admin",
+    "privacy.html": "/privacy",
+    "terms.html": "/terms",
 }
 
 NOINDEX_PREFIXES = (
@@ -155,7 +169,7 @@ NOINDEX_PREFIXES = (
 SITEMAP_PATHS = [
     "/", "/attractions", "/food", "/shopping", "/tips", "/beauty", "/faq",
     "/community", "/community/boards", "/community/rate", "/community/friends",
-    "/rules", "/member",
+    "/rules", "/member", "/privacy", "/terms",
 ]
 
 router = APIRouter()
@@ -245,7 +259,11 @@ def json_ld(origin, title, desc, path, extra=None):
         page["author"] = {"@type": "Person", "name": extra["author"]}
     graph = [org, website, page]
     import json
-    return '<script type="application/ld+json">' + json.dumps({"@context": "https://schema.org", "@graph": graph}, ensure_ascii=False, separators=(",", ":")) + "</script>"
+    data = json.dumps({"@context": "https://schema.org", "@graph": graph}, ensure_ascii=False, separators=(",", ":"))
+    # 用户写的标题/昵称会进 JSON-LD：转义 < > & 和行分隔符，防止 </script> 截断脚本造成 XSS
+    data = (data.replace("<", "\\u003c").replace(">", "\\u003e").replace("&", "\\u0026")
+                .replace("\u2028", "\\u2028").replace("\u2029", "\\u2029"))
+    return '<script type="application/ld+json">' + data + "</script>"
 
 
 def head_extra(url_path: str, extra=None) -> str:
@@ -292,12 +310,12 @@ def _ensure_lang(html_text: str) -> str:
 
 def _replace_or_insert_meta(html_text, title, desc):
     if re.search(r"<title>[^<]*</title>", html_text, re.I):
-        html_text = re.sub(r"<title>[^<]*</title>", f"<title>{_esc(title)}</title>", html_text, count=1, flags=re.I)
+        html_text = re.sub(r"<title>[^<]*</title>", lambda m: f"<title>{_esc(title)}</title>", html_text, count=1, flags=re.I)
     else:
         html_text = re.sub(r"<head[^>]*>", lambda m: m.group(0) + f"\n<title>{_esc(title)}</title>", html_text, count=1, flags=re.I)
     desc_tag = f'<meta name="description" content="{_esc(desc)}">'
     if re.search(r'<meta\s+name=["\']description["\']', html_text, re.I):
-        html_text = re.sub(r'<meta\s+name=["\']description["\'][^>]*>', desc_tag, html_text, count=1, flags=re.I)
+        html_text = re.sub(r'<meta\s+name=["\']description["\'][^>]*>', lambda m: desc_tag, html_text, count=1, flags=re.I)
     else:
         html_text = html_text.replace("</title>", "</title>\n" + desc_tag, 1)
     return html_text
@@ -336,7 +354,8 @@ def inject_page(html_text: str, url_path: str, extra=None, ssr_target=None, ssr_
     html_text = re.sub(r"<meta name=\"naver-site-verification\"[^>]*>", "", html_text, flags=re.I)
     extra_head = head_extra(url_path, extra)
     if re.search(r"</head>", html_text, re.I):
-        html_text = re.sub(r"</head>", extra_head + "\n</head>", html_text, count=1, flags=re.I)
+        # 用函数做替换：用户内容里的反斜杠不会被当成正则分组引用
+        html_text = re.sub(r"</head>", lambda m: extra_head + "\n</head>", html_text, count=1, flags=re.I)
     html_text = _inject_ssr(html_text, ssr_target, ssr_html)
     return html_text
 
@@ -354,7 +373,19 @@ def html_file_response(filename: str, url_path=None, extra=None, ssr_target=None
         html_text = f.read()
     url_path = url_path or FILE_PATHS.get(filename, "/")
     html_text = inject_page(html_text, url_path, extra=extra, ssr_target=ssr_target, ssr_html=ssr_html)
-    return HTMLResponse(html_text, headers={"Cache-Control": "no-cache"})
+    html_text = html_text.replace("{{PRIVACY_CONTACT}}", _esc(privacy_contact()))
+    from security import new_nonce, add_nonce, csp
+    nonce = new_nonce()
+    html_text = add_nonce(html_text, nonce)
+    return HTMLResponse(html_text, headers={"Cache-Control": "no-cache", "Content-Security-Policy": csp(nonce)})
+
+
+def privacy_contact() -> str:
+    """隐私/删除请求联系方式：环境变量 PRIVACY_CONTACT_EMAIL 有值就显示，否则提示站内渠道。"""
+    v = (os.environ.get("PRIVACY_CONTACT_EMAIL") or "").strip()
+    if v and re.fullmatch(r"[^@\s<>\"']{1,64}@[^@\s<>\"']{1,190}", v):
+        return v
+    return "会员页「我的状态」里的注销账号功能，或在站内点“🚩 举报”留言给管理员"
 
 
 def _iso(dt):

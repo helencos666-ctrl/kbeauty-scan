@@ -25,27 +25,42 @@ _lock = threading.Lock()
 _hits = defaultdict(deque)        # (ip,kind) -> timestamps
 _day = {"date": None, "count": defaultdict(int), "global": 0}
 
-def client_ip(req: Request):
-    h = req.headers
-    xff = (h.get("x-forwarded-for") or "").split(",")[0].strip()
-    return h.get("true-client-ip") or h.get("cf-connecting-ip") or xff or (req.client.host if req.client else "?")
+from security import client_ip, SecurityMiddleware  # noqa: E402
+
+GLOBAL_KIND_DAY = {"scan": GLOBAL_DAY, "price": 300, "card": 600, "station": 600, "tts": 1500}
 
 def rate_limit(req: Request, kind: str, per_min=PER_MIN, per_day=PER_DAY):
+    """按 IP 每分钟/每天限次 + 每种接口全站每日上限（防止换 IP 刷 AI 接口产生费用）。"""
     ip, now = client_ip(req), time.time()
     today = datetime.datetime.now(KST).date().isoformat()
     with _lock:
         if _day["date"] != today:
-            _day.update(date=today, count=defaultdict(int)); _day["global"] = 0
+            _day.update(date=today, count=defaultdict(int), kinds=defaultdict(int)); _day["global"] = 0
+            for k in [k for k, q in _hits.items() if not q or now - q[-1] > 60]:
+                del _hits[k]
+        if len(_hits) > 50000:          # 防止内存被大量不同 IP 撑爆
+            for k in [k for k, q in _hits.items() if not q or now - q[-1] > 60]:
+                del _hits[k]
         q = _hits[(ip, kind)]
         while q and now - q[0] > 60: q.popleft()
         if len(q) >= per_min:
             raise HTTPException(429, "操作太频繁，请一分钟后再试")
         if _day["count"][(ip, kind)] >= per_day:
-            raise HTTPException(429, "今天的识别次数已用完，明天再来")
-        if kind == "scan" and _day["global"] >= GLOBAL_DAY:
+            raise HTTPException(429, "今天的使用次数已用完，明天再来")
+        kinds = _day.setdefault("kinds", defaultdict(int))
+        if kinds[kind] >= GLOBAL_KIND_DAY.get(kind, 500):
             raise HTTPException(429, "今日服务额度已满，请明天再试")
-        q.append(now); _day["count"][(ip, kind)] += 1
+        q.append(now); _day["count"][(ip, kind)] += 1; kinds[kind] += 1
         if kind == "scan": _day["global"] += 1
+
+async def json_body(request: Request) -> dict:
+    try:
+        d = await request.json()
+    except Exception:
+        raise HTTPException(400, "请求格式不正确")
+    if not isinstance(d, dict):
+        raise HTTPException(400, "请求格式不正确")
+    return d
 
 # ---------- 合规清洗（描述性字段）----------
 BANNED = ["美白","增白","祛斑","淡斑","去斑","祛痘","去痘","抗痘","消痘","祛皱","去皱","抗皱","除皱","淡纹","去纹","细纹","皱纹",
@@ -129,13 +144,9 @@ app.include_router(community_router)
 app.include_router(seo_router)
 app.middleware("http")(ref_middleware)
 
-@app.middleware("http")
-async def limit_body(request: Request, call_next):
-    cl = request.headers.get("content-length")
-    cap = 20 * 1024 * 1024 if request.url.path == "/api/community/posts" else MAX_UPLOAD + 100_000
-    if cl and cl.isdigit() and int(cl) > cap:
-        return JSONResponse({"detail": "图片太大，请少选几张或换小一点的图"}, status_code=413)
-    return await call_next(request)
+# 安全中间件（最外层之一）：安全头、https 跳转、写操作同源校验、请求体流式限长
+app.add_middleware(SecurityMiddleware, max_body=MAX_UPLOAD + 100_000,
+                   big_paths={"/api/community/posts"}, big_body=20 * 1024 * 1024)
 
 @app.post("/api/scan")
 async def scan(request: Request, image: UploadFile = File(...)):
@@ -164,10 +175,20 @@ TRUSTED = ("oliveyoung.co.kr","coupang.com","shopping.naver.com","smartstore.nav
            "gmarket.co.kr","11st.co.kr","auction.co.kr","amoremall.com","innisfree.com","cosrx.co.kr","lghnh.com","kurly.com",
            "musinsa.com","daisomall.co.kr","lotteimall.com","hmall.com","shinsegae.com","chicor.com")
 
+def _trusted_url(u) -> bool:
+    """只接受 https 且主机名属于白名单站点（防止 evil.com/?oliveyoung.co.kr 这类伪装）。"""
+    try:
+        from urllib.parse import urlsplit
+        p = urlsplit(str(u))
+        host = (p.hostname or "").lower()
+    except Exception:
+        return False
+    return p.scheme == "https" and any(host == d or host.endswith("." + d) for d in TRUSTED)
+
 @app.post("/api/price")
 async def price(request: Request):
     rate_limit(request, "price", per_min=5, per_day=30)
-    body = await request.json()
+    body = await json_body(request)
     q = str(body.get("query", ""))[:80].strip()
     product = str(body.get("product", ""))[:120].strip()
     none = {"found": False, "message": "暂无可靠价格，建议现场比价"}
@@ -177,7 +198,7 @@ async def price(request: Request):
                          json={"query": f"{q} 가격", "count": 8, "need_content": True})
     if r.status_code != 200:
         print("search error", r.status_code, flush=True); return none
-    results = [x for x in r.json().get("results", []) if any(d in x.get("url", "") for d in TRUSTED)]
+    results = [x for x in r.json().get("results", []) if _trusted_url(x.get("url", ""))]
     if not results: return none
     blocks = []
     for i, x in enumerate(results[:6]):
@@ -257,7 +278,7 @@ BACK_PROMPT = """把下面这句韩语忠实地直译成简体中文，不要润
 @app.post("/api/card")
 async def card(request: Request):
     rate_limit(request, "card", per_min=10, per_day=80)
-    body = await request.json()
+    body = await json_body(request)
     zh = str(body.get("text", "")).strip()[:600]
     if not zh: raise HTTPException(400, "请先输入中文")
     res, _ = await chat([{"role": "user", "content": CARD_PROMPT + zh}], max_tokens=1600)
@@ -271,6 +292,21 @@ import hashlib
 TTS_DIR = os.path.join(BASE, "tts_cache"); os.makedirs(TTS_DIR, exist_ok=True)
 HANGUL = re.compile(r"[\uac00-\ud7a3]")
 
+TTS_MAX_FILES = 3000
+
+def _trim_tts_cache():
+    """朗读缓存最多保留 TTS_MAX_FILES 个文件，超出时删最旧的，避免磁盘被刷满。"""
+    try:
+        files = [os.path.join(TTS_DIR, f) for f in os.listdir(TTS_DIR) if f.endswith(".mp3")]
+        if len(files) <= TTS_MAX_FILES:
+            return
+        files.sort(key=lambda f: os.path.getmtime(f))
+        for f in files[:len(files) - TTS_MAX_FILES + 100]:
+            try: os.remove(f)
+            except OSError: pass
+    except OSError:
+        pass
+
 @app.get("/api/tts")
 async def tts(request: Request, text: str = ""):
     text = text.strip()[:700]
@@ -279,6 +315,7 @@ async def tts(request: Request, text: str = ""):
     path = os.path.join(TTS_DIR, h + ".mp3")
     if not os.path.exists(path):
         rate_limit(request, "tts", per_min=15, per_day=150)
+        _trim_tts_cache()
         import edge_tts
         try:
             await edge_tts.Communicate(text, "ko-KR-SunHiNeural", rate="-10%").save(path + ".tmp")
@@ -305,10 +342,7 @@ STATION_PROMPT = """你是韩国地铁站名转换助手，用户是在韩国的
 @app.post("/api/station")
 async def station(request: Request):
     rate_limit(request, "station", per_min=10, per_day=60)
-    try:
-        body = await request.json()
-    except Exception:
-        raise HTTPException(400, "请输入车站名称")
+    body = await json_body(request)
     raw = str(body.get("name", "")).strip()
     if not raw:
         raise HTTPException(400, "请输入车站名称")
@@ -323,6 +357,25 @@ async def station(request: Request):
 @app.exception_handler(HTTPException)
 async def http_exc(request, exc):
     return JSONResponse({"detail": exc.detail}, status_code=exc.status_code)
+
+from starlette.exceptions import HTTPException as StarletteHTTPException  # noqa: E402
+from fastapi.exceptions import RequestValidationError  # noqa: E402
+
+@app.exception_handler(StarletteHTTPException)
+async def starlette_http_exc(request, exc):
+    msg = {404: "页面不存在", 405: "请求方式不正确"}.get(exc.status_code, exc.detail if isinstance(exc.detail, str) else "请求无效")
+    return JSONResponse({"detail": msg}, status_code=exc.status_code)
+
+@app.exception_handler(RequestValidationError)
+async def validation_exc(request, exc):
+    # 不回显用户输入和内部字段结构
+    return JSONResponse({"detail": "请求参数不正确，请刷新页面重试"}, status_code=422)
+
+@app.exception_handler(Exception)
+async def unhandled_exc(request, exc):
+    # 只记录异常类型和路径，不记录请求内容、密钥或数据库地址
+    print("unhandled error", type(exc).__name__, request.url.path, flush=True)
+    return JSONResponse({"detail": "服务器开小差了，请稍后再试"}, status_code=500)
 
 @app.get("/healthz")
 def healthz(): return {"ok": True}
@@ -369,5 +422,20 @@ def service_worker():
         media_type="application/javascript",
         headers={"Cache-Control": "no-cache", "Service-Worker-Allowed": "/"},
     )
+
+@app.get("/privacy")
+def privacy():
+    return html_file_response("privacy.html", "/privacy")
+
+@app.get("/terms")
+def terms():
+    return html_file_response("terms.html", "/terms")
+
+@app.get("/static/{name}.html")
+def static_html(name: str):
+    """静态目录里的 .html 也走页面渲染（加 SEO 标签和脚本 nonce）；其它静态文件仍由 StaticFiles 提供。"""
+    if not re.fullmatch(r"[a-z0-9][a-z0-9\-]{0,40}", name) or not os.path.isfile(os.path.join(BASE, "static", name + ".html")):
+        raise HTTPException(404, "Not Found")
+    return html_file_response(name + ".html")
 
 app.mount("/static", StaticFiles(directory=os.path.join(BASE, "static")), name="static")

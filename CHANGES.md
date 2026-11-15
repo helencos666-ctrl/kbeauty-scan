@@ -1,38 +1,32 @@
-# kbeauty-push16：会员头像 + 搜索引擎优化
+# kbeauty-push17：安全加固 + 隐私政策/用户协议
 
-基于线上最新版（push14 代码 + push15 已上线的会员页收款码与 sw.js v19）。不要推送部署。不要提及或模仿其他社区品牌。
+基于线上 93d109c（push16）。不要自动部署；上传后手动 trigger deploy。
 
-## 根目录
-- community.py
-  - 新增 `c_users.avatar BYTEA`（`ADD COLUMN IF NOT EXISTS`，与帖子图片一样存 Postgres，避免 Render 磁盘无持久化）
-  - 登录用户可上传/更换/删除自己的头像：`POST/DELETE /api/community/avatar`（需登录和 CSRF）；接受 JPG/PNG/WebP，最大 5MB，服务端用 Pillow 按拍摄方向摆正、居中裁成正方形、缩到 256px、重编码为无 EXIF 的 JPEG
-  - 公开读取 `GET /api/community/avatar/{uid}`；无头像返回 404，前端用彩色圆+昵称首字回退
-  - 旅韩小助手（系统账号）默认用站点图标作头像，用户和管理员都不能改
-  - 后台 `POST /api/admin/users/{uid}/clear_avatar` 可移除不当头像（需管理员登录和 CSRF）
-  - 频率限制：每用户每小时 8 次、每 IP 每小时 20 次
-  - 后台用户搜索：输入纯数字时按会员编号精确匹配，避免命中邮箱/手机号里的数字片段
-  - `/api/community/me`、帖子列表/详情、评论带 `has_avatar` 与 `author_id`
-  - 公开帖子页把标题和正文写入 HTML，社区首页把最近帖子标题写入列表，方便搜索引擎抓取
-- friends.py
-  - 交友卡片、资料页、私信列表和对话返回 `has_avatar`
-- seo.py / app.py
-  - 每页独特中文标题和描述（含韩国旅游攻略、首尔自由行、韩国景点、韩国交友、旅韩助手等词）
-  - canonical、Open Graph / Twitter Card、og 图 `/static/og-cover.jpg`、`lang=zh-CN` 与 hreflang、JSON-LD WebSite + Organization
-  - `GOOGLE_SITE_VERIFICATION` / `BAIDU_SITE_VERIFICATION` / `NAVER_SITE_VERIFICATION` 仅在环境变量有值时输出验证标签
-  - `/robots.txt` 允许爬虫并指向 sitemap；禁止后台、接口、私信、发帖页和登录页
-  - `/sitemap.xml` 列出首页、景点、攻略、社区、公开帖子、约定、会员等公开页及 lastmod
-  - IndexNow 密钥文件 `/{key}.txt`（密钥在 `indexnow.key`）
-- scripts/ping_indexnow.py
-  - 部署后向 api.indexnow.org 提交 sitemap 中的公开网址；不要在开发时运行
+## 新增
+- security.py：安全中间件
+  - 安全响应头：CSP（脚本 nonce，每次请求随机）、HSTS、X-Content-Type-Options、X-Frame-Options、Referrer-Policy、Permissions-Policy、COOP；/api 响应 no-store
+  - 经代理的 http 请求 301 跳到 https
+  - 写操作（POST/PUT/PATCH/DELETE）校验 Origin/Referer 必须是本站（在 X-LH 请求头之外再加一层防 CSRF）
+  - 请求体流式限长（分块上传也会截断）
+  - 客户端 IP 只信任 Cloudflare 的 CF-Connecting-IP（原来先信任可伪造的 True-Client-IP / X-Forwarded-For 第一个值，限流可被绕过）
+- static/privacy.html（/privacy）隐私政策、static/terms.html（/terms）用户协议与免责声明
+- 自助注销账号：POST /api/community/account/delete（需登录、CSRF、密码和“注销”确认），会员页「我的状态」底部入口
+- 后台用户操作「彻底删除账号」（处理删除请求）
+- test/test_security.py：70 项安全测试
 
-## static/
-- community.js / community.css：更大的圆形头像（帖子/评论约 42px，资料/顶栏 56px），无图时彩色首字回退；顶栏「设置头像」
-- member.html：「我的状态」可设置/更换/删除头像
-- community.html、community-post.html、friends.html、friend.html、messages.html、chat.html：展示头像
-- admin.html：用户列表显示头像，并提供「移除头像」
-- og-cover.jpg：1200×630 社交分享图
-- sw.js：缓存 lvhan-shell-v19 → v20
-- member.html、pay-wechat.jpg、pay-alipay.jpg：沿用 push15 已上线的收款码（本批未改支付逻辑）
-
-## test/
-- test_community.py：头像上传、类型/大小拒绝、管理员移除、默认/回退渲染，以及 robots、sitemap、SEO 标签、IndexNow 密钥文件、公开页服务端正文；sw.js v20
+## 修复
+- 【高】存储型 XSS：帖子标题/正文/昵称写进 JSON-LD 时没转义，标题含 </script> 可注入脚本。现转义 < > & 等
+- 【中】帖子标题含反斜杠（如 \1）时帖子页 500：正则替换改用函数
+- 【中】未登录也能上传大图让服务器解码：发帖、头像、交友照片先验身份再处理图片；图片只启用 JPEG/PNG/WebP/GIF/BMP 解码器，先查像素再解码（防解压炸弹）
+- 【中】AI 接口（翻译卡/站名/比价/朗读）只有按 IP 的限额：增加每种接口全站每日上限；朗读缓存最多 3000 个文件
+- 后台登录：按失败次数锁定（同 IP 5 次/15 分钟、全站 20 次/小时），失败延迟 0.5 秒，不再提示密码长度要求
+- 注册限流：每 IP 每小时 5 次、每天 10 次，全站每小时 300 次
+- 比价来源网址按主机名白名单校验（防 evil.com/?oliveyoung.co.kr）
+- 推广访问的访客标识改为带密钥的哈希（不能靠穷举 IP 反推）
+- JSON 请求体不是对象时返回 400（原来 500）；参数校验错误、未处理异常只返回通用中文提示，不回显输入
+- AI 回复线程列表定期清理
+- 依赖：requirements.txt 锁定全部间接依赖版本；pip-audit 无已知漏洞
+- community.js：去掉内联 onerror（CSP 兼容）
+- 页面底部加「用户协议 · 隐私政策 · 社区约定」和“仅供参考、不是旅行社、不代办签证”；注册勾选改为同意三份文件和境外存储
+- sitemap / seo 加 /privacy、/terms；sw.js 缓存 lvhan-shell-v20 → v21
+- scripts/ping_indexnow.py：修复 url 列表 bug
