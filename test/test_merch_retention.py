@@ -57,10 +57,15 @@ allb = {x["key"]: x for c in bl["categories"] for x in c["boards"]}
 check("logistics merchant board", allb.get("logistics", {}).get("merchant") and allb["logistics"]["name"] == "中韩物流", allb.get("logistics"))
 check("daily board in 住在韩国", allb.get("daily", {}).get("name") == "在韩日常" and not allb["daily"]["merchant"])
 meta = g.get("/api/merch/meta").json()
-check("subcats clinic 5 + logistics", len(meta["subcats"]["clinic"]) == 5 and [x["name"] for x in meta["subcats"]["clinic"]][2] == "牙齿" and meta["subcats"].get("logistics"), meta["subcats"].get("clinic"))
+cnames = [x["name"] for x in meta["subcats"]["clinic"]]
+ckeys = [x["key"] for x in meta["subcats"]["clinic"]]
+check("subcats clinic 4 no 韩妆 + logistics", cnames == ["整形", "皮肤管理", "牙齿", "体检"] and "韩妆" not in cnames and "makeup" not in ckeys and meta["subcats"].get("logistics"), meta["subcats"].get("clinic"))
+check("daigou 美妆 kept", any(x["name"] == "美妆" for x in meta["subcats"].get("daigou", [])), meta["subcats"].get("daigou"))
 
 # ---------- 商家活动帖 ----------
 mer = user("美丽诊所", merchant=True)
+r = mer.post("/api/community/posts", data={"board": "clinic", "tag": "makeup", "title": "韩妆活动", "body": "新品体验，名额有限，欢迎站内咨询。"}, headers=H)
+check("new 韩妆 tag rejected", r.status_code == 400 and "分类" in r.json()["detail"], r.text)
 r = mer.post("/api/community/posts", data={"board": "clinic", "tag": "dental", "title": "牙齿美白活动", "body": "冷光美白体验，保证效果无副作用。"}, headers=H)
 check("medical promise blocked", r.status_code == 400 and "承诺效果" in r.json()["detail"], r.text)
 r = mer.post("/api/community/posts", data={"board": "clinic", "tag": "dental", "title": "牙齿美白活动", "body": "冷光美白体验，名额有限。"},
@@ -229,6 +234,14 @@ check("profile shows badges", any(b["key"] == "good_merchant" and b["icon"] == "
 check("badge notice to merchant", any("优质商家" in x["text"] for x in mer.get("/api/notifications").json()["items"]))
 lst = g.get("/api/community/posts?board=clinic").json()["posts"]
 check("author badges in list", "good_merchant" in (lst[0].get("author_badges") or []), lst[:1])
+# 已有韩妆帖不删数据，归到「全部」下照常显示；不再出现韩妆标签名
+with psycopg.connect(DSN) as pc:
+    mid = pc.execute("""INSERT INTO c_posts(user_id,board,title,body,status,is_merchant,quota_kind,tag)
+        VALUES (%s,'clinic','旧韩妆帖','历史活动帖保留','published',TRUE,'merchant','makeup') RETURNING id""", (mer.uid,)).fetchone()[0]
+allc = g.get("/api/community/posts?board=clinic").json()["posts"]
+oldp = next((p for p in allc if p["id"] == mid), None)
+check("legacy 韩妆 post still in 全部", oldp and oldp["title"] == "旧韩妆帖" and not oldp.get("tag_name"), oldp)
+check("legacy 韩妆 not a visible subcat", "韩妆" not in [x["name"] for x in g.get("/api/merch/meta").json()["subcats"]["clinic"]])
 prof1 = g.get(f"/api/community/users/{m1.uid}").json()
 check("profile stats + posts", prof1["stats"]["posts"] == 3 and prof1["stats"]["featured"] == 1 and len(prof1["posts"]) == 3, prof1["stats"])
 check("profile/notice pages 200", g.get(f"/community/u/{m1.uid}").status_code == 200 and g.get("/community/notices").status_code == 200)
