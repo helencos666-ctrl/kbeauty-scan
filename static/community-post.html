@@ -17,7 +17,7 @@
 </head>
 <body>
 <header>
-  <h1>🧭 同路社区</h1>
+  <h1>🧭 韩友圈</h1>
   <p><a href="/community">← 返回社区</a></p>
 </header>
 <main>
@@ -64,7 +64,7 @@ async function load(){
     box.innerHTML = '<div class="empty">' + LH.esc(e.message) + (e.status === 401 ? '<br><br><a class="btn primary" href="/login?next=' + encodeURIComponent(location.pathname) + '">登录 / 注册</a>' : (e.status === 403 ? '<br><br><a class="btn primary" href="/member">了解会员</a>' : '')) + '</div>';
     return;
   }
-  document.title = p.title + ' · 同路社区';
+  document.title = p.title + ' · 韩友圈';
   document.getElementById('warn').innerHTML = (p.status === 'pending' ? '<div class="pending">⏳ 这篇帖子正在等待管理员审核，目前只有你自己能看到。' + (p.review_note ? '（' + LH.esc(p.review_note) + '）' : '') + '住宿、包车用车、医美等商业信息请开通商家会员后在商家专区发布。详见<a href="/rules#r3">社区约定</a>。</div>' : '') +
     (p.status === 'rejected' ? '<div class="pending">❌ 这篇帖子未通过审核：' + LH.esc(p.review_note || '') + '</div>' : '') +
     (WARN[p.board] ? '<div class="warn">' + WARN[p.board] + '</div>' : '');
@@ -85,7 +85,7 @@ async function load(){
     if (me.user.tier < 1){ if (confirm('开通会员后才能点赞。去了解会员？')) location.href = '/member'; return; }
     try { var r = await LH.api('POST', '/api/community/posts/' + pid + '/like', {}); this.textContent = (r.liked ? '❤️ 已赞 ' : '🤍 点赞 ') + r.likes; } catch(e){ alert(e.message); }
   };
-  document.getElementById('share').onclick = function(){ LH.share({title: p.title, text: '来自旅韩助手同路社区', url: location.origin + '/community/post/' + pid, targetType: 'post', targetId: pid}); };
+  document.getElementById('share').onclick = function(){ LH.share({title: p.title, text: '来自旅韩助手韩友圈', url: location.origin + '/community/post/' + pid, targetType: 'post', targetId: pid}); };
   document.getElementById('repp').onclick = function(){ LH.report('post', pid); };
   var fol = document.getElementById('fol');
   if (fol) fol.onclick = async function(){

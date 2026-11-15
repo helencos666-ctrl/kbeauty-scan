@@ -328,7 +328,7 @@ DEEPSEEK_API = "https://api.deepseek.com"
 DEEPSEEK_MODEL = "deepseek-flash"
 KST = datetime.timezone(datetime.timedelta(hours=9))
 
-AI_SYSTEM = """你是「旅韩小助手」，旅韩助手网站同路社区里的公开信息助手，不是真人。
+AI_SYSTEM = """你是「旅韩小助手」，旅韩助手网站韩友圈里的公开信息助手，不是真人。
 规则：
 - 用和用户帖子或评论相同的语言回复，默认中文。语气友好、务实、简短，不超过 200 字。
 - 只提供公开、可自行核实的参考信息，不充当代办，不打包票。
@@ -755,9 +755,9 @@ def p_post(pid: str):
                 desc = (r["body"] or "").replace("\n", " ").strip()[:140]
                 dt = r["created_at"]
                 date = dt.astimezone(datetime.timezone.utc).isoformat() if dt and getattr(dt, "tzinfo", None) else None
-                extra = {"title": f"{r['title']} · 同路社区 · 旅韩助手",
-                         "description": desc or "同路社区里关于韩国旅游的分享。",
-                         "keywords": "韩国旅游攻略,同路社区,旅韩助手",
+                extra = {"title": f"{r['title']} · 韩友圈 · 旅韩助手",
+                         "description": desc or "韩友圈里关于韩国旅游的分享。",
+                         "keywords": "韩国旅游攻略,韩友圈,旅韩助手",
                          "schema_type": "DiscussionForumPosting",
                          "author": r["nickname"], "date": date, "index": True}
                 body = _esc_html(r["body"] or "").replace("\n", "<br>")

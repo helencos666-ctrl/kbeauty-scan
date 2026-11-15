@@ -19,8 +19,8 @@
 - 普通频道中非商家帖子含商业关键词时进入待审核，后台“审核”通过/拒绝
 - 所有价格在后台“价格设置”修改（表 c_settings），无需改代码
 
-## 同路社区：首页 + 旅韩交友
-- 社区首页 `/community`（同路社区）：粉珊瑚渐变头图 + 分段标签 精选 / 实用干货 / 今日热议 / 刚发布 / 我关注的（接口 tab 值仍为 recommend/news/hot/latest/follow）；“旅韩交友”突出卡片；“按行程找话题”三段（出发前 / 在韩国 / 找商家）频道列表；今日热议、避坑 & 签证新帖、刚发布；右下角“写帖子”按钮
+## 韩友圈：首页 + 旅韩交友
+- 社区首页 `/community`（韩友圈）：粉珊瑚渐变头图 + 分段标签 精选 / 实用干货 / 今日热议 / 刚发布 / 我关注的（接口 tab 值仍为 recommend/news/hot/latest/follow）；“旅韩交友”突出卡片；“按行程找话题”三段（出发前 / 在韩国 / 找商家）频道列表；今日热议、避坑 & 签证新帖、刚发布；右下角“写帖子”按钮
 - 新页面：`/community/boards` 全部频道（分组卡片，可“＋ 关注”）、`/community/rate` 汇率换算（汇率在后台“价格与汇率设置”手动填写，无外部接口）、`/community/friends` 旅韩交友、`/community/friends/{id}` 资料详情、`/community/friends/edit` 我的交友资料、`/community/messages` 私信列表、`/community/messages/{id}` 聊天
 - 频道（显示名只在 community.py 的 BOARDS 里改，库里存的键不变）：pit 踩坑避雷、group 结伴同行、news 出行提醒、visa 签证问答、study 留学打听、rent 租房找房、used 闲置转让、jobs 工作机会、friends 旅韩交友、hotel 住宿推荐、car 包车用车、clinic 皮肤管理·医美
 - 交友代码在 `friends.py`（由 community.py 末尾挂载），权限、打招呼上限（20 次/24 小时）、诈骗关键词等都是文件顶部常量
