@@ -27,7 +27,7 @@ def key():
 
 
 def url_list(base):
-    urls = [base + (p if p != "/" else "/")]
+    urls = [base + p for p in PATHS]
     # 再附上 sitemap，搜索引擎可从中展开全部公开页
     urls.append(base + "/sitemap.xml")
     return urls
