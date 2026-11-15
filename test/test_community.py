@@ -361,7 +361,7 @@ for p in ["/", "/attractions", "/food", "/shopping", "/tips", "/beauty", "/sw.js
           "/community/messages", "/community/messages/1", "/community?tab=hot", "/community?board=rent"]:
     r = guest.get(p); check(f"GET {p} 200", r.status_code == 200, r.status_code)
 swt = guest.get("/sw.js").text
-check("sw.js cache bumped v30", "lvhan-shell-v30" in swt and "/rules" in swt and "/static/stations.json" in swt and "/community/friends" in swt and "/static/chat.html" in swt)
+check("sw.js cache bumped v31", "lvhan-shell-v31" in swt and "/rules" in swt and "/static/stations.json" in swt and "/community/friends" in swt and "/static/chat.html" in swt)
 stj = guest.get("/static/stations.json").json()["stations"]; check("stations.json coords", stj.get("강남역") and stj.get("홍대입구역") and stj.get("건대입구역"))
 mj = guest.get("/static/maps.js").text; check("maps.js naver+amap", "map.naver.com/p/directions/" in mj and "m.map.naver.com/?slng=" in mj and "uri.amap.com/navigation" in mj and "uri.amap.com/search" in mj)
 pages = "".join(guest.get(p).text for p in ["/", "/attractions", "/food", "/shopping", "/tips", "/beauty"])
@@ -369,6 +369,8 @@ check("no Kakao/Google map links", "map.kakao.com" not in pages and "google.com/
 check("pages load maps.js", all("/static/maps.js" in guest.get(p).text for p in ["/", "/attractions", "/food"]))
 mp = guest.get("/member").text; check("member page has tiers + merchant", all(w in mp for w in ['data-p="price_t1"', 'data-p="price_t2"', 'data-p="price_m_month"', 'data-p="price_m_year"', "高级会员", "商家会员", "微信收款码"]))
 check("homepage has 社区 entry", 'href="/community"' in guest.get("/").text)
+home_html = guest.get("/").text
+check("homepage has 韩友圈·最新, no 交友·最新", "韩友圈 · 最新" in home_html and 'id="postBlk"' in home_html and "交友 · 最新" not in home_html and "friendBlk" not in home_html and "friends-latest" not in home_html)
 check("no promo words", not any(w in "".join(guest.get(p).text for p in ["/community", "/member", "/community/friends", "/community/boards", "/community/rate", "/rules", "/community/friends/edit", "/community/messages"]) for w in ["直播间", "韩国大叔", "抖音"]))
 adp = guest.get("/admin").text; check("admin page has AI toggle", "AI 自动回复" in adp and "ai_reply" in adp)
 check("admin page has 改编号", "改编号" in adp and "/member_no" in adp and "u.member_no" in adp)

@@ -244,7 +244,11 @@ r = m3.post("/api/points/checkin", json={}, headers=H).json()
 check("streak 7 bonus + next actions", r.get("streak_bonus") == 20 and r.get("next_actions") and r["next_actions"][1]["href"] == "/community/new?board=daily", {k: r.get(k) for k in ("streak", "streak_bonus", "reason")})
 check("streak7 badge", "streak7" in m3.get("/api/community/me").json()["user"]["badges"])
 
-# ---------- 首页交友最新 ----------
+# ---------- 首页只保留韩友圈·最新，交友帖仍走原列表接口 ----------
+home = open(os.path.join(ROOT, "static", "index.html"), encoding="utf-8").read()
+check("homepage keeps 韩友圈·最新 only", "韩友圈 · 最新" in home and 'id="postBlk"' in home and "/api/community/posts?limit_n=3" in home)
+check("homepage has no 交友·最新 block", "交友 · 最新" not in home and "friendBlk" not in home and "friends-latest" not in home and "friendList" not in home)
+# 接口保留但首页不再调用
 fr = user("交友小美", tier=2)
 fr.post("/api/community/posts", data={"board": "friends", "title": "周末一起去汉江", "body": "有没有人周末一起去汉江野餐？"}, headers=H)
 fl = g.get("/api/community/friends-latest").json()["posts"]
