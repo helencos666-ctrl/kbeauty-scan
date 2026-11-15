@@ -53,6 +53,7 @@ main{max-width:560px;margin:-18px auto 0;padding:0 14px}
 textarea{width:100%;min-height:90px;border:1px solid var(--line);border-radius:12px;padding:12px;font-size:17px;font-family:inherit;resize:vertical}
 .kocard{background:#fff;border:2px solid var(--pink);border-radius:16px;padding:18px;margin-top:12px}
 .kocard .ko{font-size:30px;font-weight:800;line-height:1.35;word-break:keep-all}
+.kocard .ko.long{font-size:21px;line-height:1.5}
 .kocard .roman{font-size:14px;color:var(--sub);margin-top:8px}
 .kocard .back{font-size:14px;margin-top:8px;padding-top:8px;border-top:1px dashed var(--line)}
 .acts{display:flex;gap:8px;margin-top:12px}
@@ -65,6 +66,7 @@ textarea{width:100%;min-height:90px;border:1px solid var(--line);border-radius:1
 .phrase .sp{border:0;background:#ffe8ee;color:var(--pink);border-radius:50%;width:40px;height:40px;font-size:18px;flex:none}
 #big{display:none;position:fixed;inset:0;background:#fff;z-index:50;padding:24px 20px calc(24px + env(safe-area-inset-bottom));flex-direction:column}
 #big .bk{flex:1;display:flex;align-items:center;justify-content:center;text-align:center;font-size:44px;font-weight:800;line-height:1.35;word-break:keep-all}
+#big .bk.long{font-size:26px;line-height:1.5;overflow-y:auto;display:block;padding-top:8px}
 #big .bz{text-align:center;font-size:18px;color:var(--sub);margin:10px 0}
 #big .br{text-align:center;font-size:15px;color:#999;margin-bottom:16px}
 #big .bb{display:flex;gap:10px}
@@ -186,7 +188,7 @@ nav button.on,nav a.on{color:var(--pink);font-weight:700}
     <div class="card">
       <h2>💬 中文 → 韩文沟通卡</h2>
       <div class="card-inrow">
-        <textarea id="cardIn" maxlength="120" placeholder="输入想说的话，例如：请帮我拿一个大一点的袋子"></textarea>
+        <textarea id="cardIn" maxlength="600" placeholder="输入想说的话，例如：请帮我拿一个大一点的袋子"></textarea>
         <button type="button" class="mic-btn" id="micBtn" aria-label="按住说话"><span class="ico">🎤</span><span class="lb">按住说话</span></button>
       </div>
       <div id="micState"></div>
@@ -309,7 +311,7 @@ function speak(ko, btn){
   if(up&&up.then) up.then(afterUnlock).catch(afterUnlock);
   else afterUnlock();
 }
-function showBig(ko,zh,ro){$('bigKo').textContent=ko;$('bigZh').textContent=zh||'';$('bigRo').textContent=ro||'';$('big').style.display='flex';$('bigSpk').onclick=()=>speak(ko,$('bigSpk'))}
+function showBig(ko,zh,ro){$('bigKo').textContent=ko;$('bigKo').classList.toggle('long',ko.length>40);$('bigZh').textContent=zh||'';$('bigRo').textContent=ro||'';$('big').style.display='flex';$('bigSpk').onclick=()=>speak(ko,$('bigSpk'))}
 $('bigClose').onclick=()=>{$('big').style.display='none'};
 
 // ---------- 拍照 ----------
@@ -557,7 +559,7 @@ async function makeCard(text){
   try{
     const r=await fetch('/api/card',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({text:t})});
     const j=await r.json();if(!r.ok)throw new Error(j.detail||'翻译失败');
-    $('cardOut').innerHTML=`<div class="kocard"><div class="ko">${esc(j.ko)}</div><div class="roman">发音：${esc(j.roman)}</div>
+    $('cardOut').innerHTML=`<div class="kocard"><div class="ko${j.ko.length>60?' long':''}">${esc(j.ko)}</div><div class="roman">发音：${esc(j.roman)}</div>
       <div class="back">中文回译：${esc(j.back)}</div>
       <div class="acts"><button id="cSpk">🔊 朗读</button><button id="cBig">⛶ 全屏给对方看</button></div></div>`;
     $('cSpk').onclick=()=>speak(j.ko,$('cSpk'));$('cBig').onclick=()=>showBig(j.ko,t,j.roman);
@@ -566,57 +568,74 @@ async function makeCard(text){
 }
 $('cardBtn').onclick=()=>makeCard();
 
-// 沟通卡语音输入（仅浏览器端，不上传录音）
+// 沟通卡语音输入（仅浏览器端，不上传录音）：可连续说多句，松手后统一翻译
 (function(){
   const btn=$('micBtn'), tip=$('micTip'), st=$('micState');
   const SR=window.SpeechRecognition||window.webkitSpeechRecognition;
   const unsupported='当前浏览器不支持语音，请用 Safari/Chrome 打开，或点输入框用键盘上的话筒说话';
   if(!SR){tip.style.display='block';btn.onclick=()=>showErr(unsupported);return}
-  let rec=null, on=false, holding=false, t0=0, skipUp=false, autoGen=false;
+  const MAX_MS=180000, MAXLEN=600;
+  let rec=null, want=false, holding=false, t0=0, skipUp=false, committed='', cur='', timer=null, fatal=false;
   const errMap={
     'not-allowed':'没有麦克风权限，请在浏览器设置里允许后重试',
     'permission-denied':'没有麦克风权限，请在浏览器设置里允许后重试',
-    'no-speech':'没听清，请再试一次或改用键盘输入',
+    'service-not-allowed':'没有麦克风权限，请在浏览器设置里允许后重试',
     'audio-capture':'找不到麦克风，请检查设备后重试',
     'network':'语音识别网络错误，请稍后再试'
   };
   function setState(s){if(!s){st.style.display='none';st.textContent='';return}st.style.display='block';st.textContent=s}
-  function startRec(){
-    if(on) return;
-    rec=new SR();rec.lang='zh-CN';rec.interimResults=true;rec.continuous=true;autoGen=false;
-    rec.onresult=e=>{
-      let interim='',final='';
-      for(let i=e.resultIndex;i<e.results.length;i++){
-        const x=e.results[i][0].transcript;
-        if(e.results[i].isFinal) final+=x; else interim+=x;
-      }
-      if(interim) setState('正在听… '+interim);
-      if(final){const v=final.trim();$('cardIn').value=v;autoGen=true;setState('正在听…')}
+  function joinTxt(a,b){a=a.trim();b=b.trim();if(!a)return b;if(!b)return a;return /[。！？!?，,；;]$/.test(a)?a+b:a+'，'+b}
+  function full(){return joinTxt(committed,cur).slice(0,MAXLEN)}
+  function secs(){return Math.floor((Date.now()-t0)/1000)}
+  function ui(on){btn.classList.toggle('on',on);btn.querySelector('.lb').textContent=on?'正在听…':'按住说话'}
+  function tick(){if(want) setState('正在听… '+secs()+'秒（可以连续说很多句，松手后一起翻译）')}
+  function newRec(){
+    const r=new SR();r.lang='zh-CN';r.interimResults=true;r.continuous=true;
+    r.onresult=e=>{
+      let fin='',interim='';
+      for(let i=0;i<e.results.length;i++){const x=e.results[i][0].transcript;if(e.results[i].isFinal) fin+=x; else interim+=x}
+      cur=joinTxt(fin,interim);
+      $('cardIn').value=full();
     };
-    rec.onerror=e=>{
-      if(e.error==='aborted') return;
-      autoGen=false;
+    r.onerror=e=>{
+      if(e.error==='aborted'||e.error==='no-speech') return;
       const m=errMap[e.error];
-      if(m) showErr(m);
+      if(m){fatal=true;want=false;showErr(m)}
     };
-    rec.onend=()=>{
-      on=false;btn.classList.remove('on');btn.querySelector('.lb').textContent='按住说话';setState('');
-      const v=$('cardIn').value.trim();
-      if(autoGen&&v) makeCard(v);
+    r.onend=()=>{
+      committed=joinTxt(committed,cur);cur='';
+      if(want&&!fatal&&Date.now()-t0<MAX_MS&&committed.length<MAXLEN){
+        try{rec=newRec();rec.start();return}catch(err){}
+      }
+      finish();
     };
-    try{
-      rec.start();on=true;btn.classList.add('on');btn.querySelector('.lb').textContent='正在听…';setState('正在听…');
-    }catch(err){showErr('无法开始语音识别，请改用键盘输入')}
+    return r;
   }
-  function stopRec(){if(!on||!rec) return;try{rec.stop()}catch(e){}}
+  function startRec(){
+    if(want) return;
+    committed='';cur='';fatal=false;want=true;t0=Date.now();
+    $('cardIn').value='';
+    try{rec=newRec();rec.start();ui(true);tick();timer=setInterval(()=>{tick();if(Date.now()-t0>=MAX_MS) stopRec()},500)}
+    catch(err){want=false;showErr('无法开始语音识别，请改用键盘输入')}
+  }
+  function finish(){
+    want=false;clearInterval(timer);timer=null;ui(false);setState('');
+    const v=full().trim();$('cardIn').value=v;
+    if(v&&!fatal) makeCard(v);
+  }
+  function stopRec(){
+    if(!want) return;
+    want=false;setState('正在识别，请稍等…');
+    try{rec&&rec.stop()}catch(e){finish()}
+  }
   btn.addEventListener('contextmenu',e=>e.preventDefault());
   btn.addEventListener('selectstart',e=>e.preventDefault());
   btn.addEventListener('pointerdown',e=>{
     if(e.button!=null&&e.button!==0) return;
     e.preventDefault();
     try{btn.setPointerCapture(e.pointerId)}catch(ex){}
-    if(on){skipUp=true;holding=false;stopRec();return}
-    skipUp=false;holding=true;t0=Date.now();startRec();
+    if(want){skipUp=true;holding=false;stopRec();return}
+    skipUp=false;holding=true;startRec();
   });
   function endHold(e){
     if(skipUp){skipUp=false;return}
@@ -625,8 +644,7 @@ $('cardBtn').onclick=()=>makeCard();
     if(Date.now()-t0>=250) stopRec(); // 长按松手结束；短按保持聆听，再点一次结束
   }
   btn.addEventListener('pointerup',endHold);
-  btn.addEventListener('pointerleave',endHold);
-  btn.addEventListener('pointercancel',()=>{skipUp=false;holding=false;stopRec()});
+  btn.addEventListener('pointercancel',endHold);
   btn.addEventListener('lostpointercapture',endHold);
 })();
 
