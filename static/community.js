@@ -58,6 +58,7 @@ var LH = (function(){
         el.innerHTML = '<span class="who">' + avatar(d.user.id, d.user.nickname, d.user.has_avatar, 'lg') +
           '<span>' + esc(d.user.nickname) + badge(d.user.display_tier) + '</span></span>' +
           '<span class="row"><button class="btn sm ghost" type="button" id="lhAv">设置头像</button>' +
+          '<a class="btn sm ghost" href="/points">🫘 ' + (d.user.points_balance != null ? d.user.points_balance : '') + ' 旅行豆</a>' +
           '<a class="btn sm ghost" href="/community/messages" style="position:relative">✉️ 私信' + (d.user.unread ? '<span class="dot">' + (d.user.unread > 99 ? '99+' : d.user.unread) + '</span>' : '') + '</a>' + (d.user.tier >= 2 ? '' : '<a class="btn sm primary" href="/member">' + (d.user.tier === 1 ? '升级高级会员' : '开通会员') + '</a>') +
           '<button class="btn sm gray" id="lhLogout">退出</button></span>';
         el.querySelector('#lhAv').onclick = function(){ pickAvatar(function(){ _me = null; userbar(el); }); };
@@ -144,6 +145,37 @@ var LH = (function(){
     }).catch(function(){});
   }
   var ANTISCAM = '🛡️ 防骗提示：交友不谈钱。任何以投资、理财、虚拟币、借钱、垫付、“微信转账”等为由要钱的，一律是骗子；不要提供验证码、证件和银行卡；第一次见面请选人多的公共场所，并告诉朋友行程。遇到可疑账号请点“举报”。';
+  async function share(opts){
+    opts = opts || {};
+    var url = opts.url || (location.origin + location.pathname + location.search);
+    var title = opts.title || document.title || '旅韩助手';
+    var text = opts.text || '';
+    var usedShare = false;
+    try {
+      if (navigator.share){
+        await navigator.share({title: title, text: text, url: url});
+        usedShare = true;
+      }
+    } catch(e){
+      if (e && e.name === 'AbortError') return {ok: false, aborted: true};
+    }
+    if (!usedShare){
+      try {
+        if (navigator.clipboard && navigator.clipboard.writeText){ await navigator.clipboard.writeText(url); alert('链接已复制，可以发给朋友'); }
+        else { prompt('复制链接发给朋友', url); }
+      } catch(e){ prompt('复制链接发给朋友', url); }
+    }
+    if (opts.targetType && opts.targetId){
+      try {
+        var r = await api('POST', '/api/points/event', {kind: 'share', target_type: opts.targetType, target_id: String(opts.targetId)});
+        if (r && r.awarded) alert('分享成功，旅行豆 +' + r.awarded + '（余额 ' + r.balance + '）');
+        else if (r && r.reason) { /* 已达上限或已领过：不打断分享 */ }
+      } catch(e){
+        if (e.status !== 401) { /* 未登录不提示奖励 */ }
+      }
+    }
+    return {ok: true};
+  }
   return {prices: prices, esc: esc, api: api, me: me, badge: badge, showErr: showErr, qs: qs, compress: compress, userbar: userbar, report: report,
-          vb: vb, avatar: avatar, pickAvatar: pickAvatar, postItem: postItem, friendCard: friendCard, lockedPrompt: lockedPrompt, ANTISCAM: ANTISCAM};
+          vb: vb, avatar: avatar, pickAvatar: pickAvatar, postItem: postItem, friendCard: friendCard, lockedPrompt: lockedPrompt, ANTISCAM: ANTISCAM, share: share};
 })();

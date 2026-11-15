@@ -1,0 +1,151 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>推荐店铺与避雷经验 · 旅韩助手</title>
+<meta name="description" content="旅韩助手推荐店铺与避雷经验：用户分享的美食、美妆、购物、咖啡和避雷信息，审核通过后公开。">
+<meta name="theme-color" content="#ff6b8f">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="旅韩助手">
+<link rel="manifest" href="/manifest.webmanifest">
+<link rel="apple-touch-icon" href="/static/icons/apple-touch-icon.png">
+<link rel="icon" type="image/png" sizes="192x192" href="/static/icons/icon-192.png">
+<link rel="stylesheet" href="/static/pwa.css">
+<link rel="stylesheet" href="/static/community.css">
+</head>
+<body>
+<header>
+  <h1>🏪 推荐店铺与避雷</h1>
+  <p>好店和避雷经验都要审核通过后才会公开</p>
+</header>
+<main>
+  <div class="card userbar" id="ub">加载中…</div>
+
+  <div class="err" id="err" style="display:none"></div>
+  <div class="ok" id="ok" style="display:none"></div>
+  <div class="card">
+    <h2>已公开的推荐</h2>
+    <div class="row" id="typechips" style="gap:8px;flex-wrap:wrap;margin-bottom:10px"></div>
+    <div class="row" style="gap:8px;flex-wrap:wrap;margin-bottom:10px">
+      <select class="f" id="farea" style="flex:1;min-width:120px"><option value="">全部地区</option></select>
+      <select class="f" id="ftype" style="flex:1;min-width:120px"><option value="">全部类型</option></select>
+    </div>
+    <div id="list">加载中…</div>
+  </div>
+  <div class="card">
+    <h2>我要推荐</h2>
+    <p class="tip" style="margin-top:0">请写真实到店体验或避雷原因。不要填写网址、电话或微信。提交后需管理员审核，通过后公开，并奖励 10 旅行豆。每人每天最多 5 条。避雷请写清楚发生了什么、为什么要避开，不要点名谩骂。</p>
+    <div id="formbox"></div>
+  </div>
+  <div class="card" id="minebox" style="display:none"><h2>我提交的</h2><div id="minelist"></div></div>
+  <div class="footlinks"><a href="/points">旅行豆</a>·<a href="/coupons">卡券</a>·<a href="/shops">推荐店铺</a>·<a href="/member">会员</a>·<a href="/community">社区</a></div>
+  <p style="font-size:12px;color:#888;text-align:center;margin:10px 0 16px;line-height:1.7">旅韩助手为个人运营的免费信息网站，内容仅供参考，不是旅行社，不代办签证。<br><a href="/terms" style="color:#2c7be5">用户协议与免责声明</a> · <a href="/privacy" style="color:#2c7be5">隐私政策</a> · <a href="/rules" style="color:#2c7be5">社区约定</a></p>
+</main>
+<nav>
+  <a href="/"><i>🏠</i>首页</a>
+  <a href="/attractions"><i>🗺️</i>景点</a>
+  <a href="/tips"><i>📘</i>攻略</a>
+  <a href="/community"><i>💬</i>社区</a>
+  <a href="/member"><i>👑</i>会员</a>
+</nav>
+<script src="/static/community.js"></script>
+
+<script>
+(async function(){
+  var d = await LH.userbar(document.getElementById('ub'));
+  var err = document.getElementById('err'), ok = document.getElementById('ok');
+  function show(el, t){ el.textContent = t || ''; el.style.display = t ? 'block' : 'none'; }
+  var meta = {areas: ['明洞','弘大','江南','东大门','梨泰院','圣水','其他'], types: ['美食','美妆','购物','咖啡','其他']};
+  function fillSel(id, arr, all){
+    var el = document.getElementById(id);
+    el.innerHTML = '<option value="">' + all + '</option>' + arr.map(function(a){ return '<option>' + LH.esc(a) + '</option>'; }).join('');
+  }
+  fillSel('farea', meta.areas, '全部地区');
+  fillSel('ftype', meta.types, '全部类型');
+  var pre = new URLSearchParams(location.search).get('type');
+  if (pre) document.getElementById('ftype').value = pre;
+  function renderChips(){
+    var box = document.getElementById('typechips');
+    if (!box) return;
+    var cur = document.getElementById('ftype').value;
+    var all = [''].concat(meta.types);
+    box.innerHTML = all.map(function(tp){
+      var label = tp || '全部';
+      return '<button type="button" class="btn sm '+(cur===tp?'':'ghost')+'" data-tp="'+LH.esc(tp)+'">'+LH.esc(label)+'</button>';
+    }).join('');
+    box.querySelectorAll('button').forEach(function(b){
+      b.onclick=function(){ document.getElementById('ftype').value=b.dataset.tp; renderChips(); loadList(); };
+    });
+  }
+  async function loadList(){
+    var area = document.getElementById('farea').value, typ = document.getElementById('ftype').value;
+    var q = '/api/shops' + (area || typ ? ('?' + new URLSearchParams({area: area, shop_type: typ})) : '');
+    try {
+      var r = await LH.api('GET', q);
+      meta.areas = r.areas || meta.areas; meta.types = r.types || meta.types;
+      var box = document.getElementById('list');
+      if (!r.items.length){ box.innerHTML = '<div class="empty">还没有公开的推荐，欢迎你来分享。</div>'; return; }
+      box.innerHTML = r.items.map(function(s){
+        return '<div class="cmt"><div class="who">' + LH.esc(s.name) + '</div>' +
+          '<div class="meta"><span class="tag">' + LH.esc(s.shop_type) + '</span><span>' + LH.esc(s.area) + '</span><span>' + LH.esc(s.time) + '</span></div>' +
+          '<p style="margin:8px 0 10px;line-height:1.7">' + LH.esc(s.description) + '</p>' +
+          '<button class="btn sm ghost" type="button" data-share="' + s.id + '" data-name="' + LH.esc(s.name) + '">分享</button></div>';
+      }).join('');
+      box.querySelectorAll('[data-share]').forEach(function(b){
+        b.onclick = function(){ LH.share({title: '推荐店铺：' + b.dataset.name, text: '旅韩助手上的店铺推荐', url: location.origin + '/shops#s' + b.dataset.share, targetType: 'shop', targetId: b.dataset.share}); };
+      });
+    } catch(e){ document.getElementById('list').innerHTML = '<p>' + LH.esc(e.message) + '</p>'; }
+  }
+  document.getElementById('farea').onchange = loadList;
+  document.getElementById('ftype').onchange = function(){ renderChips(); loadList(); };
+  renderChips();
+  await loadList();
+  var fb = document.getElementById('formbox');
+  if (!d || !d.user){
+    fb.innerHTML = '<a class="btn primary block" href="/login?next=/shops">登录后即可提交推荐</a>';
+    return;
+  }
+  fb.innerHTML = '<input class="f" id="sname" maxlength="40" placeholder="店铺或事项名称">' +
+    '<div class="row" style="gap:8px;margin-top:8px"><select class="f" id="sarea" style="flex:1"></select><select class="f" id="stype" style="flex:1"></select></div>' +
+    '<textarea class="f" id="sdesc" maxlength="200" rows="4" placeholder="简短描述（最多 200 字，不要写网址、电话或微信）" style="margin-top:8px;min-height:90px"></textarea>' +
+    '<button class="btn primary block" type="button" id="ssub" style="margin-top:10px">提交审核</button>';
+  fillSel('sarea', meta.areas, '选择地区');
+  fillSel('stype', meta.types, '选择类型');
+  if (pre === '避雷经验') document.getElementById('stype').value = '避雷经验';
+  function syncPh(){
+    var pit = document.getElementById('stype').value === '避雷经验';
+    document.getElementById('sname').placeholder = pit ? '要避开的事项或店铺名称' : '店铺名称';
+    document.getElementById('sdesc').placeholder = pit ? '发生了什么、为什么建议避开（不要谩骂，不要写联系方式）' : '简短描述（最多 200 字，不要写网址、电话或微信）';
+  }
+  document.getElementById('stype').onchange = syncPh; syncPh();
+  document.getElementById('ssub').onclick = async function(){
+    show(err, ''); show(ok, '');
+    try {
+      var r = await LH.api('POST', '/api/shops', {name: document.getElementById('sname').value, area: document.getElementById('sarea').value, type: document.getElementById('stype').value, description: document.getElementById('sdesc').value});
+      show(ok, r.message || '已提交');
+      document.getElementById('sdesc').value = '';
+      document.getElementById('sname').value = '';
+      await loadMine();
+    } catch(e){ show(err, e.message); }
+  };
+  async function loadMine(){
+    try {
+      var r = await LH.api('GET', '/api/shops/mine');
+      if (!r.items.length) return;
+      document.getElementById('minebox').style.display = 'block';
+      var ST = {pending:'待审核', approved:'已公开', rejected:'未通过'};
+      document.getElementById('minelist').innerHTML = r.items.map(function(s){
+        return '<div class="cmt"><div class="who">' + LH.esc(s.name) + '</div><div class="meta"><span class="tag">' + LH.esc(ST[s.status]||s.status) + '</span><span>' + LH.esc(s.area) + '</span><span>' + LH.esc(s.shop_type) + '</span></div>' +
+          (s.review_note ? '<p class="tip" style="margin:6px 0 0">' + LH.esc(s.review_note) + '</p>' : '') + '</div>';
+      }).join('');
+    } catch(e){}
+  }
+  await loadMine();
+})();
+</script>
+
+<script src="/static/pwa.js" defer></script>
+</body>
+</html>

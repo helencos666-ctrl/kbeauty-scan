@@ -93,6 +93,54 @@ PAGES = {
         "同路社区,旅韩助手,韩国交友",
         True,
     ),
+    "/points": (
+        "旅行豆 · 旅韩助手",
+        "旅韩助手旅行豆：每日签到、分享内容和常用功能可累积点数，兑换权益即将上线。",
+        "旅行豆,旅韩助手",
+        False,
+    ),
+    "/coupons": (
+        "卡券 · 旅韩助手",
+        "查看旅韩助手卡券。新人券仅作展示，人工开通时由管理员核对抵扣。",
+        "卡券,旅韩助手",
+        False,
+    ),
+    "/shops": (
+        "推荐店铺与避雷经验 · 旅韩助手",
+        "旅韩助手推荐店铺与避雷经验：用户分享的美食、美妆、购物、咖啡和避雷信息，审核通过后公开。",
+        "韩国店铺,首尔美食,避雷,旅韩助手",
+        True,
+    ),
+    "/pay": (
+        "韩国支付与交通卡 · 旅韩助手",
+        "赴韩支付与交通卡说明：T-money、WOWPASS、外卡以及支付宝和微信在商户与地铁闸机的区别。闸机一般不能直接刷支付宝、微信或银联。",
+        "T-money,韩国交通卡,韩国支付,旅韩助手",
+        True,
+    ),
+    "/tax-refund": (
+        "韩国退税须知 · 旅韩助手",
+        "韩国购物退税：即时退税与机场退税的区别，以及 VisitKorea 公开的金额门槛。查阅日期 2026-11-15，以官方为准。",
+        "韩国退税,即时退税,旅韩助手",
+        True,
+    ),
+    "/visa": (
+        "赴韩签证须知 · 旅韩助手",
+        "中国游客赴韩签证与团体阶段性免签说明。团体免签已延长至 2026-12-31。本站不代办签证，以韩国驻华使领馆和法务部官方为准。",
+        "赴韩签证,韩国免签,旅韩助手",
+        True,
+    ),
+    "/itineraries": (
+        "首尔路线卡片 · 旅韩助手",
+        "首尔 3 日路线：首次经典、购物美妆、追星 K-POP 和美食，含地铁线路与站号，不推荐付费店铺。",
+        "首尔自由行,首尔路线,旅韩助手",
+        True,
+    ),
+    "/chicken": (
+        "炸鸡代点 · 旅韩助手",
+        "旅韩助手炸鸡代点：填写酒店地址后由客服确认再付款。个人代点协助，非持牌外卖。",
+        "炸鸡代点,旅韩助手",
+        False,
+    ),
     "/login": (
         "登录或注册 · 旅韩助手",
         "登录或注册旅韩助手同路社区，参与韩国旅游经验交流和韩国交友。",
@@ -145,6 +193,14 @@ FILE_PATHS = {
     "community-post.html": "/community/post",
     "login.html": "/login",
     "member.html": "/member",
+    "points.html": "/points",
+    "coupons.html": "/coupons",
+    "shops.html": "/shops",
+    "pay.html": "/pay",
+    "tax-refund.html": "/tax-refund",
+    "visa.html": "/visa",
+    "itineraries.html": "/itineraries",
+    "chicken.html": "/chicken",
     "rules.html": "/rules",
     "friends.html": "/community/friends",
     "friend-edit.html": "/community/friends/edit",
@@ -164,12 +220,15 @@ NOINDEX_PREFIXES = (
     "/community/new",
     "/community/friends/edit",
     "/login",
+    "/points",
+    "/coupons",
+    "/chicken",
 )
 
 SITEMAP_PATHS = [
     "/", "/attractions", "/food", "/shopping", "/tips", "/beauty", "/faq",
     "/community", "/community/boards", "/community/rate", "/community/friends",
-    "/rules", "/member", "/privacy", "/terms",
+    "/rules", "/member", "/shops", "/pay", "/tax-refund", "/visa", "/itineraries", "/privacy", "/terms",
 ]
 
 router = APIRouter()

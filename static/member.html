@@ -65,7 +65,7 @@
       <figure style="flex:1;min-width:140px;max-width:260px;margin:0;text-align:center"><img src="/static/pay-wechat.jpg" alt="微信收款码" loading="lazy" style="width:100%;border-radius:10px"><figcaption style="font-size:13px;color:#666">微信扫码支付</figcaption></figure>
       <figure style="flex:1;min-width:140px;max-width:260px;margin:0;text-align:center"><img src="/static/pay-alipay.jpg" alt="支付宝收款码" loading="lazy" style="width:100%;border-radius:10px"><figcaption style="font-size:13px;color:#666">支付宝扫码支付</figcaption></figure>
     </div>
-    <p class="tip">手机上可长按收款码保存或识别。付款时请在备注里写上会员编号和开通项目。</p>
+    <p class="tip">手机上可长按收款码保存或识别。付款时请在备注里写上会员编号和开通项目。若你有新人券，请同时告知管理员，由人工抵扣；收款码金额不会自动变化。把 ¥9.9 新人券用于 ¥9.9 会员档时，该档相当于免费，需人工确认。</p>
     <p class="tip">费用用于网站服务器与社区维护。虚拟服务一经开通不支持退款；因违规被删帖或封禁的不退费。开通即表示同意<a href="/rules" style="color:#2c7be5">《社区约定》</a>。</p>
   </div>
   <div class="card" id="mine" style="display:none"><h2>我的帖子</h2><div id="mylist"></div></div>
@@ -100,6 +100,9 @@
   }
   html += '</p><div class="row" style="margin-top:10px"><button class="btn sm primary" type="button" id="setAv">' + (u.has_avatar ? '更换头像' : '设置头像') + '</button>' +
     (u.has_avatar ? '<button class="btn sm gray" type="button" id="delAv">删除头像</button>' : '') + '</div></div></div>';
+  html += '<div class="row" style="margin-top:12px;gap:8px;flex-wrap:wrap">' +
+    '<a class="btn ghost" href="/points">🫘 旅行豆 ' + (u.points_balance != null ? u.points_balance : 0) + (u.points_streak ? ' · 连续签到' + u.points_streak + '天' : '') + '</a>' +
+    '<a class="btn ghost" href="/coupons">🎫 卡券' + (u.coupon_available ? ' · ' + u.coupon_available + '张可用' : '') + '</a></div>';
   if (u.tier >= 2) html += '<a class="btn primary block" style="margin-top:12px" href="/community/new">去发帖</a>';
   else if (u.tier === 1) html += '<p class="tip">升级高级会员补差价即可发帖、交友和在旅韩交友帖子下评论。</p>';
   html += '<details style="margin-top:16px;font-size:13px;color:var(--sub)"><summary style="cursor:pointer">注销账号（删除我的全部信息）</summary>' +

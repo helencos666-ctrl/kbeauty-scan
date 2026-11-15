@@ -59,10 +59,11 @@ COMMERCIAL_WORDS = ["酒店预订", "订酒店", "订房", "民宿预订", "租�
 PRICE_KEYS = ("price_t1", "price_t2", "price_m_month", "price_m_year", "price_extra", "rate_cny_krw")
 BOOL_SETTINGS = {"ai_reply"}
 DEFAULT_SETTINGS = {"price_t1": "9.9", "price_t2": "19.9", "price_m_month": "99", "price_m_year": "999", "price_extra": "19.9",
-                    "rate_cny_krw": "195", "ai_reply": "1"}
+                    "rate_cny_krw": "195", "ai_reply": "1", "chicken_fee_krw": "3000"}
 SETTING_LABELS = {"price_t1": "会员价格", "price_t2": "高级会员价格", "price_m_month": "商家会员月付", "price_m_year": "商家会员年付",
                   "price_extra": "商家超额每篇", "rate_cny_krw": "汇率换算：1 人民币 = ? 韩元（手动设置）",
-                  "ai_reply": "AI 自动回复（发帖后由旅韩小助手回复）"}
+                  "ai_reply": "AI 自动回复（发帖后由旅韩小助手回复）",
+                  "chicken_fee_krw": "炸鸡代点服务费（韩元）"}
 LOGIN_ONLY_BOARDS = {"friends"}          # 交友版：会员（≥1 档）才能查看
 TIER_NAMES = {0: "普通用户", 1: "会员", 2: "高级会员", 3: "商家会员"}
 MAX_IMAGES = 6
@@ -366,7 +367,13 @@ def db():
                         cur.execute(MIGRATE4)
                         cur.execute(MIGRATE5)
                         cur.execute(MIGRATE6)
+                        from points import MIGRATE_POINTS
+                        cur.execute(MIGRATE_POINTS)
+                        from chicken import MIGRATE_CHICKEN
+                        cur.execute(MIGRATE_CHICKEN)
                     ensure_bot(conn)
+                    from chicken import ensure_chicken_shops
+                    ensure_chicken_shops(conn)
                     conn.commit()
                     _schema_ready = True
         yield conn
@@ -811,13 +818,17 @@ def api_me(req: Request):
                             AND NOT EXISTS (SELECT 1 FROM c_blocks b WHERE b.blocker_id=%s AND b.blocked_id=m.sender_id)""",
                    (u["id"], u["id"]), one=True)["n"]
         has_profile = q(conn, "SELECT 1 AS x FROM c_dating_profiles WHERE user_id=%s", (u["id"],), one=True) is not None
+        from points import user_points_summary
+        pts = user_points_summary(conn, u["id"])
         return {"user": {"id": u["id"], "member_no": u.get("member_no") or u["id"], "nickname": u["nickname"], "tier": u["tier"], "base_tier": u["base_tier"],
                          "display_tier": disp, "tier_name": TIER_NAMES[disp], "is_member": u["tier"] >= 1,
                          "merchant": bool(u["merchant"]), "merchant_info": merchant_quota(conn, u),
                          "merchant_expired": bool(u["merchant_until"] and not u["merchant"]),
                          "account": mask_account(u), "joined": _ts(u["created_at"]),
                          "verified": bool(u.get("verified")), "unread": unread, "has_profile": has_profile,
-                         "has_avatar": bool(u.get("has_avatar"))},
+                         "has_avatar": bool(u.get("has_avatar")),
+                         "points_name": pts["name"], "points_balance": pts["balance"],
+                         "points_streak": pts["streak"], "coupon_available": pts["coupon_available"]},
                 "boards": BOARDS, "merchant_boards": sorted(MERCHANT_BOARDS), "prices": st}
 
 @router.get("/api/community/prices")
@@ -899,6 +910,8 @@ async def api_register(req: Request, resp: Response):
         row = q(conn, f"INSERT INTO c_users({kind},nickname,pw_hash,last_login,promoter_code) VALUES (%s,%s,%s,now(),%s) RETURNING id",
                 (acct, nick, hash_pw(pw), ref), one=True)
         assign_member_no(conn, row["id"])
+        from points import issue_welcome_coupon
+        issue_welcome_coupon(conn, row["id"])
         new_session(conn, resp, req, user_id=row["id"])
     return {"ok": True}
 
@@ -1369,13 +1382,20 @@ def api_follow(req: Request, uid: int):
 def api_rate():
     """汇率换算用的参考汇率：管理员在后台手动设置；数据库未配置时用默认值"""
     v = DEFAULT_SETTINGS["rate_cny_krw"]
+    updated = None
     if _db_url():
         try:
             with db() as conn:
                 v = get_settings(conn)["rate_cny_krw"]
+                row = q(conn, "SELECT updated_at FROM c_settings WHERE key=%s", ("rate_cny_krw",), one=True)
+                if row and row.get("updated_at"):
+                    updated = _ts(row["updated_at"])
         except HTTPException:
             pass
-    return {"cny_krw": float(v), "source": "manual"}
+    out = {"cny_krw": float(v), "source": "manual"}
+    if updated:
+        out["updated_at"] = updated
+    return out
 
 @router.get("/api/community/posts/{pid}")
 def api_post(req: Request, pid: int):
@@ -1659,6 +1679,7 @@ def api_admin_overview(req: Request):
                               (SELECT count(*) FROM c_reports WHERE NOT resolved) AS reports,
                               (SELECT count(*) FROM c_dating_profiles) AS profiles,
                               (SELECT count(*) FROM c_messages WHERE flagged AND created_at>now()-interval '7 days') AS flagged7,
+                              (SELECT count(*) FROM c_shop_recs WHERE status='pending') AS shop_pending,
                               pg_database_size(current_database()) AS db_bytes""", one=True)
     s["db_mb"] = round(s.pop("db_bytes") / 1048576, 1)
     return s
@@ -2170,3 +2191,9 @@ async def api_admin_settings_save(req: Request):
 # 交友/相亲（friends.py 依赖本模块的工具函数，放在文件末尾导入）
 from friends import router as _friends_router   # noqa: E402
 router.include_router(_friends_router)
+from points import router as _points_router   # noqa: E402
+router.include_router(_points_router)
+from chicken import router as _chicken_router   # noqa: E402
+router.include_router(_chicken_router)
+from guides import router as _guides_router   # noqa: E402
+router.include_router(_guides_router)

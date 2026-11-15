@@ -110,6 +110,12 @@ nav button.on,nav a.on{color:var(--pink);font-weight:700}
 .phrase .sp.spk-on{background:var(--pink);color:#fff}
 #cSpk.spk-on{background:var(--pink);color:#fff}
 #bigSpk.spk-on{background:var(--pink)!important;color:#fff!important}
+.tools{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin:0 0 14px}
+.tool{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;background:#fff;border-radius:16px;padding:14px 4px;text-decoration:none;color:var(--ink);box-shadow:0 4px 16px rgba(255,79,123,.08);font-size:13px;font-weight:600;min-height:76px}
+.tool i{font-style:normal;font-size:22px}
+.extra{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin:0 0 14px}
+.extra a{display:flex;align-items:center;gap:10px;background:#fff;border-radius:16px;padding:14px 12px;text-decoration:none;color:var(--ink);box-shadow:0 4px 16px rgba(255,79,123,.08);font-size:15px;font-weight:700;min-height:64px}
+.extra a span{display:block;font-size:12px;font-weight:500;color:var(--sub);margin-top:2px}
 </style>
 </head>
 <body>
@@ -122,6 +128,19 @@ nav button.on,nav a.on{color:var(--pink);font-weight:700}
 
   <!-- 化妆品识别 -->
   <section class="page on" id="p-cos">
+
+    <div class="tools">
+      <a class="tool" href="/community/rate"><i>💱</i>汇率</a>
+      <a class="tool" href="/?tab=sub"><i>🚇</i>地铁</a>
+      <a class="tool" href="/pay"><i>💳</i>支付</a>
+      <a class="tool" href="/tax-refund"><i>🧾</i>退税</a>
+    </div>
+    <div class="extra">
+      <a href="/itineraries">🗺️ 路线卡片<span>经典 / 购物 / 追星 / 美食</span></a>
+      <a href="/visa">🛂 签证须知<span>以官方为准，不代办</span></a>
+      <a href="/chicken">🍗 炸鸡代点<span>个人协助，先确认再付款</span></a>
+      <a href="/shops?type=避雷经验">⚠️ 避雷经验<span>审核后公开</span></a>
+    </div>
     <div class="card">
       <h2>🗺️ 韩国免费景点</h2>
       <p style="margin:0 0 12px;font-size:15px;line-height:1.65">宫殿、寺庙、市场、自然风光和季节活动，面向中国游客的简短说明和交通提示。资料来自公开信息，不收费。</p>
@@ -142,8 +161,10 @@ nav button.on,nav a.on{color:var(--pink);font-weight:700}
       <p style="margin:0 0 12px;font-size:15px;line-height:1.65">签证入境、交通卡、紧急电话、购物退税和买妆注意事项，整理自官方公开信息。</p>
       <div class="btns" style="flex-wrap:wrap">
         <a class="btn ghost" href="/tips" style="text-align:center;text-decoration:none">攻略</a>
+        <a class="btn ghost" href="/visa" style="text-align:center;text-decoration:none">签证</a>
         <a class="btn ghost" href="/faq" style="text-align:center;text-decoration:none">常见问题</a>
-        <a class="btn ghost" href="/shopping" style="text-align:center;text-decoration:none">退税</a>
+        <a class="btn ghost" href="/tax-refund" style="text-align:center;text-decoration:none">退税</a>
+        <a class="btn ghost" href="/pay" style="text-align:center;text-decoration:none">支付</a>
         <a class="btn ghost" href="/beauty" style="text-align:center;text-decoration:none">买妆</a>
       </div>
     </div>

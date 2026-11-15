@@ -34,7 +34,7 @@
       <div class="row" style="justify-content:space-between"><b id="stats">…</b><button class="btn sm gray" id="alogout">退出后台</button></div>
     </div>
     <div class="boards" id="tabs">
-      <button data-t="users" class="on">用户/会员</button><button data-t="reports">举报</button><button data-t="posts">帖子</button><button data-t="review">审核</button><button data-t="promo">推广统计</button><button data-t="settings">设置</button><button data-t="friends">交友</button>
+      <button data-t="users" class="on">用户/会员</button><button data-t="reports">举报</button><button data-t="posts">帖子</button><button data-t="review">审核</button><button data-t="chicken">代点</button><button data-t="promo">推广统计</button><button data-t="settings">设置</button><button data-t="friends">交友</button>
     </div>
     <div class="card" id="t-users">
       <div class="row"><input class="f" id="us" placeholder="搜索编号/昵称/手机号/邮箱" style="flex:1"><button class="btn primary" id="usgo">搜索</button></div>
@@ -42,7 +42,14 @@
     </div>
     <div class="card" id="t-reports" style="display:none"><div id="rlist"></div></div>
     <div class="card" id="t-posts" style="display:none"><div id="plist"></div><button class="btn ghost block" id="pmore" style="margin-top:10px">加载更多</button></div>
-    <div class="card" id="t-review" style="display:none"><p class="tip" style="margin-top:0">普通频道中非商家用户发布的、含商业关键词的帖子在这里审核。通过后公开，拒绝后仅作者可见“未通过”。</p><div id="rvlist"></div></div>
+    <div id="t-review" style="display:none">
+      <div class="card"><p class="tip" style="margin-top:0">普通频道中非商家用户发布的、含商业关键词的帖子在这里审核。通过后公开，拒绝后仅作者可见“未通过”。</p><div id="rvlist"></div></div>
+      <div class="card">
+        <h2>推荐店铺审核</h2>
+        <p class="tip" style="margin-top:0">用户提交的店铺推荐和避雷经验。通过后公开，并向提交人发放 10 旅行豆；拒绝后仅提交人可见理由。简介不得含网址、电话或联系方式。</p>
+        <div id="shoplist"></div>
+      </div>
+    </div>
     <div id="t-friends" style="display:none">
       <div class="card">
         <h2>交友资料</h2>
@@ -54,6 +61,31 @@
         <h2>可疑私信（自动标记）</h2>
         <p class="tip" style="margin-top:0">私信含转账、投资、虚拟币、借钱等词会自动标记，并在双方聊天里显示防骗提醒。</p>
         <div id="mlist"></div>
+      </div>
+    </div>
+
+    <div id="t-chicken" style="display:none">
+      <div class="card">
+        <h2>炸鸡代点订单</h2>
+        <p class="tip" style="margin-top:0">先确认接单，再等用户按客服确认的金额扫码；登记“已付款”和“已送达”均由人工操作，系统不会自动收款或履约。微信号仅在此显示，请勿复制到聊天记录以外的地方传播。</p>
+        <div class="row" style="gap:8px;margin-bottom:8px">
+          <select class="f" id="ckstatus" style="flex:1;min-width:140px">
+            <option value="pending_review">待确认</option>
+            <option value="approved">已确认</option>
+            <option value="paid">已付款</option>
+            <option value="delivered">已送达</option>
+            <option value="rejected">未接单</option>
+            <option value="all">全部</option>
+          </select>
+          <button class="btn primary" id="ckgo">刷新</button>
+        </div>
+        <div id="cklist"></div>
+      </div>
+      <div class="card">
+        <h2>代点店铺（可编辑）</h2>
+        <p class="tip" style="margin-top:0">价格为韩元。示例店仅用于演示，上线真实店铺前请改名称并取消“示例”标记。</p>
+        <div id="ckshops"></div>
+        <button class="btn ghost block" id="ckadd" style="margin-top:10px">新增店铺</button>
       </div>
     </div>
     <div class="card" id="t-settings" style="display:none">
@@ -103,14 +135,14 @@ document.getElementById('alogout').onclick = async function(){ await call('POST'
 document.querySelectorAll('#tabs button').forEach(function(b){
   b.onclick = function(){
     document.querySelectorAll('#tabs button').forEach(function(x){ x.className = x === b ? 'on' : ''; document.getElementById('t-' + x.dataset.t).style.display = x === b ? 'block' : 'none'; });
-    ({users: users, reports: reports, posts: function(){ posts(true); }, promo: promo, review: review, settings: settings, friends: friends})[b.dataset.t]();
+    ({users: users, reports: reports, posts: function(){ posts(true); }, promo: promo, review: review, settings: settings, friends: friends, chicken: chickenAdmin})[b.dataset.t]();
   };
 });
 async function boot(){
   var s;
   try { s = await LH.api('GET', '/api/admin/overview'); } catch(e){ if (e.status === 401) return showLogin(); return msg(e.message, true); }
   document.getElementById('loginBox').style.display = 'none'; document.getElementById('panel').style.display = 'block';
-  document.getElementById('stats').textContent = '用户 ' + s.users + ' · 会员 ' + s.members + ' · 高级 ' + s.premium + ' · 商家 ' + s.merchants + ' · 待审核 ' + s.pending + ' · 帖子 ' + s.posts + ' · 评论 ' + s.comments + ' · 待处理举报 ' + s.reports + ' · 交友资料 ' + s.profiles + ' · 7天可疑私信 ' + s.flagged7 + ' · 数据库 ' + s.db_mb + 'MB/1024MB';
+  document.getElementById('stats').textContent = '用户 ' + s.users + ' · 会员 ' + s.members + ' · 高级 ' + s.premium + ' · 商家 ' + s.merchants + ' · 待审核 ' + s.pending + ' · 待审店铺 ' + (s.shop_pending || 0) + ' · 帖子 ' + s.posts + ' · 评论 ' + s.comments + ' · 待处理举报 ' + s.reports + ' · 交友资料 ' + s.profiles + ' · 7天可疑私信 ' + s.flagged7 + ' · 数据库 ' + s.db_mb + 'MB/1024MB';
   users();
 }
 async function users(){
@@ -251,6 +283,16 @@ async function review(){
     var why = prompt('拒绝理由（作者可见）', '含商业推广内容，请开通商家会员后在商家专区发布'); if (why === null) return;
     await call('POST', '/api/admin/posts/' + b.dataset.no + '/review', {action: 'reject', reason: why}); document.getElementById('rv' + b.dataset.no).remove(); }; });
   document.querySelectorAll('#rvlist [data-banu]').forEach(function(b){ b.onclick = async function(){ if (!confirm('封禁该用户？')) return; await call('POST', '/api/admin/users/' + b.dataset.banu, {action: 'ban'}); msg('已封禁', false); }; });
+  var sh = await call('GET', '/api/admin/shop-recs?status=pending');
+  document.getElementById('shoplist').innerHTML = sh.items.length ? sh.items.map(function(x){
+    return '<div class="cmt" id="shop' + x.id + '"><div class="who">#' + x.member_no + ' ' + E(x.nickname) + ' · ' + E(x.name) + '</div>' +
+      '<div class="meta"><span class="tag">' + E(x.shop_type) + '</span><span>' + E(x.area) + '</span><span>' + E(x.time) + '</span></div>' +
+      '<p style="margin:8px 0;line-height:1.7">' + E(x.description) + '</p>' +
+      '<div class="row" style="gap:8px"><button class="btn sm primary" data-shopok="' + x.id + '">通过（+10旅行豆）</button>' +
+      '<button class="btn sm gray" data-shopno="' + x.id + '">拒绝</button></div></div>';
+  }).join('') : '<div class="empty">没有待审核的店铺推荐</div>';
+  document.querySelectorAll('#shoplist [data-shopok]').forEach(function(b){ b.onclick = async function(){ var r = await call('POST', '/api/admin/shop-recs/' + b.dataset.shopok, {action: 'approve'}); document.getElementById('shop' + b.dataset.shopok).remove(); msg(r.awarded ? ('已通过，旅行豆 +' + r.awarded) : '已通过', false); }; });
+  document.querySelectorAll('#shoplist [data-shopno]').forEach(function(b){ b.onclick = async function(){ var why = prompt('拒绝理由（提交人可见）', '信息不足或不符合约定'); if (why === null) return; await call('POST', '/api/admin/shop-recs/' + b.dataset.shopno, {action: 'reject', reason: why}); document.getElementById('shop' + b.dataset.shopno).remove(); }; });
 }
 async function friends(){
   var d = await call('GET', '/api/admin/friends?s=' + encodeURIComponent(document.getElementById('fs').value));
@@ -296,6 +338,68 @@ async function settings(){
 document.getElementById('setsave').onclick = async function(){
   var body = {}; document.querySelectorAll('#setlist [data-k]').forEach(function(i){ body[i.dataset.k] = i.dataset.bool ? (i.checked ? '1' : '0') : i.value; });
   await call('POST', '/api/admin/settings', body); msg('设置已保存', false); settings();
+};
+
+async function chickenAdmin(){
+  var st = document.getElementById('ckstatus').value;
+  var d = await call('GET', '/api/admin/chicken/orders?status=' + encodeURIComponent(st));
+  document.getElementById('cklist').innerHTML = d.orders.length ? d.orders.map(function(o){
+    var its = (o.items||[]).map(function(i){ return E(i.name)+' ×'+i.qty; }).join('、');
+    var wx = o.wechat_id ? ('微信号：' + E(o.wechat_id)) : '未填写微信号';
+    return '<div class="cmt" id="ck'+o.id+'"><div class="who">#'+o.id+' '+E(o.nickname||'')+'（编号 '+(o.member_no||'')+'）· '+E(o.shop_name)+' · '+E(o.status_name)+'</div>'+
+      '<div class="ct">'+E(its)+'</div>'+
+      '<div class="ct" style="color:var(--sub)">酒店：'+E(o.hotel_name)+' / '+E(o.hotel_address)+'<br>希望时间：'+E(o.desired_time||'未填')+' · 备注：'+E(o.notes||'无')+'<br>'+wx+'</div>'+
+      '<div class="ct">小计 '+o.subtotal_krw+' + 服务费 '+o.fee_krw+' = '+o.total_krw+' 韩元，约 ¥'+(o.estimate_cny||'—')+(o.rate_time?('（汇率更新 '+E(o.rate_time)+'）'):'')+'</div>'+
+      '<div class="row" style="margin-top:8px;gap:6px">'+
+      (o.status==='pending_review'?'<button class="btn sm primary" data-cka="approve" data-id="'+o.id+'">确认接单</button><button class="btn sm gray" data-cka="reject" data-id="'+o.id+'">不接单</button>':'')+
+      (o.status==='approved'?'<button class="btn sm primary" data-cka="mark-paid" data-id="'+o.id+'">登记已付款</button><button class="btn sm gray" data-cka="reject" data-id="'+o.id+'">取消</button>':'')+
+      (o.status==='paid'||o.status==='approved'?'<button class="btn sm primary" data-cka="mark-delivered" data-id="'+o.id+'">登记已送达</button>':'')+
+      '</div></div>';
+  }).join('') : '<div class="empty">这个状态下没有订单</div>';
+  document.querySelectorAll('#cklist [data-cka]').forEach(function(b){
+    b.onclick = async function(){
+      var act=b.dataset.cka, note=null;
+      if(act==='reject'){ note=prompt('原因（用户可见）','暂无法代点'); if(note===null) return; }
+      await call('POST','/api/admin/chicken/orders/'+b.dataset.id,{action:act, note:note});
+      chickenAdmin();
+    };
+  });
+  var s = await call('GET','/api/admin/chicken/shops');
+  document.getElementById('ckshops').innerHTML = s.shops.map(function(x){
+    return '<div class="cmt" id="cks'+x.id+'"><div class="who">'+E(x.name)+(x.is_example?'（示例）':'')+(x.active?'':' · 已下架')+' · '+E(x.area||'')+'</div>'+
+      '<div class="ct">'+(x.menu||[]).map(function(m){return E(m.name)+' '+m.price_krw+'韩元';}).join('、')+'</div>'+
+      '<button class="btn sm ghost" data-edits="'+x.id+'">编辑</button></div>';
+  }).join('') || '<div class="empty">还没有店铺</div>';
+  document.querySelectorAll('#ckshops [data-edits]').forEach(function(b){
+    b.onclick = function(){
+      var x = s.shops.find(function(z){ return String(z.id)===b.dataset.edits; });
+      if(!x) return;
+      var name=prompt('店铺名称', x.name); if(name===null) return;
+      var area=prompt('地区', x.area||''); if(area===null) return;
+      var menu=prompt('菜单，格式：名称,价格韩元;名称,价格韩元', (x.menu||[]).map(function(m){return m.name+','+m.price_krw;}).join(';'));
+      if(menu===null) return;
+      var notes=prompt('说明', x.notes||''); if(notes===null) return;
+      var ex=confirm('是否标记为示例店铺？确定=示例，取消=正式');
+      var active=confirm('是否上架？确定=上架，取消=下架');
+      var items=menu.split(';').map(function(line,i){
+        var p=line.split(',');
+        return {id:'m'+(i+1), name:(p[0]||'').trim(), price_krw:parseInt((p[1]||'').trim(),10)||0};
+      }).filter(function(m){return m.name && m.price_krw>0;});
+      call('POST','/api/admin/chicken/shops',{id:x.id,name:name,area:area,menu:items,notes:notes,is_example:ex,active:active,sort_order:x.sort_order||0}).then(function(){ msg('店铺已保存', false); chickenAdmin(); });
+    };
+  });
+}
+document.getElementById('ckgo').onclick = chickenAdmin;
+document.getElementById('ckadd').onclick = function(){
+  var name=prompt('店铺名称'); if(!name) return;
+  var area=prompt('地区','其他')||'其他';
+  var menu=prompt('菜单，格式：名称,价格韩元;名称,价格韩元','原味炸鸡,18000');
+  if(!menu) return;
+  var items=menu.split(';').map(function(line,i){
+    var p=line.split(',');
+    return {id:'m'+(i+1), name:(p[0]||'').trim(), price_krw:parseInt((p[1]||'').trim(),10)||0};
+  }).filter(function(m){return m.name && m.price_krw>0;});
+  call('POST','/api/admin/chicken/shops',{name:name,area:area,menu:items,notes:'',is_example:true,active:true,sort_order:0}).then(function(){ msg('已新增', false); chickenAdmin(); });
 };
 document.getElementById('padd').onclick = async function(){
   var r = await call('POST', '/api/admin/promoters', {name: document.getElementById('pname').value, code: document.getElementById('pcode').value, commission: document.getElementById('pcom').value || 3, commission2: document.getElementById('pcom2').value || 6, commission3: document.getElementById('pcom3').value || 20, commission4: document.getElementById('pcom4').value || 200});
