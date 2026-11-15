@@ -61,11 +61,11 @@
       <li>付款后<b>截图发给管理员</b>，管理员核对后为你开通。</li>
       <li>开通后刷新本页即可生效。</li>
     </ol>
-    <!-- 收款码位置：管理员提供收款码图片后在这里替换 -->
-    <div class="row" style="margin-top:12px;justify-content:center" id="payqr">
-      <div class="qr" style="flex:1;min-width:140px">微信收款码<br><small>即将上线</small></div>
-      <div class="qr" style="flex:1;min-width:140px">支付宝收款码<br><small>即将上线</small></div>
+        <div class="row" style="margin-top:12px;justify-content:center;gap:10px;flex-wrap:wrap" id="payqr">
+      <figure style="flex:1;min-width:140px;max-width:260px;margin:0;text-align:center"><img src="/static/pay-wechat.jpg" alt="微信收款码" loading="lazy" style="width:100%;border-radius:10px"><figcaption style="font-size:13px;color:#666">微信扫码支付</figcaption></figure>
+      <figure style="flex:1;min-width:140px;max-width:260px;margin:0;text-align:center"><img src="/static/pay-alipay.jpg" alt="支付宝收款码" loading="lazy" style="width:100%;border-radius:10px"><figcaption style="font-size:13px;color:#666">支付宝扫码支付</figcaption></figure>
     </div>
+    <p class="tip">手机上可长按收款码保存或识别。付款时请在备注里写上会员编号和开通项目。</p>
     <p class="tip">费用用于网站服务器与社区维护。虚拟服务一经开通不支持退款；因违规被删帖或封禁的不退费。开通即表示同意<a href="/rules" style="color:#2c7be5">《社区约定》</a>。</p>
   </div>
   <div class="card" id="mine" style="display:none"><h2>我的帖子</h2><div id="mylist"></div></div>
