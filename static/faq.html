@@ -1,0 +1,501 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>常见问题 · 旅韩助手</title>
+<meta name="description" content="旅韩助手常见问题：中国游客赴韩签证、机票入境、交通、住宿、支付、景点、美食、免税购物与返程退税，72个问题，资料来自官方公开页面。">
+<meta name="theme-color" content="#ff6b8f">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="旅韩助手">
+<link rel="manifest" href="/manifest.webmanifest">
+<link rel="apple-touch-icon" href="/static/icons/apple-touch-icon.png">
+<link rel="icon" type="image/png" sizes="192x192" href="/static/icons/icon-192.png">
+<link rel="stylesheet" href="/static/pwa.css">
+<link rel="stylesheet" href="/static/guide.css">
+<style>
+:root{--pink:#ff4f7b;--ink:#1f2330;--sub:#6b7080;--bg:#fff6f8;--card:#fff;--line:#f0e3e7}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+body{margin:0;font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Noto Sans SC","Microsoft YaHei",sans-serif;background:var(--bg);color:var(--ink);padding-bottom:132px}
+header{background:linear-gradient(135deg,#ff6b8f,#ff9a6b);color:#fff;padding:20px 18px 30px;border-radius:0 0 22px 22px}
+header h1{margin:0;font-size:21px}
+header p{margin:6px 0 0;font-size:14px;opacity:.95}
+main{max-width:560px;margin:-18px auto 0;padding:0 14px}
+.card{background:var(--card);border-radius:16px;padding:16px;box-shadow:0 4px 16px rgba(255,79,123,.08);margin-bottom:14px}
+.tip{font-size:12px;color:var(--sub);margin-top:10px;line-height:1.6}
+nav{position:fixed;left:0;right:0;bottom:0;height:calc(60px + env(safe-area-inset-bottom));padding-bottom:env(safe-area-inset-bottom);background:#fff;border-top:1px solid var(--line);display:flex;z-index:10}
+nav a{flex:1;border:0;background:none;font-size:11px;color:var(--sub);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;text-decoration:none}
+nav a i{font-style:normal;font-size:20px}
+#q{width:100%;border:1px solid var(--line);border-radius:12px;padding:12px 14px;font-size:16px;font-family:inherit;-webkit-appearance:none}
+#count{font-size:13px;color:var(--sub);margin:8px 0 0}
+.toc{margin-top:10px}
+.sec h2{font-size:17px;color:var(--pink);margin:18px 2px 10px;display:flex;align-items:center;justify-content:space-between}
+.sec h2 .n{font-size:12px;color:var(--sub);font-weight:400}
+details.qa{background:var(--card);border-radius:14px;box-shadow:0 4px 16px rgba(255,79,123,.08);margin-bottom:10px;overflow:hidden}
+details.qa>summary{list-style:none;cursor:pointer;padding:14px 16px;font-size:15px;font-weight:700;line-height:1.5;display:flex;gap:10px;justify-content:space-between;align-items:flex-start}
+details.qa>summary::-webkit-details-marker{display:none}
+details.qa>summary::after{content:"＋";color:var(--pink);flex:none;font-size:17px;line-height:1.4}
+details.qa[open]>summary::after{content:"－"}
+details.qa[open]>summary{border-bottom:1px solid var(--line)}
+details.qa .ans{padding:12px 16px 14px;font-size:15px;line-height:1.75}
+details.qa .ans a{color:#2c7be5}
+mark{background:#ffe3a3;color:inherit;border-radius:3px;padding:0 1px}
+.empty{display:none;text-align:center;padding:24px 10px;color:var(--sub)}
+.src ul{margin:0;padding-left:18px}
+.src li{font-size:13px;line-height:1.6;margin:0 0 6px}
+</style>
+</head>
+<body>
+<header>
+  <h1>🇰🇷 旅韩助手</h1>
+  <p>常见问题 · 中国游客赴韩 72 问</p>
+</header>
+<main>
+  <div class="gbar">
+    <a href="/attractions">🗺️ 景点</a>
+    <a href="/food">🍜 美食</a>
+    <a href="/shopping">🛍️ 购物</a>
+    <a href="/tips">📘 攻略</a>
+    <a href="/faq" class="on">❓ 常见问题</a>
+    <a href="/beauty">💄 买妆</a>
+    <a href="/community">💬 社区</a>
+  </div>
+
+  <div class="card">
+    <input id="q" type="search" placeholder="搜索问题，如：退税、济州、插头、支付宝" autocomplete="off" aria-label="搜索常见问题">
+    <p id="count">共 72 个问题，点问题展开答案</p>
+    <div class="toc">
+      <a href="#visa">签证相关</a>
+      <a href="#flight">机票、交通、出入境</a>
+      <a href="#stay">住宿问题</a>
+      <a href="#pay">通讯、支付、货币</a>
+      <a href="#play">游玩攻略、景点、行程规划</a>
+      <a href="#food">美食、饮食</a>
+      <a href="#shop">购物、免税店</a>
+      <a href="#back">返程和其他问题</a>
+    </div>
+    <p class="tip" style="margin:8px 0 0">面向持中国普通护照的短期游客。本页根据官方公开页面于2026年11月整理；签证、免签、价格和退税规定经常调整，出行前请以韩国驻华使领馆、海关和各景点官网为准。本站只提供经验和信息参考，<strong>不提供签证代办</strong>，也不推荐任何旅行社、医院或包车公司。更多实用贴士见 <a href="/tips" style="color:#2c7be5">攻略</a>。</p>
+  </div>
+
+  <section class="sec" id="visa" data-sec="visa">
+    <h2>一、签证相关<span class="n">10问</span></h2>
+      <details class="qa" id="visa-1">
+        <summary>去韩国需要办什么签证？个人旅游签、C-3-9单次、五年多次、十年多次签证分别有什么区别？</summary>
+        <div class="ans">持中国普通护照自由行去首尔、釜山等地，一般办<strong>C-3-9 个人旅游签证</strong>；直飞济州可免签（见第7问）。单次签证只能入境一次；五年、十年多次签证在有效期内可多次往返，每次停留天数以签证上写的为准。2026年3月30日起韩国放宽了多次签：<strong>去过韩国的人可申请5年多次</strong>，北京、上海、广州、深圳、天津、南京、<strong>青岛</strong>、重庆、厦门、杭州、苏州、宁波、长沙、武汉14个城市户籍居民等可申请最长10年多次（2026年11月查询）。3人以上通过指定旅行社报名的<strong>中国团队游客可免签停留最长15天</strong>，该政策已延长到2026年12月31日，之后是否续期请看使领馆公告。</div>
+      </details>
+      <details class="qa" id="visa-2">
+        <summary>单次韩国签证有效期多久？停留期是多少天？五年多次每次最多能待几天？</summary>
+        <div class="ans">单次旅游签证一般<strong>有效期3个月</strong>（须在这3个月内入境），停留期常见为30天。五年、十年多次签证每次停留期以签证确认书上的「停留期间」为准，领馆材料写的是每次不超过90天（2026年11月查询）。不要只看「有效期」，超过停留期会被认定为非法滞留。</div>
+      </details>
+      <details class="qa" id="visa-3">
+        <summary>办理韩国签证需要什么材料？山东莱西/青岛户籍，材料有没有简化？要不要银行流水、在职证明？自由职业、宝妈、学生怎么办理？</summary>
+        <div class="ans">山东户籍归<strong>韩国驻青岛总领事馆</strong>管辖，在青岛的韩国签证申请中心递交，申请表须在电脑上填好后打印，不接受手写和邮寄。单次签证常见材料：护照、3.5×4.5cm白底照片、申请表、身份证、户口本复印件；成人另需<strong>近6个月银行流水、社保明细、个税证明中任选两项</strong>（非户籍地居住的还要暂住证明）。青岛户籍属于10年多次签的14个城市之一，但莱西等县级市是否在范围内，请以青岛总领馆最新材料清单为准。自由职业和宝妈可用本人或配偶的经济材料（配偶材料需附亲属关系证明）；学生交在读证明或学信网学籍报告，加父母经济材料。</div>
+      </details>
+      <details class="qa" id="visa-4">
+        <summary>签证办理多长时间出签？能不能加急？加急多少钱？</summary>
+        <div class="ans">韩国旅游发展局写的是 C-3-9 平均约<strong>10个工作日</strong>，部分领区材料写6个工作日，要补材料会更久。旅游签证原则上<strong>不能随便加急</strong>，只有家人病危、去世等特殊人道理由才可申请。领馆材料里的签证费：单次280元、多次630元，签证中心另收服务费（2026年11月查询），以申请中心公告为准；被拒签费用不退。</div>
+      </details>
+      <details class="qa" id="visa-5">
+        <summary>签证照片要求是什么？尺寸、底色、能不能戴眼镜？</summary>
+        <div class="ans"><strong>3.5cm×4.5cm 彩色照片，纯白底，无边框</strong>，近6个月内拍摄，脸长约占2.5–3.5cm，露出耳朵和脸部轮廓。韩国法务部规定原则上<strong>不戴眼镜</strong>，墨镜、有色眼镜、美瞳都不行。不接受自拍、扫描或过度修图的照片，建议到照相馆说明是韩国签证。</div>
+      </details>
+      <details class="qa" id="visa-6">
+        <summary>没有社保、存款不多，能不能办韩国多次签？拒签了怎么办？拒签记录会不会影响下次申请？</summary>
+        <div class="ans">多次签要符合具体资格（如去过韩国、指定城市户籍、一定收入或资产等），不符合的可以先办单次，没有社保可用银行流水和个税证明等凑够两项。按韩国驻华使馆规定，一般签证被拒后通常要<strong>满2个月才能再申请</strong>，拒签记录会留在系统里，下次要如实填写。建议补齐材料再申请，不要相信「包过」「花钱消除记录」之类的说法。</div>
+      </details>
+      <details class="qa" id="visa-7">
+        <summary>济州岛免签是真的吗？济州岛免签可以直接飞吗？需要准备什么材料？免签能待多久？济州岛能不能坐船去首尔？</summary>
+        <div class="ans">是真的。须<strong>从境外直飞（或乘船直达）济州</strong>，免签停留<strong>最长30天</strong>，只能在济州活动；经首尔、釜山转机进入的不适用。持直达航班免签进入济州一般<strong>不用办K-ETA</strong>，但要填入境卡，建议带好返程机票、酒店订单和行程。<strong>免签入境后不能自行坐船或飞机去首尔等地</strong>，离开济州去本土需另获许可，一般做法是持签证入境。</div>
+      </details>
+      <details class="qa" id="visa-8">
+        <summary>签证办好之后，有效期内随便什么时候都能去吗？有没有入境限制？</summary>
+        <div class="ans">在签证有效期内可以入境，但每次停留不能超过签证上写的停留期。签证只是入境资格，<strong>能否入境由入境审查官决定</strong>，行程说不清、无返程、像打工的都可能被拒绝入境。持旅游签证不能工作，包括直播带货、打零工。</div>
+      </details>
+      <details class="qa" id="visa-9">
+        <summary>电子签和贴纸签有什么不一样？入境的时候出示哪个？</summary>
+        <div class="ans">韩国驻华使领馆自2020年7月起发<strong>电子签证</strong>，护照上不再贴签证。出签后在 visa.go.kr 用护照号和出生日期查询并打印「签证签发确认书」，效力和贴纸签证一样。值机和入境时出示<strong>护照+打印的签证确认书</strong>，手机里也存一份备用。</div>
+      </details>
+      <details class="qa" id="visa-10">
+        <summary>儿童办理韩国签证需要额外材料吗？未成年人单独出行或者只跟一方家长出行需要公证吗？</summary>
+        <div class="ans">儿童同样要单独办签证，一般需出生证明或户口本等<strong>亲属关系证明</strong>和父母的经济材料。不与父母同行（或只跟一方）的，领馆材料通常要求<strong>父母同意书</strong>、父母护照或签证页复印件及关系证明。是否需要公证以青岛总领馆当期清单为准；出行时建议随身带同意书和关系证明原件或复印件，以备航空公司或边检询问。</div>
+      </details>
+  </section>
+
+  <section class="sec" id="flight" data-sec="flight">
+    <h2>二、机票、交通、出入境<span class="n">16问</span></h2>
+      <details class="qa" id="flight-1">
+        <summary>【机票】青岛飞韩国（首尔仁川、金浦、釜山）航班有哪些？直飞多久？大概机票价格区间？淡季、旺季分别是什么时候？</summary>
+        <div class="ans">青岛胶东机场飞首尔<strong>主要到仁川</strong>，山东航空、东方航空、大韩航空、济州航空、真航空、青岛航空、德威航空等都有执飞，日均约20班，飞行约<strong>1.5小时</strong>；另有飞釜山、济州、大邱、清州的航线，青岛直飞金浦不常见（2026年11月查询）。票价波动大，淡季单程常见几百元起，节假日可能翻倍，以航司官网实时价为准。旺季：春节、五一、暑假、国庆，以及4月樱花、10–11月红叶；淡季多在3月、6月、11月下旬到12月中旬平日。</div>
+      </details>
+      <details class="qa" id="flight-2">
+        <summary>什么时候买机票最便宜？往返机票、单程机票怎么选？行李额包含多少？</summary>
+        <div class="ans">一般提前1–2个月、避开节假日和周五周日出发更便宜。行程确定的话往返票常比两张单程便宜，但要比较两边价格。<strong>行李额各航司和票价等级不同</strong>，廉价航空的最低价常不含托运行李，买票前看清「行李额」一栏；回程买化妆品多的，建议提前加购托运额度。</div>
+      </details>
+      <details class="qa" id="flight-3">
+        <summary>仁川机场和金浦机场有什么区别？哪个离市区更近？</summary>
+        <div class="ans"><strong>仁川</strong>是主要国际机场，航线最多，离首尔市区较远，机场铁路到首尔站约1小时（直达车更快）。<strong>金浦</strong>离市区更近，去弘大、明洞更方便，但国际航线以日本、中国部分城市短线为主。买票时看清机场代码：ICN 是仁川，GMP 是金浦。</div>
+      </details>
+      <details class="qa" id="flight-4">
+        <summary>航班延误、取消怎么办？韩国航司退票改签规则复杂吗？</summary>
+        <div class="ans">先在航司App或柜台确认改签、退票或餐食住宿安排，保留登机牌和延误证明。退改规则取决于<strong>票价等级</strong>，不是航司国籍：特价票常不可退或手续费高，在第三方平台买的票须通过该平台办理。买票时留意规则和购票渠道，有纠纷可向航司或民航主管部门投诉。</div>
+      </details>
+      <details class="qa" id="flight-5">
+        <summary>能不能买联程票？中转需要韩国签证吗？</summary>
+        <div class="ans">可以，同一张票的联程行李一般直挂到终点。在仁川<strong>不出机场隔离区转机，一般不需要韩国签证</strong>。想出机场短暂停留的，持美国、加拿大、澳大利亚、新西兰或指定欧洲国家有效签证并前往或来自这些国家等条件下，可免签入境最长30天，条件较细，出发前在 visa.go.kr 或航司处确认。</div>
+      </details>
+      <details class="qa" id="flight-6">
+        <summary>【入境海关】入境韩国需要填什么表？入境卡、海关申报单怎么填？有没有中文版本？现在是不是电子化申报？</summary>
+        <div class="ans">入境卡可在官网 <a href="https://www.e-arrivalcard.go.kr" target="_blank" rel="noopener">e-arrivalcard.go.kr</a> 免费<strong>提前3天在线填写</strong>（电子入境卡），纸质入境卡目前仍可使用；中国团队游客团签等少数情况可免填（2026年11月查询）。海关方面，<strong>没有需要申报物品的走「无申报」通道</strong>，有超额物品、超过1万美元现金、肉类或农产品时要主动申报。机场有中文指引和平板电脑，不确定可问工作人员。</div>
+      </details>
+      <details class="qa" id="flight-7">
+        <summary>入境会抽查什么？现金要求是多少？需要带多少韩币现金备查？</summary>
+        <div class="ans">韩国<strong>没有规定游客必须带多少现金</strong>，入境审查官可能问来韩目的、住哪、待几天、何时回程，可能要求出示返程机票和酒店订单。携带现金和支票合计<strong>超过1万美元</strong>要向韩国海关申报；从中国出境时，人民币现钞超过2万元、外币超过等值5000美元也有申报或携带证规定。准备少量韩币应急即可。</div>
+      </details>
+      <details class="qa" id="flight-8">
+        <summary>哪些东西不能带进韩国？肉类、水果、咸菜、零食、中成药能不能带？电子烟可以入境吗？</summary>
+        <div class="ans"><strong>新鲜水果、蔬菜禁止带入</strong>；<strong>肉类及肉制品（香肠、肉干、含肉零食等）</strong>没有检疫证明基本不能带，不申报被查到最高可罚1000万韩元。咸菜、坚果、种子等农产品须在检疫台申报，由检疫官决定能否放行。中成药限合理自用量，含麻黄等受管制成分的可能被扣；电子烟可以带，免税限额为烟液20ml（2026年11月查询）。</div>
+      </details>
+      <details class="qa" id="flight-9">
+        <summary>化妆品、护肤品买多了回国会不会被海关查？回国免税额度是多少？</summary>
+        <div class="ans">会。中国海关规定，居民旅客在境外获得的个人自用物品<strong>总值5000元人民币以内免税</strong>；在设有口岸进境免税店的口岸，再加进境免税店购物，合计<strong>8000元以内</strong>免税（2026年11月查询）。超出部分要征税（高档化妆品税率50%），明显超过自用数量的按货物处理，<strong>代购带货可能构成走私</strong>。超额请走申报通道，保留小票。</div>
+      </details>
+      <details class="qa" id="flight-10">
+        <summary>入境会问什么问题？英语不好怎么办？</summary>
+        <div class="ans">常见问题：来韩国做什么、待几天、住哪里、跟谁来、有没有返程机票。可以用简单韩语、英语或中文回答，提前把酒店地址、返程机票打印或截图，必要时直接出示。可用 Papago 翻译，或拨打<strong>1330旅游热线</strong>（有中文）请求帮助。</div>
+      </details>
+      <details class="qa" id="flight-11">
+        <summary>【境内交通】首尔市内怎么坐车？地铁怎么坐？有没有中文地铁图？地铁卡T-money在哪里买、怎么充值？</summary>
+        <div class="ans">首尔地铁覆盖主要景点，站内有中文标识和中文广播。T-money 卡在<strong>便利店（CU、GS25、7-Eleven等）和地铁站</strong>都能买，多数充值要用现金。查路线推荐 <strong>Naver地图</strong>（有中文界面），也可用本站首页的「地铁」路线功能；高德地图也可参考。</div>
+      </details>
+      <details class="qa" id="flight-12">
+        <summary>机场到市区怎么去？机场大巴、机场铁路AREX、出租车哪个划算？大概多少钱？</summary>
+        <div class="ans"><strong>机场铁路AREX</strong>最省钱：普通车到首尔站，刷交通卡约4,750韩元（1号航站楼）；直达车到首尔站约13,000韩元（2026年11月查询）。机场大巴可直达明洞、东大门、江南等酒店附近，适合行李多。出租车最贵，到市区常见数万到近10万韩元（含过路费，看距离和时段），多人、深夜或行李多时可考虑。</div>
+      </details>
+      <details class="qa" id="flight-13">
+        <summary>首尔去釜山、济州岛怎么去？高铁KTX怎么买票？可以提前线上买票吗？</summary>
+        <div class="ans">首尔到釜山坐<strong>KTX</strong>最快约2小时15分起；也可坐高速巴士或飞机。KTX 可在韩国铁道官网（korail.com 外国人页面）或 KORAIL+ App 买票，一般<strong>出发前约2个月开售</strong>，周末、节假日要早买；外国游客还可买 KORAIL Pass（2026年11月查询）。去<strong>济州</strong>基本坐飞机（金浦、釜山等都有很多班），也有部分港口的渡轮。</div>
+      </details>
+      <details class="qa" id="flight-14">
+        <summary>韩国打车贵不贵？出租车能不能刷支付宝/微信？会不会拒载？</summary>
+        <div class="ans">首尔普通出租车白天起步价<strong>4,800韩元</strong>（1.6公里内），<strong>22:00–04:00夜间加价</strong>，其中23:00–02:00加价更高；黑色模范出租更贵（2026年11月查询）。出租车普遍能刷卡，银联卡和银联云闪付多数可用，部分车辆和叫车App支持支付宝、微信，上车前问司机最稳妥。拒载违法但深夜热门地段确实会遇到，可用叫车App并给司机看韩文地址或 Naver 地图链接。</div>
+      </details>
+      <details class="qa" id="flight-15">
+        <summary>自驾需要韩国驾照吗？中国驾照能不能直接用？</summary>
+        <div class="ans"><strong>中国大陆驾照在韩国不能用</strong>，国内办的「国际驾照翻译件」也不行，因为中国未加入日内瓦/维也纳道路交通公约，两国也没有驾照互认（2026年11月查询）。游客没有韩国驾照就<strong>不能租车自驾</strong>（包括济州岛），济州等地议论过开放，但目前没有实施。替代方案：公交、出租车或预约正规包车。</div>
+      </details>
+      <details class="qa" id="flight-16">
+        <summary>城市之间大巴怎么乘坐？站点好找吗？</summary>
+        <div class="ans">城市间有高速巴士和市外巴士，首尔主要从<strong>首尔高速巴士客运站</strong>（江南）和<strong>东首尔客运站</strong>出发，地铁可直达。可在车站售票机或窗口买票，也可在官方网站 kobus.co.kr、bustago.or.kr 预订（外国卡支付可能受限）。车票上有站台号，按号候车即可；节假日要提前买。</div>
+      </details>
+  </section>
+
+  <section class="sec" id="stay" data-sec="stay">
+    <h2>三、住宿问题<span class="n">7问</span></h2>
+      <details class="qa" id="stay-1">
+        <summary>韩国酒店、民宿怎么选？</summary>
+        <div class="ans">第一次去建议选<strong>交通方便、有前台的酒店</strong>，靠近地铁站最省事。民宿选择正规登记、评价多、有实拍照片的，下单前看清取消政策和入住人数。不要通过私人转账预订来路不明的房源。</div>
+      </details>
+      <details class="qa" id="stay-2">
+        <summary>酒店一般几点入住、几点退房？能不能提前入住、延迟退房？寄存行李收费吗？</summary>
+        <div class="ans">常见<strong>15:00入住、11:00退房</strong>，以各酒店规定为准。提前入住、延迟退房看当天房态，有的免费、有的收费。多数酒店可在入住前和退房后<strong>免费寄存行李</strong>。</div>
+      </details>
+      <details class="qa" id="stay-3">
+        <summary>韩国酒店有没有一次性牙刷牙膏、拖鞋？</summary>
+        <div class="ans"><strong>很多韩国酒店不主动提供一次性牙刷、牙膏和拖鞋</strong>，这是减少一次性用品的趋势，部分酒店前台可索取或收费。建议自带洗漱用品和拖鞋；便利店也能买到。</div>
+      </details>
+      <details class="qa" id="stay-4">
+        <summary>住宿位置怎么选？首尔住明洞、弘大、江南、东大门各有什么优缺点？</summary>
+        <div class="ans"><strong>明洞</strong>：购物、换钱、免税店集中，机场大巴多，人多、价格偏高。<strong>弘大</strong>：年轻热闹、夜生活多，去仁川机场铁路方便，晚上较吵。<strong>江南</strong>：皮肤科医美多、商圈新，离老城景点较远。<strong>东大门</strong>：夜间购物方便，交通枢纽多，酒店性价比较好。按自己行程重心选，靠近地铁站最重要。</div>
+      </details>
+      <details class="qa" id="stay-5">
+        <summary>民宿安全吗？有没有门禁？</summary>
+        <div class="ans">正规民宿和公寓大多有<strong>电子密码锁或门禁</strong>，总体安全。入住后修改或确认门锁、不要把密码告诉陌生人，贵重物品随身或放保险箱。中国驻韩机构也提醒过注意住宿门锁安全；遇到紧急情况拨112报警。</div>
+      </details>
+      <details class="qa" id="stay-6">
+        <summary>酒店押金怎么付？可以用人民币、支付宝吗？退房押金多久退回？</summary>
+        <div class="ans">很多酒店入住时会<strong>预授权信用卡</strong>或收韩币现金押金，一般不收人民币。部分酒店支持支付宝等，以前台为准。预授权退房后释放，到账时间看发卡银行，常见几天到两周；现金押金一般退房时当面退。</div>
+      </details>
+      <details class="qa" id="stay-7">
+        <summary>带孩子出行，有没有家庭房？能不能加床？</summary>
+        <div class="ans">不少酒店有家庭房或三人房，公寓式酒店空间更大。加床、儿童是否计入人数各酒店规定不同，<strong>预订时如实填写儿童人数和年龄</strong>，不要私自多住人。需要婴儿床的提前联系酒店。</div>
+      </details>
+  </section>
+
+  <section class="sec" id="pay" data-sec="pay">
+    <h2>四、通讯、支付、货币<span class="n">6问</span></h2>
+      <details class="qa" id="pay-1">
+        <summary>去韩国手机上网怎么解决？电话卡、eSIM、随身WiFi哪个更好用？价格多少？</summary>
+        <div class="ans">手机支持 eSIM 的，<strong>eSIM 最方便</strong>，不用换卡，几天流量套餐常见几十元人民币。实体电话卡适合需要韩国号码的人；随身WiFi适合多人共用，但要充电、归还。价格各平台不同，出发前比较；在机场现买一般比提前买贵。</div>
+      </details>
+      <details class="qa" id="pay-2">
+        <summary>国内手机到韩国可以直接漫游吗？信号怎么样？</summary>
+        <div class="ans">可以，出发前向自己的运营商确认<strong>已开通国际漫游</strong>，并了解日包资费（以运营商公布为准）。韩国城市和地铁里信号很好。漫游的好处是国内号码能正常收验证码，很多人用「漫游接短信+eSIM上网」的组合。</div>
+      </details>
+      <details class="qa" id="pay-3">
+        <summary>韩国可以微信、支付宝付款吗？哪些地方支持？商场、便利店、路边小店都能用吗？</summary>
+        <div class="ans"><strong>明洞、弘大等商圈的大商场、免税店、Olive Young、主要便利店</strong>越来越多支持支付宝、微信支付，结账前看门口标识或问店员。路边小摊、传统市场和不少小饭馆仍<strong>只收现金或韩国卡</strong>。建议准备少量韩币，再带一张银联卡或Visa/万事达卡。</div>
+      </details>
+      <details class="qa" id="pay-4">
+        <summary>韩币在哪里换最合适？国内银行换还是到韩国机场换？换多少合适？</summary>
+        <div class="ans">常见做法：国内银行换少量应急，到首尔后在<strong>明洞等地有公示汇率的正规换钱所</strong>换主要部分，当场点清。机场换汇方便但汇率一般较差，只换车费即可。很多地方能刷卡和扫码，现金按每天小吃、交通、市场消费准备就够；不要私下找人换钱。</div>
+      </details>
+      <details class="qa" id="pay-5">
+        <summary>韩国刷卡方便吗？银联卡能不能直接刷？有没有手续费？</summary>
+        <div class="ans">韩国刷卡非常普及，<strong>银联卡在多数商户和出租车可用</strong>，Visa、万事达更通用。很多国内银联卡境外刷卡免货币转换费，Visa/万事达卡常有约1%–2%的货币转换费，具体以发卡行规定为准。刷卡时选择用<strong>韩元结算</strong>，避免被按人民币动态货币转换多收钱。</div>
+      </details>
+      <details class="qa" id="pay-6">
+        <summary>汇率大概多少？去哪里看实时汇率？</summary>
+        <div class="ans">2026年11月中旬约<strong>1元人民币≈200韩元</strong>，汇率天天变。实时汇率可看中国银行等银行官网、支付宝/微信里的汇率工具；本站也有「汇率换算」小工具（默认汇率仅供参考）。实际兑换价以换钱所和银行当日牌价为准。</div>
+      </details>
+  </section>
+
+  <section class="sec" id="play" data-sec="play">
+    <h2>五、游玩攻略、景点、行程规划<span class="n">11问</span></h2>
+      <details class="qa" id="play-1">
+        <summary>韩国最佳旅游季节是什么时候？春天看樱花、秋天看红叶分别是什么时间？</summary>
+        <div class="ans">春（4–5月）、秋（9–11月）最舒服。首尔樱花一般在<strong>3月底到4月中旬</strong>，2026年汝矣岛樱花节是4月3日–12日；首尔红叶一般在<strong>10月下旬到11月上中旬</strong>，山区更早。夏季6月下旬到7月是雨季、闷热，冬季寒冷但有滑雪和圣诞氛围。</div>
+      </details>
+      <details class="qa" id="play-2">
+        <summary>第一次去韩国，安排几天合适？3天、4天、5天经典行程怎么安排？首尔一地，还是首尔+釜山？</summary>
+        <div class="ans">第一次去建议<strong>4–5天只玩首尔</strong>。3天：景福宫+北村/益善洞、明洞+南山塔、弘大或圣水洞。4–5天：再加乐天世界或爱宝乐园、江南/汉江、东大门夜市。想去釜山的，建议总共6天以上（首尔4天+釜山2天，KTX约2.5小时）。</div>
+      </details>
+      <details class="qa" id="play-3">
+        <summary>必去景点有哪些：景福宫、北村韩屋村、弘大、明洞、南山塔、乐天世界、爱宝乐园分别值得去吗？门票多少钱？要不要提前预约？</summary>
+        <div class="ans">都值得，看兴趣选。<strong>景福宫</strong>成人门票3,000韩元、每周二闭馆，穿韩服免费；北村韩屋村、弘大、明洞免费逛（北村是居民区，部分区域有限制通行时段，请保持安静）（2026年11月查询）。南山塔上观景台要买票；乐天世界、爱宝乐园门票较贵且按日期浮动，<strong>官网或官方App提前买常有优惠</strong>。具体票价见各景点官网和本站 <a href="/attractions">景点</a> 页。</div>
+      </details>
+      <details class="qa" id="play-4">
+        <summary>景福宫租韩服多少钱？有没有免费租韩服的活动？</summary>
+        <div class="ans">景福宫附近韩服店很多，基础款常见约<strong>1.5万–2万韩元/2–4小时</strong>，做发型、选高级款另收费（2026年11月查询）。宫殿本身不免费出借韩服，但<strong>穿符合规定的韩服可免费进景福宫等宫殿</strong>。偶尔有政府或旅游机构的免费体验活动，以 VisitKorea 公告为准。</div>
+      </details>
+      <details class="qa" id="play-5">
+        <summary>乐天世界和爱宝乐园哪个更好玩？适合大人还是小朋友？</summary>
+        <div class="ans"><strong>乐天世界</strong>在首尔蚕室，地铁直达，室内+室外，下雨天也能玩，适合时间紧的游客。<strong>爱宝乐园</strong>在龙仁，从首尔过去约1小时，面积大、有动物园和熊猫馆、刺激项目多，适合留一整天。带小朋友两个都适合；只多一天又想省路程选乐天世界。</div>
+      </details>
+      <details class="qa" id="play-6">
+        <summary>有没有免费景点？哪些景点周一闭馆？</summary>
+        <div class="ans">免费的：<strong>国立中央博物馆（常设展）</strong>、清溪川、汉江公园、北村、益善洞、梨花壁画村、首尔路7017、首尔林等；穿韩服进宫殿也免费。<strong>景福宫周二闭馆</strong>；<strong>昌德宫、德寿宫、昌庆宫、宗庙等周一闭馆</strong>；很多博物馆和美术馆也是周一闭馆（2026年11月查询）。出行前查官网，见本站 <a href="/attractions">景点</a> 页。</div>
+      </details>
+      <details class="qa" id="play-7">
+        <summary>济州岛西线、东线、中线怎么玩？适合自驾还是包车？</summary>
+        <div class="ans"><strong>东线</strong>：城山日出峰、牛岛、涉地可支；<strong>西线</strong>：挟才海边、雪绿茶博物馆、翰林公园一带；<strong>南线</strong>（西归浦、中文）：瀑布和海岸；<strong>中线</strong>：汉拿山徒步。中国驾照在韩国不能用，所以游客<strong>不能自驾</strong>，可选公交（便宜但慢）、出租车或正规包车，包车价格和包含项目事先书面确认。</div>
+      </details>
+      <details class="qa" id="play-8">
+        <summary>海边、海岛什么时候去合适？</summary>
+        <div class="ans">海水浴季主要在<strong>7–8月</strong>，釜山海云台等海水浴场正式开放期以当地公告为准。5–6月和9–10月看海、散步最舒服。8–9月可能有台风，出行前关注天气和航班、渡轮停航信息。</div>
+      </details>
+      <details class="qa" id="play-9">
+        <summary>有没有小众打卡地？避开人群的地方？</summary>
+        <div class="ans">首尔可去西村、望远洞、首尔林周边、解放村，釜山可去白浅滩文化村、影岛一带。热门地（景福宫、明洞、圣水洞）避开周末和中午，<strong>工作日早上</strong>去人最少。小巷和住宅区请小声、不要随便拍居民。</div>
+      </details>
+      <details class="qa" id="play-10">
+        <summary>当地一日游、包车靠谱吗？包车一天多少钱？中文司机好找吗？</summary>
+        <div class="ans">选择<strong>正规登记的旅行社或客运公司</strong>，看清合同、保险和退改政策就比较放心。价格按车型、时长、路线差别很大，停车费、高速费、餐费是否包含要事先写清楚，本站不推荐具体公司。中文司机可以找到，但更建议确认对方有合法营运资质，避免黑车。</div>
+      </details>
+      <details class="qa" id="play-11">
+        <summary>景点有没有中文讲解？</summary>
+        <div class="ans">景福宫有<strong>免费中文讲解</strong>，目前为每天10:30和15:00（周二闭馆），在兴礼门内咨询处集合，10人以下不用预约（2026年11月查询）；其他宫殿也有定时外语讲解，国立中央博物馆等有中文语音导览。大多数景点有中文标识或说明牌。遇到语言问题可拨<strong>1330</strong>（中文旅游咨询翻译）。</div>
+      </details>
+  </section>
+
+  <section class="sec" id="food" data-sec="food">
+    <h2>六、美食、饮食<span class="n">6问</span></h2>
+      <details class="qa" id="food-1">
+        <summary>韩国必吃美食有哪些：烤肉、部队锅、参鸡汤、石锅拌饭、酱蟹、鱼饼汤、冷面推荐吗？</summary>
+        <div class="ans">都推荐，按口味选：<strong>烤五花肉/韩牛</strong>、<strong>参鸡汤</strong>（不辣，适合老人小孩）、<strong>石锅拌饭</strong>、<strong>酱蟹</strong>（生腌，肠胃敏感慎吃）、部队锅、冷面（夏天最好）、炸鸡、辣炒年糕。具体店铺按区域筛选，见本站 <a href="/food">美食</a> 页。</div>
+      </details>
+      <details class="qa" id="food-2">
+        <summary>不吃辣能不能在韩国吃饭？很多菜是不是都很辣？有没有不辣的选择？</summary>
+        <div class="ans">可以。韩国辣菜多，但也有很多不辣的：<strong>参鸡汤、烤肉、雪浓汤、牛骨汤、酱油炸鸡、紫菜包饭、韩式粥</strong>等。点餐时可以说「안 맵게 해 주세요」（请做不辣的），本站「沟通卡」也能出示给店员看。</div>
+      </details>
+      <details class="qa" id="food-3">
+        <summary>韩国烤肉怎么点餐？人均大概多少钱？</summary>
+        <div class="ans">很多烤肉店<strong>按人份点，常要求至少点2人份</strong>，一人用餐可找「1人烤肉」店。泡菜、生菜等小菜一般免费续。普通五花肉店人均常见约2万–3万多韩元，韩牛店贵很多，以菜单价格为准（2026年11月查询）。</div>
+      </details>
+      <details class="qa" id="food-4">
+        <summary>咖啡店多吗？韩国咖啡贵不贵？</summary>
+        <div class="ans"><strong>非常多</strong>，几乎每条街都有。平价连锁美式咖啡常见约2千韩元左右，星巴克等品牌和网红店约4千–7千韩元以上（2026年11月查询）。圣水洞、益善洞的网红咖啡店环境好，但价格偏高、周末排队。</div>
+      </details>
+      <details class="qa" id="food-5">
+        <summary>素食游客在韩国吃饭方便吗？</summary>
+        <div class="ans">不算特别方便：很多汤和小菜用<strong>鳀鱼、虾酱或肉汤</strong>调味，看起来是素的也不一定纯素。可找寺庙料理、标明 vegan 的餐厅，或用 Naver 地图搜「비건」（vegan）。点餐时可出示「고기, 생선, 젓갈 빼 주세요」（不要肉、鱼、鱼虾酱）。</div>
+      </details>
+      <details class="qa" id="food-6">
+        <summary>便利店有什么好吃的？必买零食是什么？</summary>
+        <div class="ans">便利店热门：<strong>三角饭团、便当、香蕉牛奶、杯面（可现场冲泡）、炸鸡、关东煮</strong>，晚上很方便。常见伴手零食：调味海苔、蜂蜜黄油薯片、各种饼干和韩式辣酱小包装。买得多的话，大超市通常比便利店便宜。</div>
+      </details>
+  </section>
+
+  <section class="sec" id="shop" data-sec="shop">
+    <h2>七、购物、免税店<span class="n">6问</span></h2>
+      <details class="qa" id="shop-1">
+        <summary>韩国免税店在哪里？乐天、新罗、新世界免税店哪个价格划算？线上免税店和线下哪个便宜？</summary>
+        <div class="ans">市内免税店主要在<strong>明洞（乐天、新世界）、奖忠洞（新罗）、江南三成洞（现代）</strong>等，仁川、金浦、釜山、济州机场也有。各家价格和优惠券活动常变，<strong>没有哪家固定最便宜</strong>，建议用官方App比价。线上免税店常有更多优惠券，但须在出境前按规定时间下单，并在机场提货。</div>
+      </details>
+      <details class="qa" id="shop-2">
+        <summary>免税店购买流程是什么？提货分机场提货、现场提货有什么区别？</summary>
+        <div class="ans">购买时出示<strong>护照和回程机票信息</strong>。进口商品一般要<strong>在出境时到机场提货点领取</strong>；部分韩国国产品可当场带走，但仍须随身带出境。机场提货点排队较长，建议出发当天预留足够时间，至少在起飞前1小时到提货点。</div>
+      </details>
+      <details class="qa" id="shop-3">
+        <summary>护肤品、彩妆、手表、包包、保健品哪些在韩国买划算？</summary>
+        <div class="ans"><strong>韩国本土护肤品、彩妆、面膜</strong>在 Olive Young 和品牌店常有折扣，最划算；红参等保健品也很常见。国际大牌包、手表价格要和国内专柜、国内免税店比较，不一定更便宜，而且<strong>回国超过5000元免税额度要缴税</strong>。具体看本站 <a href="/shopping">购物与退税</a> 和 <a href="/beauty">买妆</a> 页。</div>
+      </details>
+      <details class="qa" id="shop-4">
+        <summary>免税品有没有购买限额？一个人最多买多少？</summary>
+        <div class="ans">韩国已于2022年<strong>取消出境旅客5000美元的免税店购物上限</strong>，从韩国方面看买多少都可以。真正的限制在<strong>回国</strong>：中国居民旅客境外所得物品5000元以内免税（口岸进境免税店另计，合计8000元以内），超出要申报缴税（2026年11月查询）。烟酒另有数量限制：中国规定12度以上酒1.5升、香烟400支内免税。</div>
+      </details>
+      <details class="qa" id="shop-5">
+        <summary>东大门、南大门怎么买衣服？营业时间是几点？</summary>
+        <div class="ans"><strong>东大门</strong>分零售商场和批发商场：零售商场一般营业到深夜，批发商场多为夜间营业，部分档口不零售，周末有休息时段。<strong>南大门市场</strong>以白天营业为主，很多店<strong>周日休息</strong>。具体时间各楼不同，出发前在 Naver 地图查最新营业时间；砍价要礼貌，付现金有时更好谈。</div>
+      </details>
+      <details class="qa" id="shop-6">
+        <summary>免税店可以用支付宝、微信吗？</summary>
+        <div class="ans"><strong>乐天、新罗、新世界等主要免税店普遍支持支付宝，多数也支持微信支付</strong>，银联卡也可以用。不同门店和柜台可能不同，付款前确认。线上免税店也提供支付宝等付款方式，以官方页面为准。</div>
+      </details>
+  </section>
+
+  <section class="sec" id="back" data-sec="back">
+    <h2>八、返程和其他问题<span class="n">10问</span></h2>
+      <details class="qa" id="back-1">
+        <summary>返程提前多久到仁川机场？值机和免税提货要多久？</summary>
+        <div class="ans">国际航班建议<strong>起飞前3小时</strong>到仁川，节假日和要办退税的再提前30–60分钟。值机柜台一般在<strong>起飞前1小时截止</strong>，以航司为准。先办退税的海关确认和托运，过安检后再去免税提货点，<strong>至少在起飞前1小时到提货点</strong>；注意仁川有1号、2号两个航站楼，先确认自己航司在哪个楼。</div>
+      </details>
+      <details class="qa" id="back-2">
+        <summary>免税店买的液体（化妆水、酒）可以随身带上飞机吗？转机怎么办？</summary>
+        <div class="ans">在仁川机场安检后购买或提取的超过100ml液体，由店家装进<strong>防拆封透明袋（STEB）</strong>并附小票，<strong>直飞</strong>可以随身带上飞机，到达前不要拆封。<strong>转机</strong>时，中转机场按当地规定重新安检，可能被没收，购买前先查中转机场规定，稳妥做法是托运或换直飞。市内免税店买的液体同样以封袋形式在机场提货。</div>
+      </details>
+      <details class="qa" id="back-3">
+        <summary>韩国有什么特产、伴手礼适合送人？</summary>
+        <div class="ans">常见：<strong>韩国护肤品和面膜、红参制品、调味海苔、蜂蜜黄油薯片等零食、韩式辣酱</strong>，以及传统工艺小饰品。泡菜、酱料等液体食品须<strong>密封托运</strong>，不能随身过安检。回国能否携带以中国海关《禁止携带、寄递进境的动植物及其产品名录》为准，新鲜人参等新鲜植物产品不要带，酒类注意1.5升免税限量。</div>
+      </details>
+      <details class="qa" id="back-4">
+        <summary>韩国插头是什么样的？需要转换插头吗？</summary>
+        <div class="ans">韩国电压<strong>220V、60Hz</strong>，插座是<strong>两个圆孔</strong>（欧标/德标），国内扁插头插不进去，<strong>需要转换插头</strong>。手机、电脑充电器大多支持100–240V，只换插头就行；国内电吹风等电器电压同为220V，一般可用。</div>
+      </details>
+      <details class="qa" id="back-5">
+        <summary>韩国天气怎么样？和国内温差大吗？穿什么衣服？</summary>
+        <div class="ans">首尔纬度和山东差不多，气候相近但<strong>冬天更冷、更干</strong>，12月到2月最低常在零下，寒潮时可到零下十几度；夏天6月下旬到7月为雨季，闷热。春秋昼夜温差大，建议<strong>洋葱式穿法</strong>；冬天室内暖气很足，外套方便脱最好。出发前看韩国气象厅或天气App。</div>
+      </details>
+      <details class="qa" id="back-6">
+        <summary>韩国自来水能直接喝吗？公共场所有饮用水吗？</summary>
+        <div class="ans">首尔自来水（Arisu）经官方检测<strong>可以直接饮用</strong>，但旧楼水管可能影响水质，很多当地人也会喝烧开水或桶装水。<strong>餐厅一般免费提供饮用水</strong>（常是自助）；公园、地铁站等有部分饮水台。不放心就在便利店买瓶装水。</div>
+      </details>
+      <details class="qa" id="back-7">
+        <summary>自由行好还是跟团好？跟团会不会被强制购物？</summary>
+        <div class="ans"><strong>自由行</strong>时间自由，但要自己办签证（济州直飞除外）和安排行程；<strong>跟团</strong>省心，3人以上团队目前还可免签（政策至2026年12月31日）。中国《旅游法》<strong>禁止以不合理低价组团和强制购物</strong>，报名时选正规旅行社、签合同、看清购物店安排，「零团费」「超低价」团最容易出问题。遇到强制购物可保留证据，向12345或文化和旅游部门投诉。</div>
+      </details>
+      <details class="qa" id="back-8">
+        <summary>现在韩国游客多吗？什么时候人少？</summary>
+        <div class="ans">2026年中国游客明显增多，青岛到首尔航班也在加密。人最多的是<strong>中国春节、五一、暑假、国庆</strong>和<strong>韩国春节、中秋（秋夕）</strong>，以及4月樱花、10月下旬红叶期。想避开人流，选<strong>3月、6月、11月下旬到12月中旬的工作日</strong>；热门景点早上开门就去。</div>
+      </details>
+      <details class="qa" id="back-9">
+        <summary>韩国物价怎么样？吃一顿饭、一瓶水多少钱？</summary>
+        <div class="ans">大致比国内一线城市贵一些。普通一顿饭（拌饭、汤饭、面）常见约<strong>1万–1.5万韩元</strong>，烤肉人均2万–3万多韩元；便利店500ml瓶装水约1千多韩元（2026年11月查询）。按1元人民币约200韩元换算，1万韩元约50元人民币。</div>
+      </details>
+      <details class="qa" id="back-10">
+        <summary>回国后还能拿小票退税吗？退税流程和地点是什么？</summary>
+        <div class="ans">关键在<strong>离境当天</strong>：须在机场或港口，凭护照、退税单和<strong>未使用的商品</strong>完成海关出口确认（仁川可用自助机），之后在退税柜台或自助机领钱，或把盖章退税单投进机场退税邮箱、用退税公司的线上方式申请（2026年11月查询）。<strong>没在离境时做出口确认的，回国后一般无法再退</strong>；商品须在购买后3个月内带出境。用过「市内先退税」的，离境时也必须确认，否则已退税款会从信用卡扣回。单笔满<strong>15,000韩元</strong>才可退税；只通过官方退税点办理，不要把护照和退税单交给搭讪的「代办」，详见 <a href="/shopping">购物与退税</a>。</div>
+      </details>
+  </section>
+
+  <div class="empty" id="empty">没有找到相关问题，换个关键词试试，或到 <a href="/community" style="color:#2c7be5">社区</a> 提问。</div>
+
+  <div class="card src">
+    <h2 style="font-size:17px;margin:0 0 10px">来源（2026年11月查阅）</h2>
+    <ul>
+      <li><a href="https://www.mofa.go.kr/cn-shanghai-zh/brd/m_492/view.do?seq=760833" target="_blank" rel="noopener">韩国驻上海总领事馆 2026-06-22：中国团队游客阶段性免签延长至2026-12-31</a></li>
+      <li><a href="https://koreatourismtimes.com/article/2026-09-15/n4/zh" target="_blank" rel="noopener">Korea Tourism Times：团队免签条件（3人以上、15天、济州30天）</a></li>
+      <li><a href="https://www.moj.go.kr/bbs/immigration/214/607993/artclView.do" target="_blank" rel="noopener">韩国法务部 2026-07-01：6国团体签证手续费减免延长至年底</a></li>
+      <li><a href="https://chinese.visitkorea.or.kr/svc/contents/contentsView.do?vcontsId=1589034" target="_blank" rel="noopener">VisitKorea 中文：2026-03-30起放宽5年/10年多次签证</a></li>
+      <li><a href="https://cn.yna.co.kr/view/ACK20260331004500881" target="_blank" rel="noopener">韩联社：韩国对华放宽多次往返签证（14城市名单）</a></li>
+      <li><a href="https://chinese.visitkorea.or.kr/svc/contents/contentsView.do?vcontsId=189505" target="_blank" rel="noopener">VisitKorea 中文：韩国签证 A to Z（照片、平均审查约10个工作日）</a></li>
+      <li><a href="https://www.koreavisa-wh.com/files/visadoc/%E8%A7%82%E5%85%8925.02%201.pdf" target="_blank" rel="noopener">韩国签证申请中心（武汉）观光签证材料与手续费说明</a></li>
+      <li><a href="https://overseas.mofa.go.kr/cn-guangzhou-zh/brd/m_89/view.do?seq=726399" target="_blank" rel="noopener">韩国驻广州总领事馆：签证申请相片要求</a></li>
+      <li><a href="https://isr.mofa.go.kr/cn-zh/brd/m_23455/view.do?seq=2" target="_blank" rel="noopener">韩国驻华大使馆：签证申请及签发程序（拒签后再申请）</a></li>
+      <li><a href="https://www.mofa.go.kr/cn-qingdao-zh/index.do" target="_blank" rel="noopener">韩国驻青岛总领事馆（山东领区签证材料以此为准）</a></li>
+      <li><a href="https://www.visa.go.kr" target="_blank" rel="noopener">大韩民国签证门户（查询、打印电子签证确认书）</a></li>
+      <li><a href="https://www.k-eta.go.kr" target="_blank" rel="noopener">K-ETA 官方网站</a></li>
+      <li><a href="https://www.e-arrivalcard.go.kr/portal/guide/eacGuide.do" target="_blank" rel="noopener">韩国法务部：电子入境卡（e-Arrival Card）指南</a></li>
+      <li><a href="https://overseas.mofa.go.kr/us-seattle-en/brd/m_23042/view.do?seq=40" target="_blank" rel="noopener">韩国驻西雅图总领事馆：第三国中转旅客免签入境</a></li>
+      <li><a href="https://www.customs.go.kr/kcs_english/cm/cntnts/cntntsView.do?cntntsId=2715&amp;mi=8027" target="_blank" rel="noopener">韩国关税厅：入境旅客通关程序</a></li>
+      <li><a href="https://www.customs.go.kr/english/cm/cntnts/cntntsView.do?cntntsId=5500&amp;mi=10800" target="_blank" rel="noopener">韩国关税厅：携带货币申报（超过1万美元）</a></li>
+      <li><a href="https://customs.go.kr/english/cm/cntnts/cntntsView.do?mi=10803&amp;cntntsId=5504" target="_blank" rel="noopener">韩国关税厅：退税出口确认与3个月期限</a></li>
+      <li><a href="http://paper.people.com.cn/rmrbhwb/pc/content/202510/18/content_30110106.html" target="_blank" rel="noopener">人民日报海外版·海关答疑：回国5000元/8000元免税额度与烟酒限量</a></li>
+      <li><a href="https://www.gov.cn/zhengce/zhengceku/202411/P020241129805840429474.pdf" target="_blank" rel="noopener">《进境物品关税、增值税、消费税征收办法》（2024-12-01施行）</a></li>
+      <li><a href="http://english.customs.gov.cn/Statics/88707c1e-aa4e-40ca-a968-bdbdbb565e4f.html" target="_blank" rel="noopener">中国海关总署：旅客通关指南（携带现钞规定）</a></li>
+      <li><a href="http://www.caacnews.com.cn/1/5/202609/t20260930_1397634.html" target="_blank" rel="noopener">中国民航网 2026-09-30：青岛机场韩国航线日均约20–25班</a></li>
+      <li><a href="https://www.airportrailroad.com/train/express/introduce" target="_blank" rel="noopener">AREX 机场铁路：直达车介绍与票价</a></li>
+      <li><a href="https://www.korail.com/global/eng" target="_blank" rel="noopener">韩国铁道公社 KORAIL 外国人购票页</a></li>
+      <li><a href="https://english.seoul.go.kr/policy/transportation/modes-of-transport/taxi/" target="_blank" rel="noopener">首尔市：出租车起步价与夜间加价时段</a></li>
+      <li><a href="https://www.koreatimes.co.kr/lifestyle/travel-food/20260714/chinese-tourist-surge-reignites-debate-over-driving-in-jeju" target="_blank" rel="noopener">The Korea Times 2026-07-14：中国驾照在韩无效、济州开放仍在讨论</a></li>
+      <li><a href="https://english.visitkorea.or.kr/svc/contents/infoHtmlView.do?vcontsId=248765" target="_blank" rel="noopener">VisitKorea：退税完整指南（15,000韩元门槛、机场退税柜台、邮箱/手机退税）</a></li>
+      <li><a href="https://easylaw.go.kr/CSP/OnhunqueansInfoRetrieve.laf?onhunqnaAstSeq=87&amp;onhunqueSeq=3741" target="_blank" rel="noopener">韩国法制处生活法令：免税液体与防拆封袋</a></li>
+      <li><a href="https://www.koreaherald.com/article/2815750" target="_blank" rel="noopener">The Korea Herald：2022年取消出境免税购物上限</a></li>
+      <li><a href="https://english.visitkorea.or.kr/svc/contents/contentsView.do?vcontsId=140041" target="_blank" rel="noopener">VisitKorea：电压与插座（220V、双圆孔）</a></li>
+      <li><a href="https://arisu.seoul.go.kr/eng/sub?menukey=8023" target="_blank" rel="noopener">首尔自来水 Arisu 水质检测</a></li>
+      <li><a href="https://english.visitseoul.net/hallyu/wearhanbokvisitpalaces/ENN015747" target="_blank" rel="noopener">Visit Seoul：穿韩服免费参观宫殿</a></li>
+      <li><a href="https://royal.khs.go.kr/ENG/contents/E701000000.do" target="_blank" rel="noopener">韩国宫廷遗址本部：宫殿开放时间、闭馆日与门票</a></li>
+      <li><a href="https://royal.khs.go.kr/ROYAL/contents/R706010000.do" target="_blank" rel="noopener">宫陵遗址本部：景福宫讲解时间</a></li>
+      <li><a href="https://english.visitkorea.or.kr/svc/contents/contentsView.do?vcontsId=1593230" target="_blank" rel="noopener">VisitKorea：2026年红叶预报</a></li>
+      <li><a href="https://chinese.visitkorea.or.kr/svc/contents/contentsView.do?vcontsId=140655" target="_blank" rel="noopener">VisitKorea 中文：1330 旅游咨询翻译热线</a></li>
+    </ul>
+    <p class="tip">本页只提供出行参考，不构成签证、法律或税务建议，最终以主管机关当场审查为准。紧急情况拨 112（报警）/119（急救），旅游咨询拨 1330。</p>
+  </div>
+</main>
+<nav>
+  <a href="/?tab=cos"><i>💄</i>化妆品</a>
+  <a href="/?tab=sub"><i>🚇</i>地铁</a>
+  <a href="/attractions"><i>🗺️</i>景点</a>
+  <a href="/food"><i>🍜</i>美食</a>
+  <a href="/?tab=card"><i>💬</i>沟通卡</a>
+  <a href="/?tab=ph"><i>📍</i>常用句</a>
+</nav>
+
+<script src="/static/pwa.js" defer></script>
+<script>
+(function(){
+  var qs = Array.prototype.slice.call(document.querySelectorAll("details.qa"));
+  var secs = Array.prototype.slice.call(document.querySelectorAll("section.sec"));
+  var input = document.getElementById("q"), count = document.getElementById("count"), empty = document.getElementById("empty");
+  var total = qs.length;
+  qs.forEach(function(d){
+    var s = d.querySelector("summary");
+    d._q = s.textContent; d._a = d.querySelector(".ans").textContent;
+    d._s = s;
+  });
+  function escRe(s){ return s.replace(/[.*+?^${}()|[\]\\]/g, "\\$&"); }
+  function escHtml(s){ return s.replace(/[&<>"]/g, function(c){ return {"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;"}[c]; }); }
+  function run(){
+    var raw = input.value.trim();
+    var words = raw.toLowerCase().split(/\s+/).filter(Boolean);
+    var shown = 0;
+    qs.forEach(function(d){
+      var hay = (d._q + " " + d._a).toLowerCase();
+      var ok = words.every(function(w){ return hay.indexOf(w) !== -1; });
+      d.style.display = ok ? "" : "none";
+      if (words.length && words.length < 5) {
+        var re = new RegExp("(" + words.map(escRe).join("|") + ")", "gi");
+        d._s.innerHTML = escHtml(d._q).replace(re, "<mark>$1</mark>");
+      } else { d._s.textContent = d._q; }
+      if (ok) shown++;
+      if (ok && words.length && (d._a.toLowerCase().indexOf(words[0]) !== -1) && d._q.toLowerCase().indexOf(words[0]) === -1) d.open = true;
+    });
+    secs.forEach(function(s){
+      var any = s.querySelector("details.qa:not([style*='none'])");
+      s.style.display = any ? "" : "none";
+    });
+    count.textContent = words.length ? ("找到 " + shown + " / " + total + " 个问题") : ("共 " + total + " 个问题，点问题展开答案");
+    empty.style.display = shown ? "none" : "block";
+  }
+  var t; input.addEventListener("input", function(){ clearTimeout(t); t = setTimeout(run, 120); });
+  function openHash(){
+    var h = location.hash; if (!h) return;
+    var el = document.querySelector(h);
+    if (el && el.tagName === "DETAILS") { el.open = true; el.scrollIntoView(); }
+  }
+  window.addEventListener("hashchange", openHash);
+  openHash();
+})();
+</script>
+</body>
+</html>
