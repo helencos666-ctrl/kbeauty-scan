@@ -60,6 +60,7 @@
       '<div class="meta" style="margin-bottom:6px">' + (s.is_example ? '<span class="tag ex">示例</span>' : '') + (s.official ? '<span class="tag off">站方收录</span>' : '') + '<span class="tag">' + E(s.shop_type) + '</span><span>' + E(s.area) + '</span></div>' +
       '<p style="margin:8px 0;line-height:1.7;white-space:pre-wrap">' + E(s.description) + '</p>' +
     '</div>' +
+    '<div class="card" style="padding-top:4px;padding-bottom:14px">' + LH.consultBtn('shop', s.id, '立即咨询（站内沟通）') + '<div class="tip" style="margin:6px 0 0">所有咨询在站内完成，请勿添加站外联系方式。</div></div>' +
     '<div class="card"><h2>💰 价格</h2>' +
       (price ? '<div class="price-big">' + E(price) + '</div>' : '<div class="tip" style="margin:0">暂未填写人均价格</div>') +
       (s.price_note ? '<div class="tip" style="margin-top:4px">' + E(s.price_note) + '</div>' : '') +

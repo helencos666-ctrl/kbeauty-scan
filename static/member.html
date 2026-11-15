@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <title>会员 · 旅韩助手</title>
-<meta name="description" content="旅韩助手社区会员：会员可看交友资料、评论点赞；高级会员可发帖和交友；商家会员可在住宿、包车用车、皮肤管理·医美、留学机构、代购、地陪、追星活动频道发布。">
+<meta name="description" content="旅韩助手社区会员：会员可在日常和实用频道发帖、评论点赞、看交友资料；高级会员可在旅韩交友发帖和私信；商家会员可在住宿、包车用车、皮肤管理·医美、留学机构、代购、地陪、追星活动、中韩物流频道发布。">
 <meta name="theme-color" content="#ff6b8f">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
@@ -46,14 +46,15 @@ a.paylink{color:#2c7be5}
       <tr><td>交友资料和清晰照片</td><td class="no">模糊</td><td class="yes">✓</td><td class="yes">✓</td></tr>
       <tr><td>发布交友资料、打招呼、私信</td><td class="no">—</td><td class="no">—</td><td class="yes">✓</td></tr>
       <tr><td>旅韩交友帖子评论</td><td class="no">—</td><td class="no">—</td><td class="yes">✓</td></tr>
-      <tr><td>发布图文帖子（含旅韩交友）</td><td class="no">—</td><td class="no">—</td><td class="yes">✓</td></tr>
+      <tr><td>发布图文帖子（在韩日常、踩坑避雷、签证问答等）</td><td class="no">—</td><td class="yes">✓</td><td class="yes">✓</td></tr>
+      <tr><td>在旅韩交友发帖</td><td class="no">—</td><td class="no">—</td><td class="yes">✓</td></tr>
       <tr><td>身份标识</td><td class="no">—</td><td><span class="mbadge">会员</span></td><td><span class="mbadge pro">高级会员</span></td></tr>
     </table>
     <p class="tip">已开通会员升级高级会员只需补差价。游客和免费用户可浏览除旅韩交友以外的全部帖子。</p>
   </div>
   <div class="card" id="merchant">
     <h2>🏪 商家会员</h2>
-    <p style="margin:0 0 10px;font-size:15px;line-height:1.7">在韩国经营<b>住宿、包车用车、皮肤管理·医美、留学机构、代购、地陪、追星活动</b>，想在社区发布信息的，都属于商家，须开通商家会员。</p>
+    <p style="margin:0 0 10px;font-size:15px;line-height:1.7">在韩国经营<b>住宿、包车用车、皮肤管理·医美、留学机构、代购、地陪、追星活动、中韩物流</b>，想在社区发布信息的，都属于商家，须开通商家会员。</p>
     <table class="tiers">
       <tr><th></th><th>月付</th><th>年付</th></tr>
       <tr><td>价格</td><td class="price">¥<span data-p="price_m_month">99</span></td><td class="price">¥<span data-p="price_m_year">999</span></td></tr>
@@ -98,7 +99,9 @@ a.paylink{color:#2c7be5}
           <option value="m_month">商家会员月付</option>
           <option value="m_year">商家会员年付</option>
           <option value="extra">商家增发帖</option>
+          <option value="banner" id="pkBanner" hidden disabled>横幅广告位</option>
         </select>
+        <div id="pbWrap" style="display:none"><label class="f">要付款的横幅</label><select class="f" id="pban"></select></div>
         <div id="pnWrap" style="display:none"><label class="f">增发篇数</label><input class="f" id="pn" type="number" min="1" max="20" value="1"></div>
         <label class="f">付款截图（JPG/PNG，最大 6MB，会自动压缩）</label>
         <input type="file" id="pimg" accept="image/jpeg,image/png,image/webp">
@@ -149,8 +152,8 @@ a.paylink{color:#2c7be5}
     '<a class="btn ghost" href="/points">🫘 旅行豆 ' + (u.points_balance != null ? u.points_balance : 0) + (u.points_streak ? ' · 连续签到' + u.points_streak + '天' : '') + '</a>' +
     '<a class="btn ghost" href="/coupons">🎫 卡券' + (u.coupon_available ? ' · ' + u.coupon_available + '张可用' : '') + '</a>' +
     '<a class="btn ghost" href="/promo">📣 推广中心</a></div>';
-  if (u.tier >= 2) html += '<a class="btn primary block" style="margin-top:12px" href="/community/new">去发帖</a>';
-  else if (u.tier === 1) html += '<p class="tip">升级高级会员补差价即可发帖、交友和在旅韩交友帖子下评论。</p>';
+  if (u.tier >= 1) html += '<a class="btn primary block" style="margin-top:12px" href="/community/new">去发帖</a>';
+  if (u.tier === 1) html += '<p class="tip">升级高级会员补差价即可在旅韩交友发帖、发布交友资料和私信。</p>';
   html += '<details style="margin-top:16px;font-size:13px;color:var(--sub)"><summary style="cursor:pointer">注销账号（删除我的全部信息）</summary>' +
     '<p style="line-height:1.7">注销后，账号、帖子、评论、图片、头像、交友资料和私信会立即彻底删除，无法恢复。已付会员费按<a href="/terms#t4" style="color:#2c7be5">用户协议</a>处理。详见<a href="/privacy#p7" style="color:#2c7be5">隐私政策</a>。</p>' +
     '<input class="f" id="delPw" type="password" autocomplete="current-password" placeholder="请输入登录密码">' +
@@ -205,10 +208,18 @@ a.paylink{color:#2c7be5}
     var ks = document.getElementById('pkind');
     if (d.user.base_tier >= 1) ks.value = 't2';
     try { drawList((await LH.api('GET', '/api/pay-proof/mine')).items); } catch(e){}
+    try {
+      var bl = ((await LH.api('GET', '/api/banners/mine')).banners || []).filter(function(b){ return !b.paid && b.price > 0; });
+      if (bl.length){
+        var o = document.getElementById('pkBanner'); o.hidden = false; o.disabled = false;
+        document.getElementById('pban').innerHTML = bl.map(function(b){ return '<option value="' + b.id + '">#' + b.id + ' ' + LH.esc(b.title) + ' · ¥' + b.price + '</option>'; }).join('');
+      }
+    } catch(e){}
   }
   var file = null;
   document.getElementById('pkind').addEventListener('change', function(){
     document.getElementById('pnWrap').style.display = this.value === 'extra' ? 'block' : 'none';
+    document.getElementById('pbWrap').style.display = this.value === 'banner' ? 'block' : 'none';
   });
   document.getElementById('pimg').addEventListener('change', async function(){
     var f = this.files && this.files[0]; if (!f) return;
@@ -223,6 +234,7 @@ a.paylink{color:#2c7be5}
     var fd = new FormData();
     fd.append('kind', document.getElementById('pkind').value);
     fd.append('extra_n', document.getElementById('pn').value || '1');
+    if (document.getElementById('pkind').value === 'banner') fd.append('ref_id', document.getElementById('pban').value || '0');
     fd.append('note', document.getElementById('pnote').value);
     fd.append('image', file, 'pay.jpg');
     var b = this; b.disabled = true; b.textContent = '提交中…';

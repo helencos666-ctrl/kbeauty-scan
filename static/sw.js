@@ -1,5 +1,5 @@
 /* 旅韩助手 service worker: cache app shell, never cache API or POST. */
-const CACHE = 'lvhan-shell-v29';
+const CACHE = 'lvhan-shell-v30';
 const SHELL = [
   '/',
   '/attractions',
@@ -49,6 +49,7 @@ const SHELL = [
   '/static/privacy.html',
   '/static/terms.html',
   '/static/pwa.js',
+  '/static/banners.js',
   '/static/pwa.css',
   '/manifest.webmanifest',
   '/static/manifest.webmanifest',
@@ -139,4 +140,14 @@ self.addEventListener('fetch', event => {
   if (shellExt) {
     event.respondWith(cacheFirst(request));
   }
+});
+
+// 站内咨询提醒：点通知打开咨询列表
+self.addEventListener('notificationclick', event => {
+  event.notification.close();
+  const url = (event.notification.data && event.notification.data.url) || '/consult';
+  event.waitUntil(self.clients.matchAll({ type: 'window', includeUncontrolled: true }).then(list => {
+    for (const c of list) { if ('focus' in c) { c.navigate(url).catch(() => {}); return c.focus(); } }
+    return self.clients.openWindow(url);
+  }));
 });

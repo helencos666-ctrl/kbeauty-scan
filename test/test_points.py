@@ -86,7 +86,7 @@ def main():
         check("GET /api/points 200", r.status_code == 200, r.text)
         p = r.json()
         check("balance starts 0", p["balance"] == 0 and p["name"] == "旅行豆" and p["checked_in_today"] is False, p)
-        check("rules present", {x["kind"] for x in p["rules"]} == {"checkin", "share", "subway", "card", "profile"}, p["rules"])
+        check("rules present", {x["kind"] for x in p["rules"]} == {"checkin", "share", "subway", "card", "profile", "post", "comment", "first_reply"}, p["rules"])
         check("redeem catalog placeholder", all(x["status"] == "即将上线" for x in p["catalog"]) and len(p["catalog"]) >= 2, p["catalog"])
         check("coupon also in points", any(c["kind"] == "welcome_99" for c in p["coupons"]), p.get("coupons"))
 

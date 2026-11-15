@@ -23,6 +23,7 @@ BOARDS = {   # 键名（pit/group/...）已存库，不要改；只改右边显�
     "visa": "签证问答",
     "study": "留学打听",
     "friends": "旅韩交友",
+    "daily": "在韩日常",
     "hotel": "住宿推荐",
     "car": "包车用车",
     "clinic": "皮肤管理·医美",
@@ -30,6 +31,7 @@ BOARDS = {   # 键名（pit/group/...）已存库，不要改；只改右边显�
     "daigou": "代购商家",
     "guide": "地陪",
     "kpop": "追星活动",
+    "logistics": "中韩物流",
     "news": "出行提醒",
     "rent": "租房找房",
     "used": "闲置转让",
@@ -39,23 +41,25 @@ BOARDS = {   # 键名（pit/group/...）已存库，不要改；只改右边显�
 BOARD_CATEGORIES = [
     {"key": "travel", "name": "旅途路上", "icon": "🧭", "boards": ["pit", "group", "news"]},
     {"key": "visa", "name": "签证·留学", "icon": "🛂", "boards": ["visa", "study"]},
-    {"key": "life", "name": "住在韩国", "icon": "🏡", "boards": ["rent", "used", "jobs"]},
+    {"key": "life", "name": "住在韩国", "icon": "🏡", "boards": ["daily", "rent", "used", "jobs"]},
     {"key": "friends", "name": "旅韩交友", "icon": "💗", "boards": ["friends"]},
-    {"key": "biz", "name": "商家专区", "icon": "🏷️", "boards": ["hotel", "car", "clinic", "agency", "daigou", "guide", "kpop"]},
+    {"key": "biz", "name": "商家专区", "icon": "🏷️", "boards": ["hotel", "car", "clinic", "agency", "daigou", "guide", "kpop", "logistics"]},
 ]
 BOARD_ICONS = {"pit": "🚧", "group": "🧳", "news": "📣", "visa": "🛂", "study": "🎓", "rent": "🔑", "used": "♻️",
                "jobs": "💼", "friends": "💗", "hotel": "🛏️", "car": "🚐", "clinic": "✨",
-               "agency": "🏫", "daigou": "🛍️", "guide": "🙋", "kpop": "🎤"}
+               "agency": "🏫", "daigou": "🛍️", "guide": "🙋", "kpop": "🎤", "logistics": "📦", "daily": "🌸"}
 BOARD_DESCS = {"pit": "换钱、打车、购物被坑的真实经历", "group": "找人一起逛、一起拼车、AA 出行", "news": "天气、交通、闭馆等出行变化",
                "visa": "各类签证、K-ETA 的个人经验", "study": "语学院、大学、生活费怎么选", "rent": "看房、合同、押金经验",
                "used": "回国前转让、二手好物", "jobs": "合法打工与求职信息", "friends": "认识新朋友、找搭子、语言交换",
                "hotel": "商家发布的住宿信息", "car": "商家发布的包车、租车信息", "clinic": "合法医疗机构发布的皮肤管理信息",
                "agency": "正规留学机构发布的招生与咨询信息", "daigou": "商家发布的代购服务信息",
-               "guide": "商家发布的地陪、向导服务信息", "kpop": "演出、应援、见面会等追星活动信息"}
+               "guide": "商家发布的地陪、向导服务信息", "kpop": "演出、应援、见面会等追星活动信息",
+               "logistics": "商家发布的中韩海运、空运、快递、集运信息",
+               "daily": "今天在韩国的一件小事，一句话也可以"}
 NEWS_BOARDS = ["news", "visa", "study", "pit"]   # “实用干货”标签包含的频道
 HOT_HOURS, HOT_FALLBACK_DAYS = 24, 7             # 24 小时热门；24 小时内没有帖子时退回近 7 天
 RECOMMEND_DAYS = 30
-MERCHANT_BOARDS = {"hotel", "car", "clinic", "agency", "daigou", "guide", "kpop"}   # 仅有效商家会员可发
+MERCHANT_BOARDS = {"hotel", "car", "clinic", "agency", "daigou", "guide", "kpop", "logistics"}   # 仅有效商家会员可发
 MERCHANT_QUOTA = 10                            # 每 30 天周期 10 篇
 CYCLE_DAYS = 30
 PLAN_DAYS = {"month": 30, "year": 365}
@@ -73,6 +77,12 @@ SETTING_LABELS = {"price_t1": "会员价格", "price_t2": "高级会员价格", 
                   "chicken_fee_krw": "炸鸡代点服务费（韩元）"}
 LOGIN_ONLY_BOARDS = {"friends"}          # 交友版：会员（≥1 档）才能查看
 TIER_NAMES = {0: "普通用户", 1: "会员", 2: "高级会员", 3: "商家会员"}
+DAILY_BOARD, DAILY_CAP = "daily", 3       # 在韩日常：短标题短正文也可以，每人每天最多 3 篇
+# 发帖门槛：会员（¥9.9）即可在日常/实用频道发帖；旅韩交友仍需高级会员；商家专区仍需商家会员
+def post_tier(board):
+    return 2 if board in LOGIN_ONLY_BOARDS else 1
+AUTHOR_COLS = ("au.nickname, COALESCE(au.is_official, FALSE) AS is_official, "
+               "(SELECT string_agg(bd.badge, ',' ORDER BY bd.created_at) FROM c_badges bd WHERE bd.user_id=au.id) AS badges")
 MAX_IMAGES = 6
 MAX_IMG_BYTES = 6 * 1024 * 1024          # 单张原图上限（前端已压缩，正常远小于此）
 IMG_MAX_SIDE, THUMB_SIDE = 1280, 480
@@ -392,6 +402,12 @@ def db():
                         cur.execute(MIGRATE_PAY_PROOF)
                         from chicken_merchant import MIGRATE_CHICKEN_MERCHANT
                         cur.execute(MIGRATE_CHICKEN_MERCHANT)
+                        from contact_guard import MIGRATE_CONTACT_GUARD
+                        cur.execute(MIGRATE_CONTACT_GUARD)
+                        from merch import MIGRATE_MERCH
+                        cur.execute(MIGRATE_MERCH)
+                        from retention import MIGRATE_RETENTION
+                        cur.execute(MIGRATE_RETENTION)
                     ensure_bot(conn)
                     from chicken import ensure_chicken_shops
                     ensure_chicken_shops(conn)
@@ -847,12 +863,17 @@ def api_me(req: Request):
         has_profile = q(conn, "SELECT 1 AS x FROM c_dating_profiles WHERE user_id=%s", (u["id"],), one=True) is not None
         from points import user_points_summary
         pts = user_points_summary(conn, u["id"])
+        from merch import consult_unread
+        cun = consult_unread(conn, u["id"])
+        from retention import notif_unread, badges_out
+        nun = notif_unread(conn, u["id"])
+        ub = q(conn, "SELECT COALESCE(is_official,FALSE) AS o, (SELECT string_agg(badge, ',' ORDER BY created_at) FROM c_badges WHERE user_id=%s) AS b FROM c_users WHERE id=%s", (u["id"], u["id"]), one=True)
         return {"user": {"id": u["id"], "member_no": u.get("member_no") or u["id"], "nickname": u["nickname"], "tier": u["tier"], "base_tier": u["base_tier"],
                          "display_tier": disp, "tier_name": TIER_NAMES[disp], "is_member": u["tier"] >= 1,
                          "merchant": bool(u["merchant"]), "merchant_info": merchant_quota(conn, u),
                          "merchant_expired": bool(u["merchant_until"] and not u["merchant"]),
                          "account": mask_account(u), "joined": _ts(u["created_at"]),
-                         "verified": bool(u.get("verified")), "id_verified": bool(u.get("id_verified")), "unread": unread, "has_profile": has_profile,
+                         "verified": bool(u.get("verified")), "id_verified": bool(u.get("id_verified")), "unread": unread, "consult_unread": cun, "notif_unread": nun, "official": bool(ub["o"]), "badges": badges_out(ub["b"]), "has_profile": has_profile,
                          "has_avatar": bool(u.get("has_avatar")),
                          "points_name": pts["name"], "points_balance": pts["balance"],
                          "points_streak": pts["streak"], "coupon_available": pts["coupon_available"]},
@@ -1253,7 +1274,20 @@ def _post_out(r, full=False):
          "author": r["nickname"], "author_id": r.get("user_id") or r.get("author_id"),
          "author_tier": r["tier"], "has_avatar": has_avatar_row(r), "likes": r["like_count"],
          "comments": r["comment_count"], "time": _ts(r["created_at"]),
-         "merchant": bool(r.get("is_merchant")), "status": r.get("status", "published")}
+         "merchant": bool(r.get("is_merchant")), "status": r.get("status", "published"),
+         "views": r.get("views") or 0,
+         "pinned": bool(r.get("pinned")), "featured": bool(r.get("featured")), "topic": bool(r.get("topic")),
+         "author_official": bool(r.get("is_official"))}
+    if r.get("badges"):
+        from retention import badges_out
+        o["author_badges"] = badges_out(r["badges"])
+    if r.get("tag"):
+        from merch import tag_name
+        o["tag"] = r["tag"]; o["tag_name"] = tag_name(r["board"], r["tag"])
+    if r.get("offer"):
+        o["offer"] = r["offer"]
+    if r.get("valid_until"):
+        o["valid_until"] = str(r["valid_until"])
     if full:
         o["body"] = r["body"]
     else:
@@ -1262,7 +1296,7 @@ def _post_out(r, full=False):
     return o
 
 @router.get("/api/community/posts")
-def api_posts(req: Request, board: str = "", before: int = 0, limit_n: int = 20):
+def api_posts(req: Request, board: str = "", before: int = 0, limit_n: int = 20, tag: str = ""):
     limit_n = max(1, min(limit_n, 30))
     if board and board not in BOARDS:
         raise HTTPException(400, "频道不存在")
@@ -1274,11 +1308,23 @@ def api_posts(req: Request, board: str = "", before: int = 0, limit_n: int = 20)
         cond, args = ["NOT p.deleted", "p.status='published'", "NOT au.is_banned"], []
         if board:
             cond.append("p.board=%s"); args.append(board)
+            if tag and re.fullmatch(r"[a-z]{2,12}", tag):
+                cond.append("p.tag=%s"); args.append(tag)
         elif tier < 1:
             cond.append("p.board <> ALL(%s)"); args.append(list(LOGIN_ONLY_BOARDS))
+        pinned_rows = []
+        if board and before <= 0 and not tag:
+            pinned_rows = q(conn, f"""SELECT p.*, {AUTHOR_COLS}, (CASE WHEN au.merchant_until>now() THEN 3 ELSE au.tier END) AS tier,
+                 (au.avatar IS NOT NULL OR COALESCE(au.is_bot, FALSE)) AS has_avatar,
+                 (SELECT id FROM c_images i WHERE i.post_id=p.id ORDER BY pos LIMIT 1) AS cover,
+                 (SELECT count(*) FROM c_images i WHERE i.post_id=p.id) AS img_n
+                 FROM c_posts p JOIN c_users au ON au.id=p.user_id
+                 WHERE {' AND '.join(cond)} AND p.pinned ORDER BY p.pinned_at DESC NULLS LAST LIMIT 3""", tuple(args))
+        if board and not tag:
+            cond.append("NOT p.pinned")
         if before > 0:
             cond.append("p.id<%s"); args.append(before)
-        rows = q(conn, f"""SELECT p.*, au.nickname, (CASE WHEN au.merchant_until>now() THEN 3 ELSE au.tier END) AS tier,
+        rows = q(conn, f"""SELECT p.*, {AUTHOR_COLS}, (CASE WHEN au.merchant_until>now() THEN 3 ELSE au.tier END) AS tier,
                  (au.avatar IS NOT NULL OR COALESCE(au.is_bot, FALSE)) AS has_avatar,
                  (SELECT id FROM c_images i WHERE i.post_id=p.id ORDER BY pos LIMIT 1) AS cover,
                  (SELECT count(*) FROM c_images i WHERE i.post_id=p.id) AS img_n
@@ -1288,9 +1334,12 @@ def api_posts(req: Request, board: str = "", before: int = 0, limit_n: int = 20)
     out = []
     for r in rows[:limit_n]:
         o = _post_out(r); o["cover"] = r["cover"]; o["img_n"] = r["img_n"]; out.append(o)
-    return {"posts": out, "more": more}
+    pins = []
+    for r in pinned_rows:
+        o = _post_out(r); o["cover"] = r["cover"]; o["img_n"] = r["img_n"]; pins.append(o)
+    return {"posts": out, "more": more, "pinned": pins}
 
-FEED_TABS = ("recommend", "news", "hot", "latest", "follow")
+FEED_TABS = ("recommend", "news", "hot", "latest", "follow", "featured", "topic")
 
 @router.get("/api/community/feed")
 def api_feed(req: Request, tab: str = "recommend", boards: str = "", offset: int = 0, limit_n: int = 20):
@@ -1316,6 +1365,10 @@ def api_feed(req: Request, tab: str = "recommend", boards: str = "", offset: int
             cond.append("NOT EXISTS (SELECT 1 FROM c_blocks b WHERE b.blocker_id=%s AND b.blocked_id=p.user_id)"); args.append(u["id"])
         if tab == "news":
             cond.append("p.board = ANY(%s)"); args.append(NEWS_BOARDS)
+        if tab == "featured":
+            cond.append("p.featured")
+        if tab == "topic":
+            cond.append("p.topic")
         if tab == "follow":
             cond.append("""(p.user_id IN (SELECT followee_id FROM c_follows WHERE follower_id=%s)
                            OR p.board IN (SELECT board FROM c_board_follows WHERE user_id=%s))""")
@@ -1323,14 +1376,17 @@ def api_feed(req: Request, tab: str = "recommend", boards: str = "", offset: int
         score, order = "0", "p.id DESC"
         if tab == "recommend":
             score = """((p.like_count*2 + p.comment_count*3 + 1 + CASE WHEN EXISTS (SELECT 1 FROM c_images i WHERE i.post_id=p.id) THEN 1 ELSE 0 END)
-                       / power(EXTRACT(EPOCH FROM (now()-p.created_at))/3600 + 2, 1.3))"""
+                       / power(EXTRACT(EPOCH FROM (now()-p.created_at))/3600 + 2, 1.3)
+                       * (CASE WHEN p.featured THEN 3 ELSE 1 END))"""
             order = "score DESC, p.id DESC"
         elif tab == "hot":
             score = "(p.like_count + p.comment_count*2)"
             order = "score DESC, p.id DESC"
+        elif tab == "featured":
+            order = "p.featured_at DESC NULLS LAST, p.id DESC"
 
         def run(extra, eargs):
-            return q(conn, f"""SELECT p.*, au.nickname, au.verified, (CASE WHEN au.merchant_until>now() THEN 3 ELSE au.tier END) AS tier,
+            return q(conn, f"""SELECT p.*, {AUTHOR_COLS}, au.verified, (CASE WHEN au.merchant_until>now() THEN 3 ELSE au.tier END) AS tier,
                      (au.avatar IS NOT NULL OR COALESCE(au.is_bot, FALSE)) AS has_avatar,
                      {score} AS score,
                      (SELECT id FROM c_images i WHERE i.post_id=p.id ORDER BY pos LIMIT 1) AS cover,
@@ -1405,6 +1461,8 @@ def api_follow(req: Request, uid: int):
         had = q(conn, "DELETE FROM c_follows WHERE follower_id=%s AND followee_id=%s RETURNING followee_id", (u["id"], uid), one=True)
         if not had:
             q(conn, "INSERT INTO c_follows(follower_id,followee_id) VALUES (%s,%s) ON CONFLICT DO NOTHING", (u["id"], uid))
+            from retention import on_follow
+            on_follow(conn, u, uid)
     return {"following": not had}
 
 @router.get("/api/community/rate")
@@ -1430,18 +1488,26 @@ def api_rate():
 def api_post(req: Request, pid: int):
     with db() as conn:
         u = current_user(conn, req)
-        r = q(conn, """SELECT p.*, au.nickname, au.verified, (CASE WHEN au.merchant_until>now() THEN 3 ELSE au.tier END) AS tier,
+        r = q(conn, f"""SELECT p.*, {AUTHOR_COLS}, au.verified, (CASE WHEN au.merchant_until>now() THEN 3 ELSE au.tier END) AS tier,
                               (au.avatar IS NOT NULL OR COALESCE(au.is_bot, FALSE)) AS has_avatar
                        FROM c_posts p JOIN c_users au ON au.id=p.user_id
                        WHERE p.id=%s AND NOT p.deleted AND NOT au.is_banned""", (pid,), one=True)
         if not r or (r["status"] != "published" and not (u and u["id"] == r["user_id"])):
             raise HTTPException(404, "帖子不存在或已删除")
+        if r["status"] == "published" and not (u and u["id"] == r["user_id"]):
+            vk = "pv:%s:%d" % ((u or {}).get("id") or ip_of(req), pid)
+            try:
+                limit(vk, 1, 1800)
+                q(conn, "UPDATE c_posts SET views=views+1 WHERE id=%s", (pid,))
+                r["views"] = (r.get("views") or 0) + 1
+            except HTTPException:
+                pass
         if r["board"] in LOGIN_ONLY_BOARDS and not u:
             raise HTTPException(401, "旅韩交友频道需登录并开通会员后查看")
         if r["board"] in LOGIN_ONLY_BOARDS and u["tier"] < 1:
             raise HTTPException(403, "旅韩交友频道需开通会员（¥%s）后查看" % price(conn, "price_t1"))
         imgs = q(conn, "SELECT id,width,height FROM c_images WHERE post_id=%s ORDER BY pos", (pid,))
-        cms = q(conn, """SELECT c.id,c.body,c.created_at,c.user_id,au.nickname,au.is_bot,
+        cms = q(conn, f"""SELECT c.id,c.body,c.created_at,c.user_id,{AUTHOR_COLS},au.is_bot,
                                  (CASE WHEN au.merchant_until>now() THEN 3 ELSE au.tier END) AS tier,
                                  (au.avatar IS NOT NULL OR COALESCE(au.is_bot, FALSE)) AS has_avatar
                          FROM c_comments c
@@ -1458,30 +1524,59 @@ def api_post(req: Request, pid: int):
     o["mine"] = bool(u and u["id"] == r["user_id"])
     o["comment_tier"] = 2 if r["board"] in LOGIN_ONLY_BOARDS else 1
     o["review_note"] = r.get("review_note")
+    if r["board"] in MERCHANT_BOARDS:
+        from merch import MEDICAL_BOARDS, MEDICAL_NOTE
+        o["consult"] = not o["mine"] and r["status"] == "published"
+        if r["board"] in MEDICAL_BOARDS:
+            o["medical_note"] = MEDICAL_NOTE
     o["comment_list"] = [{"id": c["id"], "body": c["body"], "author": c["nickname"], "author_id": c["user_id"],
                           "author_tier": c["tier"], "has_avatar": has_avatar_row(c),
                           "time": _ts(c["created_at"]), "mine": bool(u and u["id"] == c["user_id"]),
-                          "is_bot": bool(c.get("is_bot"))} for c in cms]
+                          "is_bot": bool(c.get("is_bot")), "official": bool(c.get("is_official")),
+                          "badges": (__import__("retention").badges_out(c.get("badges")))} for c in cms]
     return o
 
 @router.post("/api/community/posts")
 async def api_new_post(req: Request, board: str = Form(...), title: str = Form(...), body: str = Form(...),
+                       tag: str = Form(""), offer: str = Form(""), valid_until: str = Form(""),
                        images: list[UploadFile] = File(default=[])):
     csrf(req)
     if board not in BOARDS:
         raise HTTPException(400, "请选择频道")
-    title = clean_text(title, 40, "标题", 4)
-    body = clean_text(body, 3000, "正文", 10)
+    daily = board == DAILY_BOARD
+    title = clean_text(title, 40, "标题", 2 if daily else 4)
+    body = clean_text(body, 3000, "正文", 5 if daily else 10)
     images = [f for f in (images or []) if f and f.filename]
+    need_t = post_tier(board)
+    tier_msg = "开通高级会员（¥{t2}）后才能在旅韩交友发帖" if need_t >= 2 else "开通会员（¥{t1}）后即可发帖"
     if len(images) > MAX_IMAGES:
         raise HTTPException(400, f"最多 {MAX_IMAGES} 张图片")
+    act = (None, None, None)
     with db() as conn:     # 先确认身份再处理图片，未登录者不能消耗服务器算力
-        need_tier(conn, req, 2, "开通高级会员（¥{t2}）后才能发帖")
-    processed = []
+        u0 = need_tier(conn, req, need_t, tier_msg)
+        if board in MERCHANT_BOARDS:
+            from merch import clean_activity, MEDICAL_BOARDS
+            from contact_guard import guard_text, guard_medical
+            if u0["merchant"]:
+                act = clean_activity(board, tag, offer, valid_until)
+                guard_text(conn, u0["id"], "商家活动帖", title, body, act[1] or "")
+                if board in MEDICAL_BOARDS:
+                    guard_medical(title + "\n" + body + "\n" + (act[1] or ""))
+    processed, raws = [], []
     for f in images:
-        processed.append(process_image(await f.read(MAX_IMG_BYTES + 1)))
+        raw = await f.read(MAX_IMG_BYTES + 1)
+        processed.append(process_image(raw)); raws.append(raw)
+    if board in MERCHANT_BOARDS and raws:
+        from contact_guard import guard_images
+        with db() as conn:
+            guard_images(conn, u0["id"], "商家活动帖图片", raws)
     with db() as conn:
-        u = need_tier(conn, req, 2, "开通高级会员（¥{t2}）后才能发帖")
+        u = need_tier(conn, req, need_t, tier_msg)
+        if daily:
+            nd = q(conn, """SELECT count(*) AS n FROM c_posts WHERE user_id=%s AND board=%s AND NOT deleted
+                            AND (timezone('Asia/Seoul', created_at))::date = (timezone('Asia/Seoul', now()))::date""", (u["id"], DAILY_BOARD), one=True)["n"]
+            if nd >= DAILY_CAP:
+                raise HTTPException(429, f"「在韩日常」每天最多发 {DAILY_CAP} 篇，明天再来记录吧")
         st = get_settings(conn)
         status, quota_kind, note = "published", None, None
         if board in MERCHANT_BOARDS:
@@ -1495,6 +1590,7 @@ async def api_new_post(req: Request, board: str = Form(...), title: str = Form(.
                 q(conn, "UPDATE c_users SET merchant_credits=merchant_credits-1 WHERE id=%s AND merchant_credits>0", (u["id"],))
             else:
                 raise HTTPException(403, f"本周期 {MERCHANT_QUOTA} 篇额度已用完（{mq['cycle_end']} 重置）。每增发 1 篇 ¥{st['price_extra']}，付款后联系管理员增加次数")
+            status, note = "pending", "商家活动帖，先审后发"
         elif not u["merchant"]:
             hits = is_commercial(title + "\n" + body)
             if hits:
@@ -1505,16 +1601,22 @@ async def api_new_post(req: Request, board: str = Form(...), title: str = Form(.
               (u["id"],), one=True)["n"]
         if n >= 20:
             raise HTTPException(429, "今天发帖已达上限（20 篇）")
-        row = q(conn, """INSERT INTO c_posts(user_id,board,title,body,status,is_merchant,quota_kind,review_note)
-                         VALUES (%s,%s,%s,%s,%s,%s,%s,%s) RETURNING id""",
-                (u["id"], board, title, body, status, bool(u["merchant"]), quota_kind, note), one=True)
+        row = q(conn, """INSERT INTO c_posts(user_id,board,title,body,status,is_merchant,quota_kind,review_note,tag,offer,valid_until)
+                         VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s) RETURNING id""",
+                (u["id"], board, title, body, status, bool(u["merchant"]), quota_kind, note, *act), one=True)
         for i, (big, th, w, h) in enumerate(processed):
             q(conn, "INSERT INTO c_images(post_id,pos,data,thumb,width,height) VALUES (%s,%s,%s,%s,%s,%s)",
               (row["id"], i, big, th, w, h))
+    if status == "pending" and board in MERCHANT_BOARDS:
+        return {"ok": True, "id": row["id"], "pending": True,
+                "message": "活动已提交，管理员审核通过后公开（一般 1 个工作日内）。审核期间可在「我的帖子」查看状态。"}
     if status == "pending":
         return {"ok": True, "id": row["id"], "pending": True,
                 "message": "你的帖子含有商业推广类内容（如酒店预订、租车包车、医美、联系方式、代办等），已提交管理员审核，审核通过后才会公开。"
                            "住宿、包车用车、皮肤管理·医美、留学机构、代购、地陪、追星活动等商业信息请开通商家会员后在商家专区发布。"}
+    with db() as conn:
+        from retention import on_post_published
+        on_post_published(conn, u["id"], row["id"], board)
     schedule_ai_reply("post", row["id"], u["id"])
     return {"ok": True, "id": row["id"]}
 
@@ -1557,7 +1659,7 @@ async def api_comment(req: Request, pid: int):
     body = clean_text(d.get("body"), 500, "评论")
     with db() as conn:
         u = need_tier(conn, req, 1, "开通会员（¥{t1}）后才能评论")
-        p = q(conn, "SELECT id,board,user_id FROM c_posts WHERE id=%s AND NOT deleted AND status='published'", (pid,), one=True)
+        p = q(conn, "SELECT id,board,user_id,title FROM c_posts WHERE id=%s AND NOT deleted AND status='published'", (pid,), one=True)
         if not p:
             raise HTTPException(404, "帖子不存在或已删除")
         if p["board"] in LOGIN_ONLY_BOARDS and u["tier"] < 2:
@@ -1567,6 +1669,8 @@ async def api_comment(req: Request, pid: int):
         limit("cm:" + str(u["id"]), 10, 300, "评论太频繁，请稍后再试")
         r = q(conn, "INSERT INTO c_comments(post_id,user_id,body) VALUES (%s,%s,%s) RETURNING id", (pid, u["id"], body), one=True)
         q(conn, "UPDATE c_posts SET comment_count=(SELECT count(*) FROM c_comments WHERE post_id=%s AND NOT deleted) WHERE id=%s", (pid, pid))
+        from retention import on_comment
+        on_comment(conn, u, p, r["id"], body)
         want_ai = comment_wants_ai(body, u["id"], p["user_id"])
     if want_ai:
         schedule_ai_reply("comment", pid, u["id"], body)
@@ -1598,6 +1702,8 @@ def api_like(req: Request, pid: int):
         had = q(conn, "DELETE FROM c_likes WHERE post_id=%s AND user_id=%s RETURNING post_id", (pid, u["id"]), one=True)
         if not had:
             q(conn, "INSERT INTO c_likes(post_id,user_id) VALUES (%s,%s) ON CONFLICT DO NOTHING", (pid, u["id"]))
+            from retention import on_like
+            on_like(conn, u, pid)
         r = q(conn, "UPDATE c_posts SET like_count=(SELECT count(*) FROM c_likes WHERE post_id=%s) WHERE id=%s RETURNING like_count",
               (pid, pid), one=True)
     return {"liked": not had, "likes": r["like_count"]}
@@ -2170,6 +2276,9 @@ async def api_admin_review(req: Request, pid: int):
         if not r:
             raise HTTPException(404, "该帖子不在待审核队列")
         uid = r["user_id"]
+        if act == "approve":
+            from retention import on_post_published
+            on_post_published(conn, uid, pid, "")
     if act == "approve":
         schedule_ai_reply("post", pid, uid)
     return {"ok": True}
@@ -2229,3 +2338,7 @@ from pay_proof import router as _pay_proof_router   # noqa: E402
 router.include_router(_pay_proof_router)
 from chicken_merchant import router as _chicken_merchant_router   # noqa: E402
 router.include_router(_chicken_merchant_router)
+from merch import router as _merch_router  # noqa: E402
+router.include_router(_merch_router)
+from retention import router as _retention_router  # noqa: E402
+router.include_router(_retention_router)

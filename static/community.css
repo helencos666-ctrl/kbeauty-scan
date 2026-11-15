@@ -243,3 +243,19 @@ header.thero{padding:18px 18px 34px}
 .pill.pending{background:#fff3cd;color:#8a5300}
 .pill.approved{background:#e3f7e9;color:#1b7a3d}
 .pill.rejected{background:#fde2e2;color:#c62828}
+
+/* 商家活动 / 小分类 / 站内咨询 */
+.subcats{display:flex;gap:8px;overflow-x:auto;padding:2px 0 10px;scrollbar-width:none}.subcats::-webkit-scrollbar{display:none}
+.subcats button{flex:0 0 auto;border:1px solid var(--line,#eee);background:#fff;border-radius:14px;padding:8px 10px;min-width:64px;font-size:12.5px;color:inherit;display:flex;flex-direction:column;align-items:center;gap:3px;cursor:pointer}
+.subcats button i{font-style:normal;font-size:20px}.subcats button.on{border-color:#ff6b8f;background:#fff0f4;color:#e8456f;font-weight:600}
+.biz-item .btag{color:#e8456f;margin-right:4px}.biz-item .offer{margin:4px 0 0;font-size:13px;color:#e8456f}
+.biz-item .bzph{display:flex;align-items:center;justify-content:center;font-size:26px;background:#fff0f4}
+.consult-btn{margin-top:10px}
+.mednote{background:#fff7ed;border:1px solid #fed7aa;color:#9a3412;border-radius:12px;padding:10px 12px;font-size:13px;line-height:1.6;margin:10px 0}
+.offerbox{background:#fff0f4;border-radius:12px;padding:10px 12px;margin:10px 0;font-size:14px}
+
+.ubadge{display:inline-block;font-size:12px;margin-left:3px;vertical-align:middle;line-height:1}
+.offbadge{display:inline-block;font-size:10.5px;font-weight:700;color:#fff;background:#2c7be5;border-radius:6px;padding:1px 5px;margin-left:4px;vertical-align:middle}
+.tag.pin{background:#fff3e0;color:#e65100}.tag.feat{background:#fff8d6;color:#b7791f}.tag.topic{background:#e8f1ff;color:#1d5fd1}
+.bdg-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}.bdg{background:#fff7fa;border-radius:12px;padding:10px 6px;text-align:center;font-size:12px}.bdg i{display:block;font-style:normal;font-size:24px}.bdg small{color:var(--sub);display:block;margin-top:2px}
+.ntf{display:flex;gap:10px;padding:12px 0;border-bottom:1px solid var(--line);text-decoration:none;color:inherit}.ntf.un{background:#fff7fa}.ntf i{font-style:normal;font-size:20px;flex:none;width:32px;text-align:center}.ntf .tx{flex:1}.ntf small{display:block;color:var(--sub);font-size:11px;margin-top:2px}

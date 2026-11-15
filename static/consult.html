@@ -1,0 +1,147 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>站内咨询 · 旅韩助手</title>
+<meta name="description" content="旅韩助手站内咨询：和商家一对一沟通，所有咨询在站内完成。">
+<meta name="theme-color" content="#ff6b8f">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="旅韩助手">
+<link rel="manifest" href="/manifest.webmanifest">
+<link rel="apple-touch-icon" href="/static/icons/apple-touch-icon.png">
+<link rel="icon" type="image/png" sizes="192x192" href="/static/icons/icon-192.png">
+<link rel="stylesheet" href="/static/pwa.css">
+<link rel="stylesheet" href="/static/community.css">
+<meta name="robots" content="noindex">
+<style>
+.ctabs{display:flex;gap:8px;margin:0 0 10px}.ctabs button{flex:1;border:1px solid var(--line);background:#fff;border-radius:12px;padding:9px;font-size:14px;color:inherit}
+.ctabs button.on{background:#ff6b8f;color:#fff;border-color:#ff6b8f;font-weight:600}
+.cth{display:flex;gap:10px;align-items:center;background:#fff;border-radius:14px;padding:12px;margin-bottom:8px;text-decoration:none;color:inherit;box-shadow:0 2px 10px rgba(0,0,0,.04)}
+.cth .ic{flex:none;width:42px;height:42px;border-radius:21px;background:#fff0f4;display:flex;align-items:center;justify-content:center;font-size:20px;position:relative}
+.cth .ic .dot{top:-4px;right:-6px}.cth .tx{flex:1;min-width:0}.cth b{font-size:15px}.cth small{display:block;color:var(--sub);font-size:12px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.cth .tm{font-size:11px;color:var(--sub);flex:none}
+.msg.sys{align-self:center;background:#f3f4f6;color:var(--sub);font-size:12px;box-shadow:none;padding:4px 10px}
+.msg img{max-width:220px;max-height:260px;border-radius:10px;display:block;margin-top:4px}
+.sendbar label.pic{flex:none;width:42px;height:42px;border-radius:12px;border:1px solid var(--line);display:flex;align-items:center;justify-content:center;font-size:20px;cursor:pointer}
+.refbar{background:#fff;border-radius:12px;padding:8px 12px;font-size:13px;margin-bottom:10px;color:var(--sub)}
+</style>
+</head>
+<body>
+<header style="padding-bottom:24px">
+  <h1 id="h1">💬 站内咨询</h1>
+  <p id="hsub">所有咨询都在站内完成，请勿添加站外联系方式</p>
+</header>
+<main style="padding-bottom:80px">
+  <div class="err" id="err"></div>
+  <div id="box"><div class="loading">加载中…</div></div>
+</main>
+<div class="sendbar" id="sb" style="display:none">
+  <label class="pic" title="发送图片">🖼<input type="file" id="pic" accept="image/jpeg,image/png,image/webp" style="display:none"></label>
+  <textarea id="txt" maxlength="500" placeholder="输入咨询内容（不要发微信/电话/二维码）"></textarea><button class="btn primary" id="send">发送</button>
+</div>
+<nav>
+  <a href="/"><i>🏠</i>首页</a>
+  <a href="/?tab=sub"><i>🚇</i>地铁</a>
+  <a href="/?tab=card"><i>💬</i>翻译</a>
+  <a href="/community"><i>🧭</i>韩友圈</a>
+  <a href="/?tab=more"><i>☰</i>全部</a>
+</nav>
+<script src="/static/community.js"></script>
+<script>
+var E = LH.esc, box = document.getElementById('box'), err = document.getElementById('err');
+function loginLink(){ return '<div class="card empty">请先登录后再咨询<br><br><a class="btn primary" href="/login?next=' + encodeURIComponent(location.pathname + location.search) + '">登录 / 注册</a></div>'; }
+var path = location.pathname, m = path.match(/^\/consult\/(\d+)$/);
+(async function(){
+  var me = null;
+  try { me = await LH.me(); } catch(e){}
+  if (!me || !me.user){ box.innerHTML = loginLink(); return; }
+  LH.startConsultPoll();
+  if (path === '/consult/new') return start();
+  if (m) return chat(+m[1]);
+  return list();
+})();
+
+async function start(){
+  try {
+    var r = await LH.api('POST', '/api/consult/start', {kind: LH.qs('kind') || '', id: +(LH.qs('id') || 0)});
+    location.replace('/consult/' + r.thread_id);
+  } catch(e){ box.innerHTML = '<div class="card empty">' + E(e.message) + '<br><br><a class="btn ghost" href="javascript:history.back()">返回</a></div>'; }
+}
+
+var side = 'user';
+async function list(){
+  var d;
+  try { d = await LH.api('GET', '/api/consult/threads'); } catch(e){ box.innerHTML = '<div class="card empty">' + E(e.message) + '</div>'; return; }
+  if (d.merchant && d.as_merchant.some(function(t){ return t.unread; })) side = 'merchant';
+  function draw(){
+    var items = side === 'user' ? d.as_user : d.as_merchant;
+    box.innerHTML = (d.merchant ? '<div class="ctabs"><button data-s="user" class="' + (side === 'user' ? 'on' : '') + '">我咨询的</button><button data-s="merchant" class="' + (side === 'merchant' ? 'on' : '') + '">客户咨询（商家）</button></div>' : '') +
+      (window.Notification && Notification.permission === 'default' ? '<button class="btn ghost block" id="notiB" style="margin-bottom:10px">🔔 开启新消息通知</button>' : '') +
+      (items.length ? items.map(function(t){
+        return '<a class="cth" href="/consult/' + t.id + '"><span class="ic">' + (t.platform ? '🛎️' : (side === 'user' ? '🏪' : '🙂')) + (t.unread ? '<span class="dot">' + t.unread + '</span>' : '') + '</span>' +
+          '<span class="tx"><b>' + E(t.name) + '</b><small>' + E(t.ref) + '</small><small>' + E(t.last || '还没有消息') + '</small></span><span class="tm">' + E(t.time) + '</span></a>';
+      }).join('') : '<div class="card empty">' + (side === 'user' ? '还没有咨询记录。在商家活动、店铺详情或广告上点「立即咨询」即可开始。' : '还没有客户咨询') + '</div>');
+    box.querySelectorAll('[data-s]').forEach(function(b){ b.onclick = function(){ side = b.dataset.s; draw(); }; });
+    var nb = document.getElementById('notiB');
+    if (nb) nb.onclick = async function(){ try { await Notification.requestPermission(); } catch(e){} draw(); };
+  }
+  draw();
+}
+
+var tid = 0, last = 0, timer = null, T = null;
+function msgHtml(x){
+  if (x.sender === 'system') return '<div class="msg sys">' + E(x.body) + '</div>';
+  return '<div class="msg' + (x.mine ? ' me' : '') + '">' + (x.body ? E(x.body) : '') +
+    (x.img ? '<a href="' + E(x.img) + '" target="_blank" rel="noopener"><img loading="lazy" alt="图片" src="' + E(x.img) + '?t=1"></a>' : '') +
+    '<span class="mt">' + E(x.time) + '</span></div>';
+}
+async function chat(id){
+  tid = id;
+  try { T = await LH.api('GET', '/api/consult/threads/' + tid); }
+  catch(e){ box.innerHTML = '<div class="card empty">' + E(e.message) + '<br><br><a class="btn ghost" href="/consult">全部咨询</a></div>'; return; }
+  document.getElementById('h1').textContent = '💬 ' + T.name;
+  document.getElementById('hsub').innerHTML = '<a href="/consult">‹ 全部咨询</a>' + (T.ref_href ? ' · <a href="' + E(T.ref_href) + '">查看' + E(T.ref.split('：')[0] || '详情') + '</a>' : '');
+  box.innerHTML = '<div class="refbar">🔒 为保护双方权益，请在站内沟通，不要交换微信、电话或二维码；不要私下转账定金。</div><div class="msgs" id="msgs"></div>';
+  var el = document.getElementById('msgs');
+  el.innerHTML = T.messages.map(msgHtml).join('') || '<div class="empty">还没有消息，说说你想咨询什么吧</div>';
+  if (T.messages.length) last = T.messages[T.messages.length - 1].id;
+  document.getElementById('sb').style.display = 'flex';
+  window.scrollTo(0, document.body.scrollHeight);
+  timer = setInterval(poll, 4000);
+}
+async function poll(){
+  if (document.hidden) return;
+  try {
+    var d = await LH.api('GET', '/api/consult/threads/' + tid + '?after=' + last);
+    if (d.messages.length){
+      var el = document.getElementById('msgs');
+      if (!last) el.innerHTML = '';
+      el.insertAdjacentHTML('beforeend', d.messages.map(msgHtml).join(''));
+      last = d.messages[d.messages.length - 1].id;
+      window.scrollTo(0, document.body.scrollHeight);
+    }
+  } catch(e){}
+}
+async function send(fd){
+  LH.showErr(err, '');
+  try { await LH.api('POST', '/api/consult/threads/' + tid + '/messages', fd); await poll(); return true; }
+  catch(e){ LH.showErr(err, e.message); window.scrollTo(0, 0); return false; }
+}
+document.getElementById('send').onclick = async function(){
+  var t = document.getElementById('txt').value.trim(); if (!t) return;
+  this.disabled = true;
+  var fd = new FormData(); fd.append('body', t);
+  if (await send(fd)) document.getElementById('txt').value = '';
+  this.disabled = false;
+};
+document.getElementById('pic').onchange = async function(){
+  var f = this.files[0]; this.value = ''; if (!f) return;
+  var c = await LH.compress(f), fd = new FormData(); fd.append('body', ''); fd.append('image', c, 'img.jpg');
+  await send(fd);
+};
+</script>
+<script src="/static/pwa.js" defer></script>
+</body>
+</html>

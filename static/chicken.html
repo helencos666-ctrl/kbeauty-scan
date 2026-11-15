@@ -64,6 +64,7 @@ nav a.on{color:var(--pink);font-weight:700}
   <p>个人代点协助，先提交再等客服确认</p>
 </header>
 <main>
+  <div data-banner-slot="chicken"></div>
 
   <div class="card">
     <p class="note">本服务为个人代点协助，<strong>不是</strong>持牌外卖或食品配送企业。餐品由店铺制作配送，食品质量、过敏原和送达时间以店铺与客服确认为准。如有过敏或忌口，请务必写在备注里。</p>
@@ -96,6 +97,7 @@ nav a.on{color:var(--pink);font-weight:700}
 </nav>
 
 <script src="/static/community.js"></script>
+<script src="/static/banners.js"></script>
 <script>
 (async function(){
   var d = await LH.userbar(document.getElementById('ub'));
@@ -111,6 +113,10 @@ nav a.on{color:var(--pink);font-weight:700}
   document.querySelectorAll('#ckfilter button').forEach(function(b){ b.onclick = function(){
     filt = b.dataset.f; document.querySelectorAll('#ckfilter button').forEach(function(x){ x.classList.toggle('on', x === b); });
     shops = filt === 'all' ? allShops : openShops; renderShopCards(); }; });
+  var _w = +LH.qs('shop');
+  if (_w && !openShops.some(function(s){ return s.id === _w; }) && allShops.some(function(s){ return s.id === _w; })){
+    filt = 'all'; shops = allShops; document.querySelectorAll('#ckfilter button').forEach(function(x){ x.classList.toggle('on', x.dataset.f === 'all'); });
+  }
   var rate = cfg.rate_cny_krw;
   function renderShopCards(){
     var box = document.getElementById('shoplist');
@@ -121,12 +127,15 @@ nav a.on{color:var(--pink);font-weight:700}
         (s.notes?('<p class="tip" style="margin:4px 0">'+LH.esc(s.notes)+'</p>'):'')+
         '<div class="tip" style="margin:0 0 4px">'+(s.rating_count?('★ '+s.rating_avg+'（'+s.rating_count+' 条评价）'):'暂无评价')+'</div>'+
         LH.menuHtml(s.menu, rate)+LH.locHtml(s,{targetType:'chicken'})+
+        '<a class="btn sm ghost" style="margin-top:6px;display:inline-block" href="'+LH.consultHref('chicken', s.id)+'">💬 立即咨询</a>'+
         '<div class="rev" id="revc'+s.id+'"></div></div>';
     }).join('');
     LH.bindShopExtras(box, {onShare: function(b){
       LH.share({title: '炸鸡代点：'+b.dataset.name, text: '旅韩助手炸鸡代点', url: location.origin+'/chicken#cks'+b.dataset.share, targetType:'chicken', targetId:b.dataset.share});
     }});
     shops.forEach(function(s){ renderReviews(s.id); });
+    var want = LH.qs('shop'), el = want && document.getElementById('cks' + want);
+    if (el && !window._ckJump){ window._ckJump = 1; setTimeout(function(){ el.scrollIntoView({behavior: 'smooth', block: 'start'}); el.style.outline = '2px solid #ff6b8f'; }, 150); }
   }
   async function renderReviews(sid){
     var box = document.getElementById('revc'+sid);

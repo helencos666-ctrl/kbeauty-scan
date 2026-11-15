@@ -361,7 +361,7 @@ for p in ["/", "/attractions", "/food", "/shopping", "/tips", "/beauty", "/sw.js
           "/community/messages", "/community/messages/1", "/community?tab=hot", "/community?board=rent"]:
     r = guest.get(p); check(f"GET {p} 200", r.status_code == 200, r.status_code)
 swt = guest.get("/sw.js").text
-check("sw.js cache bumped v29", "lvhan-shell-v29" in swt and "/rules" in swt and "/static/stations.json" in swt and "/community/friends" in swt and "/static/chat.html" in swt)
+check("sw.js cache bumped v30", "lvhan-shell-v30" in swt and "/rules" in swt and "/static/stations.json" in swt and "/community/friends" in swt and "/static/chat.html" in swt)
 stj = guest.get("/static/stations.json").json()["stations"]; check("stations.json coords", stj.get("강남역") and stj.get("홍대입구역") and stj.get("건대입구역"))
 mj = guest.get("/static/maps.js").text; check("maps.js naver+amap", "map.naver.com/p/directions/" in mj and "m.map.naver.com/?slng=" in mj and "uri.amap.com/navigation" in mj and "uri.amap.com/search" in mj)
 pages = "".join(guest.get(p).text for p in ["/", "/attractions", "/food", "/shopping", "/tips", "/beauty"])
@@ -384,7 +384,7 @@ check("friend page shows member_no", "P.member_no" in guest.get("/community/frie
 ptp = guest.get("/community/post/1").text; check("post page has AI tag markup", "ai-tag" in ptp and "c.is_bot" in ptp)
 
 ch = guest.get("/community").text
-check("community home: 5 tabs", all(w in ch for w in ['data-t="follow"', '>精选<', '>实用干货<', '>今日热议<', '>刚发布<', '>我关注的<']))
+check("community home: tabs", all(w in ch for w in ['data-t="follow"', '>推荐<', '>🌟 精选<', '>实用干货<', '>今日热议<', '>刚发布<', '>我关注的<']))
 check("community home: journey topics", all(w in ch for w in ["出发前", "在韩国", "找商家", "签证问答", "留学打听", "结伴同行", "踩坑避雷", "出行提醒", "租房找房", "闲置转让", "工作机会", "汇率换算", "住宿推荐", "包车用车", "皮肤管理·医美"]) and ch.count('class="topic"') >= 12 and 'class="tools"' not in ch)
 check("community home: 旅韩交友 + sections + fab", all(w in ch for w in ["旅韩交友", "/community/friends", "今日热议", "避坑 &amp; 签证新帖", "刚发布", 'class="fab pill"', "写帖子", "韩友圈"]))
 _seo_pages = "".join(guest.get(p).text for p in ["/community", "/community/friends", "/community/boards"])
@@ -529,9 +529,11 @@ if os.environ.get("DATABASE_URL"):
     check("restore bob member_no", r.status_code == 200, r.text)
 
 
-# 会员(1) 不能发帖
-r = alice.post("/api/community/posts", data={"board": "pit", "title": "明洞换钱踩坑", "body": "换钱所汇率看清楚，有的店写的是买入价。"}, headers=H)
-check("tier1 cannot post", r.status_code == 403 and "高级会员" in r.json()["detail"], r.text)
+# 会员(1) 可在日常/实用频道发帖，旅韩交友仍需高级会员
+r = alice.post("/api/community/posts", data={"board": "friends", "title": "找周末搭子", "body": "周末想找人一起逛弘大，有人吗？"}, headers=H)
+check("tier1 cannot post friends", r.status_code == 403 and "高级会员" in r.json()["detail"], r.text)
+r = alice.post("/api/community/posts", data={"board": "daily", "title": "汉江", "body": "今天在汉江吃炸鸡。"}, headers=H)
+check("tier1 can post daily (short title ok)", r.status_code == 200 and r.json().get("id"), r.text)
 # 高级(2) 发帖（6 张以内，服务器压缩）
 files = [("images", (f"{i}.png", img_bytes(color=(i * 30, 100, 150)), "image/png")) for i in range(3)]
 r = bob.post("/api/community/posts", data={"board": "pit", "title": "明洞换钱踩坑", "body": "换钱所汇率看清楚，有的店写的是买入价。<script>alert(1)</script>"}, files=files, headers=H)
@@ -723,20 +725,30 @@ r = admin.post(f"/api/admin/users/{uid_d}", json={"action": "merchant", "plan": 
 me_d = dave.get("/api/community/me").json()["user"]
 check("merchant /me", me_d["merchant"] and me_d["display_tier"] == 3 and me_d["tier"] == 2 and me_d["merchant_info"]["left"] == 10 and me_d["merchant_info"]["plan"] == "month", me_d)
 until1 = me_d["merchant_info"]["until"]
-r = dave.post("/api/community/posts", data={"board": "hotel", "title": "明洞酒店特价", "body": "明洞站步行三分钟，双人间每晚价格 8 万韩元，微信号 hotel888。"}, headers=H)
-check("merchant posts hotel (no review)", r.status_code == 200 and not r.json().get("pending"), r.text); pid_h = r.json()["id"]
+r = dave.post("/api/community/posts", data={"board": "hotel", "tag": "hotel", "title": "明洞酒店特价", "body": "明洞站步行三分钟，双人间每晚价格 8 万韩元，微信号 hotel888。"}, headers=H)
+check("merchant post with wechat rejected", r.status_code == 400 and "站外联系方式" in r.json()["detail"], r.text)
+r = dave.post("/api/community/posts", data={"board": "hotel", "title": "明洞酒店特价", "body": "明洞站步行三分钟，双人间每晚价格 8 万韩元。"}, headers=H)
+check("merchant post needs subcategory tag", r.status_code == 400 and "分类" in r.json()["detail"], r.text)
+r = dave.post("/api/community/posts", data={"board": "hotel", "tag": "hotel", "offer": "连住两晚 9 折", "valid_until": "2099-12-31", "title": "明洞酒店特价", "body": "明洞站步行三分钟，双人间每晚价格 8 万韩元。"}, headers=H)
+check("merchant activity post pending review", r.status_code == 200 and r.json().get("pending"), r.text); pid_h = r.json()["id"]
+check("pending activity hidden", guest.get(f"/api/community/posts/{pid_h}").status_code == 404)
+check("admin approves activity", admin.post(f"/api/admin/posts/{pid_h}/review", json={"action": "approve"}, headers=H).status_code == 200)
 r = dave.post("/api/community/posts", data={"board": "pit", "title": "明洞住宿小贴士", "body": "订房前确认是否含税，价格以前台为准。"}, headers=H)
 check("merchant normal-board post not held", r.status_code == 200 and not r.json().get("pending"), r.text)
 hp = guest.get(f"/api/community/posts/{pid_h}").json(); check("merchant label + badge", hp["merchant"] is True and hp["author_tier"] == 3, hp)
+check("activity fields + consult", hp.get("tag_name") == "酒店" and hp.get("offer") == "连住两晚 9 折" and hp.get("valid_until") == "2099-12-31" and hp.get("consult") is True, hp)
+check("views counted", hp.get("views", 0) >= 1, hp)
+check("tag filter", any(p["id"] == pid_h for p in guest.get("/api/community/posts?board=hotel&tag=hotel").json()["posts"]) and not any(p["id"] == pid_h for p in guest.get("/api/community/posts?board=hotel&tag=hanok").json()["posts"]))
 check("hotel board list", any(p["id"] == pid_h and p["merchant"] for p in guest.get("/api/community/posts?board=hotel").json()["posts"]))
 check("quota 9 left", dave.get("/api/community/me").json()["user"]["merchant_info"]["left"] == 9)
 # 新增 4 个商家频道：留学机构 / 代购商家 / 地陪 / 追星活动（用两个新商家号，避开每人 10 分钟 3 帖的频率限制）
-NEWB = {"agency": "留学机构", "daigou": "代购商家", "guide": "地陪", "kpop": "追星活动"}
+NEWB = {"agency": "留学机构", "daigou": "代购商家", "guide": "地陪", "kpop": "追星活动", "logistics": "中韩物流"}
+NEWT = {"agency": "lang", "daigou": "beauty", "guide": "city", "kpop": "concert", "logistics": "sea"}
 bl = guest.get("/api/community/boards").json()
 allb = {x["key"]: x for c in bl.get("categories", []) for x in c.get("boards", [])}
 check("new merchant boards listed", all(k in allb and allb[k]["merchant"] and allb[k]["name"] == v for k, v in NEWB.items()), list(allb))
 mers = []
-for nm in ("fay", "gil"):
+for nm in ("fay", "gil", "hal"):
     cm = httpx.Client(base_url=BASE)
     r = cm.post("/api/community/register", json={"account": f"{nm}{rnd}@ex.com", "password": "Passw0rd!xyz", "nickname": "商家" + nm, "agree": True}, headers=H)
     check(f"merchant {nm} registers", r.status_code == 200, r.text)
@@ -746,20 +758,21 @@ for nm in ("fay", "gil"):
 for i, k in enumerate(NEWB):
     r = eve.post("/api/community/posts", data={"board": k, "title": "测试商家信息发布", "body": "这是一条测试用的商家信息正文内容。"}, headers=H)
     check(f"tier2 non-merchant cannot post {k}", r.status_code == 403 and "商家会员" in r.json()["detail"], r.text)
-    cm = mers[0] if i < 3 else mers[1]
-    r = cm.post("/api/community/posts", data={"board": k, "title": "测试商家信息发布", "body": "这是一条测试用的商家信息正文内容。"}, headers=H)
-    check(f"merchant posts {k}", r.status_code == 200 and not r.json().get("pending"), r.text)
+    cm = mers[0] if i < 3 else (mers[1] if i < 4 else mers[2])
+    r = cm.post("/api/community/posts", data={"board": k, "tag": NEWT[k], "title": "测试商家信息发布", "body": "这是一条测试用的商家信息正文内容。"}, headers=H)
+    check(f"merchant posts {k} (pending)", r.status_code == 200 and r.json().get("pending"), r.text)
     if r.status_code == 200:
+        admin.post(f"/api/admin/posts/{r.json()['id']}/review", json={"action": "approve"}, headers=H)
         check(f"{k} board list", any(p["id"] == r.json()["id"] and p["merchant"] and p["board_name"] == NEWB[k] for p in guest.get(f"/api/community/posts?board={k}").json()["posts"]))
 check("new boards share quota (7 left after 3 posts)", mers[0].get("/api/community/me").json()["user"]["merchant_info"]["left"] == 7)
 import psycopg
 with psycopg.connect(os.environ["DATABASE_URL"]) as pc:
     for i in range(9):
         pc.execute("INSERT INTO c_posts(user_id,board,title,body,is_merchant,quota_kind,created_at) VALUES (%s,'hotel','额度测试','额度测试正文内容',TRUE,'quota',now())", (uid_d,))
-r = dave.post("/api/community/posts", data={"board": "clinic", "title": "皮肤科介绍", "body": "江南区合法皮肤科诊所，提供中文咨询。"}, headers=H)
+r = dave.post("/api/community/posts", data={"board": "clinic", "tag": "skin", "title": "皮肤科介绍", "body": "江南区合法皮肤科诊所，提供中文咨询。"}, headers=H)
 check("quota exhausted -> 403 with extra price", r.status_code == 403 and "额度已用完" in r.json()["detail"] and "19.9" in r.json()["detail"], r.text)
 r = admin.post(f"/api/admin/users/{uid_d}", json={"action": "credits", "n": 2}, headers=H); check("grant 2 credits", r.json().get("credits") == 2, r.text)
-r = dave.post("/api/community/posts", data={"board": "clinic", "title": "皮肤科介绍", "body": "江南区合法皮肤科诊所，提供中文咨询。"}, headers=H)
+r = dave.post("/api/community/posts", data={"board": "clinic", "tag": "skin", "title": "皮肤科介绍", "body": "江南区合法皮肤科诊所，提供中文咨询。"}, headers=H)
 check("post using credit", r.status_code == 200, r.text)
 mi = dave.get("/api/community/me").json()["user"]["merchant_info"]; check("left 0 credits 1", mi["left"] == 0 and mi["credits"] == 1, mi)
 r = admin.post(f"/api/admin/users/{uid_d}", json={"action": "merchant", "plan": "year"}, headers=H); check("renew with annual", r.status_code == 200)

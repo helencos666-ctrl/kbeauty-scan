@@ -30,6 +30,11 @@ POINT_RULES = {
     "profile": {"points": 20, "daily_cap": 0, "once": True, "label": "完善资料"},
     "shop_approve": {"points": 10, "daily_cap": 0, "label": "推荐店铺通过审核"},
     "opening_bonus": {"points": 50, "daily_cap": 0, "once": True, "label": "开业前100名奖励"},
+    "post": {"points": 5, "daily_cap": 3, "label": "发帖"},
+    "comment": {"points": 2, "daily_cap": 5, "label": "评论"},
+    "first_reply": {"points": 2, "daily_cap": 5, "label": "帖子收到第一条回复"},
+    "featured": {"points": 30, "daily_cap": 0, "label": "帖子被加精"},
+    "streak_bonus": {"points": 0, "daily_cap": 0, "label": "连续签到奖励"},
 }
 USER_EVENT_KINDS = ("share", "subway", "card", "profile")
 SHARE_TARGET_TYPES = ("post", "shop", "merchant", "trip", "card", "subway", "chicken")
@@ -253,7 +258,7 @@ def user_points_summary(conn, uid):
 def _rules_out(counts):
     out = []
     for kind, rule in POINT_RULES.items():
-        if kind in ("shop_approve", "opening_bonus"):
+        if kind in ("shop_approve", "opening_bonus", "featured", "streak_bonus"):
             continue
         cap = rule.get("daily_cap") or 0
         used = counts.get(kind, 0)
@@ -373,10 +378,19 @@ def api_points_checkin(req: Request):
         limit("ptck:" + str(u["id"]), 10, 60, "操作太频繁，请稍后再试")
         limit("ptckip:" + ip_of(req), 30, 60, "操作太频繁，请稍后再试")
         result = _award(conn, u["id"], "checkin", item_key="checkin", note="每日签到")
+        streak = _streak(conn, u["id"], kst_today())
         if result["awarded"]:
             result["reason"] = "签到成功，获得 %d %s" % (result["awarded"], POINTS_NAME)
+            from retention import after_checkin
+            extra = after_checkin(conn, u["id"], streak)
+            if extra.get("streak_bonus"):
+                result["reason"] += "；连续签到 %d 天，额外奖励 %d %s" % (streak, extra["streak_bonus"], POINTS_NAME)
+            result.update(extra)
+        else:
+            from retention import CHECKIN_NEXT
+            result["next_actions"] = CHECKIN_NEXT
         payload = _points_payload(conn, u["id"], result)
-        payload["streak"] = _streak(conn, u["id"], kst_today())
+        payload["streak"] = streak
         return payload
 
 

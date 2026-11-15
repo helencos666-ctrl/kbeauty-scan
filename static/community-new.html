@@ -27,6 +27,7 @@
     <label class="f">发到哪个频道</label>
     <select class="f" id="board">
       <option value="">请选择频道</option>
+      <option value="daily">🌸 在韩日常</option>
       <option value="pit">踩坑避雷</option>
       <option value="group">结伴同行</option>
       <option value="visa">签证问答</option>
@@ -44,13 +45,24 @@
         <option value="daigou">🛍️ 代购商家</option>
         <option value="guide">🙋 地陪</option>
         <option value="kpop">🎤 追星活动</option>
+        <option value="logistics">📦 中韩物流</option>
       </optgroup>
     </select>
     <div class="tip" id="quota" style="display:none"></div>
     <div class="warn" id="bwarn" style="display:none;margin-top:10px"></div>
-    <label class="f">标题（4–40 字）</label>
+    <div id="actbox" style="display:none">
+      <label class="f">分类标签</label>
+      <select class="f" id="tag"></select>
+      <label class="f">优惠 / 价格（选填，60 字内）</label>
+      <input class="f" id="offer" maxlength="60" placeholder="例如：新客体验价 ₩59,000（原价 ₩89,000）">
+      <label class="f">有效期至（选填）</label>
+      <input class="f" id="valid" type="date">
+      <div class="mednote" id="mednote" style="display:none"></div>
+      <div class="tip">商家活动帖<b>先审后发</b>。请勿填写微信、QQ、电话、二维码等站外联系方式，用户会通过站内「立即咨询」联系你。</div>
+    </div>
+    <label class="f" id="tlab">标题（4–40 字）</label>
     <input class="f" id="title" maxlength="40" placeholder="一句话说清楚，例如：明洞换钱踩坑记录">
-    <label class="f">正文（10–3000 字）</label>
+    <label class="f" id="blab">正文（10–3000 字）</label>
     <textarea class="f" id="body" maxlength="3000" placeholder="时间、地点、经过、建议……写得越具体越有用"></textarea>
     <label class="f">图片（最多 6 张，会自动压缩）</label>
     <input type="file" id="pick" accept="image/*" multiple>
@@ -81,11 +93,35 @@ var WARN = {visa: '签证问答仅限个人经验分享，禁止发布代办广�
   daigou: '商家专区：请写清代购品类、价格与发货方式，不得销售假货、违禁品或逃避海关的商品。',
   guide: '商家专区：请写清服务范围、时长与收费，确保具备合法从业资质，不得发布色情陪同等违法内容。',
   kpop: '商家专区：演出、应援、见面会信息请注明主办方与信息来源，严禁倒卖门票和代抢票。',
+  logistics: '商家专区：请写清线路、计费方式、时效与清关说明，不得承运违禁品或协助逃避海关监管。',
 };
-var MB = {hotel: 1, car: 1, clinic: 1, agency: 1, daigou: 1, guide: 1, kpop: 1}, ME = null;
+var MB = {hotel: 1, car: 1, clinic: 1, agency: 1, daigou: 1, guide: 1, kpop: 1, logistics: 1}, ME = null;
 var NORMAL_HINT = '普通频道里含酒店预订、租车包车、医美、微信号、代办等商业内容的帖子会先进入人工审核。';
-var files = [];
+var files = [], SUBC = {}, MED = {}, MEDNOTE = '', lastTpl = '';
+// 按频道预填的一句话模板（可改，不是强制格式）
+var TPL = {
+  daily: '今天在（地区），（一件小事）。\n想分享的是……',
+  visa: '我的情况是……\n想问的是……\n已经查过……',
+  study: '我的情况是……\n想问的是……\n已经查过……',
+  pit: '时间：\n地点：\n经过：\n建议：',
+  group: '时间：\n地点 / 路线：\n想找什么样的搭子：\n费用：AA',
+  news: '时间：\n地点：\n发生了什么变化：',
+  rent: '区域 / 预算：\n看房经历：\n合同和押金要注意：',
+  used: '物品：\n成色 / 价格：\n交易方式：当面交易（区域）',
+  jobs: '岗位 / 地区：\n签证要求：\n工作内容和待遇：'
+};
+var TITLE_PH = {daily: '一句话也行，例如：今天在汉江边吃了炸鸡', visa: '例如：D-4 转 D-2 需要准备什么？', pit: '例如：明洞换钱踩坑记录'};
 document.getElementById('board').onchange = function(){
+  var bd = document.getElementById('body'), tv = TPL[this.value] || '';
+  if (!bd.value.trim() || bd.value === lastTpl){ bd.value = tv; lastTpl = tv; }
+  document.getElementById('title').placeholder = TITLE_PH[this.value] || '一句话说清楚';
+  var dly = this.value === 'daily';
+  document.getElementById('tlab').textContent = dly ? '标题（2–40 字）' : '标题（4–40 字）';
+  document.getElementById('blab').textContent = dly ? '正文（5 字起，一句话也可以）' : '正文（10–3000 字）';
+  var ab = document.getElementById('actbox'), subs = SUBC[this.value] || [];
+  ab.style.display = MB[this.value] ? 'block' : 'none';
+  document.getElementById('tag').innerHTML = '<option value="">请选择分类</option>' + subs.map(function(x){ return '<option value="' + x.key + '">' + x.icon + ' ' + LH.esc(x.name) + '</option>'; }).join('');
+  var mn = document.getElementById('mednote'); mn.style.display = MED[this.value] ? 'block' : 'none'; mn.textContent = '⚠️ ' + MEDNOTE + ' 不得使用“保证效果”“无副作用”“100%”等承诺性用语。';
   var w = document.getElementById('bwarn'), t = WARN[this.value] || '';
   var qd = document.getElementById('quota'), u = ME && ME.user;
   if (MB[this.value]){
@@ -99,8 +135,10 @@ document.getElementById('board').onchange = function(){
   var gate = document.getElementById('gate'), d;
   try { d = ME = await LH.me(); } catch(e){ gate.innerHTML = '<div class="empty">' + LH.esc(e.message) + '</div>'; return; }
   if (!d.user){ gate.innerHTML = '<div class="empty">请先登录<br><br><a class="btn primary" href="/login?next=/community/new">登录 / 注册</a></div>'; return; }
-  if (d.user.tier < 2){ gate.innerHTML = '<div class="empty">开通高级会员（¥' + d.prices.price_t2 + '）后即可在所有频道发帖（含旅韩交友）；住宿、包车、医美、留学机构、代购、地陪、追星活动等商家请开通商家会员<br><br><a class="btn primary" href="/member">' + (d.user.tier === 1 ? '升级高级会员' : '了解会员') + '</a></div>'; return; }
+  if (d.user.tier < 1){ gate.innerHTML = '<div class="empty">开通会员（¥' + d.prices.price_t1 + '）后即可在在韩日常、踩坑避雷、签证问答等频道发帖；旅韩交友发帖需高级会员；住宿、包车、医美、留学机构、代购、地陪、追星活动、中韩物流等商家请开通商家会员<br><br><a class="btn primary" href="/member">了解会员</a></div>'; return; }
+  if (d.user.tier < 2){ var fo = document.querySelector('#board option[value="friends"]'); if (fo){ fo.disabled = true; fo.textContent = '旅韩交友（需高级会员）'; } }
   gate.style.display = 'none'; document.getElementById('form').style.display = 'block';
+  try { var mm = await LH.api('GET', '/api/merch/meta'); SUBC = mm.subcats || {}; MEDNOTE = mm.medical_note || ''; (mm.medical_boards || []).forEach(function(k){ MED[k] = 1; }); } catch(e){}
   var b = LH.qs('board'); if (b) document.getElementById('board').value = b;
   document.getElementById('board').onchange();
 })();
@@ -121,10 +159,14 @@ document.getElementById('pick').onchange = async function(){
 document.getElementById('send').onclick = async function(){
   var err = document.getElementById('err'); LH.showErr(err, '');
   if (!document.getElementById('agree').checked){ LH.showErr(err, '请先勾选同意社区规则'); return; }
+  if (lastTpl && document.getElementById('body').value.trim() === lastTpl.trim()){ LH.showErr(err, '把模板里的括号和省略号换成你自己的内容再发吧'); return; }
   var fd = new FormData();
   fd.append('board', document.getElementById('board').value);
   fd.append('title', document.getElementById('title').value);
   fd.append('body', document.getElementById('body').value);
+  if (MB[document.getElementById('board').value]){
+    fd.append('tag', document.getElementById('tag').value); fd.append('offer', document.getElementById('offer').value); fd.append('valid_until', document.getElementById('valid').value);
+  }
   files.forEach(function(f){ fd.append('images', f, 'img.jpg'); });
   this.disabled = true; this.textContent = '发布中…';
   try { var r = await LH.api('POST', '/api/community/posts', fd); if (r.pending) alert(r.message); location.href = '/community/post/' + r.id; }

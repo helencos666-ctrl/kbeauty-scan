@@ -215,6 +215,7 @@ body.is-home .disclaimer{display:none}
     <a class="promo-bar" id="openPromo" href="/points" hidden></a>
     <section class="blk" id="shopBlk" hidden><div class="bh"><h2>热门商家</h2><a href="/shops">全部 ›</a></div><div class="hs" id="shopList"></div></section>
     <section class="blk" id="postBlk" hidden><div class="bh"><h2>韩友圈 · 最新</h2><a href="/community">进入 ›</a></div><div id="postList"></div></section>
+    <section class="blk" id="friendBlk" hidden><div class="bh"><h2>交友 · 最新</h2><a href="/community?board=friends">进入 ›</a></div><div id="friendList"></div></section>
   </section>
 
   <!-- 化妆品识别 -->
@@ -326,6 +327,7 @@ body.is-home .disclaimer{display:none}
       <a href="/community?board=daigou" data-k="代购 买货 免税 商家"><i>🛍️</i>代购商家</a>
       <a href="/community?board=guide" data-k="地陪 导游 向导 陪同 翻译 商家"><i>🙋</i>地陪</a>
       <a href="/community?board=kpop" data-k="追星 演唱会 应援 见面会 打歌 kpop 爱豆"><i>🎤</i>追星活动</a>
+      <a href="/community?board=logistics" data-k="物流 快递 海运 空运 集运 寄回国 搬家 中韩物流 商家"><i>📦</i>中韩物流</a>
     </div></div>
   </section>
 
@@ -852,6 +854,15 @@ drawScenes();
       return '<a class="pi" href="/community/post/' + encodeURIComponent(p.id) + '"><b>' + E(p.title) + '</b><span>' + E(p.board_name) + (t ? (' · ' + E(t)) : '') + ' · ' + (p.comments || 0) + ' 评论</span></a>';
     }).join('');
     document.getElementById('postBlk').hidden = false;
+  }).catch(function(){});
+  // 交友最新 3 帖（旅韩交友、结伴同行）
+  fetch('/api/community/friends-latest').then(function(r){ return r.json(); }).then(function(d){
+    var ps = (d && d.posts) || []; if (!ps.length) return;
+    document.getElementById('friendList').innerHTML = ps.map(function(p){
+      var t = (p.time || '').slice(5, 10).replace('-', '/');
+      return '<a class="pi" href="/community/post/' + encodeURIComponent(p.id) + '"><b>' + E(p.title) + '</b><span>' + E(p.board_name) + (t ? (' · ' + E(t)) : '') + ' · ' + (p.comments || 0) + ' 评论</span></a>';
+    }).join('');
+    document.getElementById('friendBlk').hidden = false;
   }).catch(function(){});
   // 首页搜索：从「全部功能」里找
   var q = document.getElementById('q'), box = document.getElementById('qres');

@@ -56,11 +56,14 @@ var LH = (function(){
       var d = await me();
       if (d.user){
         el.innerHTML = '<span class="who">' + avatar(d.user.id, d.user.nickname, d.user.has_avatar, 'lg') +
-          '<span>' + esc(d.user.nickname) + badge(d.user.display_tier) + '</span></span>' +
+          '<span><a href="/community/u/' + d.user.id + '" style="color:inherit;text-decoration:none">' + esc(d.user.nickname) + '</a>' + badge(d.user.display_tier) + ubadges(d.user.badges, d.user.official, 3) + '</span></span>' +
           '<span class="row"><button class="btn sm ghost" type="button" id="lhAv">设置头像</button>' +
           '<a class="btn sm ghost" href="/points">🫘 ' + (d.user.points_balance != null ? d.user.points_balance : '') + ' 旅行豆</a>' +
+          '<a class="btn sm ghost" href="/community/notices" style="position:relative">🔔 通知' + (d.user.notif_unread ? '<span class="dot">' + (d.user.notif_unread > 99 ? '99+' : d.user.notif_unread) + '</span>' : '') + '</a>' +
+          '<a class="btn sm ghost" href="/consult" style="position:relative">💬 咨询<span class="dot" data-consult-dot' + (d.user.consult_unread ? '' : ' style="display:none"') + '>' + (d.user.consult_unread || '') + '</span></a>' +
           '<a class="btn sm ghost" href="/community/messages" style="position:relative">✉️ 私信' + (d.user.unread ? '<span class="dot">' + (d.user.unread > 99 ? '99+' : d.user.unread) + '</span>' : '') + '</a>' + (d.user.tier >= 2 ? '' : '<a class="btn sm primary" href="/member">' + (d.user.tier === 1 ? '升级高级会员' : '开通会员') + '</a>') +
           '<button class="btn sm gray" id="lhLogout">退出</button></span>';
+        startConsultPoll();
         el.querySelector('#lhAv').onclick = function(){ pickAvatar(function(){ _me = null; userbar(el); }); };
         el.querySelector('#lhLogout').onclick = async function(){ await api('POST', '/api/community/logout', {}); location.reload(); };
       } else {
@@ -113,16 +116,48 @@ var LH = (function(){
     inp.click();
   }
   // 帖子列表项（rank 为排名序号，可选）
+  // 徽章（与 retention.py BADGES 同步）
+  var BADGES = {first_post: ['✍️', '首帖'], posts10: ['📝', '笔耕不辍'], featured_author: ['🌟', '精选作者'], streak7: ['🔥', '连续签到7天'],
+    streak30: ['🏆', '连续签到30天'], helper: ['💬', '热心回答'], daily_star: ['🇰🇷', '在韩达人'], official: ['✅', '官方认证'], good_merchant: ['🏅', '优质商家']};
+  function ubadges(list, official, max){
+    var h = official ? '<span class="offbadge">官方</span>' : '';
+    (list || []).slice(-(max || 3)).forEach(function(k){ var b = BADGES[k]; if (b) h += '<span class="ubadge" title="' + b[1] + '">' + b[0] + '</span>'; });
+    return h;
+  }
+  function postFlags(p){ return (p.pinned ? '<span class="tag pin">置顶</span>' : '') + (p.featured ? '<span class="tag feat">精选</span>' : '') + (p.topic ? '<span class="tag topic">话题</span>' : ''); }
   function postItem(p, rank){
     var cover = p.cover ? '<img class="cover" loading="lazy" alt="" src="/api/community/img/' + p.cover + '?t=1">' : '';
     return '<a class="post" href="/community/post/' + p.id + '">' + (rank ? '<span class="rank' + (rank <= 3 ? ' t' : '') + '">' + rank + '</span>' : '') +
       avatar(p.author_id, p.author, p.has_avatar, 'sm') +
       '<div class="txt"><h3>' + esc(p.title) + '</h3><p class="ex">' + esc(p.excerpt) + '</p><div class="meta">' +
-      (p.merchant ? '<span class="tag biz">商家</span>' : '') + '<span class="tag">' + esc(p.board_name) + '</span>' +
-      '<span>' + esc(p.author) + badge(p.author_tier) + vb(p.author_verified) + '</span><span>' + esc(p.time) + '</span>' +
+      postFlags(p) + (p.merchant ? '<span class="tag biz">商家</span>' : '') + '<span class="tag">' + esc(p.board_name) + '</span>' +
+      '<span>' + esc(p.author) + badge(p.author_tier) + vb(p.author_verified) + ubadges(p.author_badges, p.author_official, 2) + '</span><span>' + esc(p.time) + '</span>' +
       '<span>❤️ ' + p.likes + '</span><span>💬 ' + p.comments + '</span>' + (p.img_n > 1 ? '<span>🖼 ' + p.img_n + '</span>' : '') +
       '</div></div>' + cover + '</a>';
   }
+  // 商家活动列表：标题 + 缩略图 + 阅读数 + 时间
+  function bizItem(p){
+    var cover = p.cover ? '<img class="cover" loading="lazy" alt="" src="/api/community/img/' + p.cover + '?t=1">' : '<span class="cover bzph">🏷️</span>';
+    return '<a class="post biz-item" href="/community/post/' + p.id + '"><div class="txt"><h3>' + postFlags(p) + (p.tag_name ? '<span class="btag">[' + esc(p.tag_name) + ']</span>' : '') + esc(p.title) + '</h3>' +
+      (p.offer ? '<p class="offer">🎁 ' + esc(p.offer) + '</p>' : '') +
+      '<div class="meta"><span>👁 ' + (p.views || 0) + '</span><span>' + esc(p.time) + '</span>' + (p.valid_until ? '<span>有效至 ' + esc(p.valid_until) + '</span>' : '') + '</div></div>' + cover + '</a>';
+  }
+  function consultHref(kind, id){ return '/consult/new?kind=' + encodeURIComponent(kind) + '&id=' + encodeURIComponent(id); }
+  function consultBtn(kind, id, label){ return '<a class="btn primary block consult-btn" href="' + consultHref(kind, id) + '">💬 ' + esc(label || '立即咨询') + '</a>'; }
+  // 站内咨询未读提醒：页面角标 + （已授权时）系统通知
+  var _cn = -1;
+  async function consultPoll(){
+    try {
+      var r = await api('GET', '/api/consult/unread'), n = r.n || 0;
+      document.querySelectorAll('[data-consult-dot]').forEach(function(el){ el.textContent = n > 99 ? '99+' : n; el.style.display = n ? '' : 'none'; });
+      if (_cn >= 0 && n > _cn && document.hidden && window.Notification && Notification.permission === 'granted' && !/^\/consult\/\d/.test(location.pathname)){
+        var opt = {body: '你有 ' + n + ' 条未读咨询消息', icon: '/static/icons/icon-192.png', tag: 'lh-consult', data: {url: '/consult'}};
+        try { var reg = navigator.serviceWorker && await navigator.serviceWorker.getRegistration(); if (reg) reg.showNotification('旅韩助手 · 站内咨询', opt); else new Notification('旅韩助手 · 站内咨询', opt); } catch(e){}
+      }
+      _cn = n;
+    } catch(e){}
+  }
+  function startConsultPoll(){ if (window._lhCP) return; window._lhCP = 1; consultPoll(); setInterval(function(){ if (!document.hidden || (window.Notification && Notification.permission === 'granted')) consultPoll(); }, 30000); }
   // 交友卡片：locked = 未开通会员，只显示模糊照片
   function friendCard(c){
     var sub = [c.age ? c.age + '岁' : '', c.height ? c.height + 'cm' : '', c.city || ''].filter(Boolean).join(' · ');
@@ -255,6 +290,6 @@ var LH = (function(){
     }
   }
   return {prices: prices, esc: esc, api: api, me: me, badge: badge, showErr: showErr, qs: qs, compress: compress, userbar: userbar, report: report,
-          vb: vb, avatar: avatar, pickAvatar: pickAvatar, postItem: postItem, friendCard: friendCard, lockedPrompt: lockedPrompt, ANTISCAM: ANTISCAM, share: share,
+          vb: vb, avatar: avatar, pickAvatar: pickAvatar, postItem: postItem, bizItem: bizItem, ubadges: ubadges, BADGES: BADGES, postFlags: postFlags, consultHref: consultHref, consultBtn: consultBtn, startConsultPoll: startConsultPoll, friendCard: friendCard, lockedPrompt: lockedPrompt, ANTISCAM: ANTISCAM, share: share,
           mapLinks: mapLinks, copyText: copyText, krwCny: krwCny, menuHtml: menuHtml, locHtml: locHtml, ratingText: ratingText, bindShopExtras: bindShopExtras, starsHtml: starsHtml, priceLine: priceLine};
 })();

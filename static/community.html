@@ -23,6 +23,7 @@
       <p>去韩国前，问问走过的人</p>
     </div>
     <div class="thero-act">
+      <a href="/community/notices" id="notiIc" title="通知" style="position:relative">🔔 通知</a>
       <a href="/community/messages" id="inboxIc" title="私信">私信</a>
       <a href="/community/boards" title="全部频道">全部频道</a>
     </div>
@@ -31,16 +32,23 @@
 <main class="home">
   <div class="card userbar" id="ub">加载中…</div>
   <div class="seg" id="tabs">
-    <button data-t="recommend">精选</button>
+    <button data-t="recommend">推荐</button>
+    <button data-t="featured">🌟 精选</button>
     <button data-t="news">实用干货</button>
     <button data-t="hot">今日热议</button>
     <button data-t="latest">刚发布</button>
     <button data-t="follow" id="tFollow" style="display:none">我关注的</button>
   </div>
 
+  <div id="boardBanner"></div>
   <div id="boardHead" class="card" style="display:none"></div>
+  <div class="subcats" id="subcats" style="display:none"></div>
   <div class="warn" id="bwarn" style="display:none"></div>
 
+  <div class="card" id="topicBox" style="display:none">
+    <div class="sech"><h2>🔥 本周话题 · 置顶</h2><a href="/community?tab=topic">往期话题 ›</a></div>
+    <div class="slist" id="topicList"></div>
+  </div>
   <div id="homeBlocks" style="display:none">
     <section class="meet" id="friendsBox">
       <div class="meet-hd">
@@ -63,6 +71,7 @@
         <div class="stage-t"><span>2</span>在韩国</div>
         <a class="topic" href="/community?board=pit"><em>🚧</em><span><b>踩坑避雷</b><small>换钱、打车、购物的真实经历</small></span></a>
         <a class="topic" href="/community?board=news"><em>📣</em><span><b>出行提醒</b><small>天气、交通、闭馆等变化</small></span></a>
+        <a class="topic" href="/community?board=daily"><em>🌸</em><span><b>在韩日常</b><small>今天的一件小事，一句话也行</small></span></a>
         <a class="topic" href="/community?board=rent"><em>🔑</em><span><b>租房找房</b><small>看房、合同、押金</small></span></a>
         <a class="topic" href="/community?board=used"><em>♻️</em><span><b>闲置转让</b><small>回国前转让、二手好物</small></span></a>
         <a class="topic" href="/community?board=jobs"><em>💼</em><span><b>工作机会</b><small>先确认签证允许工作</small></span></a>
@@ -77,6 +86,7 @@
         <a class="topic" href="/community?board=daigou"><em>🛍️</em><span><b>代购商家</b><small>商家会员发布</small></span></a>
         <a class="topic" href="/community?board=guide"><em>🙋</em><span><b>地陪</b><small>商家会员发布</small></span></a>
         <a class="topic" href="/community?board=kpop"><em>🎤</em><span><b>追星活动</b><small>演出/应援/见面会信息</small></span></a>
+        <a class="topic" href="/community?board=logistics"><em>📦</em><span><b>中韩物流</b><small>海运/空运/快递/集运</small></span></a>
       </div>
     </section>
 
@@ -119,6 +129,7 @@
   <a href="/?tab=more"><i>☰</i>全部</a>
 </nav>
 <script src="/static/community.js"></script>
+<script src="/static/banners.js"></script>
 <script>
 var WARN = {
   visa: '⚠️ 签证问答仅为网友个人经验分享，本站不提供签证代办。政策以韩国驻华使领馆、韩国签证申请中心和 K-ETA 官网为准。',
@@ -135,7 +146,9 @@ var WARN = {
   daigou: '🛍️ 代购信息由商家自行发布并负责。请确认商品来源和价格，尽量使用有交易保障的支付方式，注意入境免税额度和海关规定。',
   guide: '🙋 地陪信息由商家自行发布并负责。在韩国为外国游客提供有偿导游服务通常需要相应资质，请事先确认身份、价格和服务内容，谨慎预付。',
   kpop: '🎤 活动信息由发布者负责，请以主办方、经纪公司和正规售票平台公告为准。不要购买黄牛票或向个人预付抢票费用。',
+  logistics: '📦 物流信息由商家自行发布并负责。请确认运费、时效、保价和清关责任，违禁品不得寄递，谨慎预付全款并保留单号凭证。',
 };
+var MB = ['hotel','car','clinic','agency','daigou','guide','kpop','logistics'], SUBC = {}, btag = LH.qs('tag') || '';
 var board = LH.qs('board') || '', tab = LH.qs('tab') || 'recommend', next = 0, fb = false, boards = {}, user = null;
 var listEl = document.getElementById('list'), moreEl = document.getElementById('more');
 function setTab(t){
@@ -158,7 +171,16 @@ function render(){
       '<button class="jbtn" id="joinB">＋ 关注</button></span></div>';
     joinState();
   } else bh.style.display = 'none';
+  var isBiz = board && MB.indexOf(board) >= 0, sc = document.getElementById('subcats'), bb = document.getElementById('boardBanner');
+  if (isBiz){
+    LHBanner.mount(bb, 'board:' + board);
+    var subs = SUBC[board] || [];
+    sc.style.display = subs.length ? 'flex' : 'none';
+    sc.innerHTML = '<button data-k="" class="' + (btag ? '' : 'on') + '"><i>🗂️</i>全部</button>' + subs.map(function(x){ return '<button data-k="' + x.key + '" class="' + (btag === x.key ? 'on' : '') + '"><i>' + x.icon + '</i>' + LH.esc(x.name) + '</button>'; }).join('');
+    sc.querySelectorAll('button').forEach(function(b){ b.onclick = function(){ btag = b.dataset.k; history.replaceState(null, '', '/community?board=' + board + (btag ? '&tag=' + btag : '')); render(); }; });
+  } else { sc.style.display = 'none'; bb.hidden = true; bb.innerHTML = ''; btag = ''; }
   if (home) loadHome();
+  loadTopics(home);
   load(true);
 }
 async function joinState(){
@@ -170,7 +192,7 @@ async function joinState(){
   };
 }
 function feedUrl(){
-  if (board) return '/api/community/posts?board=' + board + (next ? '&before=' + next : '');
+  if (board) return '/api/community/posts?board=' + board + (btag ? '&tag=' + btag : '') + (next ? '&before=' + next : '');
   var t = tab === 'recommend' ? 'latest' : tab;   // 精选页下方“刚发布”列表
   return '/api/community/feed?tab=' + t + '&offset=' + next + (fb ? '&fb=1' : '');
 }
@@ -187,16 +209,28 @@ async function load(reset){
     if (d.login_required){ listEl.innerHTML = '<div class="card empty">登录后可关注用户和频道<br><br><a class="btn primary" href="/login?next=/community%3Ftab%3Dfollow">登录 / 注册</a></div>'; moreEl.style.display = 'none'; return; }
     if (d.fallback && reset && tab === 'hot' && !board) listEl.insertAdjacentHTML('beforeend', '<div class="tip" style="margin:0 0 8px">今天还没有热议的帖子，下面是近 7 天讨论最多的</div>');
     fb = !!d.fallback;
-    if (!d.posts.length && reset){
+    if (!d.posts.length && reset && !(d.pinned && d.pinned.length)){
       listEl.innerHTML = tab === 'follow' && !board ? '<div class="card empty">还没有内容。去<a href="/community/boards">全部频道</a>关注感兴趣的频道，或在帖子里关注作者</div>' : '<div class="card empty">这里还没有帖子，来发第一篇吧</div>';
     }
     var rankBase = (tab === 'hot' && !board) ? next : -1;
-    listEl.insertAdjacentHTML('beforeend', d.posts.map(function(p, i){ return LH.postItem(p, rankBase >= 0 ? rankBase + i + 1 : 0); }).join(''));
+    var bizList = board && MB.indexOf(board) >= 0;
+    if (reset && d.pinned && d.pinned.length) listEl.insertAdjacentHTML('beforeend', d.pinned.map(function(p){ return bizList ? LH.bizItem(p) : LH.postItem(p, 0); }).join(''));
+    listEl.insertAdjacentHTML('beforeend', d.posts.map(function(p, i){ return bizList ? LH.bizItem(p) : LH.postItem(p, rankBase >= 0 ? rankBase + i + 1 : 0); }).join(''));
     if (board){ if (d.posts.length) next = d.posts[d.posts.length - 1].id; } else next = d.next;
     moreEl.style.display = d.more ? 'inline-block' : 'none';
   } catch(e){ listEl.innerHTML = '<div class="card empty">' + LH.esc(e.message) + '</div>'; moreEl.style.display = 'none'; }
 }
 moreEl.onclick = function(){ load(false); };
+async function loadTopics(show){
+  var box = document.getElementById('topicBox');
+  if (!show){ box.style.display = 'none'; return; }
+  try {
+    var d = await LH.api('GET', '/api/community/topics'), items = (d.topics || []).concat(d.pinned || []);
+    if (!items.length){ box.style.display = 'none'; return; }
+    document.getElementById('topicList').innerHTML = items.map(function(p){ return LH.postItem(p, 0); }).join('');
+    box.style.display = 'block';
+  } catch(e){ box.style.display = 'none'; }
+}
 async function section(el, url, ranked, titleEl){
   try {
     var d = await LH.api('GET', url);
@@ -218,13 +252,15 @@ async function loadHome(){
 }
 (async function(){
   var d = await LH.userbar(document.getElementById('ub'));
-  if (d){ boards = d.boards || {}; user = d.user; }
+  if (d){ boards = d.boards || {}; user = d.user; if (d.merchant_boards) MB = d.merchant_boards; }
+  try { SUBC = (await LH.api('GET', '/api/merch/meta')).subcats || {}; } catch(e){}
   if (board && !boards[board]) board = '';
   if (user){
     document.getElementById('tFollow').style.display = '';
     if (user.unread) document.getElementById('inboxIc').insertAdjacentHTML('beforeend', '<span class="dot">' + (user.unread > 99 ? '99+' : user.unread) + '</span>');
   } else if (tab === 'follow') tab = 'recommend';
-  if (['recommend', 'news', 'hot', 'latest', 'follow'].indexOf(tab) < 0) tab = 'recommend';
+  if (user && user.notif_unread) document.getElementById('notiIc').insertAdjacentHTML('beforeend', '<span class="dot">' + (user.notif_unread > 99 ? '99+' : user.notif_unread) + '</span>');
+  if (['recommend', 'news', 'hot', 'latest', 'follow', 'featured', 'topic'].indexOf(tab) < 0) tab = 'recommend';
   render();
 })();
 </script>

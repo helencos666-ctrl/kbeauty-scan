@@ -73,6 +73,7 @@ nav a.on{color:var(--pink);font-weight:700}
     <a href="/community">💬 社区</a>
   </div>
 
+  <div id="foodBanner" hidden></div>
   <div class="card">
     <input id="q" type="search" enterkeyhint="search" placeholder="搜索店名、菜式或区域" autocomplete="off">
     <div class="lab">城市</div>
@@ -108,6 +109,7 @@ nav a.on{color:var(--pink);font-weight:700}
 
 <script src="/static/pwa.js" defer></script>
 <script src="/static/maps.js"></script>
+<script src="/static/banners.js"></script>
 <script>
 var STN={}; LHMap.stations().then(function(s){ STN=s; if(DATA.items&&DATA.items.length) render(); });
 const $=id=>document.getElementById(id);
@@ -174,6 +176,7 @@ function render(){
   }).join('');
 }
 function drawFilters(){
+  if (window.LHBanner && area !== window._bnA){ window._bnA = area; LHBanner.mount($('foodBanner'), 'food', area); }
   const cities=[['', '全部']].concat((DATA.cities||[]).map(c=>[c,c]));
   chipBar($('cityChips'), cities, city, id=>{city=id; area=''; drawFilters(); render();});
   const wrap=$('areaWrap'), hint=$('areaHint'), intro=$('areaIntro');
@@ -185,7 +188,7 @@ function drawFilters(){
   }else{
     wrap.classList.add('show');
     hint.style.display='none';
-    const featured=(DATA.areas||[]).filter(a=>a.city_zh===city);
+    const featured=(DATA.areas||[]).filter(a=>a.city_zh===city).sort((x,y)=>(y.id==='myeongdong')-(x.id==='myeongdong'));
     const hasOther=(DATA.items||[]).some(it=>it.city_zh===city && it.area_id==='other');
     const opts=[['', '全部']].concat(featured.map(a=>[a.id,a.zh]));
     if(hasOther) opts.push(['other','其他']);

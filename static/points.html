@@ -87,7 +87,12 @@
     var ck = document.getElementById('ck');
     if (ck && !p.checked_in_today) ck.onclick = async function(){
       ck.disabled = true;
-      try { var r = await LH.api('POST', '/api/points/checkin', {}); show(ok, r.reason || ('签到成功，余额 ' + r.balance)); show(err, ''); await render(); }
+      try {
+        var r = await LH.api('POST', '/api/points/checkin', {}); show(ok, r.reason || ('签到成功，余额 ' + r.balance)); show(err, ''); await render();
+        if (r.next_actions && r.next_actions.length){
+          ok.insertAdjacentHTML('beforeend', '<div class="row" style="gap:8px;margin-top:8px">' + r.next_actions.map(function(a, i){ return '<a class="btn sm ' + (i ? 'primary' : 'ghost') + '" href="' + LH.esc(a.href) + '">' + LH.esc(a.label) + '</a>'; }).join('') + '</div>');
+        }
+      }
       catch(e){ show(err, e.message); ck.disabled = false; }
     };
     document.getElementById('rules').innerHTML = '<table class="tiers"><tr><th>任务</th><th>奖励</th><th>今日</th></tr>' + (p.rules||[]).map(function(r){

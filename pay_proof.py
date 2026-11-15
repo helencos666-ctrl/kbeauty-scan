@@ -17,6 +17,7 @@ KIND_LABELS = {
     "m_year": "商家会员年付",
     "extra": "商家增发帖",
     "chk_deposit": "炸鸡商家保证金",
+    "banner": "横幅广告位",
 }
 PRICE_KEY = {"t1": "price_t1", "t2": "price_t2", "m_month": "price_m_month", "m_year": "price_m_year", "extra": "price_extra"}
 EXTRA_MAX = 20
@@ -51,7 +52,10 @@ def _cents(v) -> int:
         return 0
 
 
-def expect_cents(conn, u, kind, n=1) -> int:
+def expect_cents(conn, u, kind, n=1, ref_id=0) -> int:
+    if kind == "banner":
+        from merch import banner_price_cents
+        return banner_price_cents(conn, u["id"], ref_id)
     if kind == "chk_deposit":
         from chicken_merchant import DEPOSIT_YUAN
         return DEPOSIT_YUAN * 100
@@ -70,7 +74,7 @@ def _out(r, admin=False):
          "admin_note": r.get("admin_note") or "", "time": _ts(r["created_at"]), "reviewed_at": _ts(r.get("reviewed_at"))}
     if admin:
         o.update({"user_id": r["user_id"], "member_no": r.get("member_no"), "nickname": r.get("nickname") or "",
-                  "account": r.get("account") or "", "note": r.get("note") or "",
+                  "account": r.get("account") or "", "note": r.get("note") or "", "ref_id": r.get("ref_id"),
                   "paid": round((r.get("paid_cents") or 0) / 100, 2) if r.get("paid_cents") else None,
                   "img": f"/api/admin/pay-proofs/{r['id']}/img", "thumb": f"/api/admin/pay-proofs/{r['id']}/img?t=1"})
     return o
@@ -81,7 +85,7 @@ def api_meta(req: Request):
     with db() as conn:
         st = get_settings(conn)
     from chicken_merchant import DEPOSIT_YUAN
-    return {"kinds": [{"key": k, "label": v, "price": st.get(PRICE_KEY[k]) if k in PRICE_KEY else str(DEPOSIT_YUAN)} for k, v in KIND_LABELS.items()],
+    return {"kinds": [{"key": k, "label": v, "price": st.get(PRICE_KEY[k]) if k in PRICE_KEY else (str(DEPOSIT_YUAN) if k == "chk_deposit" else "按报价")} for k, v in KIND_LABELS.items()],
             "extra_max": EXTRA_MAX}
 
 
@@ -95,7 +99,7 @@ def api_mine(req: Request):
 
 @router.post("/api/pay-proof")
 async def api_submit(req: Request, kind: str = Form(...), extra_n: int = Form(1), note: str = Form(""),
-                     image: UploadFile = File(...)):
+                     ref_id: int = Form(0), image: UploadFile = File(...)):
     csrf(req)
     if kind not in KIND_LABELS:
         raise HTTPException(400, "请选择开通项目")
@@ -115,6 +119,8 @@ async def api_submit(req: Request, kind: str = Form(...), extra_n: int = Form(1)
                 raise HTTPException(400, "请先提交炸鸡商家入驻申请，再上传保证金截图")
             if app["deposit_status"] == "paid":
                 raise HTTPException(400, "保证金已确认收到，无需重复提交")
+        if kind == "banner":
+            expect_cents(conn, u, kind, 1, ref_id)   # 先校验横幅归属和是否已付
         limit("payproof-try:" + str(u["id"]), 10, 3600, "操作太频繁，请一小时后再试")   # 含失败尝试
         cnt = q(conn, "SELECT count(*) AS n FROM c_pay_proofs WHERE user_id=%s AND status='pending'", (u["id"],), one=True)["n"]
         if cnt >= MAX_PENDING:
@@ -125,10 +131,10 @@ async def api_submit(req: Request, kind: str = Form(...), extra_n: int = Form(1)
         big, th, _w, _h = process_image(await image.read(MAX_IMG_BYTES + 1))
         limit("payproof:" + str(u["id"]), 3, 3600, "提交太频繁，请一小时后再试")
         limit("payproof-ip:" + ip_of(req), 20, 86400, "今天提交次数太多，请明天再试或联系管理员")
-        exp = expect_cents(conn, u, kind, n)
-        r = q(conn, """INSERT INTO c_pay_proofs(user_id,kind,extra_n,expect_cents,note,img,thumb)
-                       VALUES (%s,%s,%s,%s,%s,%s,%s) RETURNING id,user_id,kind,extra_n,expect_cents,status,admin_note,created_at,reviewed_at""",
-              (u["id"], kind, n, exp, note or None, big, th), one=True)
+        exp = expect_cents(conn, u, kind, n, ref_id)
+        r = q(conn, """INSERT INTO c_pay_proofs(user_id,kind,extra_n,expect_cents,note,img,thumb,ref_id)
+                       VALUES (%s,%s,%s,%s,%s,%s,%s,%s) RETURNING id,user_id,kind,extra_n,expect_cents,status,admin_note,created_at,reviewed_at""",
+              (u["id"], kind, n, exp, note or None, big, th, ref_id if kind == "banner" else None), one=True)
     return {"ok": True, "item": _out(r), "member_no": u.get("member_no")}
 
 
@@ -139,7 +145,7 @@ def api_admin_list(req: Request, status: str = "pending"):
         raise HTTPException(400, "状态不正确")
     with db() as conn:
         need_admin(conn, req)
-        sql = """SELECT p.id,p.user_id,p.kind,p.extra_n,p.expect_cents,p.paid_cents,p.note,p.status,p.admin_note,p.created_at,p.reviewed_at,
+        sql = """SELECT p.id,p.user_id,p.kind,p.extra_n,p.expect_cents,p.paid_cents,p.note,p.status,p.admin_note,p.created_at,p.reviewed_at,p.ref_id,
                         u.member_no,u.nickname,COALESCE(u.email,u.phone) AS account FROM c_pay_proofs p JOIN c_users u ON u.id=p.user_id"""
         args = ()
         if status != "all":
@@ -184,7 +190,13 @@ async def api_admin_review(req: Request, pid: int):
         if amount in (None, ""):
             amount = (r["expect_cents"] or 0) / 100
         result = {"ok": True, "status": "approved"}
-        if r["kind"] == "chk_deposit":
+        if r["kind"] == "banner":
+            from merch import mark_banner_paid
+            if r.get("ref_id"):
+                mark_banner_paid(conn, r["ref_id"])
+            result["banner"] = "paid"
+            paid = _cents(amount)
+        elif r["kind"] == "chk_deposit":
             from chicken_merchant import mark_deposit_paid
             mark_deposit_paid(conn, r["user_id"], pid)
             result["deposit"] = "paid"

@@ -234,6 +234,8 @@ async def api_apply(req: Request, shop_name: str = Form(...), address: str = For
     with db() as conn:
         u = need_user(conn, req)
         limit("chkm-try:" + str(u["id"]), 10, 3600, "操作太频繁，请一小时后再试")
+        from contact_guard import guard_text
+        guard_text(conn, u["id"], "炸鸡商家资料", shop_name, address, hours, " ".join(str(i.get("name", "")) for i in items))
         old = q(conn, "SELECT id,status FROM c_chicken_merchants WHERE user_id=%s FOR UPDATE", (u["id"],), one=True)
         if old and old["status"] in ("approved", "suspended"):
             raise HTTPException(409, "你的店铺已入驻，修改资料请联系管理员")

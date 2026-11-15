@@ -34,7 +34,7 @@
       <div class="row" style="justify-content:space-between"><b id="stats">…</b><button class="btn sm gray" id="alogout">退出后台</button></div>
     </div>
     <div class="boards" id="tabs">
-      <button data-t="users" class="on">用户/会员</button><button data-t="payproofs">付款审核<span id="pppend"></span></button><button data-t="reports">举报</button><button data-t="posts">帖子</button><button data-t="review">审核</button><button data-t="merchants">商家/评价</button><button data-t="chicken">代点</button><button data-t="promo">推广统计</button><button data-t="settings">设置</button><button data-t="friends">交友</button><button data-t="idv">实名核验</button><button data-t="opening">开业活动</button>
+      <button data-t="users" class="on">用户/会员</button><button data-t="payproofs">付款审核<span id="pppend"></span></button><button data-t="reports">举报</button><button data-t="posts">帖子</button><button data-t="review">审核</button><button data-t="merchants">商家/评价</button><button data-t="chicken">代点</button><button data-t="promo">推广统计</button><button data-t="settings">设置</button><button data-t="friends">交友</button><button data-t="idv">实名核验</button><button data-t="opening">开业活动</button><button data-t="banners">横幅广告</button><button data-t="consult">站内咨询</button><button data-t="ops">运营·徽章</button><button data-t="hits">拦截记录</button>
     </div>
     <div class="card" id="t-users">
       <div class="row"><input class="f" id="us" placeholder="搜索编号/昵称/手机号/邮箱" style="flex:1"><button class="btn primary" id="usgo">搜索</button></div>
@@ -46,6 +46,10 @@
       <div class="row" style="gap:8px;margin-bottom:8px"><select class="f" id="ppst" style="flex:1"><option value="pending">待审核</option><option value="approved">已开通</option><option value="rejected">已驳回</option><option value="all">全部</option></select><button class="btn primary" id="ppgo">刷新</button></div>
       <div id="pplist"></div>
     </div>
+    <div id="t-banners" style="display:none"></div>
+    <div id="t-consult" style="display:none"></div>
+    <div id="t-ops" style="display:none"></div>
+    <div id="t-hits" style="display:none"></div>
     <div class="card" id="t-reports" style="display:none"><div id="rlist"></div></div>
     <div class="card" id="t-posts" style="display:none"><div id="plist"></div><button class="btn ghost block" id="pmore" style="margin-top:10px">加载更多</button></div>
     <div id="t-review" style="display:none">
@@ -209,6 +213,7 @@
   </div>
 </main>
 <script src="/static/community.js"></script>
+<script src="/static/admin-ops.js"></script>
 <script>
 var E = LH.esc, err = document.getElementById('err'), okEl = document.getElementById('ok');
 function msg(t, isErr){ LH.showErr(isErr ? err : okEl, t); LH.showErr(isErr ? okEl : err, ''); if (t) window.scrollTo(0, 0); }
@@ -222,7 +227,7 @@ document.getElementById('alogout').onclick = async function(){ await call('POST'
 document.querySelectorAll('#tabs button').forEach(function(b){
   b.onclick = function(){
     document.querySelectorAll('#tabs button').forEach(function(x){ x.className = x === b ? 'on' : ''; document.getElementById('t-' + x.dataset.t).style.display = x === b ? 'block' : 'none'; });
-    ({users: users, reports: reports, posts: function(){ posts(true); }, promo: promo, review: review, settings: settings, friends: friends, chicken: chickenAdmin, idv: idvQueue, opening: openingPromo, payproofs: payProofs, merchants: function(){ loadReviews(); merchants(); }})[b.dataset.t]();
+    ({users: users, reports: reports, posts: function(){ posts(true); }, promo: promo, review: review, settings: settings, friends: friends, chicken: chickenAdmin, idv: idvQueue, opening: openingPromo, payproofs: payProofs, banners: bannersAdmin, consult: consultAdmin, ops: opsAdmin, hits: hitsAdmin, merchants: function(){ loadReviews(); merchants(); }})[b.dataset.t]();
   };
 });
 async function payProofs(){
@@ -333,10 +338,11 @@ async function posts(reset){
   if (reset){ plast = 0; document.getElementById('plist').innerHTML = ''; }
   var d = await call('GET', '/api/admin/posts' + (plast ? '?before=' + plast : ''));
   document.getElementById('plist').insertAdjacentHTML('beforeend', d.posts.map(function(p){
-    return '<div class="cmt" id="ap' + p.id + '"><div class="who">#' + p.id + ' [' + E(p.board_name) + '] ' + E(p.title) + '</div>' +
+    return '<div class="cmt" style="display:block" id="ap' + p.id + '"><div class="who">#' + p.id + ' [' + E(p.board_name) + '] ' + LH.postFlags(p) + E(p.title) + '</div>' +
       '<div class="ct" style="color:var(--sub)">' + E(p.author) + '（编号 ' + p.member_no + '）· ' + E(p.time) + ' · 💬' + p.comments + '</div>' +
       '<div class="row" style="margin-top:6px"><a class="btn sm ghost" target="_blank" href="/community/post/' + p.id + '">查看</a>' +
-      '<button class="btn sm gray" data-cm="' + p.id + '">管理评论</button><button class="btn sm primary" data-dp="' + p.id + '">删除帖子</button></div><div data-cl="' + p.id + '"></div></div>';
+      '<button class="btn sm gray" data-cm="' + p.id + '">管理评论</button><button class="btn sm primary" data-dp="' + p.id + '">删除帖子</button></div>' +
+      '<div class="row" style="margin-top:6px" data-pfh="' + p.id + '">' + postFlagButtons(p) + '</div><div data-cl="' + p.id + '"></div></div>';
   }).join(''));
   if (d.posts.length) plast = d.posts[d.posts.length - 1].id;
   document.getElementById('pmore').style.display = d.posts.length === 30 ? 'block' : 'none';
