@@ -128,11 +128,12 @@ async function users(){
       '<button class="btn sm gray" data-u="' + u.id + '" data-a="' + (u.verified ? 'unverify">取消认证' : 'verify">标记已认证') + '</button>' +
       (u.is_bot ? '' : '<button class="btn sm gray" data-u="' + u.id + '" data-a="set_member_no">改编号</button>') +
       (u.has_avatar && !u.is_bot ? '<button class="btn sm gray" data-u="' + u.id + '" data-a="clear_avatar">移除头像</button>' : '') +
-      '<button class="btn sm gray" data-u="' + u.id + '" data-a="purge">删全部内容</button><button class="btn sm gray" data-u="' + u.id + '" data-a="reset_pw">重置密码</button></td></tr>';
+      '<button class="btn sm gray" data-u="' + u.id + '" data-a="purge">删全部内容</button><button class="btn sm gray" data-u="' + u.id + '" data-a="reset_pw">重置密码</button>' +
+      (u.is_bot ? '' : '<button class="btn sm gray" style="color:#c62828" data-u="' + u.id + '" data-a="delete_account">彻底删除账号</button>') + '</td></tr>';
   }).join('') + '</table>' : '<div class="empty">没有用户</div>';
   document.querySelectorAll('#ulist [data-a]').forEach(function(b){
     b.onclick = async function(){
-      var names = {set_tier: '设为' + ['普通用户', '会员', '高级会员'][+b.dataset.t || 0], merchant: '商家会员' + (b.dataset.plan === 'year' ? '年付（365 天）' : '月付（30 天）') + '开通/续费', merchant_off: '立即停用商家会员', credits: '增加增发次数', ban: '封禁', unban: '解封', verify: '标记“已认证”（请确认已人工核实）', unverify: '取消“已认证”', purge: '删除该用户全部帖子、评论、交友资料和私信', reset_pw: '重置密码'};
+      var names = {set_tier: '设为' + ['普通用户', '会员', '高级会员'][+b.dataset.t || 0], merchant: '商家会员' + (b.dataset.plan === 'year' ? '年付（365 天）' : '月付（30 天）') + '开通/续费', merchant_off: '立即停用商家会员', credits: '增加增发次数', ban: '封禁', unban: '解封', verify: '标记“已认证”（请确认已人工核实）', unverify: '取消“已认证”', purge: '删除该用户全部帖子、评论、交友资料和私信', reset_pw: '重置密码', delete_account: '彻底删除账号及全部信息（用于处理用户的删除请求，不可恢复）'};
       var extra = {action: b.dataset.a, tier: +b.dataset.t || 0, plan: b.dataset.plan};
       if (b.dataset.a === 'credits'){ var n = prompt('增加几次增发（每次 = 1 篇，已收款后再加；负数为扣减）', '1'); if (!n) return; extra.n = parseInt(n, 10); }
       else if (b.dataset.a === 'set_member_no'){
@@ -155,6 +156,7 @@ async function users(){
       var r = await call('POST', '/api/admin/users/' + b.dataset.u, extra);
       if (r.merchant_until) msg('商家会员已生效，到期 ' + r.merchant_until, false);
       else if (r.credits != null) msg('当前增发次数：' + r.credits, false);
+      else if (r.deleted) msg('账号已彻底删除', false);
       else if (r.temp_password) alert('临时密码：' + r.temp_password + '\n请私下告知用户，登录后尽快修改。'); else msg('已完成：' + names[b.dataset.a], false);
       users();
     };

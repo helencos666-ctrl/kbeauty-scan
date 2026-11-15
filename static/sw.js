@@ -1,5 +1,5 @@
 /* 旅韩助手 service worker: cache app shell, never cache API or POST. */
-const CACHE = 'lvhan-shell-v20';
+const CACHE = 'lvhan-shell-v21';
 const SHELL = [
   '/',
   '/attractions',
@@ -15,6 +15,8 @@ const SHELL = [
   '/community/boards',
   '/community/friends',
   '/community/rate',
+  '/privacy',
+  '/terms',
   '/static/index.html',
   '/static/attractions.html',
   '/static/attractions.json',
@@ -42,6 +44,8 @@ const SHELL = [
   '/static/messages.html',
   '/static/chat.html',
   '/static/rate.html',
+  '/static/privacy.html',
+  '/static/terms.html',
   '/static/pwa.js',
   '/static/pwa.css',
   '/manifest.webmanifest',

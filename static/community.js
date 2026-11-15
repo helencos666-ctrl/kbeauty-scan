@@ -1,4 +1,12 @@
 /* 旅韩助手 · 社区通用脚本 */
+/* 头像加载失败时回退到首字母（替代内联 onerror，配合内容安全策略 CSP） */
+document.addEventListener('error', function(ev){
+  var t = ev.target;
+  if (t && t.tagName === 'IMG' && t.getAttribute('data-avfb') === '1'){
+    t.style.display = 'none';
+    if (t.parentNode && t.parentNode.classList) t.parentNode.classList.add('fb');
+  }
+}, true);
 var LH = (function(){
   function esc(s){ return String(s == null ? '' : s).replace(/[&<>"']/g, function(c){ return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]; }); }
   async function api(method, url, body){
@@ -84,7 +92,7 @@ var LH = (function(){
   function avatar(uid, nick, has, size, fallbackUrl){
     size = size || 'sm';
     var src = (has && uid) ? ('/api/community/avatar/' + uid) : (fallbackUrl || '');
-    var img = src ? '<img src="' + src + '" alt="" onerror="this.style.display=\'none\';this.parentNode.classList.add(\'fb\')">' : '';
+    var img = src ? '<img src="' + esc(src) + '" alt="" data-avfb="1">' : '';
     return '<span class="av av-' + size + (src ? '' : ' fb') + '" style="background:' + avColor(uid || nick) + '">' +
       img + '<span class="av-letter">' + esc(initial(nick)) + '</span></span>';
   }
