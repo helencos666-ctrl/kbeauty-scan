@@ -104,6 +104,10 @@ nav button.on,nav a.on{color:var(--pink);font-weight:700}
 .mic-btn:disabled{opacity:.5}
 #micState{display:none;margin-top:8px;font-size:13px;color:var(--pink);font-weight:600}
 #micTip{display:none}
+
+.phrase .sp.spk-on{background:var(--pink);color:#fff}
+#cSpk.spk-on{background:var(--pink);color:#fff}
+#bigSpk.spk-on{background:var(--pink)!important;color:#fff!important}
 </style>
 </head>
 <body>
@@ -234,15 +238,77 @@ document.querySelectorAll('nav button').forEach(b=>b.onclick=()=>{
 function showErr(m){$('err').textContent=m;$('err').style.display='block';window.scrollTo(0,0)}
 
 // ---------- 朗读 ----------
+// 预录韩语音频（edge-tts ko-KR-SunHiNeural），用 Audio 播放可绕过 iPhone 静音拨片。
+const TTS_MANIFEST={"택스 리펀드 되나요?":"13371362db2cb7c540a18eaf790c6a440f61e1de.mp3","즉시 환급 되나요?":"1c56f475e79d7d75fae4b3f75176296ea2daad5c.mp3","여권 여기 있어요.":"e414645d24fa7f280f43954efebdc0d0ff4edbaf.mp3","택스 리펀드 영수증 주세요.":"c61d2d9f0b5eb4de64961e61df7eb5b28fa745fa.mp3","이거 얼마예요?":"27122a203445d022783d2920302467aee70f9a87.mp3","좀 깎아 주세요.":"2b7beade8d6bc890779e7b8c33da88f352bee035.mp3","카드 결제 되나요?":"93dd24e8b04bfdfaebd2d236801a468c823894d5.mp3","알리페이 돼요?":"eacf66b739fdf2c8fc8fa01e720086db8b16d5d2.mp3","위챗페이 돼요?":"c208c4737ba04962eaad8de31aaf695667bb04ac.mp3","그냥 구경하는 거예요.":"0d4fafb37a6805478f277a1c2d8bbb28a0b47dd9.mp3","화장실 어디예요?":"65377d03321d187e4f67177d6c8c09931b342264.mp3","화장실 써도 돼요?":"88a4be141b61f0196e87d9b0036d08f693065031.mp3","여기로 가 주세요.":"8aa0c93aed6d7f99c05a64fbdb45f943583ce1d8.mp3","명동역으로 가 주세요.":"3b8d9816b156ff7baa45ce9a31a795226ea3e384.mp3","여기서 세워 주세요.":"d0e8d6e8070f8dce49098d9adb19956a84453cb9.mp3","트렁크 열어 주세요.":"edd5b14f61aee73702ba0233f71c801f2528a60b.mp3","영수증 주세요.":"e4b4938ed9d883bcd4425e2324fc53bd7716d507.mp3","명동역 어떻게 가요?":"932a984ec4b2d486b6ebead3067457806c74b425.mp3","여기가 어디예요?":"998f212f2e7210deac4ae19d41ea5cfd91f206e6.mp3","가까운 지하철역이 어디예요?":"918c89f6e4cfacfbc38931a220f42ab8be9459dd.mp3","지도로 보여 주세요.":"5eb88b34c8579ad7671aa1978452adabcfcb2b7f.mp3","약국 어디 있어요?":"3b059cdc48ff3c0c597056f7cc052bd615dff82b.mp3","두통약 있어요?":"79827696d51bd554f046e6cc0b93171fad395ce4.mp3","감기약 있어요?":"3e80b4bf66a369a1c66be6846238c9510dbe7c06.mp3","소화제 주세요.":"35f43d65ac979405f16da802a8aebb956d367aa7.mp3","반창고 있어요?":"e63bac76532975f849de066106d21cbbd24f4598.mp3","하루에 몇 번 먹어요?":"0fb2c9a396dbee2670a96ca320ed935cc0c72a3c.mp3","도와주세요!":"fc8ac898cd4af82c2c749e7191f86d0b79f366ed.mp3","중국어 하는 분 있어요?":"73ca81ea0bb041fb60379cceecd0dcd47af2d0e8.mp3","경찰 불러 주세요.":"b667c26ac981fc4f744d2362d5565eabd387a586.mp3"};
 let audio;
-function speak(ko){
-  if(audio){audio.pause()}
-  audio=new Audio('/api/tts?text='+encodeURIComponent(ko));
-  audio.play().catch(()=>{
-    if('speechSynthesis' in window){const u=new SpeechSynthesisUtterance(ko);u.lang='ko-KR';u.rate=.9;speechSynthesis.cancel();speechSynthesis.speak(u)}
+function clearSpeakUI(){
+  document.querySelectorAll('.spk-on').forEach(el=>{
+    el.classList.remove('spk-on');
+    if(el.dataset.spkLabel!=null) el.textContent=el.dataset.spkLabel;
   });
+  if('speechSynthesis' in window) try{speechSynthesis.cancel()}catch(e){}
 }
-function showBig(ko,zh,ro){$('bigKo').textContent=ko;$('bigZh').textContent=zh||'';$('bigRo').textContent=ro||'';$('big').style.display='flex';$('bigSpk').onclick=()=>speak(ko)}
+function speakFallback(ko, done){
+  if('speechSynthesis' in window){
+    const u=new SpeechSynthesisUtterance(ko);
+    u.lang='ko-KR';u.rate=.9;
+    u.onend=done;u.onerror=done;
+    try{speechSynthesis.speak(u)}catch(e){if(done) done()}
+  }else if(done) done();
+}
+function speak(ko, btn){
+  if(audio){try{audio.pause();audio.onended=null;audio.onerror=null}catch(e){}}
+  clearSpeakUI();
+  let finished=false;
+  const done=()=>{
+    if(finished) return;
+    finished=true;
+    if(btn){
+      btn.classList.remove('spk-on');
+      if(btn.dataset.spkLabel!=null) btn.textContent=btn.dataset.spkLabel;
+    }
+  };
+  if(btn){
+    if(btn.dataset.spkLabel==null) btn.dataset.spkLabel=btn.textContent;
+    btn.classList.add('spk-on');
+    btn.textContent=(btn.id==='cSpk'||btn.id==='bigSpk')?'🔈 播放中':'🔈';
+  }
+  const file=TTS_MANIFEST[ko];
+  function bindAndPlay(a){
+    audio=a;
+    audio.setAttribute('playsinline','');
+    audio.setAttribute('webkit-playsinline','');
+    audio.preload='auto';
+    audio.onended=done;
+    audio.onerror=()=>{done(); if(!file) return; speakFallback(ko,()=>{})};
+    const p=audio.play(); // 必须在点击回调里同步调用，iPhone 静音拨片下才能出声
+    if(p&&p.catch) p.catch(()=>{if(file){done();speakFallback(ko,()=>{})}else speakFallback(ko,done)});
+  }
+  if(file){
+    bindAndPlay(new Audio('/static/audio/'+file));
+    return;
+  }
+  // 沟通卡等没有预录音频的句子：先用静音文件解锁，再播 /api/tts，最后才用系统朗读
+  const unlock=new Audio('/static/audio/silence.mp3');
+  unlock.setAttribute('playsinline','');
+  unlock.setAttribute('webkit-playsinline','');
+  const afterUnlock=()=>{
+    try{unlock.pause()}catch(e){}
+    const a=new Audio('/api/tts?text='+encodeURIComponent(ko));
+    a.setAttribute('playsinline','');
+    a.setAttribute('webkit-playsinline','');
+    a.preload='auto';
+    a.onended=done;
+    a.onerror=()=>speakFallback(ko,done);
+    audio=a;
+    const p=a.play();
+    if(p&&p.catch) p.catch(()=>speakFallback(ko,done));
+  };
+  const up=unlock.play();
+  if(up&&up.then) up.then(afterUnlock).catch(afterUnlock);
+  else afterUnlock();
+}
+function showBig(ko,zh,ro){$('bigKo').textContent=ko;$('bigZh').textContent=zh||'';$('bigRo').textContent=ro||'';$('big').style.display='flex';$('bigSpk').onclick=()=>speak(ko,$('bigSpk'))}
 $('bigClose').onclick=()=>{$('big').style.display='none'};
 
 // ---------- 拍照 ----------
@@ -493,7 +559,7 @@ async function makeCard(text){
     $('cardOut').innerHTML=`<div class="kocard"><div class="ko">${esc(j.ko)}</div><div class="roman">发音：${esc(j.roman)}</div>
       <div class="back">中文回译：${esc(j.back)}</div>
       <div class="acts"><button id="cSpk">🔊 朗读</button><button id="cBig">⛶ 全屏给对方看</button></div></div>`;
-    $('cSpk').onclick=()=>speak(j.ko);$('cBig').onclick=()=>showBig(j.ko,t,j.roman);
+    $('cSpk').onclick=()=>speak(j.ko,$('cSpk'));$('cBig').onclick=()=>showBig(j.ko,t,j.roman);
   }catch(e){showErr(e.message||'网络错误')}
   finally{$('ld-card').style.display='none';$('cardBtn').disabled=false}
 }
@@ -580,7 +646,7 @@ function drawScenes(){
   $('phraseList').innerHTML=SCENES[scene].map((p,i)=>`<div class="phrase" data-i="${i}"><div class="t"><div class="zh">${esc(p[0])}</div><div class="k">${esc(p[1])}</div></div><button class="sp" data-i="${i}">🔊</button></div>`).join('');
   $('phraseList').querySelectorAll('.phrase').forEach(el=>el.onclick=e=>{
     const p=SCENES[scene][+el.dataset.i];
-    if(e.target.classList.contains('sp')){e.stopPropagation();speak(p[1]);return}
+    if(e.target.closest&&e.target.closest('.sp')){e.stopPropagation();speak(p[1],e.target.closest('.sp'));return}
     showBig(p[1],p[0],p[2]);
   });
 }

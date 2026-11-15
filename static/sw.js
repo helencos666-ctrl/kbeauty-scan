@@ -1,5 +1,5 @@
 /* 旅韩助手 service worker: cache app shell, never cache API or POST. */
-const CACHE = 'lvhan-shell-v8';
+const CACHE = 'lvhan-shell-v11';
 const SHELL = [
   '/',
   '/attractions',
@@ -126,7 +126,7 @@ self.addEventListener('fetch', event => {
     return;
   }
   // App-shell assets (JSON, icons, JS, CSS, manifest)
-  const shellExt = /\.(json|js|css|png|webmanifest)$/i.test(url.pathname) ||
+  const shellExt = /\.(json|js|css|png|webmanifest|mp3)$/i.test(url.pathname) ||
     url.pathname === '/manifest.webmanifest';
   if (shellExt) {
     event.respondWith(cacheFirst(request));
