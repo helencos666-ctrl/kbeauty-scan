@@ -56,10 +56,13 @@ PLAN_DAYS = {"month": 30, "year": 365}
 COMMERCIAL_WORDS = ["酒店预订", "订酒店", "订房", "民宿预订", "租车", "包车", "接送机", "接机服务", "医美", "皮肤科", "整形", "整容",
                     "微整", "报价", "优惠价", "微信号", "加微", "加v", "vx", "wx:", "wx：", "私信我", "私聊", "代办", "办签",
                     "代购", "联系方式", "电话咨询", "kakao id", "kakaotalk id", "line id"]
+PRICE_KEYS = ("price_t1", "price_t2", "price_m_month", "price_m_year", "price_extra", "rate_cny_krw")
+BOOL_SETTINGS = {"ai_reply"}
 DEFAULT_SETTINGS = {"price_t1": "9.9", "price_t2": "19.9", "price_m_month": "99", "price_m_year": "999", "price_extra": "19.9",
-                    "rate_cny_krw": "195"}
+                    "rate_cny_krw": "195", "ai_reply": "1"}
 SETTING_LABELS = {"price_t1": "会员价格", "price_t2": "高级会员价格", "price_m_month": "商家会员月付", "price_m_year": "商家会员年付",
-                  "price_extra": "商家超额每篇", "rate_cny_krw": "汇率换算：1 人民币 = ? 韩元（手动设置）"}
+                  "price_extra": "商家超额每篇", "rate_cny_krw": "汇率换算：1 人民币 = ? 韩元（手动设置）",
+                  "ai_reply": "AI 自动回复（发帖后由旅韩小助手回复）"}
 LOGIN_ONLY_BOARDS = {"friends"}          # 交友版：会员（≥1 档）才能查看
 TIER_NAMES = {0: "普通用户", 1: "会员", 2: "高级会员", 3: "商家会员"}
 MAX_IMAGES = 6
@@ -289,6 +292,36 @@ CREATE TABLE IF NOT EXISTS c_blocks (
 );
 """
 
+# 第四期：系统账号「旅韩小助手」与 AI 自动回复。只追加列，幂等
+MIGRATE4 = """
+ALTER TABLE c_users ADD COLUMN IF NOT EXISTS is_bot BOOLEAN NOT NULL DEFAULT FALSE;
+CREATE UNIQUE INDEX IF NOT EXISTS c_users_one_bot_idx ON c_users((is_bot)) WHERE is_bot;
+"""
+
+BOT_NICK = "旅韩小助手"
+BOT_PW_HASH = "disabled"          # 非 scrypt 格式，check_pw 恒为失败，不能登录
+AI_TIMEOUT = 20
+AI_DAILY_LIMIT = 200
+AI_USER_HOUR = 6
+AI_USER_DAY = 20
+AI_MAX_CHARS = 200
+DEEPSEEK_API = "https://api.deepseek.com"
+DEEPSEEK_MODEL = "deepseek-flash"
+KST = datetime.timezone(datetime.timedelta(hours=9))
+
+AI_SYSTEM = """你是「旅韩小助手」，旅韩助手网站同路社区里的公开信息助手，不是真人。
+规则：
+- 用和用户帖子或评论相同的语言回复，默认中文。语气友好、务实、简短，不超过 200 字。
+- 只提供公开、可自行核实的参考信息，不充当代办，不打包票。
+- 涉及签证、入境、K-ETA 时只说明一般信息，明确不能代办、不能保证结果。
+- 涉及医美、皮肤管理、包车、租车、住宿时保持中立，不推荐、不点名具体商家、医院或司机。
+- 不留任何联系方式（包括微信、电话、邮箱、二维码、外链）。
+- 不提及任何其他社区或网站品牌，尤其不得出现“奋韩”或近似写法。
+- 不提及直播、抖音或任何带货内容。
+- 可以自称小助手，不要假装是去过当地的真人旅伴。
+只输出回复正文，不要标题，不要用引号把全文包起来。"""
+
+
 @contextmanager
 def db():
     global _psycopg, _schema_ready
@@ -311,6 +344,8 @@ def db():
                         cur.execute(SCHEMA)
                         cur.execute(MIGRATE)
                         cur.execute(MIGRATE3)
+                        cur.execute(MIGRATE4)
+                    ensure_bot(conn)
                     conn.commit()
                     _schema_ready = True
         yield conn
@@ -614,7 +649,8 @@ def api_me(req: Request):
 @router.get("/api/community/prices")
 def api_prices():
     with db() as conn:
-        return get_settings(conn)
+        st = get_settings(conn)
+    return {k: st[k] for k in PRICE_KEYS}
 
 @router.get("/api/community/my-posts")
 def api_my_posts(req: Request):
@@ -637,8 +673,8 @@ async def api_register(req: Request, resp: Response):
     if pw.isdigit() and len(set(pw)) <= 2:
         raise HTTPException(400, "密码太简单，请换一个")
     nick = clean_text(d.get("nickname"), 16, "昵称", 2)
-    if re.search(r"管理员|官方|admin", nick, re.I):
-        raise HTTPException(400, "昵称不能包含“管理员/官方”")
+    if re.search(r"管理员|官方|admin|旅韩小助手", nick, re.I):
+        raise HTTPException(400, "昵称不能包含“管理员/官方/旅韩小助手”")
     if not d.get("agree"):
         raise HTTPException(400, "请先同意社区规则")
     with db() as conn:
@@ -660,11 +696,11 @@ async def api_login(req: Request, resp: Response):
     pw = d.get("password") or ""
     limit("login-acct:" + acct, 8, 900, "这个账号尝试次数太多，请 15 分钟后再试")
     with db() as conn:
-        u = q(conn, f"SELECT id,pw_hash,is_banned FROM c_users WHERE {kind}=%s", (acct,), one=True)
+        u = q(conn, f"SELECT id,pw_hash,is_banned,is_bot FROM c_users WHERE {kind}=%s", (acct,), one=True)
         if not u:
             dummy_check(pw)
             raise HTTPException(401, "账号或密码不对")
-        if not check_pw(pw, u["pw_hash"]):
+        if u.get("is_bot") or not check_pw(pw, u["pw_hash"]):
             raise HTTPException(401, "账号或密码不对")
         if u["is_banned"]:
             raise HTTPException(403, "该账号已被封禁")
@@ -698,6 +734,213 @@ async def api_change_pw(req: Request):
         q(conn, "UPDATE c_users SET pw_hash=%s WHERE id=%s", (hash_pw(new), u["id"]))
         q(conn, "DELETE FROM c_sessions WHERE user_id=%s AND token_hash<>%s", (u["id"], _th(req.cookies.get(COOKIE))))
     return {"ok": True}
+
+
+# ---------------- 旅韩小助手（AI 自动回复）----------------
+_ai_lock = threading.Lock()
+_ai_day = {"date": None, "global": 0, "user": None}
+_ai_user_hits = defaultdict(deque)
+_ai_threads = []
+_ai_threads_lock = threading.Lock()
+
+def ensure_bot(conn):
+    """建表时创建系统账号；无可用密码、无手机号/邮箱，不能登录。"""
+    row = q(conn, "SELECT id FROM c_users WHERE is_bot LIMIT 1", one=True)
+    if row:
+        q(conn, "UPDATE c_users SET nickname=%s, pw_hash=%s, is_banned=FALSE WHERE id=%s AND (nickname<>%s OR pw_hash<>%s OR is_banned)",
+          (BOT_NICK, BOT_PW_HASH, row["id"], BOT_NICK, BOT_PW_HASH))
+        return row
+    return q(conn, """INSERT INTO c_users(nickname,pw_hash,is_bot,is_member,tier,verified)
+                      VALUES (%s,%s,TRUE,FALSE,0,FALSE) RETURNING id""",
+             (BOT_NICK, BOT_PW_HASH), one=True)
+
+def bot_id(conn):
+    r = ensure_bot(conn)
+    return r["id"] if r else None
+
+def is_bot_uid(conn, uid):
+    r = q(conn, "SELECT is_bot FROM c_users WHERE id=%s", (uid,), one=True)
+    return bool(r and r["is_bot"])
+
+def ai_enabled(conn):
+    return get_settings(conn).get("ai_reply", "1") == "1"
+
+def _ai_today():
+    return datetime.datetime.now(KST).date().isoformat()
+
+def _ai_allow(user_id):
+    """每日全站上限 + 单用户频率。超限返回 False，不抛错。"""
+    now = time.time()
+    today = _ai_today()
+    with _ai_lock:
+        if _ai_day["date"] != today:
+            _ai_day["date"] = today
+            _ai_day["global"] = 0
+            _ai_day["user"] = defaultdict(int)
+        if _ai_day["user"] is None:
+            _ai_day["user"] = defaultdict(int)
+        if _ai_day["global"] >= AI_DAILY_LIMIT:
+            return False
+        if user_id and _ai_day["user"][user_id] >= AI_USER_DAY:
+            return False
+        dq = _ai_user_hits[user_id or 0]
+        while dq and now - dq[0] > 3600:
+            dq.popleft()
+        if len(dq) >= AI_USER_HOUR:
+            return False
+        dq.append(now)
+        _ai_day["global"] += 1
+        if user_id:
+            _ai_day["user"][user_id] += 1
+        return True
+
+def looks_like_question(text):
+    t = text or ""
+    if re.search(r"[？?]", t):
+        return True
+    return bool(re.search(r"(吗|呢|怎么|如何|哪里|哪儿|哪裡|多少|要不要|可不可以|请问|求问|有没有|有木有|怎么办|哪家|推荐哪)", t))
+
+def comment_wants_ai(comment_body, comment_user_id, post_user_id):
+    """评论自动回复：@旅韩小助手，或帖主在评论里提问时才回。"""
+    body = comment_body or ""
+    if re.search(r"@?旅韩小助手", body):
+        return True
+    return comment_user_id == post_user_id and looks_like_question(body)
+
+def sanitize_ai_text(text):
+    """清洗模型输出：限长、去掉不应出现的品牌/带货/联系方式。不记录原文密钥。"""
+    if not isinstance(text, str):
+        return ""
+    s = text.strip()
+    s = re.sub(r'^["「『]+|["」』]+$', "", s).strip()
+    s = re.sub(r"```+", "", s)
+    # 屏蔽不应出现的品牌与带货词（大小写不敏感；中文直接替换）
+    for w in ("奋韩", "奮韓", "抖音", "直播间", "直播間", "Douyin", "douyin", "TikTok", "tiktok"):
+        s = re.sub(re.escape(w), "", s, flags=re.I)
+    s = re.sub(r"(微信|weixin|wechat|v信|威信|qq|电话|手機|手机|邮箱|email)[:：]?\s*\S+", "", s, flags=re.I)
+    s = re.sub(r"https?://\S+", "", s, flags=re.I)
+    s = re.sub(r"[ \t]+\n", "\n", s)
+    s = re.sub(r"\n{3,}", "\n\n", s).strip()
+    if len(s) > AI_MAX_CHARS:
+        s = s[:AI_MAX_CHARS].rstrip()
+        s = re.sub(r"[，,、；;：:\s]+$", "", s)
+    return s
+
+def _deepseek_key():
+    return (os.environ.get("DEEPSEEK_API_KEY") or "").strip()
+
+def ai_chat(system, user, timeout=AI_TIMEOUT):
+    """调用 DeepSeek 文本接口。失败返回空字符串；不打印密钥或响应体。"""
+    key = _deepseek_key()
+    if not key:
+        return ""
+    import httpx
+    body = {"model": DEEPSEEK_MODEL, "messages": [
+        {"role": "system", "content": system},
+        {"role": "user", "content": user},
+    ], "max_tokens": 400, "temperature": 0.5, "thinking": {"type": "disabled"}}
+    try:
+        with httpx.Client(timeout=timeout) as c:
+            r = c.post(f"{DEEPSEEK_API}/chat/completions", json=body,
+                       headers={"Authorization": "Bearer " + key})
+    except Exception:
+        print("ai reply network error", flush=True)
+        return ""
+    if r.status_code != 200:
+        print("ai upstream error", r.status_code, flush=True)
+        return ""
+    try:
+        txt = (r.json().get("choices") or [{}])[0].get("message", {}).get("content") or ""
+    except Exception:
+        print("ai reply parse error", flush=True)
+        return ""
+    return sanitize_ai_text(txt)
+
+def _ai_user_prompt(board, title, body, comment=None):
+    bname = BOARDS.get(board, board or "")
+    msg = "频道：" + bname + "\n标题：" + (title or "（无）") + "\n正文：\n" + (body or "（无）")
+    if comment:
+        msg += "\n\n请针对下面这条用户评论作补充回复：\n" + comment
+    else:
+        msg += "\n\n请针对这篇新帖写一条对原作者和其他读者都有用的短评。"
+    return msg
+
+def _insert_bot_comment(conn, post_id, text):
+    text = sanitize_ai_text(text)
+    if not text:
+        return None
+    bid = bot_id(conn)
+    if not bid:
+        return None
+    row = q(conn, "INSERT INTO c_comments(post_id,user_id,body) VALUES (%s,%s,%s) RETURNING id",
+            (post_id, bid, text), one=True)
+    _recount(conn, post_id)
+    return row["id"] if row else None
+
+def _ai_job(kind, post_id, trigger_user_id, comment_body=None):
+    """后台任务：失败只记日志，不影响发帖。"""
+    try:
+        if not _deepseek_key():
+            return
+        with db() as conn:
+            if not ai_enabled(conn):
+                return
+            p = q(conn, """SELECT p.id,p.title,p.body,p.board,p.status,p.deleted,p.user_id
+                           FROM c_posts p WHERE p.id=%s""", (post_id,), one=True)
+            if not p or p["deleted"] or p["status"] != "published":
+                return
+            if is_bot_uid(conn, p["user_id"]):
+                return
+            bid = bot_id(conn)
+            if kind == "post":
+                already = q(conn, "SELECT id FROM c_comments WHERE post_id=%s AND user_id=%s AND NOT deleted LIMIT 1",
+                            (post_id, bid), one=True)
+                if already:
+                    return
+            elif kind == "comment":
+                if not comment_wants_ai(comment_body or "", trigger_user_id, p["user_id"]):
+                    return
+                last = q(conn, """SELECT user_id FROM c_comments WHERE post_id=%s AND NOT deleted
+                                  ORDER BY id DESC LIMIT 1""", (post_id,), one=True)
+                if last and last["user_id"] == bid:
+                    return
+            if not _ai_allow(trigger_user_id):
+                print("ai reply skipped: rate limit", flush=True)
+                return
+        text = ai_chat(AI_SYSTEM, _ai_user_prompt(p["board"], p["title"], p["body"], comment_body))
+        if not text:
+            return
+        with db() as conn:
+            if not ai_enabled(conn):
+                return
+            p2 = q(conn, "SELECT id,deleted,status FROM c_posts WHERE id=%s", (post_id,), one=True)
+            if not p2 or p2["deleted"] or p2["status"] != "published":
+                return
+            _insert_bot_comment(conn, post_id, text)
+    except Exception:
+        print("ai reply failed", kind, flush=True)
+
+def wait_ai_replies(timeout=8):
+    """测试用：等待后台 AI 线程结束。"""
+    deadline = time.time() + timeout
+    while True:
+        with _ai_threads_lock:
+            alive = [th for th in _ai_threads if th.is_alive()]
+            _ai_threads[:] = alive
+        if not alive:
+            return True
+        if time.time() >= deadline:
+            return False
+        time.sleep(0.05)
+
+def schedule_ai_reply(kind, post_id, trigger_user_id, comment_body=None):
+    if not post_id or not _deepseek_key():
+        return
+    th = threading.Thread(target=_ai_job, args=(kind, post_id, trigger_user_id, comment_body),
+                          name="ai-reply", daemon=True)
+    with _ai_threads_lock:
+        _ai_threads.append(th)
+    th.start()
 
 # ---------------- 帖子 API ----------------
 def _post_out(r, full=False):
@@ -881,7 +1124,7 @@ def api_post(req: Request, pid: int):
         if r["board"] in LOGIN_ONLY_BOARDS and u["tier"] < 1:
             raise HTTPException(403, "旅韩交友频道需开通会员（¥%s）后查看" % price(conn, "price_t1"))
         imgs = q(conn, "SELECT id,width,height FROM c_images WHERE post_id=%s ORDER BY pos", (pid,))
-        cms = q(conn, """SELECT c.id,c.body,c.created_at,c.user_id,au.nickname,(CASE WHEN au.merchant_until>now() THEN 3 ELSE au.tier END) AS tier FROM c_comments c
+        cms = q(conn, """SELECT c.id,c.body,c.created_at,c.user_id,au.nickname,au.is_bot,(CASE WHEN au.merchant_until>now() THEN 3 ELSE au.tier END) AS tier FROM c_comments c
                          JOIN c_users au ON au.id=c.user_id
                          WHERE c.post_id=%s AND NOT c.deleted AND NOT au.is_banned ORDER BY c.id LIMIT 500""", (pid,))
         liked = bool(u and q(conn, "SELECT 1 AS x FROM c_likes WHERE post_id=%s AND user_id=%s", (pid, u["id"]), one=True))
@@ -896,7 +1139,8 @@ def api_post(req: Request, pid: int):
     o["comment_tier"] = 2 if r["board"] in LOGIN_ONLY_BOARDS else 1
     o["review_note"] = r.get("review_note")
     o["comment_list"] = [{"id": c["id"], "body": c["body"], "author": c["nickname"], "author_tier": c["tier"],
-                          "time": _ts(c["created_at"]), "mine": bool(u and u["id"] == c["user_id"])} for c in cms]
+                          "time": _ts(c["created_at"]), "mine": bool(u and u["id"] == c["user_id"]),
+                          "is_bot": bool(c.get("is_bot"))} for c in cms]
     return o
 
 @router.post("/api/community/posts")
@@ -948,6 +1192,7 @@ async def api_new_post(req: Request, board: str = Form(...), title: str = Form(.
         return {"ok": True, "id": row["id"], "pending": True,
                 "message": "你的帖子含有商业推广类内容（如酒店预订、租车包车、医美、联系方式、代办等），已提交管理员审核，审核通过后才会公开。"
                            "住宿、包车用车、皮肤管理·医美等商业信息请开通商家会员后在商家专区发布。"}
+    schedule_ai_reply("post", row["id"], u["id"])
     return {"ok": True, "id": row["id"]}
 
 @router.delete("/api/community/posts/{pid}")
@@ -989,14 +1234,19 @@ async def api_comment(req: Request, pid: int):
     body = clean_text(d.get("body"), 500, "评论")
     with db() as conn:
         u = need_tier(conn, req, 1, "开通会员（¥{t1}）后才能评论")
-        p = q(conn, "SELECT id,board FROM c_posts WHERE id=%s AND NOT deleted AND status='published'", (pid,), one=True)
+        p = q(conn, "SELECT id,board,user_id FROM c_posts WHERE id=%s AND NOT deleted AND status='published'", (pid,), one=True)
         if not p:
             raise HTTPException(404, "帖子不存在或已删除")
         if p["board"] in LOGIN_ONLY_BOARDS and u["tier"] < 2:
             raise HTTPException(403, "旅韩交友频道评论需开通高级会员（¥%s）" % price(conn, "price_t2"))
+        if u.get("id") and is_bot_uid(conn, u["id"]):
+            raise HTTPException(403, "系统账号不能发言")
         limit("cm:" + str(u["id"]), 10, 300, "评论太频繁，请稍后再试")
         r = q(conn, "INSERT INTO c_comments(post_id,user_id,body) VALUES (%s,%s,%s) RETURNING id", (pid, u["id"], body), one=True)
         q(conn, "UPDATE c_posts SET comment_count=(SELECT count(*) FROM c_comments WHERE post_id=%s AND NOT deleted) WHERE id=%s", (pid, pid))
+        want_ai = comment_wants_ai(body, u["id"], p["user_id"])
+    if want_ai:
+        schedule_ai_reply("comment", pid, u["id"], body)
     return {"ok": True, "id": r["id"]}
 
 @router.delete("/api/community/comments/{cid}")
@@ -1116,7 +1366,7 @@ def api_admin_users(req: Request, s: str = ""):
                        "merchant_until": _ts(r["merchant_until"]), "merchant_plan": r["merchant_plan"],
                        "merchant_active": bool(r["merchant_until"] and r["merchant_until"] > datetime.datetime.now(datetime.timezone.utc)),
                        "merchant_credits": r["merchant_credits"], "last_login": _ts(r["last_login"]),
-                       "verified": bool(r.get("verified"))} for r in rows]}
+                       "verified": bool(r.get("verified")), "is_bot": bool(r.get("is_bot"))} for r in rows]}
 
 @router.post("/api/admin/users/{uid}")
 async def api_admin_user_action(req: Request, uid: int):
@@ -1127,6 +1377,8 @@ async def api_admin_user_action(req: Request, uid: int):
         need_admin(conn, req)
         if not q(conn, "SELECT id FROM c_users WHERE id=%s", (uid,), one=True):
             raise HTTPException(404, "用户不存在")
+        if is_bot_uid(conn, uid):
+            raise HTTPException(403, "系统账号不可修改")
         if act == "set_tier":
             try:
                 t = int(d.get("tier"))
@@ -1242,10 +1494,10 @@ def api_admin_resolve(req: Request, rid: int):
 def api_admin_comments(req: Request, pid: int):
     with db() as conn:
         need_admin(conn, req)
-        rows = q(conn, """SELECT c.id,c.body,c.created_at,c.user_id,au.nickname FROM c_comments c
+        rows = q(conn, """SELECT c.id,c.body,c.created_at,c.user_id,au.nickname,au.is_bot FROM c_comments c
                           JOIN c_users au ON au.id=c.user_id WHERE c.post_id=%s AND NOT c.deleted ORDER BY c.id""", (pid,))
     return {"comments": [{"id": r["id"], "body": r["body"], "author": r["nickname"], "user_id": r["user_id"],
-                          "time": _ts(r["created_at"])} for r in rows]}
+                          "time": _ts(r["created_at"]), "is_bot": bool(r.get("is_bot"))} for r in rows]}
 
 # ---------------- 推广码 ----------------
 REF_COOKIE = "lh_ref"
@@ -1497,11 +1749,14 @@ async def api_admin_review(req: Request, pid: int):
         raise HTTPException(400, "未知操作")
     with db() as conn:
         need_admin(conn, req)
-        r = q(conn, "UPDATE c_posts SET status=%s, review_note=%s WHERE id=%s AND status='pending' RETURNING id",
+        r = q(conn, "UPDATE c_posts SET status=%s, review_note=%s WHERE id=%s AND status='pending' RETURNING id,user_id",
               ("published" if act == "approve" else "rejected",
                None if act == "approve" else (clean_text(d.get("reason") or "不符合社区约定", 100, "理由")), pid), one=True)
         if not r:
             raise HTTPException(404, "该帖子不在待审核队列")
+        uid = r["user_id"]
+    if act == "approve":
+        schedule_ai_reply("post", pid, uid)
     return {"ok": True}
 
 @router.get("/api/admin/settings")
@@ -1509,7 +1764,8 @@ def api_admin_settings(req: Request):
     with db() as conn:
         need_admin(conn, req)
         st = get_settings(conn)
-    return {"settings": [{"key": k, "label": SETTING_LABELS[k], "value": v} for k, v in st.items()]}
+    return {"settings": [{"key": k, "label": SETTING_LABELS[k], "value": v,
+                          "type": "bool" if k in BOOL_SETTINGS else "number"} for k, v in st.items()]}
 
 @router.post("/api/admin/settings")
 async def api_admin_settings_save(req: Request):
@@ -1519,6 +1775,9 @@ async def api_admin_settings_save(req: Request):
     for k in DEFAULT_SETTINGS:
         if k in d:
             v = str(d[k]).strip()
+            if k in BOOL_SETTINGS:
+                vals[k] = "1" if v.lower() in ("1", "true", "on", "yes", "开", "开启") else "0"
+                continue
             try:
                 f = float(v)
             except ValueError:
