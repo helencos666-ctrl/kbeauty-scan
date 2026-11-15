@@ -1,0 +1,164 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>炸鸡商家入驻 · 旅韩助手</title>
+<meta name="description" content="炸鸡店商家入驻旅韩助手代点：提交店铺资料与身份信息（加密保存），交保证金审核通过后上架，可随时切换营业/休息。">
+<meta name="theme-color" content="#ff6b8f">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="旅韩助手">
+<link rel="manifest" href="/manifest.webmanifest">
+<link rel="apple-touch-icon" href="/static/icons/apple-touch-icon.png">
+<link rel="icon" type="image/png" sizes="192x192" href="/static/icons/icon-192.png">
+<link rel="stylesheet" href="/static/pwa.css">
+<link rel="stylesheet" href="/static/community.css">
+<style>
+.sw{display:flex;gap:10px;margin-top:10px}
+.sw button{flex:1;border:0;border-radius:12px;padding:14px;font-size:16px;font-weight:700;background:#f1f1f3;color:#666}
+.sw button.on.open{background:#2e7d32;color:#fff}.sw button.on.rest{background:#555;color:#fff}
+.kv{font-size:14px;line-height:1.9}.kv b{display:inline-block;min-width:76px;color:#666;font-weight:500}
+.pill2{display:inline-block;padding:2px 9px;border-radius:10px;font-size:13px;font-weight:700;background:#fff3e0;color:#e67e22}
+.pill2.ok{background:#e8f7ee;color:#1e7a3a}.pill2.bad{background:#fdecea;color:#c62828}
+</style>
+</head>
+<body>
+<header>
+  <h1>🍗 炸鸡商家入驻</h1>
+  <p>提交资料 → 交保证金 ¥<span id="dep">500</span> → 审核通过上架 → 自己切换营业/休息</p>
+</header>
+<main>
+  <div class="card userbar" id="ub">加载中…</div>
+  <div class="err" id="err" style="display:none"></div>
+  <div class="ok" id="ok" style="display:none"></div>
+  <div class="card" id="statuscard" style="display:none"></div>
+  <div class="card" id="opencard" style="display:none">
+    <h2>营业状态</h2>
+    <p class="tip" style="margin-top:0">休息中时，前台显示「休息中 · 商家忙暂不接单」，顾客不能下单。</p>
+    <div class="sw"><button type="button" class="open" data-o="1">🟢 营业中</button><button type="button" class="rest" data-o="0">⏸ 休息</button></div>
+  </div>
+  <div class="card" id="depcard" style="display:none">
+    <h2>保证金 ¥<span class="depv">500</span></h2>
+    <p class="tip" style="margin-top:0">用<a href="/member#paycard" style="color:#2c7be5">会员页的收款码</a>付款（支付宝或微信），然后在这里上传付款截图。保证金确认到账且资质审核通过后才会上架。注销入驻并结清订单后可申请退还。</p>
+    <input type="file" id="dimg" accept="image/jpeg,image/png,image/webp">
+    <button class="btn primary block" type="button" id="dsend" style="margin-top:10px">上传保证金付款截图</button>
+  </div>
+  <div class="card" id="formcard" style="display:none">
+    <h2 id="formtitle">入驻申请</h2>
+    <label class="f">店名</label><input class="f" id="f_name" maxlength="40" placeholder="例如：明洞某某炸鸡">
+    <label class="f">区域</label><select class="f" id="f_area"></select>
+    <label class="f">地址</label><input class="f" id="f_addr" maxlength="120" placeholder="韩文地址，道路名+门牌">
+    <label class="f">营业时间</label><input class="f" id="f_hours" maxlength="60" placeholder="例如：每天 16:00–02:00，周一休">
+    <label class="f">菜单与价格（每行一个：名称,价格韩元）</label>
+    <textarea class="f" id="f_menu" rows="5" placeholder="原味炸鸡,18000&#10;洋酿炸鸡,19000&#10;半半炸鸡,20000"></textarea>
+    <label class="f">联系方式（仅管理员可见，用于确认订单）</label><input class="f" id="f_contact" maxlength="60" placeholder="电话 / 微信 / KakaoTalk">
+    <h3 style="font-size:15px;margin:16px 0 4px">身份信息（加密保存，仅管理员审核时查看）</h3>
+    <label class="f">姓名</label><input class="f" id="f_real" maxlength="30" autocomplete="off">
+    <label class="f">证件类型</label><select class="f" id="f_idtype"></select>
+    <label class="f">证件号</label><input class="f" id="f_idno" maxlength="30" autocomplete="off" placeholder="只用于资质审核">
+    <label class="f">证件照片（JPG/PNG，最大 6MB）</label><input type="file" id="f_idph" accept="image/jpeg,image/png,image/webp">
+    <label style="display:flex;gap:8px;align-items:flex-start;font-size:13px;color:var(--sub);margin-top:14px;line-height:1.6">
+      <input type="checkbox" id="f_agree" style="margin-top:3px"> 我确认店铺合法经营、菜单价格真实，同意身份信息仅用于入驻审核并加密保存，注销入驻时一并删除（见<a href="/privacy" target="_blank" style="color:#2c7be5">隐私政策</a>）。
+    </label>
+    <button class="btn primary block" type="button" id="fsend" style="margin-top:12px">提交入驻申请</button>
+  </div>
+  <div class="card" id="delcard" style="display:none">
+    <details style="font-size:13px;color:var(--sub)"><summary style="cursor:pointer">注销入驻（删除申请和身份信息，店铺下架）</summary>
+      <input class="f" id="delcf" placeholder="请输入“注销”两个字确认" style="margin-top:8px">
+      <button class="btn sm gray" type="button" id="delgo" style="margin-top:8px">确认注销入驻</button>
+    </details>
+  </div>
+  <p style="font-size:12px;color:#888;text-align:center;margin:10px 0 16px;line-height:1.7">炸鸡代点为个人代点协助，非持牌外卖平台。<br><a href="/chicken" style="color:#2c7be5">返回炸鸡代点</a> · <a href="/terms" style="color:#2c7be5">用户协议</a> · <a href="/privacy" style="color:#2c7be5">隐私政策</a></p>
+</main>
+<nav>
+  <a href="/"><i>🏠</i>首页</a>
+  <a href="/?tab=sub"><i>🚇</i>地铁</a>
+  <a href="/?tab=card"><i>💬</i>翻译</a>
+  <a href="/community"><i>🧭</i>韩友圈</a>
+  <a href="/?tab=more"><i>☰</i>全部</a>
+</nav>
+<script src="/static/community.js"></script>
+<script>
+(async function(){
+  var $ = function(id){ return document.getElementById(id); };
+  var err = $('err'), ok = $('ok');
+  function show(el, t){ el.textContent = t || ''; el.style.display = t ? 'block' : 'none'; if (t) window.scrollTo(0, 0); }
+  var u = await LH.userbar($('ub'));
+  var meta = await LH.api('GET', '/api/chicken/merchant/meta');
+  $('dep').textContent = meta.deposit; document.querySelectorAll('.depv').forEach(function(e){ e.textContent = meta.deposit; });
+  $('f_area').innerHTML = meta.areas.map(function(a){ return '<option>' + LH.esc(a) + '</option>'; }).join('');
+  $('f_idtype').innerHTML = meta.id_types.map(function(a){ return '<option>' + LH.esc(a) + '</option>'; }).join('');
+  if (!u || !u.user){
+    $('statuscard').style.display = 'block';
+    $('statuscard').innerHTML = '<h2>先登录</h2><p class="tip">登录或免费注册后即可提交入驻申请。</p><a class="btn primary block" href="/login?mode=reg&next=/chicken/join">注册 / 登录</a>';
+    return;
+  }
+  async function load(){
+    var d = await LH.api('GET', '/api/chicken/merchant/me'), a = d.app;
+    ['statuscard', 'opencard', 'depcard', 'formcard', 'delcard'].forEach(function(id){ $(id).style.display = 'none'; });
+    if (!d.open && !a){ $('statuscard').style.display = 'block'; $('statuscard').innerHTML = '<h2>暂未开放</h2><p class="tip">商家入驻正在准备中，请稍后再来。</p>'; return; }
+    if (!a){ $('formcard').style.display = 'block'; return; }
+    var cls = a.status === 'approved' ? 'ok' : (a.status === 'rejected' || a.status === 'suspended' ? 'bad' : '');
+    $('statuscard').style.display = 'block';
+    $('statuscard').innerHTML = '<h2>我的入驻</h2><div class="kv">' +
+      '<b>审核状态</b><span class="pill2 ' + cls + '">' + LH.esc(a.status_name) + '</span>' + (a.reject_reason ? '<br><b>原因</b>' + LH.esc(a.reject_reason) : '') +
+      '<br><b>保证金</b><span class="pill2 ' + (a.deposit_status === 'paid' ? 'ok' : '') + '">' + LH.esc(a.deposit_name) + (a.deposit_pending ? '（截图审核中）' : '') + '</span>' +
+      '<br><b>店名</b>' + LH.esc(a.shop_name) + ' · ' + LH.esc(a.area) +
+      '<br><b>地址</b>' + LH.esc(a.address) + '<br><b>营业时间</b>' + LH.esc(a.hours) +
+      '<br><b>菜单</b>' + a.menu.map(function(m){ return LH.esc(m.name) + ' ' + m.price_krw + '₩'; }).join('、') +
+      '<br><b>联系方式</b>' + LH.esc(a.contact) +
+      '<br><b>身份</b>' + LH.esc(a.real_name_masked) + ' · ' + LH.esc(a.id_type) + ' ' + LH.esc(a.id_masked) + '</div>' +
+      (a.status === 'pending' ? '<p class="tip">审核通常 1–2 天。保证金确认到账且资质通过后自动上架。</p>' : '');
+    if (a.deposit_status !== 'paid' && !a.deposit_pending) $('depcard').style.display = 'block';
+    if (a.status === 'approved' && a.shop_id){
+      $('opencard').style.display = 'block';
+      document.querySelectorAll('.sw button').forEach(function(b){ b.classList.toggle('on', (b.dataset.o === '1') === !!a.is_open); });
+    }
+    if (a.status === 'rejected' || a.status === 'pending'){
+      $('formcard').style.display = 'block'; $('formtitle').textContent = '修改并重新提交';
+      $('f_name').value = a.shop_name; $('f_area').value = a.area; $('f_addr').value = a.address; $('f_hours').value = a.hours;
+      $('f_menu').value = a.menu.map(function(m){ return m.name + ',' + m.price_krw; }).join('\n'); $('f_contact').value = a.contact;
+    }
+    $('delcard').style.display = 'block';
+  }
+  document.querySelectorAll('.sw button').forEach(function(b){ b.onclick = async function(){
+    show(err, ''); show(ok, '');
+    try { await LH.api('POST', '/api/chicken/merchant/open', {open: b.dataset.o === '1'}); show(ok, b.dataset.o === '1' ? '已切换为营业中，顾客可以下单了。' : '已切换为休息，前台显示暂不接单。'); load(); }
+    catch(e){ show(err, e.message); }
+  }; });
+  $('fsend').onclick = async function(){
+    show(err, ''); show(ok, '');
+    var ph = $('f_idph').files[0];
+    if (!ph){ show(err, '请选择证件照片'); return; }
+    if (!$('f_agree').checked){ show(err, '请先勾选同意'); return; }
+    var fd = new FormData();
+    [['shop_name', 'f_name'], ['area', 'f_area'], ['address', 'f_addr'], ['hours', 'f_hours'], ['menu', 'f_menu'], ['contact', 'f_contact'], ['real_name', 'f_real'], ['id_type', 'f_idtype'], ['id_no', 'f_idno']].forEach(function(p){ fd.append(p[0], $(p[1]).value); });
+    fd.append('agree', '1');
+    fd.append('id_photo', await LH.compress(ph), 'id.jpg');
+    var b = this; b.disabled = true; b.textContent = '提交中…';
+    try { var r = await LH.api('POST', '/api/chicken/merchant/apply', fd); $('f_idno').value = ''; $('f_idph').value = ''; show(ok, r.message); await load(); }
+    catch(e){ show(err, e.message); }
+    b.disabled = false; b.textContent = '提交入驻申请';
+  };
+  $('dsend').onclick = async function(){
+    show(err, ''); show(ok, '');
+    var f = $('dimg').files[0]; if (!f){ show(err, '请先选择保证金付款截图'); return; }
+    var fd = new FormData(); fd.append('kind', 'chk_deposit'); fd.append('image', await LH.compress(f), 'pay.jpg');
+    var b = this; b.disabled = true;
+    try { await LH.api('POST', '/api/pay-proof', fd); show(ok, '保证金截图已提交，等待管理员确认。'); await load(); }
+    catch(e){ show(err, e.message); }
+    b.disabled = false;
+  };
+  $('delgo').onclick = async function(){
+    if ($('delcf').value.trim() !== '注销'){ alert('请输入“注销”两个字确认'); return; }
+    if (!confirm('确定注销入驻？身份信息会立即删除，店铺下架。')) return;
+    try { var r = await LH.api('POST', '/api/chicken/merchant/delete', {confirm: '注销'}); show(ok, r.message); await load(); }
+    catch(e){ show(err, e.message); }
+  };
+  await load();
+})();
+</script>
+<script src="/static/pwa.js" defer></script>
+</body>
+</html>

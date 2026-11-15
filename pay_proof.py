@@ -16,6 +16,7 @@ KIND_LABELS = {
     "m_month": "商家会员月付",
     "m_year": "商家会员年付",
     "extra": "商家增发帖",
+    "chk_deposit": "炸鸡商家保证金",
 }
 PRICE_KEY = {"t1": "price_t1", "t2": "price_t2", "m_month": "price_m_month", "m_year": "price_m_year", "extra": "price_extra"}
 EXTRA_MAX = 20
@@ -51,6 +52,9 @@ def _cents(v) -> int:
 
 
 def expect_cents(conn, u, kind, n=1) -> int:
+    if kind == "chk_deposit":
+        from chicken_merchant import DEPOSIT_YUAN
+        return DEPOSIT_YUAN * 100
     st = get_settings(conn)
     c = _cents(st.get(PRICE_KEY[kind]))
     if kind == "extra":
@@ -76,7 +80,8 @@ def _out(r, admin=False):
 def api_meta(req: Request):
     with db() as conn:
         st = get_settings(conn)
-    return {"kinds": [{"key": k, "label": v, "price": st.get(PRICE_KEY[k])} for k, v in KIND_LABELS.items()],
+    from chicken_merchant import DEPOSIT_YUAN
+    return {"kinds": [{"key": k, "label": v, "price": st.get(PRICE_KEY[k]) if k in PRICE_KEY else str(DEPOSIT_YUAN)} for k, v in KIND_LABELS.items()],
             "extra_max": EXTRA_MAX}
 
 
@@ -104,6 +109,12 @@ async def api_submit(req: Request, kind: str = Form(...), extra_n: int = Form(1)
             raise HTTPException(403, "账号已被限制")
         if kind == "extra" and not u.get("merchant"):
             raise HTTPException(400, "增发帖仅限有效商家会员，请先开通商家会员")
+        if kind == "chk_deposit":
+            app = q(conn, "SELECT deposit_status FROM c_chicken_merchants WHERE user_id=%s", (u["id"],), one=True)
+            if not app:
+                raise HTTPException(400, "请先提交炸鸡商家入驻申请，再上传保证金截图")
+            if app["deposit_status"] == "paid":
+                raise HTTPException(400, "保证金已确认收到，无需重复提交")
         limit("payproof-try:" + str(u["id"]), 10, 3600, "操作太频繁，请一小时后再试")   # 含失败尝试
         cnt = q(conn, "SELECT count(*) AS n FROM c_pay_proofs WHERE user_id=%s AND status='pending'", (u["id"],), one=True)["n"]
         if cnt >= MAX_PENDING:
@@ -173,7 +184,12 @@ async def api_admin_review(req: Request, pid: int):
         if amount in (None, ""):
             amount = (r["expect_cents"] or 0) / 100
         result = {"ok": True, "status": "approved"}
-        if r["kind"] == "extra":
+        if r["kind"] == "chk_deposit":
+            from chicken_merchant import mark_deposit_paid
+            mark_deposit_paid(conn, r["user_id"], pid)
+            result["deposit"] = "paid"
+            paid = _cents(amount)
+        elif r["kind"] == "extra":
             row = q(conn, "UPDATE c_users SET merchant_credits=merchant_credits+%s WHERE id=%s RETURNING merchant_credits",
                     (r["extra_n"], r["user_id"]), one=True)
             q(conn, "INSERT INTO c_merchant_log(user_id,action,detail) VALUES (%s,'credits',%s)", (r["user_id"], str(r["extra_n"])))

@@ -51,6 +51,10 @@ nav a.on{color:var(--pink);font-weight:700}
 .chips button.on{background:var(--pink);color:#fff}
 .shop-card{border-top:1px solid var(--line);padding:12px 0}
 .shop-card:first-child{border-top:0;padding-top:0}
+.ost{display:inline-block;font-size:12px;font-weight:700;padding:2px 8px;border-radius:10px;margin-left:6px}
+.ost.on{background:#e8f7ee;color:#1e7a3a}.ost.off{background:#f1f1f3;color:#888}
+.shop-card.closed{opacity:.6}
+.joinbar{display:flex;align-items:center;justify-content:space-between;gap:10px}
 .shop-menu{margin:6px 0;padding-left:18px;font-size:14px;line-height:1.7}
 </style>
 </head>
@@ -70,9 +74,11 @@ nav a.on{color:var(--pink);font-weight:700}
   <div class="ok" id="ok" style="display:none;background:#eefaf0;color:#1e7a3a;border-radius:12px;padding:12px;font-size:14px;margin-bottom:14px"></div>
   <div class="card" id="shopcards">
     <h2>代点店铺</h2>
+    <div class="chips" id="ckfilter"><button type="button" class="on" data-f="open">只看营业中</button><button type="button" data-f="all">全部店铺</button></div>
     <div id="shoplist">加载中…</div>
     <p class="tip">价格为韩元，人民币为按当前手动汇率的约算，最终以客服确认为准。有地址时可复制地址，或用 Naver / Kakao / Google 地图搜索。登录后可评价。</p>
   </div>
+  <div class="card joinbar"><span>你是炸鸡店老板？入驻后由我们帮中国游客代点你的店。</span><a class="btn sm ghost" href="/chicken/join" style="white-space:nowrap">商家入驻 ›</a></div>
   <div class="card" id="formcard">
     <h2>填写代点信息</h2>
     <div id="formbox">加载中…</div>
@@ -98,13 +104,20 @@ nav a.on{color:var(--pink);font-weight:700}
   var cfg;
   try { cfg = await LH.api('GET','/api/chicken/shops'); }
   catch(e){ document.getElementById('formbox').textContent = e.message; return; }
-  var shops = cfg.shops||[];
+  var allShops = cfg.shops||[], filt = 'open';
+  var shops = allShops.filter(function(s){ return s.is_open; });
+  var openShops = shops;
+  function stHtml(s){ return s.is_open ? '<span class="ost on">营业中</span>' : '<span class="ost off">休息中 · 商家忙暂不接单</span>'; }
+  document.querySelectorAll('#ckfilter button').forEach(function(b){ b.onclick = function(){
+    filt = b.dataset.f; document.querySelectorAll('#ckfilter button').forEach(function(x){ x.classList.toggle('on', x === b); });
+    shops = filt === 'all' ? allShops : openShops; renderShopCards(); }; });
   var rate = cfg.rate_cny_krw;
   function renderShopCards(){
     var box = document.getElementById('shoplist');
-    if (!shops.length){ box.innerHTML = '<div class="tip">暂无店铺</div>'; return; }
+    if (!shops.length){ box.innerHTML = '<div class="tip">' + (filt === 'open' && allShops.length ? '现在没有营业中的店铺，点「全部店铺」看看，或稍后再来。' : '暂无店铺，商家入驻审核通过后会在这里显示。') + '</div>'; return; }
     box.innerHTML = shops.map(function(s){
-      return '<div class="shop-card" id="cks'+s.id+'"><div><b>'+LH.esc(s.name)+'</b>'+(s.is_example?' <span class="badge">示例</span>':'')+(s.area?(' · '+LH.esc(s.area)):'')+'</div>'+
+      return '<div class="shop-card'+(s.is_open?'':' closed')+'" id="cks'+s.id+'"><div><b>'+LH.esc(s.name)+'</b>'+stHtml(s)+(s.is_example?' <span class="badge">示例</span>':'')+(s.area?(' · '+LH.esc(s.area)):'')+'</div>'+
+        (s.hours?('<p class="tip" style="margin:4px 0">营业时间：'+LH.esc(s.hours)+'</p>'):'')+
         (s.notes?('<p class="tip" style="margin:4px 0">'+LH.esc(s.notes)+'</p>'):'')+
         '<div class="tip" style="margin:0 0 4px">'+(s.rating_count?('★ '+s.rating_avg+'（'+s.rating_count+' 条评价）'):'暂无评价')+'</div>'+
         LH.menuHtml(s.menu, rate)+LH.locHtml(s,{targetType:'chicken'})+
@@ -157,8 +170,9 @@ nav a.on{color:var(--pink);font-weight:700}
     '<button class="btn" type="button" id="sub" style="margin-top:12px">提交，等待客服确认</button>'+
     '<p class="tip">服务费 '+cfg.fee_krw+' 韩元；参考汇率 1 元 ≈ '+cfg.rate_cny_krw+' 韩元'+(cfg.rate_time?('，更新于 '+cfg.rate_time):'')+'（手动维护）。最终以客服确认为准。</p>';
   var sel = document.getElementById('shop');
-  sel.innerHTML = shops.map(function(s){ return '<option value="'+s.id+'">'+LH.esc(s.name)+(s.area?(' · '+LH.esc(s.area)):'')+(s.is_example?'（示例）':'')+'</option>'; }).join('');
-  function shop(){ return shops.find(function(s){ return String(s.id)===sel.value; }) || shops[0]; }
+  if (!openShops.length){ box.innerHTML = '<p>现在没有营业中的店铺，暂时不能下单，请稍后再来。</p>'; await loadMine(); return; }
+  sel.innerHTML = openShops.map(function(s){ return '<option value="'+s.id+'">'+LH.esc(s.name)+(s.area?(' · '+LH.esc(s.area)):'')+(s.is_example?'（示例）':'')+'</option>'; }).join('');
+  function shop(){ return openShops.find(function(s){ return String(s.id)===sel.value; }) || openShops[0]; }
   function renderMenu(){
     var s = shop();
     document.getElementById('shopnote').textContent = s && s.notes ? s.notes : '';

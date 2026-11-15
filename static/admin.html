@@ -144,7 +144,14 @@
         <div id="cklist"></div>
       </div>
       <div class="card">
+        <h2>炸鸡商家入驻 <span id="ckmpend" class="pill pending" style="display:none"></span></h2>
+        <p class="tip" style="margin-top:0">保证金在「付款审核」里确认（项目=炸鸡商家保证金），也可在这里手动标记。资质审核通过且保证金「已交」才能上架。证件号和证件照片加密保存，点「查看证件」才解密显示，请勿截图外传。</p>
+        <div class="row" style="gap:8px;margin-bottom:8px"><select class="f" id="ckmst" style="flex:1"><option value="pending">审核中</option><option value="approved">已上架</option><option value="suspended">已暂停</option><option value="rejected">未通过</option><option value="all">全部</option></select><button class="btn primary" id="ckmgo">刷新</button></div>
+        <div id="ckmlist"></div>
+      </div>
+      <div class="card">
         <h2>代点店铺（可编辑）</h2>
+        <label style="font-size:13px;display:flex;gap:6px;align-items:center;margin-bottom:6px"><input type="checkbox" id="ckopenonly"> 只看营业中</label>
         <p class="tip" style="margin-top:0">价格为韩元。示例店仅用于演示，上线真实店铺前请改名称并取消“示例”标记。</p>
         <div id="ckshops"></div>
         <button class="btn ghost block" id="ckadd" style="margin-top:10px">新增店铺</button>
@@ -644,6 +651,34 @@ document.getElementById('setsave').onclick = async function(){
   await call('POST', '/api/admin/settings', body); msg('设置已保存', false); settings();
 };
 
+async function ckMerchants(){
+  var d = await call('GET', '/api/admin/chicken/merchants?status=' + encodeURIComponent(document.getElementById('ckmst').value));
+  var pe = document.getElementById('ckmpend'); pe.textContent = d.pending ? d.pending + ' 待审' : ''; pe.style.display = d.pending ? 'inline-block' : 'none';
+  document.getElementById('ckmlist').innerHTML = (d.pii_ready ? '' : '<div class="err" style="display:block">未配置 LVHAN_PII_KEY，无法收集或查看证件信息</div>') + (d.items.length ? d.items.map(function(x){
+    return '<div class="cmt" style="display:block" id="ckm'+x.id+'"><div class="who">#'+x.id+' '+E(x.shop_name)+' · '+E(x.area)+' · '+E(x.status_name)+' · 保证金 '+E(x.deposit_name)+(x.shop_id?(' · 店铺#'+x.shop_id+(x.shop_active?(x.is_open?' 营业中':' 休息中'):' 已下架')):'')+'</div>'+
+      '<div class="ct" style="color:var(--sub)">用户 '+E(x.nickname)+'（编号 '+E(String(x.member_no||''))+'）· 申请人 '+E(x.real_name)+' · '+E(x.id_type)+' '+E(x.id_masked)+' · '+E(x.time)+'</div>'+
+      '<div class="ct">地址：'+E(x.address)+'<br>营业时间：'+E(x.hours)+' · 联系方式：'+E(x.contact)+'<br>菜单：'+x.menu.map(function(m){return E(m.name)+' '+m.price_krw+'₩';}).join('、')+(x.reject_reason?('<br>原因：'+E(x.reject_reason)):'')+'</div>'+
+      '<div id="ckmid'+x.id+'"></div>'+
+      '<div class="row" style="margin-top:8px;gap:6px;flex-wrap:wrap"><button class="btn sm ghost" data-ckmv="'+x.id+'">查看证件</button>'+
+      (x.status!=='approved'?'<button class="btn sm primary" data-ckma="approve" data-id="'+x.id+'">审核通过并上架</button>':'<button class="btn sm gray" data-ckma="suspend" data-id="'+x.id+'">暂停/下架</button>')+
+      (x.status==='pending'?'<button class="btn sm gray" data-ckma="reject" data-id="'+x.id+'">驳回</button>':'')+
+      (x.deposit_status!=='paid'?'<button class="btn sm ghost" data-ckma="deposit_paid" data-id="'+x.id+'">标记保证金已交</button>':'<button class="btn sm gray" data-ckma="deposit_refunded" data-id="'+x.id+'">标记保证金已退</button>')+
+      '</div></div>';
+  }).join('') : '<div class="empty">没有申请</div>');
+  document.querySelectorAll('#ckmlist [data-ckmv]').forEach(function(b){ b.onclick = async function(){
+    var id = b.dataset.ckmv, r = await call('GET', '/api/admin/chicken/merchants/' + id + '/id');
+    document.getElementById('ckmid' + id).innerHTML = '<div class="ct">证件号：<b>' + E(r.id_no) + '</b></div><img src="/api/admin/chicken/merchants/' + id + '/id-photo" alt="证件照片" style="max-width:260px;border-radius:8px">';
+  }; });
+  document.querySelectorAll('#ckmlist [data-ckma]').forEach(function(b){ b.onclick = async function(){
+    var act = b.dataset.ckma, body = {action: act};
+    if (act === 'reject'){ var why = prompt('驳回理由（商家可见）', '资料不完整，请修改后重新提交'); if (why === null) return; body.reason = why; }
+    if ((act === 'suspend' || act === 'deposit_refunded') && !confirm('确定？店铺会下架。')) return;
+    try { await call('POST', '/api/admin/chicken/merchants/' + b.dataset.id, body); msg('已处理', false); chickenAdmin(); } catch(e){}
+  }; });
+}
+document.getElementById('ckmgo').onclick = ckMerchants;
+document.getElementById('ckmst').onchange = ckMerchants;
+document.getElementById('ckopenonly').onchange = chickenAdmin;
 async function chickenAdmin(){
   var st = document.getElementById('ckstatus').value;
   var d = await call('GET', '/api/admin/chicken/orders?status=' + encodeURIComponent(st));
@@ -668,9 +703,10 @@ async function chickenAdmin(){
       chickenAdmin();
     };
   });
-  var s = await call('GET','/api/admin/chicken/shops');
+  ckMerchants();
+  var s = await call('GET','/api/admin/chicken/shops' + (document.getElementById('ckopenonly').checked ? '?open_only=1' : ''));
   document.getElementById('ckshops').innerHTML = s.shops.map(function(x){
-    return '<div class="cmt" id="cks'+x.id+'"><div class="who">'+E(x.name)+(x.is_example?'（示例）':'')+(x.active?'':' · 已下架')+' · '+E(x.area||'')+'</div>'+
+    return '<div class="cmt" id="cks'+x.id+'"><div class="who">'+E(x.name)+(x.is_example?'（示例）':'')+(x.merchant?'（入驻商家）':'')+(x.active?(x.is_open?' · 营业中':' · 休息中'):' · 已下架')+' · '+E(x.area||'')+'</div>'+
       '<div class="ct">'+(x.menu||[]).map(function(m){return E(m.name)+' '+m.price_krw+'韩元';}).join('、')+'</div>'+
       (x.address?('<div class="ct" style="color:var(--sub)">地址：'+E(x.address)+'</div>'):'')+
       '<button class="btn sm ghost" data-edits="'+x.id+'">编辑</button></div>';

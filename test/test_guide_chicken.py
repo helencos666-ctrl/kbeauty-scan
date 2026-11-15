@@ -83,6 +83,12 @@ def main():
         r = cli.get("/api/chicken/shops")
         check("GET /api/chicken/shops public", r.status_code == 200, r.text)
         js = r.json()
+        check("example shops hidden after merchant onboarding", len(js.get("shops") or []) == 0, js)
+        import psycopg as _pg
+        with _pg.connect(dsn) as _pc:
+            check("three seed shops kept (hidden)", _pc.execute("SELECT count(*) FROM c_chicken_shops WHERE is_example AND NOT active").fetchone()[0] == 3)
+            _pc.execute("UPDATE c_chicken_shops SET active=TRUE WHERE is_example")
+        js = cli.get("/api/chicken/shops").json()
         check("three seed shops", len(js.get("shops") or []) == 3, js)
         check("shops are examples", all(s.get("is_example") for s in js["shops"]), js)
         check("fee default 3000", js.get("fee_krw") == 3000, js)

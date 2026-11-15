@@ -125,7 +125,9 @@ def _shop_out(r):
     return {"id": r["id"], "name": r["name"], "area": r.get("area") or "", "is_example": bool(r["is_example"]),
             "notes": r.get("notes") or "", "active": bool(r.get("active", True)),
             "sort_order": r.get("sort_order") or 0, "menu": _menu(r.get("menu")),
-            "address": (r.get("address") or "").strip()}
+            "address": (r.get("address") or "").strip(),
+            "is_open": bool(r.get("is_open", True)), "hours": (r.get("hours") or "").strip(),
+            "merchant": bool(r.get("owner_id"))}
 
 
 def _fee(conn):
@@ -219,7 +221,7 @@ def api_chicken_shops():
         ensure_chicken_shops(conn)
         fee = _fee(conn)
         rate, rate_time = _rate_info(conn)
-        rows = q(conn, "SELECT * FROM c_chicken_shops WHERE active ORDER BY sort_order, id")
+        rows = q(conn, "SELECT * FROM c_chicken_shops WHERE active ORDER BY is_open DESC, sort_order, id")
         shops = [_shop_out(r) for r in rows]
         from shop_extras import attach_public
         attach_public(conn, "chicken", shops, rate)
@@ -257,6 +259,8 @@ async def api_chicken_submit(req: Request):
         shop = q(conn, "SELECT * FROM c_chicken_shops WHERE id=%s AND active", (shop_id,), one=True)
         if not shop:
             raise HTTPException(400, "店铺不存在或已下架")
+        if not shop.get("is_open", True):
+            raise HTTPException(400, "商家休息中，暂不接单，请选择营业中的店铺")
         fee = _fee(conn)
         rate, rate_time = _rate_info(conn)
         lines, subtotal, total, cny = _quote(_menu(shop["menu"]), d.get("items"), fee, rate)
@@ -281,11 +285,14 @@ def api_chicken_mine(req: Request):
 
 
 @router.get("/api/admin/chicken/shops")
-def api_admin_chicken_shops(req: Request):
+def api_admin_chicken_shops(req: Request, open_only: int = 0):
     with db() as conn:
         need_admin(conn, req)
         ensure_chicken_shops(conn)
-        rows = q(conn, "SELECT * FROM c_chicken_shops ORDER BY sort_order, id")
+        sql = "SELECT * FROM c_chicken_shops"
+        if open_only:
+            sql += " WHERE active AND is_open"
+        rows = q(conn, sql + " ORDER BY sort_order, id")
     return {"shops": [_shop_out(r) for r in rows]}
 
 

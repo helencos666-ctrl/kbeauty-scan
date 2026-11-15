@@ -63,6 +63,10 @@ def main():
                 check("%s has %s" % (path, w), w in r.text, w)
             check("%s no competitor wording" % path, "奋韩" not in r.text and "分含" not in r.text)
 
+        cli.get("/api/chicken/shops")  # 触发建表与隐藏示例店
+        import psycopg as _pg
+        with _pg.connect(dsn) as _pc:
+            _pc.execute("UPDATE c_chicken_shops SET active=TRUE WHERE is_example")
         r = cli.get("/api/chicken/shops")
         check("chicken shops 200", r.status_code == 200, r.text)
         js = r.json()

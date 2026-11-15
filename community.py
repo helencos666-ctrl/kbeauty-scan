@@ -390,9 +390,13 @@ def db():
                         cur.execute(MIGRATE_OPENING_PROMO)
                         from pay_proof import MIGRATE_PAY_PROOF
                         cur.execute(MIGRATE_PAY_PROOF)
+                        from chicken_merchant import MIGRATE_CHICKEN_MERCHANT
+                        cur.execute(MIGRATE_CHICKEN_MERCHANT)
                     ensure_bot(conn)
                     from chicken import ensure_chicken_shops
                     ensure_chicken_shops(conn)
+                    from chicken_merchant import hide_example_shops_once
+                    hide_example_shops_once(conn)
                     conn.commit()
                     _schema_ready = True
         yield conn
@@ -2223,3 +2227,5 @@ from opening_promo import router as _opening_promo_router   # noqa: E402
 router.include_router(_opening_promo_router)
 from pay_proof import router as _pay_proof_router   # noqa: E402
 router.include_router(_pay_proof_router)
+from chicken_merchant import router as _chicken_merchant_router   # noqa: E402
+router.include_router(_chicken_merchant_router)

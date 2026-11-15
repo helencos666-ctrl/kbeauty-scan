@@ -141,6 +141,12 @@ PAGES = {
         "炸鸡代点,旅韩助手",
         False,
     ),
+    "/chicken/join": (
+        "炸鸡商家入驻 · 旅韩助手",
+        "炸鸡店商家入驻旅韩助手代点：提交店铺资料，保证金到账且审核通过后上架，可随时切换营业或休息。",
+        "炸鸡商家入驻,旅韩助手",
+        False,
+    ),
     "/login": (
         "登录或注册 · 旅韩助手",
         "登录或注册旅韩助手韩友圈，参与韩国旅游经验交流和韩国交友。",
@@ -219,6 +225,7 @@ FILE_PATHS = {
     "visa.html": "/visa",
     "itineraries.html": "/itineraries",
     "chicken.html": "/chicken",
+    "chicken-join.html": "/chicken/join",
     "rules.html": "/rules",
     "friends.html": "/community/friends",
     "friend-edit.html": "/community/friends/edit",
@@ -245,6 +252,7 @@ NOINDEX_PREFIXES = (
     "/points",
     "/coupons",
     "/chicken",
+    "/chicken/join",
 )
 
 SITEMAP_PATHS = [
