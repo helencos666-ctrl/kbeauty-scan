@@ -70,14 +70,17 @@ def main():
 
         me = cli.get("/api/community/me").json()
         check("me has points fields", me.get("user") and me["user"].get("points_name") == "旅行豆" and me["user"].get("points_balance") == 0, me.get("user"))
-        check("welcome coupon counted on me", me["user"].get("coupon_available") == 1, me.get("user"))
+        check("welcome coupon counted on me", me["user"].get("coupon_available") >= 1, me.get("user"))
 
         r = cli.get("/api/coupons")
         check("GET /api/coupons", r.status_code == 200, r.text)
         cps = r.json()["coupons"]
-        check("one welcome coupon", len(cps) == 1 and cps[0]["title"] == "新人券 立减¥9.9" and cps[0]["amount"] == "9.9" and cps[0]["status"] == "available", cps)
-        check("coupon scope placeholder", "会员开通（待定）" in cps[0]["scope_note"] and "收款码金额不变" in cps[0]["staff_note"], cps[0])
-        check("coupon flags 9.9 free tier", "相当于免费" in (cps[0].get("flag") or ""), cps[0])
+        wel = [c for c in cps if c["kind"]=="welcome_99"]
+        sub = [c for c in cps if c["kind"]=="subway_guide_card"]
+        check("one welcome coupon", len(wel)==1 and wel[0]["title"] == "新人券 立减¥9.9" and wel[0]["amount"] == "9.9" and wel[0]["status"] == "available", cps)
+        check("subway guide card issued", len(sub)==1 and sub[0]["title"]=="地铁攻略卡" and sub[0].get("href")=="/?tab=sub", sub)
+        check("coupon scope placeholder", "会员开通（待定）" in wel[0]["scope_note"] and "收款码金额不变" in wel[0]["staff_note"], wel[0])
+        check("coupon flags 9.9 free tier", "相当于免费" in (wel[0].get("flag") or ""), wel[0])
 
         r = cli.get("/api/points")
         check("GET /api/points 200", r.status_code == 200, r.text)
@@ -164,7 +167,8 @@ def main():
             "account": f"pt2{rnd}@example.com", "password": "Passw0rd!xyz",
             "nickname": "另一用户", "agree": True
         }, headers=H)
-        check("second user coupon once", r.status_code == 200 and len(cli2.get("/api/coupons").json()["coupons"]) == 1, r.text)
+        cps2 = cli2.get("/api/coupons").json()["coupons"]
+        check("second user coupon once", r.status_code == 200 and len([c for c in cps2 if c["kind"]=="welcome_99"])==1, (r.status_code, cps2))
         check("points event unknown kind", cli2.post("/api/points/event", json={"kind": "hack"}, headers=H).status_code == 400)
         check("share missing target", cli2.post("/api/points/event", json={"kind": "share"}, headers=H).status_code == 400)
 

@@ -377,6 +377,8 @@ def db():
                         cur.execute(MIGRATE_BUDDY_VERIFY)
                         from promo import MIGRATE_PROMO
                         cur.execute(MIGRATE_PROMO)
+                        from opening_promo import MIGRATE_OPENING_PROMO
+                        cur.execute(MIGRATE_OPENING_PROMO)
                     ensure_bot(conn)
                     from chicken import ensure_chicken_shops
                     ensure_chicken_shops(conn)
@@ -922,6 +924,8 @@ async def api_register(req: Request, resp: Response):
         assign_member_no(conn, row["id"])
         from points import issue_welcome_coupon
         issue_welcome_coupon(conn, row["id"])
+        from opening_promo import on_new_user
+        on_new_user(conn, row["id"])
         new_session(conn, resp, req, user_id=row["id"])
     return {"ok": True}
 
@@ -2201,3 +2205,5 @@ from buddy_verify import router as _buddy_verify_router   # noqa: E402
 router.include_router(_buddy_verify_router)
 from promo import router as _promo_router   # noqa: E402
 router.include_router(_promo_router)
+from opening_promo import router as _opening_promo_router   # noqa: E402
+router.include_router(_opening_promo_router)

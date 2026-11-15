@@ -129,6 +129,7 @@ nav button.on,nav a.on{color:var(--pink);font-weight:700}
   <!-- 化妆品识别 -->
   <section class="page on" id="p-cos">
 
+    <div class="card" id="openPromo" style="display:none;background:#fff8f0"></div>
     <div class="tools">
       <a class="tool" href="/community/rate"><i>💱</i>汇率</a>
       <a class="tool" href="/?tab=sub"><i>🚇</i>地铁</a>
@@ -708,5 +709,23 @@ drawScenes();
 </script>
 <script src="/static/maps.js"></script>
 <script src="/static/pwa.js" defer></script>
+
+<script>
+(function(){
+  fetch('/api/opening-promo').then(function(r){ return r.json(); }).then(function(d){
+    if (!d || !d.enabled) return;
+    var el = document.getElementById('openPromo');
+    if (!el) return;
+    var dates = (d.starts_at ? d.starts_at : '') + (d.ends_at ? (' 至 ' + d.ends_at) : '');
+    var slots = d.active ? ('还剩 ' + d.remaining + ' 个名额') : ('名额共 ' + d.cap + ' 个');
+    el.style.display = 'block';
+    el.innerHTML = '<h2>🎉 开业活动</h2><p style="margin:0 0 8px;line-height:1.7">' +
+      (d.active ? '<b>活动进行中。</b> ' : '<b>活动未开始或已结束。</b> ') +
+      (dates ? ('时间：' + dates + '。') : '') +
+      (d.active ? ('每日签到 <b>' + d.checkin_points + ' 旅行豆</b>（开业双倍）。活动期内前 ' + d.cap + ' 名新注册用户额外 +' + d.bonus_points + ' 旅行豆，' + slots + '。') : slots) +
+      ' 新用户获赠地铁攻略卡。</p><p class="tip" style="margin:0">' + (d.rules||'') + ' <a href="/points">去签到</a></p>';
+  }).catch(function(){});
+})();
+</script>
 </body>
 </html>

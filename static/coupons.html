@@ -55,9 +55,12 @@
     if (!list.length){ box.innerHTML = '<h2>卡券</h2><div class="empty">暂时没有卡券</div>'; return; }
     var ST = {available:'可使用', used:'已使用', expired:'已过期'};
     box.innerHTML = '<h2>卡券</h2>' + list.map(function(c){
-      return '<div class="cmt"><div class="who">' + LH.esc(c.title) + ' <b style="color:var(--pink)">¥' + LH.esc(c.amount) + '</b></div>' +
-        '<div class="meta"><span class="tag">' + LH.esc(ST[c.status]||c.status) + '</span><span>有效期至 ' + LH.esc(c.expires_at) + '</span></div>' +
-        '<p class="tip" style="margin:8px 0 0">' + LH.esc(c.scope_note) + '<br>' + LH.esc(c.staff_note) + '<br>' + LH.esc(c.flag||'') + '</p></div>';
+      var amt = c.kind==='subway_guide_card' ? '' : (' <b style="color:var(--pink)">¥' + LH.esc(c.amount) + '</b>');
+      var exp = c.expires_at ? ('<span>有效期至 ' + LH.esc(c.expires_at) + '</span>') : '<span>长期有效</span>';
+      var link = c.href ? ('<a class="btn sm primary" href="' + LH.esc(c.href) + '">打开地铁攻略</a>') : '';
+      return '<div class="cmt"><div class="who">' + LH.esc(c.title) + amt + '</div>' +
+        '<div class="meta"><span class="tag">' + LH.esc(ST[c.status]||c.status) + '</span>' + exp + '</div>' +
+        '<p class="tip" style="margin:8px 0 0">' + LH.esc(c.scope_note) + '<br>' + LH.esc(c.flag||'') + '</p>' + link + '</div>';
     }).join('');
   } catch(e){ box.innerHTML = '<p>' + LH.esc(e.message) + '</p>'; }
 })();

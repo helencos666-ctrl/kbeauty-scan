@@ -29,6 +29,7 @@ POINT_RULES = {
     "card": {"points": 2, "daily_cap": 5, "label": "使用沟通卡"},
     "profile": {"points": 20, "daily_cap": 0, "once": True, "label": "完善资料"},
     "shop_approve": {"points": 10, "daily_cap": 0, "label": "推荐店铺通过审核"},
+    "opening_bonus": {"points": 50, "daily_cap": 0, "once": True, "label": "开业前100名奖励"},
 }
 USER_EVENT_KINDS = ("share", "subway", "card", "profile")
 SHARE_TARGET_TYPES = ("post", "shop", "merchant", "trip", "card", "subway", "chicken")
@@ -202,7 +203,7 @@ def _coupon_out(r):
     status = r["status"]
     if status == "available" and r["expires_at"] and r["expires_at"] < datetime.datetime.now(datetime.timezone.utc):
         status = "expired"
-    return {
+    o = {
         "id": r["id"],
         "kind": r["kind"],
         "title": r["title"],
@@ -216,11 +217,18 @@ def _coupon_out(r):
         "used_at": _ts(r["used_at"]),
         "flag": "若用于会员档（¥9.9），抵扣后该档相当于免费，需人工确认。",
     }
+    if r["kind"] == "subway_guide_card":
+        o["href"] = "/?tab=sub"
+        o["flag"] = "打开即可查看首尔地铁攻略，指南内容对所有人免费。"
+        o["amount"] = ""
+    return o
 
 
 def list_coupons(conn, uid):
     expire_coupons(conn, uid)
     issue_welcome_coupon(conn, uid)
+    from opening_promo import issue_subway_card
+    issue_subway_card(conn, uid)
     expire_coupons(conn, uid)
     rows = q(conn, """SELECT id,kind,title,amount_cents,status,scope_note,staff_note,issued_at,expires_at,used_at
                       FROM c_coupons WHERE user_id=%s ORDER BY id DESC""", (uid,))
@@ -245,7 +253,7 @@ def user_points_summary(conn, uid):
 def _rules_out(counts):
     out = []
     for kind, rule in POINT_RULES.items():
-        if kind == "shop_approve":
+        if kind in ("shop_approve", "opening_bonus"):
             continue
         cap = rule.get("daily_cap") or 0
         used = counts.get(kind, 0)
@@ -301,13 +309,22 @@ def _award(conn, uid, kind, *, item_key=None, idempotency_key=None, note=None, r
             raise HTTPException(400, "请先设置头像或完善交友资料")
 
     pts = int(rule["points"])
+    badge = None
+    if kind == "checkin":
+        from opening_promo import checkin_points
+        pts, badge = checkin_points(conn)
+        if badge and not note:
+            note = "每日签到（" + badge + "）"
     row = q(conn, """INSERT INTO c_points_ledger(user_id,kind,points,day,item_key,idempotency_key,note)
                      VALUES (%s,%s,%s,%s,%s,%s,%s) ON CONFLICT DO NOTHING RETURNING id""",
             (uid, kind, pts, day, item_key, idempotency_key, note or rule["label"]), one=True)
     if not row:
         return {"ok": True, "awarded": 0, "already": True, "reason": "已经领取过了", "balance": _balance(conn, uid)}
-    return {"ok": True, "awarded": pts, "already": False, "reason": None, "ledger_id": row["id"],
-            "balance": _balance(conn, uid)}
+    out = {"ok": True, "awarded": pts, "already": False, "reason": None, "ledger_id": row["id"],
+           "balance": _balance(conn, uid)}
+    if badge:
+        out["badge"] = badge
+    return out
 
 
 def _points_payload(conn, uid, extra=None):
@@ -328,6 +345,13 @@ def _points_payload(conn, uid, extra=None):
                      "note": r["note"], "time": _ts(r["created_at"])} for r in hist],
         "coupons": list_coupons(conn, uid),
     }
+    from opening_promo import public_state
+    out["promo"] = public_state(conn)
+    if out["promo"]["active"]:
+        for rule in out["rules"]:
+            if rule["kind"] == "checkin":
+                rule["points"] = out["promo"]["checkin_points"]
+                rule["badge"] = out["promo"]["badge"]
     if extra:
         out.update(extra)
     return out
