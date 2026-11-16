@@ -1,5 +1,5 @@
 {
-  "updated": "2026-11-15",
+  "updated": "2026-11-16",
   "title": "韩国美食推荐",
   "disclaimer": "本页只收录公开资料中有记载、近期仍见诸米其林指南或官方/百科旅游介绍的餐厅与市场。营业状态、菜单和价格可能随时变化，请出发前用地图或电话再确认。米其林必比登是「性价比」标注，其符号并不等同本页的人均₩档；没有把握的人均价格已省略。信息可能变化，请出行前核实。餐厅已按游客常去的打卡区域归类，具体门牌以各条地址和地图为准；不在热门区域内、但资料可靠的店会放在「其他」。",
   "price_legend": [
@@ -524,18 +524,83 @@
       "area": "中区 明洞",
       "category": "chinese_fav",
       "cuisine": "刀切面 / 饺子",
-      "desc": "明洞最广为人知的面饺老店之一，长期出现在官方旅游介绍和旅客行程里。总店经常排到门外，附近还有分店，口味和等候时间可能不同。",
+      "desc": "明洞最广为人知的面饺老店之一，长期出现在官方旅游介绍和旅客行程里。总店经常排到门外，附近还有分店，口味和等候时间可能不同。招牌上写着1966年创业，并注明自2017年起入选米其林指南首尔。饭点常常排队。",
       "transport": "地铁4号线明洞站（명동역）出站向明洞主街步行数分钟，按招牌“명동교자”寻找。",
       "tips": [
         "总店排队很长时，可先看附近分店的等候情况，不必只认一家。",
-        "刀切面和饺子是常点组合；是否有中文菜单看店内。"
+        "刀切面和饺子是常点组合；是否有中文菜单看店内。",
+        "米其林指南页面上的营业时间是每天 10:30–21:00，饭点常常排队，请出行前再确认。"
       ],
       "station": "명동역",
       "tags": [
         "chinese_fav"
       ],
       "area_id": "myeongdong",
-      "source_note": "公开旅游资料与百科/官方介绍整理，请出行前再确认营业。"
+      "source_note": "公开旅游资料与百科/官方介绍整理，请出行前再确认营业。店门口招牌写明1966年创业、自2017年起入选米其林指南首尔（查阅 2026-11-16）。",
+      "photos": [
+        "/static/food-photos/kyoja-myeongdong-cover.jpg",
+        "/static/food-photos/kyoja-myeongdong-facade.jpg"
+      ],
+      "cover": "/static/food-photos/kyoja-myeongdong-cover.jpg"
+    },
+    {
+      "id": "yoogane-myeongdong",
+      "name_zh": "柳家鸡排（明洞1号店）",
+      "name_ko": "유가네닭갈비 명동1호점",
+      "city": "seoul",
+      "city_zh": "首尔",
+      "area": "中区 明洞",
+      "area_id": "myeongdong",
+      "category": "traditional",
+      "cuisine": "铁板鸡排",
+      "desc": "1981年创立的韩国连锁铁板鸡排店，店门口的中文招牌写着「柳氏家」。明洞1号店在明洞10街13，逛街路过很方便。常点的有铁板鸡排（닭갈비）、芝士玉米鸡排，吃完还可以把锅底做成炒饭；橱窗里也能看到海鲜葱饼、荞麦冷面和拌冷面。",
+      "transport": "地铁4号线明洞站（명동역）8号出口步行约4分钟，地址是明洞10街13。",
+      "tips": [
+        "明洞有多家分店，请按「명동1호점」和明洞10街13找这家。",
+        "门上写着可以打包和外送，具体以店内公示为准。",
+        "营业时间不同来源略有出入，出行前请再确认一下。"
+      ],
+      "station": "명동역",
+      "price": "₩₩",
+      "hours": "门上写着 10:00–24:00；品牌官网门店页写约 10:45 至午夜。",
+      "address": "서울 중구 명동10길 13 (명동2가 3-1)",
+      "map_query": "유가네닭갈비 명동1호점",
+      "cover": "/static/food-photos/yoogane-myeongdong-cover.jpg",
+      "photos": [
+        "/static/food-photos/yoogane-myeongdong-cover.jpg",
+        "/static/food-photos/yoogane-myeongdong-storefront.jpg"
+      ],
+      "source_note": "品牌官网门店页「명동1호점」（지번 명동2가 3-1，查阅 2026-11-16）；道路名地址据店门门牌为 명동10길 13。1981年创立见品牌介绍页。营业时间以店门公示为准，与官网、地图软件或有出入。",
+      "source_url": "https://www.yoogane.co.kr/store/find_a_store.html?city_val=&code=CD11&county_name=&keyword=&lcode=%EC%84%9C%EC%9A%B8&mcode=%EC%A4%91%EA%B5%AC"
+    },
+    {
+      "id": "hongkong-banjeom-myeongdong",
+      "name_zh": "香港饭店0410（明洞店）",
+      "name_ko": "홍콩반점0410 PLUS 명동점",
+      "city": "seoul",
+      "city_zh": "首尔",
+      "area": "中区 明洞",
+      "area_id": "myeongdong",
+      "category": "chinese_fav",
+      "cuisine": "韩式中餐 / 炸酱面",
+      "desc": "韩国餐饮人白钟元旗下的连锁店，卖的是韩式炸酱面（짜장면）、炒码面（짬뽕）、糖醋肉（탕수육）这类韩式中餐。韩国旅游官网 VisitKorea 介绍这里价格比较亲民，适合在明洞吃一顿熟悉的中餐。明洞店就在柳家鸡排楼上，从门口红色招牌下的楼梯上去，楼梯上标明二楼是香港饭店。",
+      "transport": "地铁4号线明洞站（명동역）8号出口步行约4分钟，和柳家鸡排明洞1号店同一栋，走门口楼梯上楼。",
+      "tips": [
+        "请认准门口红色「홍콩반점 PLUS+ 0410」招牌和楼梯标识；有的地图写成明洞10街13，有的写成14，按招牌找最稳妥。",
+        "菜单和价格以店内当日为准。"
+      ],
+      "station": "명동역",
+      "price": "₩₩",
+      "hours": "常见资料写 11:30–21:00；有的还写工作日下午有休息、周末开到 22:00，春节和中秋可能休息或提早结束。请出行前用地图再确认。",
+      "address": "서울 중구 명동10길 13, 2층",
+      "map_query": "홍콩반점0410 명동점",
+      "cover": "/static/food-photos/hongkong-banjeom-myeongdong-cover.jpg",
+      "photos": [
+        "/static/food-photos/hongkong-banjeom-myeongdong-cover.jpg",
+        "/static/food-photos/hongkong-banjeom-myeongdong-facade.jpg"
+      ],
+      "source_note": "韩国旅游发展局 VisitKorea「홍콩반점0410(명동점)」页面（查阅 2026-11-16）：介绍为韩式中餐、价格比较亲民，英文地址为 명동10길 13，韩文地址有的写成 명동10길 14；营业时间写 11:30–21:00，春节和中秋假期休息。品牌官网 http://www.zzambbong.com。二楼位置据现场招牌和楼梯标识。",
+      "source_url": "https://english.visitkorea.or.kr/svc/whereToGo/locIntrdn/rgnContentsView.do?vcontsId=193087"
     },
     {
       "id": "hadongkwan",
