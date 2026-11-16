@@ -33,6 +33,14 @@
     <div class="card">
       <div class="row" style="justify-content:space-between"><b id="stats">…</b><button class="btn sm gray" id="alogout">退出后台</button></div>
     </div>
+    <div class="card" id="visit-box">
+      <h2>每日访问</h2>
+      <p class="tip" style="margin-top:0">按首尔时间统计网页浏览（不含图片、接口、健康检查和常见爬虫）。同一访客同一天只计 1 个 UV，不保存 IP。来源优先记推广码、活动参数（utm）和来路网站，方便看出哪条视频带来访问。</p>
+      <p id="visit-today" style="margin:8px 0 12px"></p>
+      <div style="overflow-x:auto"><table class="adm" id="visit-days"></table></div>
+      <h3 style="margin-top:16px">主要来源（近 30 天）</h3>
+      <div style="overflow-x:auto"><table class="adm" id="visit-sources"></table></div>
+    </div>
     <div class="boards" id="tabs">
       <button data-t="users" class="on">用户/会员</button><button data-t="payproofs">付款审核<span id="pppend"></span></button><button data-t="reports">举报</button><button data-t="posts">帖子</button><button data-t="review">审核</button><button data-t="merchants">商家/评价</button><button data-t="chicken">代点</button><button data-t="promo">推广统计</button><button data-t="settings">设置</button><button data-t="friends">交友</button><button data-t="idv">实名核验</button><button data-t="opening">开业活动</button><button data-t="banners">横幅广告</button><button data-t="consult">站内咨询</button><button data-t="ops">运营·徽章</button><button data-t="hits">拦截记录</button>
     </div>
@@ -255,8 +263,25 @@ async function boot(){
   var s;
   try { s = await LH.api('GET', '/api/admin/overview'); } catch(e){ if (e.status === 401) return showLogin(); return msg(e.message, true); }
   document.getElementById('loginBox').style.display = 'none'; document.getElementById('panel').style.display = 'block';
-  document.getElementById('stats').textContent = '用户 ' + s.users + ' · 会员 ' + s.members + ' · 高级 ' + s.premium + ' · 商家 ' + s.merchants + ' · 待审核 ' + s.pending + ' · 待审店铺 ' + (s.shop_pending || 0) + ' · 待审评价 ' + (s.review_pending || 0) + ' · 帖子 ' + s.posts + ' · 评论 ' + s.comments + ' · 待处理举报 ' + s.reports + ' · 交友资料 ' + s.profiles + ' · 7天可疑私信 ' + s.flagged7 + ' · 数据库 ' + s.db_mb + 'MB/1024MB';
+  var vt = (s.visits && s.visits.today) ? s.visits.today : {pv:0,uv:0,day:''};
+  document.getElementById('stats').textContent = '今日 PV ' + (vt.pv||0) + ' · UV ' + (vt.uv||0) + ' · 用户 ' + s.users + ' · 会员 ' + s.members + ' · 高级 ' + s.premium + ' · 商家 ' + s.merchants + ' · 待审核 ' + s.pending + ' · 待审店铺 ' + (s.shop_pending || 0) + ' · 待审评价 ' + (s.review_pending || 0) + ' · 帖子 ' + s.posts + ' · 评论 ' + s.comments + ' · 待处理举报 ' + s.reports + ' · 交友资料 ' + s.profiles + ' · 7天可疑私信 ' + s.flagged7 + ' · 数据库 ' + s.db_mb + 'MB/1024MB';
+  renderVisits(s.visits);
   users();
+}
+function renderVisits(v){
+  v = v || {today:{pv:0,uv:0,day:''}, days:[], sources:[], today_sources:[]};
+  var kn = {ref:'推广码', utm:'活动参数', referer:'来路网站'};
+  var t = v.today || {pv:0,uv:0,day:''};
+  var ts = (v.today_sources||[]).map(function(x){ return (kn[x.kind]||x.kind) + ' ' + x.value + '（PV ' + x.pv + '）'; }).join('、');
+  document.getElementById('visit-today').innerHTML = '<b>今日（' + (t.day||'—') + '，首尔时间）</b>　页面浏览 PV <b>' + (t.pv||0) + '</b>　独立访客 UV <b>' + (t.uv||0) + '</b>' + (ts ? '<br><small>今日来源：' + ts + '</small>' : '');
+  var days = (v.days||[]).slice().reverse();
+  document.getElementById('visit-days').innerHTML = days.length ? '<tr><th>日期</th><th>PV</th><th>UV</th></tr>' + days.map(function(d){
+    return '<tr><td>' + d.day + '</td><td>' + d.pv + '</td><td>' + d.uv + '</td></tr>';
+  }).join('') : '<tr><td>暂无记录</td></tr>';
+  var src = v.sources || [];
+  document.getElementById('visit-sources').innerHTML = src.length ? '<tr><th>类型</th><th>来源</th><th>PV</th><th>UV</th></tr>' + src.map(function(x){
+    return '<tr><td>' + (kn[x.kind]||x.kind) + '</td><td>' + String(x.value).replace(/[&<>]/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;'}[c];}) + '</td><td>' + x.pv + '</td><td>' + x.uv + '</td></tr>';
+  }).join('') : '<tr><td colspan="4">还没有带来访问的来源（推广链接、utm 或外部网站）</td></tr>';
 }
 async function users(){
   var d = await call('GET', '/api/admin/users?s=' + encodeURIComponent(document.getElementById('us').value));

@@ -408,6 +408,8 @@ def db():
                         cur.execute(MIGRATE_MERCH)
                         from retention import MIGRATE_RETENTION
                         cur.execute(MIGRATE_RETENTION)
+                        from visits import MIGRATE_VISITS
+                        cur.execute(MIGRATE_VISITS)
                     ensure_bot(conn)
                     from chicken import ensure_chicken_shops
                     ensure_chicken_shops(conn)
@@ -1817,7 +1819,12 @@ def api_admin_overview(req: Request):
                               (SELECT count(*) FROM c_shop_recs WHERE status='pending') AS shop_pending,
                               (SELECT count(*) FROM c_shop_reviews WHERE status='pending') AS review_pending,
                               pg_database_size(current_database()) AS db_bytes""", one=True)
-    s["db_mb"] = round(s.pop("db_bytes") / 1048576, 1)
+        s["db_mb"] = round(s.pop("db_bytes") / 1048576, 1)
+        try:
+            from visits import overview_visits
+            s["visits"] = overview_visits(conn)
+        except Exception:
+            s["visits"] = {"today": {"day": None, "pv": 0, "uv": 0}, "days": [], "sources": [], "today_sources": []}
     return s
 
 @router.get("/api/admin/users")
@@ -2342,3 +2349,5 @@ from merch import router as _merch_router  # noqa: E402
 router.include_router(_merch_router)
 from retention import router as _retention_router  # noqa: E402
 router.include_router(_retention_router)
+from visits import router as _visits_router  # noqa: E402
+router.include_router(_visits_router)
