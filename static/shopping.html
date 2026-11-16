@@ -245,11 +245,16 @@ function drawFilters(){
   const cats=[['', '全部']].concat((DATA.categories||[]).map(c=>[c.id,c.zh]));
   chipBar($('catChips'), cats, cat, id=>{cat=id; drawFilters(); render();});
 }
+const HASH_ALIASES={'lin-myeongdong':'kolonsport-myeongdong'};
 function applyHash(){
-  const id=(location.hash||'').replace(/^#/, '');
+  const raw=(location.hash||'').replace(/^#/, '');
+  const id=HASH_ALIASES[raw]||raw;
   if(!id || !DATA.items) return;
   const it=DATA.items.find(x=>x.id===id);
   if(!it) return;
+  if(raw && raw!==id && history.replaceState){
+    history.replaceState(null,'',location.pathname+location.search+'#'+id);
+  }
   cat=''; q='';
   const qel=$('q');
   if(qel) qel.value='';

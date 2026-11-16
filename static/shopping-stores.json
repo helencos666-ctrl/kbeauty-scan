@@ -74,29 +74,32 @@
       "source_note": "门面实拍与公开地图资料（查阅 2026-11-16）。"
     },
     {
-      "id": "lin-myeongdong",
-      "name_zh": "「林」（明洞，店名待确认）",
-      "name_ko": "林",
+      "id": "kolonsport-myeongdong",
+      "name_zh": "可隆 KOLON SPORT（明洞店）",
+      "name_ko": "코오롱스포츠 서울",
       "city": "seoul",
       "city_zh": "首尔",
       "area": "中区 明洞",
       "area_id": "myeongdong",
-      "category": "fashion",
-      "desc": "明洞街上一家灰色石板外墙的服装店，门面上是金属「林」字标志，橱窗里陈列大衣和皮草。目前公开资料里还没有对上确认的品牌官方店名和门牌，路过时可按这块「林」字招牌辨认。旁边是우리은행（友利银行）。",
-      "transport": "地铁4号线明洞站（명동역）出站沿明洞步行街走，在우리은행 附近按灰色石板外墙和金属「林」字招牌寻找。",
+      "category": "outdoor",
+      "desc": "可隆（KOLON SPORT，코오롱스포츠）是韩国户外和机能服饰品牌，由코오롱인더스트리 FnC 运营。明洞这家旗舰店的官方名称是 KOLON SPORT SEOUL（코오롱스포츠 서울），在명동길 42 的一到二楼，和우리은행 명동금융센터（友利银行明洞金融中心）在同一栋楼。转角门面是一层层叠起来的灰色石片外墙，上面有金属「林」字标志，入口处还能看到原木装饰。店里是户外和日常机能服饰，一、二楼按不同产品线分区陈列。",
+      "transport": "地铁4号线明洞站（명동역）出站沿명동길 步行，在우리은행 명동금융센터 同一栋楼，按灰色石片外墙和金属「林」字招牌找명동길 42。",
       "tips": [
-        "目前未能确认官方品牌名和准确门牌，介绍只按实拍门面来写。",
-        "门上写着营业时间，请以当日公示为准。"
+        "官方店名是 KOLON SPORT SEOUL（코오롱스포츠 서울）。门面上是金属「林」字，转角的石片外墙比较好认。",
+        "和友利银行在同一栋楼（명동길 42），店在一到二楼。",
+        "楼层和货品请以进门指示为准。"
       ],
       "station": "명동역",
-      "hours": "门上写着 OPEN 11:00 CLOSE 22:00。",
-      "address": "首尔中区明洞步行街，우리은행 附近（门牌待确认）",
-      "cover": "/static/shop-photos/lin-myeongdong-cover.jpg",
+      "hours": "请以店门口当日公示为准。",
+      "address": "서울 중구 명동길 42 (명동2가)",
+      "map_query": "코오롱스포츠 서울",
+      "cover": "/static/shop-photos/kolonsport-myeongdong-cover.jpg",
       "photos": [
-        "/static/shop-photos/lin-myeongdong-cover.jpg",
-        "/static/shop-photos/lin-myeongdong-facade.jpg"
+        "/static/shop-photos/kolonsport-myeongdong-cover.jpg",
+        "/static/shop-photos/kolonsport-myeongdong-facade.jpg"
       ],
-      "source_note": "仅根据门面实拍整理（查阅 2026-11-16）。官方店名、品牌和门牌尚未从公开资料确认，故未编造。"
+      "source_note": "品牌官方新闻稿「KOLON SPORT opens global flagship store “KOLON SPORT SEOUL” in Myeongdong」（주소 명동길 42，1–2층，2026-01-09 发布，查阅 2026-11-16）。门面实拍与公开建筑介绍（石片外墙、入口原木、转角立面）相符。동일 건물 우리은행 명동금융센터 见道路名地址资料（명동길 42 / 명동2가 33-2）。营业时间未见足够一致的官方或主要地图来源，故从略。",
+      "source_url": "https://en-beta.kolonfnc.com/press/1925"
     },
     {
       "id": "hm-myeongdong",
