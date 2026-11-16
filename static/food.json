@@ -1,7 +1,7 @@
 {
   "updated": "2026-11-16",
   "title": "韩国美食推荐",
-  "disclaimer": "本页只收录公开资料中有记载、近期仍见诸米其林指南或官方/百科旅游介绍的餐厅与市场。营业状态、菜单和价格可能随时变化，请出发前用地图或电话再确认。米其林必比登是「性价比」标注，其符号并不等同本页的人均₩档；没有把握的人均价格已省略。信息可能变化，请出行前核实。餐厅已按游客常去的打卡区域归类，具体门牌以各条地址和地图为准；不在热门区域内、但资料可靠的店会放在「其他」。",
+  "disclaimer": "本页只收录公开资料中有记载、近期仍见诸米其林指南或官方/百科旅游介绍的餐厅与市场。营业状态、菜单和价格可能随时变化，请出发前用地图或电话再确认。米其林必比登是「性价比」标注，其符号并不等同本页的人均₩档；没有把握的人均价格已省略。信息可能变化，请出行前核实。餐厅已按游客常去的打卡区域归类，具体门牌以各条地址和地图为准；不在热门区域内、但资料可靠的店会放在「其他」。部分明洞门店根据实地招牌和公开地图资料补充收录。",
   "price_legend": [
     {
       "id": "₩",
@@ -124,6 +124,281 @@
     "仁川"
   ],
   "items": [
+    {
+      "id": "beansbins-myeongdong",
+      "name_zh": "BEANSBINS COFFEE（明洞萨沃伊酒店店）",
+      "name_ko": "빈스빈스 명동사보이호텔점",
+      "city": "seoul",
+      "city_zh": "首尔",
+      "area": "中区 明洞",
+      "area_id": "myeongdong",
+      "category": "cafe",
+      "cuisine": "咖啡 / 华夫 / 鲜榨果汁",
+      "desc": "BEANSBINS COFFEE 在사보이호텔（萨沃伊酒店）二楼，一楼是 GS25 사보이호텔점，从便利店旁的楼梯上去。遮阳篷上写着 The Specialty Coffee Roastery。除了咖啡，门口还能看到冰淇淋华夫、蜂蜜水果华夫、比利时华夫等，以及新鲜果汁。立牌上写着店内有卫生间、无线网、吸烟室和团体座位。",
+      "transport": "地铁4号线明洞站（명동역）出站步行约数分钟，按 GS25 사보이호텔점 和二楼的绿色 BEANSBINS COFFEE 招牌上楼。",
+      "tips": [
+        "店在二楼，入口是 GS25 사보이호텔점 旁边的楼梯。",
+        "华夫和果汁的种类以店内当日菜单为准。",
+        "立牌写有卫生间、Wi-Fi、吸烟室和团体座位，具体以店内为准。"
+      ],
+      "station": "명동역",
+      "hours": "门口立牌写着 Open / Closed 8:00–21:00，最后点餐 20:30。部分较旧的资料写成更晚打烊，请以店内当日公示为准。",
+      "address": "서울 중구 명동8나길 10 사보이호텔 2층 (충무로1가 23-1)",
+      "map_query": "빈스빈스 명동사보이호텔점",
+      "cover": "/static/food-photos/beansbins-myeongdong-cover.jpg",
+      "photos": [
+        "/static/food-photos/beansbins-myeongdong-cover.jpg",
+        "/static/food-photos/beansbins-myeongdong-entrance.jpg",
+        "/static/food-photos/beansbins-myeongdong-waffles.jpg"
+      ],
+      "source_note": "店门口立牌与门面招牌（查阅 2026-11-16）；道路名地址见公开地图资料 명동8나길 10 사보이호텔 2층。",
+      "source_url": "https://beansbins.com/"
+    },
+    {
+      "id": "ungteori-myeongdong",
+      "name_zh": "荒谬的生肉（明洞店）",
+      "name_ko": "엉터리생고기 명동점",
+      "city": "seoul",
+      "city_zh": "首尔",
+      "area": "中区 明洞",
+      "area_id": "myeongdong",
+      "category": "bbq",
+      "cuisine": "五花肉吃到饱 / 沙拉吧",
+      "desc": "门口中文招牌写着「荒谬的生肉」，英文是 Ungteori Korea BBQ & Salad Bar。店在명동4길 23 的二楼，五花肉吃到饱加大酱汤，还有沙拉吧。招牌上写着 1人 17,900원。米饭、饮料或其他套餐是否另计，以及是否有用餐时间或人数要求，请以店内当日公示为准。",
+      "transport": "地铁4号线明洞站（명동역）出站向명동4길 步行，按「엉터리생고기」和「Ungteori」招牌上二楼。",
+      "tips": [
+        "招牌上的 17,900원 是店内公示的固定套餐价，以到店当日为准。",
+        "店在二楼，请按绿色和白色的 Ungteori / 엉터리생고기 灯箱上楼。",
+        "明洞可能还有其他分店，请按명동4길 23 找这家。"
+      ],
+      "station": "명동역",
+      "price": "₩₩",
+      "hours": "常见资料写每天 11:00–23:00，最后点餐约 22:00，请出行前再确认。",
+      "address": "서울 중구 명동4길 23, 2층 (명동2가 54-32)",
+      "map_query": "엉터리생고기 명동점",
+      "cover": "/static/food-photos/ungteori-myeongdong-cover.jpg",
+      "photos": [
+        "/static/food-photos/ungteori-myeongdong-cover.jpg",
+        "/static/food-photos/ungteori-myeongdong-storefront.jpg"
+      ],
+      "tags": [
+        "chinese_fav"
+      ],
+      "source_note": "店门口招牌价目与店名（查阅 2026-11-16）；地址与常见营业时间见公开地图资料。"
+    },
+    {
+      "id": "wangbijip-myeongdong",
+      "name_zh": "韩食王妃家（明洞店）",
+      "name_ko": "한식왕비집 명동점",
+      "city": "seoul",
+      "city_zh": "首尔",
+      "area": "中区 明洞",
+      "area_id": "myeongdong",
+      "category": "traditional",
+      "cuisine": "韩牛 / 石锅拌饭 / 粥",
+      "desc": "韩食王妃家明洞店在명동6길 15 的地下一层，和楼上的 Hello Kitty Apple Cafe 同一栋，不要和명동8가길 26 的王妃家本店搞混。店里有韩牛和石锅拌饭，早上也供应粥。门口招牌写着营业 7:30–23:00，早餐 7:30–10:30，午餐 11:30–17:00。有的地图还标了 10:30–11:30 休息、最后点餐约 22:00，请以店内当日公示为准。",
+      "transport": "地铁4号线明洞站（명동역）出站向명동6길 步行，按「한식왕비집」招牌走地下一层；同一栋一到二楼是 Hello Kitty Apple Cafe。",
+      "tips": [
+        "请认「한식왕비집 명동점」和명동6길 15 地下一层，不要走到本店。",
+        "早餐、午餐的供应时段以门口招牌和店内当日说明为准。",
+        "旁边转角就是 Hello Kitty 咖啡店，很好一起找。"
+      ],
+      "station": "명동역",
+      "price": "₩₩",
+      "hours": "门口招牌写着 7:30–23:00；早餐 7:30–10:30，午餐 11:30–17:00。有的地图标 10:30–11:30 休息、最后点餐约 22:00，请以店内当日公示为准。",
+      "address": "서울 중구 명동6길 15, 지하1층",
+      "map_query": "한식왕비집 명동점",
+      "cover": "/static/food-photos/wangbijip-myeongdong-cover.jpg",
+      "photos": [
+        "/static/food-photos/wangbijip-myeongdong-cover.jpg",
+        "/static/food-photos/wangbijip-myeongdong-sign.jpg",
+        "/static/food-photos/wangbijip-myeongdong-hours.jpg"
+      ],
+      "tags": [
+        "chinese_fav"
+      ],
+      "source_note": "店门口营业时间招牌与门面（查阅 2026-11-16）；地址见公开地图资料。与명동8가길 26 的王妃家本店不是同一家。"
+    },
+    {
+      "id": "hellokitty-myeongdong",
+      "name_zh": "Hello Kitty Apple Cafe（明洞店）",
+      "name_ko": "헬로키티 애플카페 명동점",
+      "city": "seoul",
+      "city_zh": "首尔",
+      "area": "中区 明洞",
+      "area_id": "myeongdong",
+      "category": "cafe",
+      "cuisine": "咖啡 / 甜点",
+      "desc": "Hello Kitty Apple Cafe 在명동6길 15 的一到二楼，是红砖和粉色外墙的转角咖啡甜点店，就在韩食王妃家楼上同一栋。常见资料写每天 10:00–22:00，最后点餐约 21:30–21:40。有的介绍提到楼上还有文具或商品，楼层请以店内指示为准。",
+      "transport": "地铁4号线明洞站（명동역）出站向명동6길 步行，按粉色 Hello Kitty 转角招牌找一到二楼；同一栋地下一层是韩食王妃家。",
+      "tips": [
+        "店在一到二楼，地下一层是韩食王妃家，不要走错层。",
+        "窗边常有人用餐，拍照时请留意不要影响其他客人。",
+        "营业和最后点餐时间请以店内当日公示为准。"
+      ],
+      "station": "명동역",
+      "hours": "常见资料写每天 10:00–22:00，最后点餐约 21:30–21:40，请出行前再确认。",
+      "address": "서울 중구 명동6길 15, 1–2층",
+      "map_query": "Hello Kitty Apple Cafe 명동",
+      "cover": "/static/food-photos/hellokitty-myeongdong-cover.jpg",
+      "photos": [
+        "/static/food-photos/hellokitty-myeongdong-cover.jpg",
+        "/static/food-photos/hellokitty-myeongdong-facade.jpg"
+      ],
+      "source_note": "门面实拍与公开地图资料（查阅 2026-11-16）。与同一栋地下一层的韩食王妃家不是同一家店。"
+    },
+    {
+      "id": "hamcho-myeongdong",
+      "name_zh": "元祖咸草酱蟹（明洞）",
+      "name_ko": "원조함초간장게장",
+      "city": "seoul",
+      "city_zh": "首尔",
+      "area": "中区 明洞",
+      "area_id": "myeongdong",
+      "category": "seafood",
+      "cuisine": "咸草酱油酱蟹",
+      "desc": "来明洞想吃酱蟹，很多人会直奔这家「元祖咸草酱蟹」。店从2011年起就在明洞开业，是街上口碑很好的人气老店，MBC、KBS、OBS等电视台都来拍过。这家的招牌是加了咸草腌制的酱油蟹。咸草长在海边滩涂，在韩国被叫做“海中的人参”，配上自家酱油，蟹肉嫩、蟹黄满，咸鲜里带一点回甘。酱蟹本身也是有讲究的传统菜，早在高丽时代就有记载。店在명동8가길 27 阳光大厦（선샤인빌딩）地下一层，入口有明显招牌。",
+      "transport": "地铁4号线明洞站（명동역）出站向명동8가길 步行，按「원조함초간장게장」招牌走阳光大厦地下一层。",
+      "tips": [
+        "推荐点一份酱油蟹套餐，喜欢辣的可以再加辣酱蟹，具体菜品以店内菜单为准。",
+        "店在地下一层，街上的入口招牌比较显眼。",
+        "饭点可能要等候，出行前可再确认营业和排队情况。"
+      ],
+      "station": "명동역",
+      "hours": "VisitSeoul 等资料写约 11:30–22:00，最后点餐约 21:30；也有来源写成稍早开门或稍晚打烊，请以店内当日公示为准。",
+      "address": "서울 중구 명동8가길 27, 선샤인빌딩 B1 (충무로2가 11-1)",
+      "map_query": "원조함초간장게장",
+      "cover": "/static/food-photos/hamcho-myeongdong-cover.jpg",
+      "photos": [
+        "/static/food-photos/hamcho-myeongdong-cover.jpg",
+        "/static/food-photos/hamcho-myeongdong-crab.jpg",
+        "/static/food-photos/hamcho-myeongdong-street.jpg",
+        "/static/food-photos/hamcho-myeongdong-entrance.jpg",
+        "/static/food-photos/hamcho-myeongdong-tv.jpg",
+        "/static/food-photos/hamcho-myeongdong-story.jpg"
+      ],
+      "tags": [
+        "chinese_fav"
+      ],
+      "source_note": "开业年份按店内招牌与已核对介绍为2011年（查阅 2026-11-16）。地址见公开地图资料；营业时间参考 VisitSeoul 等公开介绍，请出行前再确认。"
+    },
+    {
+      "id": "daega-myeongdong",
+      "name_zh": "崔家の大家烤肉（明洞）",
+      "name_ko": "대가",
+      "city": "seoul",
+      "city_zh": "首尔",
+      "area": "中区 明洞",
+      "area_id": "myeongdong",
+      "category": "bbq",
+      "cuisine": "韩牛烤肉 / 酱蟹 / 粥",
+      "desc": "明洞这家「崔家の大家 B·B·Q 烤肉」，是把牛肉、猪肉烧烤，韩式石锅拌饭，传统韩餐和海鲜都做在一起的综合餐厅。门口玻璃上写着韩牛，转角墙面上还能看到酱蟹、绿茶五花肉。楼顶灯牌写着「37年」，三楼标着海鲜锅，粥的字也很大。想来烤肉，可以点韩牛和各种牛肉部位，比如牛舌、牛胸肉、调味牛排骨、牛肋条，也有生五花肉、薄切五花肉，还有带水芹菜的五花肉；墙上另外写了绿茶五花肉。海鲜这边有酱油酱蟹、辣酱蟹，也可以点海鲜锅，或者辣炒章鱼肥肠虾。喜欢传统韩餐的，菜单上有石锅拌饭、山菜拌饭、参鸡汤、大酱汤、冷面。粥的种类也不少，比如鲍鱼粥、松茸粥、野菜粥。按店家介绍，一到五楼都是店面，整栋连在一起，规模在明洞很少见。一个人来吃可以，旅游团一起订也合适。价格、营业和座位情况都以店内当天为准。",
+      "transport": "地铁4号线明洞站（명동역）出站向명동8가길 步行，按「대가」「崔家の大家」转角灯牌找整栋楼。",
+      "tips": [
+        "灯牌上写着一、二楼从早上 7 点开始营业，适合一早就到明洞、想先坐下来吃饭的人；具体供应时间请以到店为准。",
+        "一到五楼都是店面是店家所述，有的地图写成一到四楼，请以进门指示为准。",
+        "门口有立牌菜单，想预约可以到店沟通。"
+      ],
+      "station": "명동역",
+      "hours": "灯牌写着一、二楼 OPEN AM 07:00；常见地图资料多写成约 08:30–24:00，请以店门口当日公示为准。",
+      "address": "서울 중구 명동8가길 32",
+      "map_query": "대가 명동 崔家の大家",
+      "cover": "/static/food-photos/daega-myeongdong-cover.jpg",
+      "photos": [
+        "/static/food-photos/daega-myeongdong-cover.jpg",
+        "/static/food-photos/daega-myeongdong-building.jpg",
+        "/static/food-photos/daega-myeongdong-door.jpg",
+        "/static/food-photos/daega-myeongdong-corner.jpg"
+      ],
+      "tags": [
+        "chinese_fav"
+      ],
+      "source_note": "介绍按店门口灯牌、立牌菜单与已核对文案整理（查阅 2026-11-16）。「37年」按楼顶灯牌书写，未再单独核实开业年份。地址见公开地图资料。"
+    },
+    {
+      "id": "jogaewa-myeongdong",
+      "name_zh": "明洞贝壳大排档",
+      "name_ko": "명동조개와 JOGAEWA",
+      "city": "seoul",
+      "city_zh": "首尔",
+      "area": "中区 明洞",
+      "area_id": "myeongdong",
+      "category": "seafood",
+      "cuisine": "海鲜 / 烤肉",
+      "desc": "明洞贝壳大排档（명동조개와 / JOGAEWA）是一家海鲜和烤肉店，店门口有巨大的扇贝吉祥物，转角在명동7가길，招牌还写着해물포차。地址是명동7길 17 一楼。常见资料写大约 11:00 到次日 01:00，请出行前再确认。",
+      "transport": "地铁4号线明洞站（명동역）出站向명동7길 步行，在명동7가길 转角按巨大扇贝吉祥物和「명동조개와」招牌寻找。",
+      "tips": [
+        "转角很好认，先看扇贝吉祥物和해물포차 招牌。",
+        "菜品以店内菜单为准，营业时间请出行前再确认。"
+      ],
+      "station": "명동역",
+      "hours": "常见资料写约 11:00 至次日 01:00，请出行前再确认。",
+      "address": "서울 중구 명동7길 17, 1층",
+      "map_query": "명동조개와",
+      "cover": "/static/food-photos/jogaewa-myeongdong-cover.jpg",
+      "photos": [
+        "/static/food-photos/jogaewa-myeongdong-cover.jpg",
+        "/static/food-photos/jogaewa-myeongdong-corner.jpg"
+      ],
+      "tags": [
+        "chinese_fav"
+      ],
+      "source_note": "门面实拍与公开地图资料（查阅 2026-11-16）。"
+    },
+    {
+      "id": "mcdonalds-myeongdong",
+      "name_zh": "麦当劳（明洞店）",
+      "name_ko": "맥도날드 명동점",
+      "city": "seoul",
+      "city_zh": "首尔",
+      "area": "中区 明洞",
+      "area_id": "myeongdong",
+      "category": "street",
+      "cuisine": "汉堡快餐",
+      "desc": "明洞麦当劳在명동7길 8 的一楼，同一栋二楼是 A Twosome Place 明洞艺术剧场店。门上写着 OPEN 06:00、CLOSE 01:00，部分地图写成营业到午夜，请以店门口当日公示为准。逛街中间想吃得快一点，或者一大早刚到明洞，都可以先看这家。",
+      "transport": "地铁4号线明洞站（명동역）出站向명동7길 步行，按麦当劳金牌和「맥도날드」找명동7길 8 的一楼。",
+      "tips": [
+        "同一栋二楼是 A Twosome Place，想喝咖啡可以从旁边上楼。",
+        "门上写着 06:00–01:00，和部分地图可能不一致，请以门口公示为准。"
+      ],
+      "station": "명동역",
+      "price": "₩",
+      "hours": "门上写着 OPEN 06:00、CLOSE 01:00；部分地图写成营业到午夜，请以店门口当日公示为准。",
+      "address": "서울 중구 명동7길 8, 1층",
+      "map_query": "맥도날드 명동점",
+      "cover": "/static/food-photos/mcdonalds-myeongdong-building.jpg",
+      "photos": [
+        "/static/food-photos/mcdonalds-myeongdong-building.jpg",
+        "/static/food-photos/mcdonalds-myeongdong-storefront.jpg"
+      ],
+      "source_note": "门上营业时间与门面实拍（查阅 2026-11-16）；地址见公开地图资料。"
+    },
+    {
+      "id": "twosome-myeongdong",
+      "name_zh": "A Twosome Place（明洞艺术剧场店）",
+      "name_ko": "투썸플레이스 명동예술극장점",
+      "city": "seoul",
+      "city_zh": "首尔",
+      "area": "中区 明洞",
+      "area_id": "myeongdong",
+      "category": "cafe",
+      "cuisine": "咖啡 / 甜点",
+      "desc": "A Twosome Place 明洞艺术剧场店在명동7길 8 的二楼，一楼就是麦当劳。常见资料写每天 08:00–23:00，请出行前再确认。想喝咖啡或吃甜点，从一楼麦当劳旁的楼梯上楼即可。",
+      "transport": "地铁4号线明洞站（명동역）出站向명동7길 步行，在麦当劳（명동7길 8）同一栋上二楼。",
+      "tips": [
+        "店在二楼，一楼是麦当劳，按「투썸플레이스 명동예술극장점」招牌上楼。",
+        "营业时间请出行前再确认。"
+      ],
+      "station": "명동역",
+      "hours": "常见资料写每天 08:00–23:00，请出行前再确认。",
+      "address": "서울 중구 명동7길 8, 2층",
+      "map_query": "투썸플레이스 명동예술극장점",
+      "cover": "/static/food-photos/twosome-myeongdong-cover.jpg",
+      "photos": [
+        "/static/food-photos/twosome-myeongdong-cover.jpg"
+      ],
+      "source_note": "门面实拍与公开地图资料（查阅 2026-11-16）。与一楼麦当劳在同一栋。"
+    },
     {
       "id": "woolaeoak",
       "name_zh": "遇来屋",

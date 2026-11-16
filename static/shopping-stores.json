@@ -1,0 +1,368 @@
+{
+  "updated": "2026-11-16",
+  "title": "明洞逛街店铺",
+  "disclaimer": "下列店铺根据实地照片和公开资料整理。营业时间、楼层和退税办理可能变化，请以店门口公示和店内说明为准。未核对到来源的退税信息不会写进介绍。",
+  "categories": [
+    {
+      "id": "beauty",
+      "zh": "药妆美妆"
+    },
+    {
+      "id": "shoes",
+      "zh": "鞋履运动"
+    },
+    {
+      "id": "fashion",
+      "zh": "服装时尚"
+    },
+    {
+      "id": "outdoor",
+      "zh": "户外休闲"
+    }
+  ],
+  "items": [
+    {
+      "id": "oliveyoung-myeongdong",
+      "name_zh": "Olive Young（明洞타운店）",
+      "name_ko": "올리브영 명동 타운",
+      "city": "seoul",
+      "city_zh": "首尔",
+      "area": "中区 明洞",
+      "area_id": "myeongdong",
+      "category": "beauty",
+      "desc": "明洞步行街上的 Olive Young「명동 타운」店，地址是명동길 53，占一到二楼，卖化妆品、药妆和日用品。品牌官方门店页标注可办理事后退税。明洞还有其他 Olive Young 门店，位置不同，请按「명동 타운」和명동길 53 来找这家。",
+      "transport": "地铁4号线明洞站（명동역）出站沿明洞路（명동길）步行，按 Olive Young「명동 타운」招牌找명동길 53。",
+      "tips": [
+        "结账前看清是这家「명동 타운」，不要和명동8길 一带的其他 Olive Young 搞混。",
+        "退税以店内标识和现场办理为准。"
+      ],
+      "station": "명동역",
+      "hours": "品牌官方门店页写每天 10:00–22:30，请出行前再确认。",
+      "address": "서울 중구 명동길 53, 1–2층",
+      "map_query": "올리브영 명동 타운",
+      "tax_refund": "官方标注可事后退税",
+      "cover": "/static/shop-photos/oliveyoung-myeongdong-cover.jpg",
+      "photos": [
+        "/static/shop-photos/oliveyoung-myeongdong-cover.jpg",
+        "/static/shop-photos/oliveyoung-myeongdong-corner.jpg"
+      ],
+      "source_note": "品牌官方门店页「명동 타운」（查阅 2026-11-16）；一到二楼及退税标注以官方门店信息为准。"
+    },
+    {
+      "id": "salomon-myeongdong",
+      "name_zh": "SALOMON（明洞店）",
+      "name_ko": "살로몬 명동점",
+      "city": "seoul",
+      "city_zh": "首尔",
+      "area": "中区 明洞",
+      "area_id": "myeongdong",
+      "category": "outdoor",
+      "desc": "明洞路上的 SALOMON 门店，卖户外鞋服和装备，地址在명동길 20。逛完化妆品之后，可以顺路看看鞋子和冲锋衣。",
+      "transport": "地铁4号线明洞站（명동역）出站沿명동길 步行，按 SALOMON 招牌找명동길 20。",
+      "tips": [
+        "明洞可能还有其他运动品牌店，请按 SALOMON 招牌和명동길 20 来认。"
+      ],
+      "station": "명동역",
+      "hours": "常见资料写每天 10:30–22:00，请出行前再确认。",
+      "address": "서울 중구 명동길 20",
+      "map_query": "살로몬 명동",
+      "cover": "/static/shop-photos/salomon-myeongdong-cover.jpg",
+      "photos": [
+        "/static/shop-photos/salomon-myeongdong-cover.jpg",
+        "/static/shop-photos/salomon-myeongdong-entrance.jpg"
+      ],
+      "source_note": "门面实拍与公开地图资料（查阅 2026-11-16）。"
+    },
+    {
+      "id": "lin-myeongdong",
+      "name_zh": "「林」（明洞，店名待确认）",
+      "name_ko": "林",
+      "city": "seoul",
+      "city_zh": "首尔",
+      "area": "中区 明洞",
+      "area_id": "myeongdong",
+      "category": "fashion",
+      "desc": "明洞街上一家灰色石板外墙的服装店，门面上是金属「林」字标志，橱窗里陈列大衣和皮草。目前公开资料里还没有对上确认的品牌官方店名和门牌，路过时可按这块「林」字招牌辨认。旁边是우리은행（友利银行）。",
+      "transport": "地铁4号线明洞站（명동역）出站沿明洞步行街走，在우리은행 附近按灰色石板外墙和金属「林」字招牌寻找。",
+      "tips": [
+        "目前未能确认官方品牌名和准确门牌，介绍只按实拍门面来写。",
+        "门上写着营业时间，请以当日公示为准。"
+      ],
+      "station": "명동역",
+      "hours": "门上写着 OPEN 11:00 CLOSE 22:00。",
+      "address": "首尔中区明洞步行街，우리은행 附近（门牌待确认）",
+      "cover": "/static/shop-photos/lin-myeongdong-cover.jpg",
+      "photos": [
+        "/static/shop-photos/lin-myeongdong-cover.jpg",
+        "/static/shop-photos/lin-myeongdong-facade.jpg"
+      ],
+      "source_note": "仅根据门面实拍整理（查阅 2026-11-16）。官方店名、品牌和门牌尚未从公开资料确认，故未编造。"
+    },
+    {
+      "id": "hm-myeongdong",
+      "name_zh": "H&M（明洞店）",
+      "name_ko": "H&M 명동점",
+      "city": "seoul",
+      "city_zh": "首尔",
+      "area": "中区 明洞",
+      "area_id": "myeongdong",
+      "category": "fashion",
+      "desc": "明洞的 H&M 在명동8길 3，楼层常见资料写地下一层到五楼，卖大众服饰。逛街时很好顺路进去看看。",
+      "transport": "地铁4号线明洞站（명동역）出站向명동8길 步行，按 H&M 招牌找명동8길 3。",
+      "tips": [
+        "楼层较多，进门后可先看楼层指示。",
+        "营业时间请出行前再确认。"
+      ],
+      "station": "명동역",
+      "hours": "常见资料写每天 10:30–22:00，请出行前再确认。",
+      "address": "서울 중구 명동8길 3, B1–5층",
+      "map_query": "H&M 명동",
+      "cover": "/static/shop-photos/hm-myeongdong-cover.jpg",
+      "photos": [
+        "/static/shop-photos/hm-myeongdong-cover.jpg",
+        "/static/shop-photos/hm-myeongdong-street.jpg"
+      ],
+      "source_note": "门面实拍与公开地图资料（查阅 2026-11-16）。"
+    },
+    {
+      "id": "mlb-myeongdong",
+      "name_zh": "MLB（明洞店）",
+      "name_ko": "MLB 명동점",
+      "city": "seoul",
+      "city_zh": "首尔",
+      "area": "中区 明洞",
+      "area_id": "myeongdong",
+      "category": "fashion",
+      "desc": "明洞的 MLB 门店在명동8길 7 的一楼，卖帽衫、棒球帽和休闲服饰，就在 H&M 附近，很好顺着명동8길 一家家逛。",
+      "transport": "地铁4号线明洞站（명동역）出站向명동8길 步行，按 MLB 招牌找명동8길 7。",
+      "tips": [
+        "明洞一带可能还有其他 MLB 门店，请按명동8길 7 来认这家。"
+      ],
+      "station": "명동역",
+      "hours": "常见资料写每天 11:00–22:00，请出行前再确认。",
+      "address": "서울 중구 명동8길 7, 1층",
+      "map_query": "MLB 명동8길",
+      "cover": "/static/shop-photos/mlb-myeongdong-cover.jpg",
+      "photos": [
+        "/static/shop-photos/mlb-myeongdong-cover.jpg"
+      ],
+      "source_note": "门面实拍与公开地图资料（查阅 2026-11-16）。"
+    },
+    {
+      "id": "fila-myeongdong",
+      "name_zh": "斐乐 FILA 1911（明洞店）",
+      "name_ko": "FILA 1911 명동",
+      "city": "seoul",
+      "city_zh": "首尔",
+      "area": "中区 明洞",
+      "area_id": "myeongdong",
+      "category": "fashion",
+      "desc": "明洞8길 9 的斐乐（FILA）概念店，门牌写着 FILA 1911，一到二楼。橱窗能看到 Born in Italy since 1911，以及 Air Flow Down、Echappe 等当季系列。中文请用「斐乐」，不要和街上其他运动品牌店搞混。",
+      "transport": "地铁4号线明洞站（명동역）出站向명동8길 步行，按 FILA 1911 招牌找명동8길 9。",
+      "tips": [
+        "请按「FILA 1911」和명동8길 9 寻找，一到二楼。",
+        "橱窗系列会换季，进店再看当天陈列。"
+      ],
+      "station": "명동역",
+      "hours": "橱窗和地图资料写 11:00–22:30，请出行前再确认。",
+      "address": "서울 중구 명동8길 9, 1–2층 (명동2가 33-7)",
+      "map_query": "FILA 1911 명동",
+      "cover": "/static/shop-photos/fila-myeongdong-cover.jpg",
+      "photos": [
+        "/static/shop-photos/fila-myeongdong-cover.jpg",
+        "/static/shop-photos/fila-myeongdong-window.jpg",
+        "/static/shop-photos/fila-myeongdong-facade.jpg"
+      ],
+      "source_note": "官方门店地址与橱窗营业时间、门面实拍（查阅 2026-11-16）。概念店相关报道见于 2025-04-28 公开新闻，仅作背景，不以报道中的活动为准。"
+    },
+    {
+      "id": "matinkim-myeongdong",
+      "name_zh": "Matin Kim（明洞店）",
+      "name_ko": "마뗑킴 명동점",
+      "city": "seoul",
+      "city_zh": "首尔",
+      "area": "中区 明洞",
+      "area_id": "myeongdong",
+      "category": "fashion",
+      "desc": "韩国女装品牌 Matin Kim 的明洞店，官方标注在명동8길 15 的三楼。路过时，玻璃上有时能映到 Olive Young 的字样，那多半是对面或附近店面的反光，请按 Matin Kim 招牌进门，不要当成同一栋楼上的药妆店。",
+      "transport": "地铁4号线明洞站（명동역）出站向명동8길 步行，按 Matin Kim 招牌找명동8길 15 的三楼。",
+      "tips": [
+        "官方标注在三楼，进门后按楼层指示走。",
+        "玻璃上的 Olive Young 字样请先分清是不是反光，再判断要进哪一家。"
+      ],
+      "station": "명동역",
+      "hours": "橱窗写着 11:00–23:00，部分线上资料写 11:00–22:00，请以店门口当日公示为准。",
+      "address": "서울 중구 명동8길 15, 3층",
+      "map_query": "마뗑킴 명동",
+      "cover": "/static/shop-photos/matinkim-myeongdong-cover.jpg",
+      "photos": [
+        "/static/shop-photos/matinkim-myeongdong-cover.jpg",
+        "/static/shop-photos/matinkim-myeongdong-window.jpg"
+      ],
+      "source_note": "官方销售门店信息为 명동8길 15 3층（查阅 2026-11-16）。橱窗时间与部分线上时间不一致，文中已注明。"
+    },
+    {
+      "id": "emis-myeongdong",
+      "name_zh": "emis（明洞店）",
+      "name_ko": "emis 명동점",
+      "city": "seoul",
+      "city_zh": "首尔",
+      "area": "中区 明洞",
+      "area_id": "myeongdong",
+      "category": "fashion",
+      "desc": "emis 明洞店在명동8길 17，夹在 Matin Kim 和 MARITHÉ FRANÇOIS GIRBAUD 之间。店名读作「emis」，口号是 Every Moment Is Special，卖帽子和休闲服饰。VisitKorea 资料写明可办理事后退税。窗上如果还有促销字样，请以店内当日公示为准。",
+      "transport": "地铁4号线明洞站（명동역）出站向명동8길 步行，在 Matin Kim 和 Girbaud 之间按 emis 招牌找명동8길 17。",
+      "tips": [
+        "夹在 Matin Kim 和 Girbaud 中间，比较好认。",
+        "退税以店内标识和现场办理为准。",
+        "窗上的临时促销请以店内当日说明为准。"
+      ],
+      "station": "명동역",
+      "hours": "官方资料写每天 11:00–23:00，请出行前再确认。",
+      "address": "서울 중구 명동8길 17",
+      "map_query": "emis 명동",
+      "tax_refund": "VisitKorea 资料写明可事后退税",
+      "cover": "/static/shop-photos/emis-myeongdong-cover.jpg",
+      "photos": [
+        "/static/shop-photos/emis-myeongdong-cover.jpg",
+        "/static/shop-photos/emis-myeongdong-window.jpg"
+      ],
+      "source_note": "官方门店地址与营业时间、VisitKorea 退税资料及门面实拍（查阅 2026-11-16）。"
+    },
+    {
+      "id": "girbaud-myeongdong",
+      "name_zh": "MARITHÉ FRANÇOIS GIRBAUD（明洞店）",
+      "name_ko": "마리떼 프랑소와 저버 명동점",
+      "city": "seoul",
+      "city_zh": "首尔",
+      "area": "中区 明洞",
+      "area_id": "myeongdong",
+      "category": "fashion",
+      "desc": "MARITHÉ FRANÇOIS GIRBAUD 明洞店在명동8길 17-1，一到二楼。橱窗近期有史努比（Snoopy / Peanuts）联名陈列，属于季节性摆设，是否还在请看店内。VisitKorea 资料写明可办理事后退税。",
+      "transport": "地铁4号线明洞站（명동역）出站向명동8길 步行，在 emis 旁边按 MARITHÉ FRANÇOIS GIRBAUD 招牌找명동8길 17-1。",
+      "tips": [
+        "史努比橱窗是季节性陈列，去的时候可能已经换掉。",
+        "退税以店内标识和现场办理为准。"
+      ],
+      "station": "명동역",
+      "hours": "常见资料写平日 11:00–22:00、周末 11:00–23:00，也有旅游资料写成 10:00–20:00，请以店门口当日公示为准。",
+      "address": "서울 중구 명동8길 17-1, 1–2층",
+      "map_query": "마리떼 프랑소와 저버 명동",
+      "tax_refund": "VisitKorea 资料写明可事后退税",
+      "cover": "/static/shop-photos/girbaud-myeongdong-cover.jpg",
+      "photos": [
+        "/static/shop-photos/girbaud-myeongdong-cover.jpg",
+        "/static/shop-photos/girbaud-myeongdong-street.jpg"
+      ],
+      "source_note": "门面实拍、公开地图资料与 VisitKorea 退税信息（查阅 2026-11-16）。营业时间不同来源有出入，文中已注明。"
+    },
+    {
+      "id": "discovery-myeongdong",
+      "name_zh": "Discovery Expedition（明洞店）",
+      "name_ko": "디스커버리 익스페디션 명동점",
+      "city": "seoul",
+      "city_zh": "首尔",
+      "area": "中区 明洞",
+      "area_id": "myeongdong",
+      "category": "outdoor",
+      "desc": "Discovery Expedition 明洞店在명동8길 19，就在 Girbaud 旁边，卖户外和休闲服饰。楼层常见资料写 1–4층 2호。这家是 2025 年 3 月新开的门店，具体楼层和电梯位置请进门再看指示。",
+      "transport": "地铁4号线明洞站（명동역）出站向명동8길 步行，在 Girbaud 旁边按 Discovery 招牌找명동8길 19。",
+      "tips": [
+        "就在 Girbaud 旁边，比较好认。",
+        "楼层请以进门指示为准。"
+      ],
+      "station": "명동역",
+      "hours": "常见地图资料写每天 11:00–22:00，请出行前再确认。",
+      "address": "서울 중구 명동8길 19, 1–4층 2호",
+      "map_query": "디스커버리 익스페디션 명동",
+      "cover": "/static/shop-photos/discovery-myeongdong-cover.jpg",
+      "photos": [
+        "/static/shop-photos/discovery-myeongdong-cover.jpg",
+        "/static/shop-photos/discovery-myeongdong-street.jpg"
+      ],
+      "source_note": "门面实拍与公开地图资料（查阅 2026-11-16）。公开报道写 2025-03-28 开业，仅作背景，不以开业活动为准。"
+    },
+    {
+      "id": "adidas-myeongdong",
+      "name_zh": "adidas Brand Flagship Seoul（明洞）",
+      "name_ko": "adidas Brand Flagship Seoul",
+      "city": "seoul",
+      "city_zh": "首尔",
+      "area": "中区 明洞",
+      "area_id": "myeongdong",
+      "category": "shoes",
+      "desc": "adidas 官方名称是 adidas Brand Flagship Seoul，在명동8길 27 的 M Plaza，是明洞路口一间很大的转角店。这里和명동8나길 20 的 adidas Originals 不是同一家，请按「Brand Flagship Seoul」和 M Plaza 来找。",
+      "transport": "地铁4号线明洞站（명동역）出站向명동8길 步行，在 M Plaza 转角按 adidas Brand Flagship Seoul 招牌寻找。",
+      "tips": [
+        "请和명동8나길 20 的 adidas Originals 区分开。",
+        "店面较大，进门后可先看楼层指示。"
+      ],
+      "station": "명동역",
+      "hours": "官方资料写每天 10:30–22:00，请出行前再确认。",
+      "address": "서울 중구 명동8길 27, M프라자",
+      "map_query": "adidas Brand Flagship Seoul",
+      "cover": "/static/shop-photos/adidas-myeongdong-cover.jpg",
+      "photos": [
+        "/static/shop-photos/adidas-myeongdong-cover.jpg",
+        "/static/shop-photos/adidas-myeongdong-entrance.jpg",
+        "/static/shop-photos/adidas-myeongdong-corner.jpg"
+      ],
+      "source_note": "官方门店名称、地址与营业时间及门面实拍（查阅 2026-11-16）。"
+    },
+    {
+      "id": "abcmart-myeongdong",
+      "name_zh": "ABC-MART MEGA STAGE（明洞店）",
+      "name_ko": "ABC-MART MEGA STAGE 명동",
+      "city": "seoul",
+      "city_zh": "首尔",
+      "area": "中区 明洞",
+      "area_id": "myeongdong",
+      "category": "shoes",
+      "desc": "明洞的 ABC-MART MEGA STAGE 是一家多品牌运动鞋集合店，地址在명동7길 13。门口能看到退税标识，旁边是贡茶（Gong cha）。明洞或其他街区可能还有别的 ABC-MART，请按「MEGA STAGE」这块招牌来认。",
+      "transport": "地铁4号线明洞站（명동역）出站向명동7길 步行，在贡茶（Gong cha）旁边按 ABC-MART MEGA STAGE 招牌找명동7길 13。",
+      "tips": [
+        "请按「MEGA STAGE」识别，不要和普通 ABC-MART 分店搞混。",
+        "门口有退税标识，具体办理以店内说明为准。"
+      ],
+      "station": "명동역",
+      "hours": "常见资料有的写 10:30–22:00，有的写 11:00–21:00，请以店门口当日公示为准。",
+      "address": "서울 중구 명동7길 13 (명동1가 59-1)",
+      "map_query": "ABC-MART MEGA STAGE 명동",
+      "tax_refund": "门口有退税标识",
+      "cover": "/static/shop-photos/abcmart-myeongdong-cover.jpg",
+      "photos": [
+        "/static/shop-photos/abcmart-myeongdong-cover.jpg",
+        "/static/shop-photos/abcmart-myeongdong-entrance.jpg",
+        "/static/shop-photos/abcmart-myeongdong-brands.jpg"
+      ],
+      "source_note": "门面实拍（含退税标识）与公开地图资料（查阅 2026-11-16）。营业时间不同来源有出入，文中已注明。"
+    },
+    {
+      "id": "tommy-myeongdong",
+      "name_zh": "Tommy Hilfiger（明洞店）",
+      "name_ko": "타미힐피거 명동점",
+      "city": "seoul",
+      "city_zh": "首尔",
+      "area": "中区 明洞",
+      "area_id": "myeongdong",
+      "category": "fashion",
+      "desc": "Tommy Hilfiger 明洞转角店，地址是명동6길 11。店内标识写着一楼女装、二楼男装。VisitKorea 资料写明可办理事后退税。",
+      "transport": "地铁4号线明洞站（명동역）出站向명동6길 步行，按 Tommy Hilfiger 转角招牌找명동6길 11。",
+      "tips": [
+        "一楼是女装，二楼是男装，店内有「2 MEN 1 WOMEN」标识。",
+        "退税以店内标识和现场办理为准。"
+      ],
+      "station": "명동역",
+      "hours": "门上写着 11:00–20:00，部分旅游资料写成 11:00–21:00，请以店门口当日公示为准。",
+      "address": "서울 중구 명동6길 11 (명동2가 51-7)",
+      "map_query": "타미힐피거 명동",
+      "tax_refund": "VisitKorea 资料写明可事后退税",
+      "cover": "/static/shop-photos/tommy-myeongdong-cover.jpg",
+      "photos": [
+        "/static/shop-photos/tommy-myeongdong-cover.jpg",
+        "/static/shop-photos/tommy-myeongdong-entrance.jpg"
+      ],
+      "source_note": "门面与店内楼层标识实拍、VisitKorea 退税资料（查阅 2026-11-16）。营业时间不同来源有出入，文中已注明。"
+    }
+  ]
+}

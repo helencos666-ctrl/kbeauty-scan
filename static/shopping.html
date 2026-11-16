@@ -3,8 +3,8 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<title>韩国购物与退税 · 旅韩助手</title>
-<meta name="description" content="旅韩助手：韩国退税方式、金额条件与机场柜台，资料来自 VisitKorea。">
+<title>明洞店铺与退税 · 旅韩助手</title>
+<meta name="description" content="旅韩助手：明洞逛街店铺，以及韩国退税方式、金额条件与机场柜台。退税资料来自 VisitKorea。">
 
 <meta name="theme-color" content="#ff6b8f">
 <meta name="mobile-web-app-capable" content="yes">
@@ -52,13 +52,25 @@ nav a.on{color:var(--pink);font-weight:700}
 @keyframes s{to{transform:rotate(360deg)}}
 .loading,.empty{text-align:center;padding:28px 10px;color:var(--sub)}
 .src a{color:#2c7be5;word-break:break-all}
+
+.place .cover{width:100%;border-radius:12px;margin:10px 0 0;max-height:240px;object-fit:cover;background:#f3e8eb;display:block}
+.gallery{display:flex;gap:8px;overflow-x:auto;margin-top:10px;padding-bottom:2px;-webkit-overflow-scrolling:touch}
+.gallery a{flex:none}
+.gallery img{height:100px;width:auto;max-width:180px;object-fit:cover;border-radius:10px;display:block;background:#f3e8eb}
+.place{scroll-margin-top:12px}
+.place.hl{outline:2px solid var(--pink);outline-offset:2px}
+#stores{scroll-margin-top:12px}
+#areaWrap{display:none}
+#areaWrap.show{display:block}
+.toc{display:flex;flex-wrap:wrap;gap:8px}
+.toc a{font-size:13px;color:var(--pink);text-decoration:none;background:#ffe8ee;border-radius:16px;padding:6px 10px}
 </style>
 
 </head>
 <body>
 <header>
   <h1>🇰🇷 旅韩助手</h1>
-  <p>购物与退税说明</p>
+  <p>明洞店铺与退税说明</p>
 </header>
 <main>
   <div class="gbar">
@@ -73,6 +85,7 @@ nav a.on{color:var(--pink);font-weight:700}
 
   <div class="card">
     <div class="toc">
+      <a href="#stores">明洞店铺</a>
       <a href="#how">退税方式</a>
       <a href="#limit">金额条件</a>
       <a href="#airport">机场柜台</a>
@@ -81,6 +94,18 @@ nav a.on{color:var(--pink);font-weight:700}
     </div>
     <p class="tip" style="margin:8px 0 0">退税规则以韩国海关和 VisitKorea 说明为准。下列限额摘自 VisitKorea《综合退税指南》（页面日期 2025-10-20），本页于 2026-11-15 查阅。出行前请再核对原文。也可先看精简版 <a href="/tax-refund">退税须知</a>。化妆品购买详见 <a href="/beauty">买妆指南</a>。</p>
   </div>
+
+
+  <div class="card" id="stores">
+    <h2 style="margin:0 0 8px;font-size:18px">明洞逛街店铺</h2>
+    <p class="tip" style="margin:0 0 10px">先按店名或类型找店，再在下方查看退税说明。营业和退税请以店内当日为准。</p>
+    <input id="q" type="search" enterkeyhint="search" placeholder="搜索店名、品类或街道" autocomplete="off">
+    <div class="lab">类型</div>
+    <div class="chips" id="catChips"></div>
+    <div class="tip" id="storeDisc" style="margin-top:8px"></div>
+  </div>
+  <div id="count"></div>
+  <div id="list"><div class="loading"><div class="spin"></div>正在载入店铺…</div></div>
 
   <article class="card article" id="how">
     <h2>退税和免税店不是同一回事</h2>
@@ -155,5 +180,99 @@ nav a.on{color:var(--pink);font-weight:700}
 </nav>
 
 <script src="/static/pwa.js" defer></script>
+
+<script src="/static/maps.js"></script>
+<script>
+var STN={}; if (window.LHMap) LHMap.stations().then(function(s){ STN=s; if(DATA.items&&DATA.items.length) render(); });
+const $=id=>document.getElementById(id);
+const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const CAT_ZH={beauty:'药妆美妆',shoes:'鞋履运动',fashion:'服装时尚',outdoor:'户外休闲'};
+let DATA={items:[],categories:[],disclaimer:''};
+let cat='', q='';
+function chipBar(el, opts, current, onpick){
+  el.innerHTML=opts.map(([id,zh])=>`<button type="button" class="${id===current?'on':''}" data-id="${esc(id)}">${esc(zh)}</button>`).join('');
+  el.querySelectorAll('button').forEach(b=>b.onclick=()=>onpick(b.dataset.id));
+}
+function filtered(){
+  const k=q.trim().toLowerCase();
+  return DATA.items.filter(it=>{
+    if(cat && it.category!==cat) return false;
+    if(!k) return true;
+    const blob=[it.name_zh,it.name_ko,it.area,it.category,CAT_ZH[it.category],it.desc,it.transport,it.address,it.hours,it.tax_refund,(it.tips||[]).join(' ')].join(' ').toLowerCase();
+    return blob.includes(k);
+  });
+}
+function render(){
+  const arr=filtered();
+  $('count').textContent=arr.length?`共 ${arr.length} 家`:'没有符合条件的店铺，试试改筛选或关键词。';
+  if(!arr.length){ $('list').innerHTML='<div class="empty">没有符合条件的店铺</div>'; return; }
+  $('list').innerHTML=arr.map(it=>{
+    const badges=[
+      `<span class="badge">${esc(it.city_zh||'首尔')}</span>`,
+      `<span class="badge gray">${esc(CAT_ZH[it.category]||it.category)}</span>`
+    ];
+    if(it.area) badges.push(`<span class="badge gray">${esc(it.area)}</span>`);
+    if(it.tax_refund) badges.push(`<span class="badge">${esc(it.tax_refund)}</span>`);
+    const rows=[];
+    if(it.address) rows.push(`<h3>地址</h3><p>${esc(it.address)}</p>`);
+    if(it.hours) rows.push(`<h3>营业时间</h3><p>${esc(it.hours)}</p>`);
+    if(it.transport) rows.push(`<h3>怎么去</h3><p>${esc(it.transport)}</p>`);
+    if(it.tips&&it.tips.length) rows.push(`<h3>实用提示</h3><ul>${it.tips.map(t=>`<li>${esc(t)}</li>`).join('')}</ul>`);
+    const go=it.station?`<a class="go" href="/?tab=sub&to=${encodeURIComponent(it.station)}">用地铁查到这里</a>`:'';
+    const c=it.station&&STN[it.station]||null;
+    const nq=it.map_query||it.name_ko||it.name_zh;
+    const aq=it.name_zh||it.name_ko;
+    const maps=(window.LHMap)?LHMap.buttons(LHMap.naverSearch(nq), LHMap.amapSearch(aq, c)):'';
+    const photos=(it.photos||[]).filter(Boolean);
+    const cover=it.cover||photos[0]||'';
+    const coverHtml=cover?`<img class="cover" alt="${esc(it.name_zh)}" src="${esc(cover)}" loading="lazy">`:'';
+    const rest=photos.filter(p=>p!==cover);
+    const gal=rest.length?`<div class="gallery">${rest.map(p=>`<a href="${esc(p)}" target="_blank" rel="noopener"><img alt="${esc(it.name_zh)}" loading="lazy" src="${esc(p)}"></a>`).join('')}</div>`:'';
+    return `<article class="place" id="${esc(it.id)}">
+      <div class="name-zh">${esc(it.name_zh)}</div>
+      <div class="name-ko">${esc(it.name_ko)}</div>
+      <div class="badges">${badges.join('')}</div>
+      ${coverHtml}
+      <p class="desc">${esc(it.desc)}</p>
+      ${gal}
+      <div class="meta">${rows.join('')}</div>
+      ${maps}
+      ${go}
+    </article>`;
+  }).join('');
+}
+function drawFilters(){
+  const cats=[['', '全部']].concat((DATA.categories||[]).map(c=>[c.id,c.zh]));
+  chipBar($('catChips'), cats, cat, id=>{cat=id; drawFilters(); render();});
+}
+function applyHash(){
+  const id=(location.hash||'').replace(/^#/, '');
+  if(!id || !DATA.items) return;
+  const it=DATA.items.find(x=>x.id===id);
+  if(!it) return;
+  cat=''; q='';
+  const qel=$('q');
+  if(qel) qel.value='';
+  drawFilters();
+  render();
+  requestAnimationFrame(()=>{
+    const el=document.getElementById(id);
+    if(el){ el.classList.add('hl'); el.scrollIntoView({behavior:'smooth',block:'start'}); }
+  });
+}
+window.addEventListener('hashchange', applyHash);
+fetch('/static/shopping-stores.json')
+  .then(r=>{if(!r.ok) throw new Error('load'); return r.json()})
+  .then(d=>{
+    DATA=d;
+    if($('storeDisc')) $('storeDisc').textContent=d.disclaimer||'';
+    drawFilters();
+    render();
+    applyHash();
+  })
+  .catch(()=>{ $('list').innerHTML='<div class="empty">店铺数据暂时载入失败，请检查网络后重试。</div>'; });
+$('q').addEventListener('input',()=>{q=$('q').value;render()});
+</script>
+
 </body>
 </html>
