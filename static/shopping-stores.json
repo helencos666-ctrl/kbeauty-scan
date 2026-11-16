@@ -363,6 +363,64 @@
         "/static/shop-photos/tommy-myeongdong-entrance.jpg"
       ],
       "source_note": "门面与店内楼层标识实拍、VisitKorea 退税资料（查阅 2026-11-16）。营业时间不同来源有出入，文中已注明。"
+    },
+    {
+      "id": "kpharmacy-myeongdong",
+      "name_zh": "明洞K药局",
+      "name_ko": "명동K약국",
+      "city": "seoul",
+      "city_zh": "首尔",
+      "area": "中区 明洞",
+      "area_id": "myeongdong",
+      "category": "beauty",
+      "desc": "明洞K药局在사보이호텔（萨沃伊酒店）一楼，地址是명동8나길 10，卖药品和韩国化妆品。门口立着即时退税（IMMEDIATE TAX REFUND / TAX REFUND）招牌，旁边就是兑币机。同一栋二楼是 BEANSBINS COFFEE，一楼靠近 GS25。",
+      "transport": "地铁4号线明洞站（명동역）出站向명동8나길 步行，在사보이호텔 一楼按黄色「명동K약국」招牌寻找。",
+      "tips": [
+        "门口有即时退税标识，具体办理以店内说明为准。",
+        "兑币机在药店旁边，是否营业、汇率和手续费请以机器现场为准。",
+        "同一栋二楼是 BEANSBINS COFFEE，不要走错层。"
+      ],
+      "station": "명동역",
+      "hours": "韩国国立中央医疗院等公开药房资料写每天 09:00–24:00（含周日和公休日）；店门口未见营业时间牌，请出行前再确认。",
+      "address": "서울 중구 명동8나길 10, 사보이호텔 1층 (충무로1가)",
+      "map_query": "명동K약국",
+      "tax_refund": "门口有即时退税标识",
+      "cover": "/static/shop-photos/kpharmacy-myeongdong-cover.jpg",
+      "photos": [
+        "/static/shop-photos/kpharmacy-myeongdong-cover.jpg",
+        "/static/shop-photos/kpharmacy-myeongdong-entrance.jpg",
+        "/static/shop-photos/kpharmacy-myeongdong-taxrefund.jpg"
+      ],
+      "source_note": "门面实拍（含即时退税与兑币机标识，查阅 2026-11-16）。地址与营业时间见韩国国立中央医疗院等公开药房资料；店门口未见时间牌，请出行前再确认。"
+    },
+    {
+      "id": "reclow-myeongdong",
+      "name_zh": "RECLOW（明洞旗舰店）",
+      "name_ko": "리끌로우 명동 플래그십 스토어",
+      "city": "seoul",
+      "city_zh": "首尔",
+      "area": "中区 明洞",
+      "area_id": "myeongdong",
+      "category": "fashion",
+      "desc": "RECLOW 是韩国眼镜品牌，门口口号写着 Reclow we glow。明洞旗舰店在명동8나길 12，就在사보이호텔（萨沃伊酒店）旁边，粉色门面紧挨着 OFF BEAUTY。店里有防蓝光眼镜、太阳镜，也有帽子和雨鞋。门口立着 TAX FREE 退税标识。",
+      "transport": "地铁4号线明洞站（명동역）出站向명동8나길 步行，在사보이호텔 旁边按粉色「Reclow we glow」招牌找명동8나길 12。",
+      "tips": [
+        "就在萨沃伊酒店旁边，粉色门面比较好认。",
+        "门口有 TAX FREE 标识，具体办理以店内说明为准。",
+        "除了眼镜，店里还能看到帽子和雨鞋，存货以店内为准。"
+      ],
+      "station": "명동역",
+      "hours": "品牌官网写每天 10:30–23:00，全年无休，请出行前再确认。",
+      "address": "서울 중구 명동8나길 12",
+      "map_query": "리끌로우 명동",
+      "tax_refund": "门口有 TAX FREE 标识",
+      "cover": "/static/shop-photos/reclow-myeongdong-cover.jpg",
+      "photos": [
+        "/static/shop-photos/reclow-myeongdong-cover.jpg",
+        "/static/shop-photos/reclow-myeongdong-entrance.jpg"
+      ],
+      "source_note": "品牌官网门店页「명동 플래그십 스토어」（주소 명동8나길 12，每天 10:30–23:00，查阅 2026-11-16）；退税标识见门面实拍。",
+      "source_url": "https://reclow.com/shopinfo/stores.html"
     }
   ]
 }
