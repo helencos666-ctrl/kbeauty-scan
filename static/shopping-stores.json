@@ -176,6 +176,61 @@
       "source_note": "官方门店地址与橱窗营业时间、门面实拍（查阅 2026-11-16）。概念店相关报道见于 2025-04-28 公开新闻，仅作背景，不以报道中的活动为准。"
     },
     {
+      "id": "covernat-myeongdong",
+      "name_zh": "COVERNAT（明洞旗舰店）",
+      "name_ko": "커버낫 명동플래그십",
+      "city": "seoul",
+      "city_zh": "首尔",
+      "area": "中区 明洞",
+      "area_id": "myeongdong",
+      "category": "fashion",
+      "desc": "COVERNAT 是韩国休闲和街头服饰品牌，明洞旗舰店在명동8길 10，就在 Wacky Willy 旁边。门面是米色招牌，楼上橱窗里摆着模特衣架。VisitKorea 资料写明可办理即时退税或事后退税。",
+      "transport": "地铁4号线明洞站（명동역）出站向명동8길 步行，在黄色门面的 Wacky Willy 旁边按米色 COVERNAT 招牌寻找。",
+      "tips": [
+        "就在 Wacky Willy 旁边，两家店门挨着，比较好认。",
+        "退税以店内标识和现场办理为准。",
+        "首尔市介绍写一到三楼，请以进门指示为准。"
+      ],
+      "station": "명동역",
+      "hours": "VisitKorea 写每天 12:00–23:00；也有官方介绍或地图写成 11:00–22:00 或 11:00–23:00，请以店门口当日公示为准。",
+      "address": "서울 중구 명동8길 10 (명동2가)",
+      "map_query": "커버낫 명동플래그십",
+      "tax_refund": "VisitKorea 资料写明可即时退税或事后退税",
+      "cover": "/static/shop-photos/covernat-myeongdong-cover.jpg",
+      "photos": [
+        "/static/shop-photos/covernat-myeongdong-cover.jpg",
+        "/static/shop-photos/covernat-myeongdong-street.jpg"
+      ],
+      "source_note": "VisitKorea「Covernat Myeongdong Flagship Store」（주소 명동8길 10，退税与营业时间 12:00–23:00，查阅 2026-11-16）。楼层 1–3F 见首尔市公开介绍。营业时间不同来源有出入，文中已注明。",
+      "source_url": "https://english.visitkorea.or.kr/svc/whereToGo/locIntrdn/rgnContentsView.do?vcontsId=1574009"
+    },
+    {
+      "id": "wackywilly-myeongdong",
+      "name_zh": "Wacky Willy（明洞旗舰店）",
+      "name_ko": "와키윌리 명동 플래그십 스토어",
+      "city": "seoul",
+      "city_zh": "首尔",
+      "area": "中区 明洞",
+      "area_id": "myeongdong",
+      "category": "fashion",
+      "desc": "Wacky Willy 是韩国角色休闲品牌，明洞旗舰店就在 COVERNAT 旁边，门面是明亮的黄色，招牌上有微笑的星星吉祥物。店内标识写着二楼是男装、女装和童装。地址是명동8나길 6。",
+      "transport": "地铁4号线明洞站（명동역）出站向명동8길 一带步行，在 COVERNAT 旁边按黄色「wacky willy」招牌和星星吉祥物寻找。",
+      "tips": [
+        "黄色门面和星星吉祥物很好认，就在 COVERNAT 旁边。",
+        "二楼的男装、女装和童装以店内标识为准。"
+      ],
+      "station": "명동역",
+      "hours": "品牌门店页写每天 11:00–23:00，也有旅游资料写成 12:00–23:00，请以店门口当日公示为准。",
+      "address": "서울 중구 명동8나길 6, 2층 (충무로1가 23-10)",
+      "map_query": "와키윌리 명동",
+      "cover": "/static/shop-photos/wackywilly-myeongdong-cover.jpg",
+      "photos": [
+        "/static/shop-photos/wackywilly-myeongdong-cover.jpg"
+      ],
+      "source_note": "门面与店内「2F MEN / WOMEN / KIDS」标识实拍（查阅 2026-11-16）；道路名地址见公开地图资料 명동8나길 6 2층。营业时间见品牌门店页（每天 11:00–23:00），与部分旅游资料不一致，文中已注明。",
+      "source_url": "https://www.wackywilly.co.kr/"
+    },
+    {
       "id": "matinkim-myeongdong",
       "name_zh": "Matin Kim（明洞店）",
       "name_ko": "마뗑킴 명동점",
