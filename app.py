@@ -140,9 +140,11 @@ app = FastAPI(docs_url=None, redoc_url=None, openapi_url=None)
 
 from community import router as community_router, ref_middleware
 from seo import router as seo_router, html_file_response
+from visits import visit_middleware
 app.include_router(community_router)
 app.include_router(seo_router)
 app.middleware("http")(ref_middleware)
+app.middleware("http")(visit_middleware)
 
 # 安全中间件（最外层之一）：安全头、https 跳转、写操作同源校验、请求体流式限长
 app.add_middleware(SecurityMiddleware, max_body=MAX_UPLOAD + 100_000,

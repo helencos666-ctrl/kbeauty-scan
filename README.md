@@ -12,6 +12,7 @@
 - 页面：`/rules` 社区约定、`/community` 列表、`/community/post/{id}` 详情、`/community/new` 发帖、`/login` 登录注册、`/member` 会员说明、`/admin` 管理后台
 - 代码：`community.py`（FastAPI router），数据存 Postgres（`DATABASE_URL`），图片压缩后以 bytea 存库（1280px + 480px 缩略图，去除 EXIF 定位）
 - 权限（分档）：游客/免费注册可浏览除旅韩交友外的帖子；会员 ¥9.9（tier 1）可看旅韩交友、评论（旅韩交友除外）、点赞、举报；高级会员 ¥19.9（tier 2）可在所有频道发帖并在旅韩交友评论。管理员在后台设置 0/1/2 档
+- 访问统计：后台总览显示近 30 天每日 PV/UV 与主要来源（推广码、utm、来路域名）；只统计 HTML 页面 GET，排除静态资源、接口、健康检查和常见爬虫；UV 按首尔日期哈希去重，不保存 IP
 - 推广码：`/?ref=CODE` 写入 30 天首次来源 Cookie 并记录访问（同访客同日去重）；注册可选填推广码；后台“推广统计”按日期查看访问/注册/付费/佣金并标记结算；佣金分档（默认会员 ¥3、高级 ¥6），升档只补差额，降档不追回
 - 环境变量（只在 Render 里设置，不入库）：`DATABASE_URL`（Render Postgres 的 Internal Database URL）、`ADMIN_PASSWORD`（≥12 位）
 - 测试：`python test/test_community.py http://127.0.0.1:8899`
