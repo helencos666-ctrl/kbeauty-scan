@@ -63,15 +63,16 @@ nav a.on{color:var(--pink);font-weight:700}
 .src a{color:#2c7be5;word-break:break-all}
 
 @media (min-width: 840px){ main{max-width:920px} }
-.food-ads{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:0 0 14px}
-.food-ads a{position:relative;display:block;border-radius:14px;overflow:hidden;aspect-ratio:21/9;background:#f3e8eb;box-shadow:0 4px 16px rgba(255,79,123,.08)}
-.food-ads img{width:100%;height:100%;object-fit:cover;display:block}
+.food-ads{margin:0 0 14px}
+.food-ads-viewport{overflow:hidden;border-radius:14px;box-shadow:0 4px 16px rgba(255,79,123,.08);touch-action:pan-y;background:#f3e8eb}
+.food-ads-track{display:flex;width:100%}
+.food-ads-track.anim{transition:transform .45s ease}
+.food-ads-slide{flex:0 0 100%;width:100%;min-width:100%;position:relative;display:block;aspect-ratio:21/9;overflow:hidden;background:#f3e8eb;color:inherit;text-decoration:none}
+.food-ads-slide img{width:100%;height:100%;object-fit:cover;display:block;pointer-events:none}
 .food-ads .adtag{position:absolute;top:8px;left:8px;z-index:1;font-size:10.5px;background:rgba(0,0,0,.38);color:#fff;padding:1px 6px;border-radius:6px}
-@media (max-width: 719px){
-  .food-ads{display:flex;overflow-x:auto;scroll-snap-type:x mandatory;gap:10px;-webkit-overflow-scrolling:touch;scrollbar-width:none}
-  .food-ads::-webkit-scrollbar{display:none}
-  .food-ads a{flex:0 0 86%;scroll-snap-align:start}
-}
+.food-ads-dots{display:flex;justify-content:center;align-items:center;gap:5px;margin-top:8px}
+.food-ads-dots button{width:6px;height:6px;padding:0;border:0;border-radius:3px;background:#d1d5db;cursor:pointer;font-size:0;line-height:0}
+.food-ads-dots button.on{background:#ff6b8f;width:14px}
 .place{scroll-margin-top:12px}
 .place.hl{outline:2px solid var(--pink);outline-offset:2px}
 </style>
@@ -93,15 +94,23 @@ nav a.on{color:var(--pink);font-weight:700}
   </div>
 
 
-  <div class="food-ads" aria-label="推荐餐厅">
-    <a href="#hamcho-myeongdong">
-      <span class="adtag">推广</span>
-      <img src="/static/food-banners/hamcho-food-21x9.jpg" srcset="/static/food-banners/hamcho-food-21x9.jpg 1x, /static/food-banners/hamcho-food-21x9@2x.jpg 2x" width="1260" height="540" alt="元祖咸草酱蟹（明洞）">
-    </a>
-    <a href="#daega-myeongdong">
-      <span class="adtag">推广</span>
-      <img src="/static/food-banners/daega-food-21x9.jpg" srcset="/static/food-banners/daega-food-21x9.jpg 1x, /static/food-banners/daega-food-21x9@2x.jpg 2x" width="1260" height="540" alt="崔家の大家烤肉（明洞）">
-    </a>
+  <div class="food-ads" id="foodAds" role="region" aria-roledescription="carousel" aria-label="推荐餐厅">
+    <div class="food-ads-viewport">
+      <div class="food-ads-track">
+        <a class="food-ads-slide" href="#hamcho-myeongdong">
+          <span class="adtag">推广</span>
+          <img src="/static/food-banners/hamcho-food-21x9.jpg" srcset="/static/food-banners/hamcho-food-21x9.jpg 1x, /static/food-banners/hamcho-food-21x9@2x.jpg 2x" width="1260" height="540" alt="元祖咸草酱蟹（明洞）">
+        </a>
+        <a class="food-ads-slide" href="#daega-myeongdong">
+          <span class="adtag">推广</span>
+          <img src="/static/food-banners/daega-food-21x9.jpg" srcset="/static/food-banners/daega-food-21x9.jpg 1x, /static/food-banners/daega-food-21x9@2x.jpg 2x" width="1260" height="540" alt="崔家の大家烤肉（明洞）">
+        </a>
+      </div>
+    </div>
+    <div class="food-ads-dots" aria-hidden="true">
+      <button type="button" class="on" aria-label="第 1 张"></button>
+      <button type="button" aria-label="第 2 张"></button>
+    </div>
   </div>
   <div id="foodBanner" hidden></div>
   <div class="card">
@@ -286,5 +295,100 @@ fetch('/static/food.json')
 $('q').addEventListener('input',()=>{q=$('q').value;render()});
 </script>
 
+
+<script>
+(function(){
+  const root=document.getElementById('foodAds');
+  if(!root) return;
+  const viewport=root.querySelector('.food-ads-viewport');
+  const track=root.querySelector('.food-ads-track');
+  const dots=[...root.querySelectorAll('.food-ads-dots button')];
+  const real=[...track.children];
+  const n=real.length;
+  if(n<2) return;
+  track.insertBefore(real[n-1].cloneNode(true), track.firstChild);
+  track.appendChild(real[0].cloneNode(true));
+  let index=1, timer=null, touching=false, startX=0, startY=0, dx=0, axis=null, swiped=false;
+  const reduce=window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const W=()=>viewport.clientWidth;
+  function xOf(i,anim,offset){
+    track.classList.toggle('anim', !!(anim && !reduce));
+    track.style.transform='translate3d('+((-i*W())+(offset||0))+'px,0,0)';
+  }
+  function realIdx(){
+    if(index===0) return n-1;
+    if(index===n+1) return 0;
+    return index-1;
+  }
+  function syncDots(){
+    const r=realIdx();
+    dots.forEach((d,k)=>d.classList.toggle('on', k===r));
+  }
+  function go(i,anim){
+    index=i;
+    xOf(index,anim,0);
+    syncDots();
+  }
+  function onEnd(e){
+    if(e.target!==track || (e.propertyName && e.propertyName!=='transform')) return;
+    if(index===n+1) go(1,false);
+    else if(index===0) go(n,false);
+  }
+  function stop(){ if(timer){ clearInterval(timer); timer=null; } }
+  function start(){
+    stop();
+    if(reduce) return;
+    timer=setInterval(function(){
+      if(document.hidden || touching) return;
+      go(index+1,true);
+    }, 3000);
+  }
+  function onDown(e){
+    if(e.touches){ if(e.touches.length!==1) return; startX=e.touches[0].clientX; startY=e.touches[0].clientY; }
+    else { if(e.button!=null && e.button!==0) return; startX=e.clientX; startY=e.clientY; }
+    touching=true; swiped=false; dx=0; axis=null; stop();
+    track.classList.remove('anim');
+  }
+  function onMove(e){
+    if(!touching) return;
+    const p=e.touches?e.touches[0]:e;
+    const mx=p.clientX-startX, my=p.clientY-startY;
+    if(!axis){
+      if(Math.abs(mx)<6 && Math.abs(my)<6) return;
+      axis=Math.abs(mx)>Math.abs(my)+2?'x':'y';
+    }
+    if(axis!=='x') return;
+    if(e.cancelable) e.preventDefault();
+    dx=mx;
+    xOf(index,false,dx);
+  }
+  function onUp(){
+    if(!touching) return;
+    touching=false;
+    const thresh=Math.max(40, W()*0.18);
+    if(Math.abs(dx)>8) swiped=true;
+    if(dx<=-thresh) go(index+1,true);
+    else if(dx>=thresh) go(index-1,true);
+    else go(index,true);
+    dx=0; axis=null;
+    start();
+  }
+  track.addEventListener('transitionend', onEnd);
+  viewport.addEventListener('touchstart', onDown, {passive:true});
+  viewport.addEventListener('touchmove', onMove, {passive:false});
+  viewport.addEventListener('touchend', onUp);
+  viewport.addEventListener('touchcancel', onUp);
+  viewport.addEventListener('pointerdown', function(e){ if(e.pointerType==='touch') return; onDown(e); });
+  window.addEventListener('pointermove', function(e){ if(e.pointerType==='touch') return; onMove(e); });
+  window.addEventListener('pointerup', function(e){ if(e.pointerType==='touch') return; onUp(); });
+  window.addEventListener('pointercancel', function(e){ if(e.pointerType==='touch') return; onUp(); });
+  track.addEventListener('click', function(e){ if(swiped){ e.preventDefault(); e.stopPropagation(); swiped=false; } }, true);
+  dots.forEach((d,k)=>d.addEventListener('click', function(){ go(k+1,true); start(); }));
+  window.addEventListener('resize', function(){ go(index,false); });
+  document.addEventListener('visibilitychange', function(){ if(document.hidden) stop(); else if(!touching) start(); });
+  go(1,false);
+  start();
+})();
+</script>
 </body>
 </html>
