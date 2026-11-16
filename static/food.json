@@ -145,14 +145,14 @@
       "hours": "VisitSeoul 等资料写约 11:30–22:00，最后点餐约 21:30；也有来源写成稍早开门或稍晚打烊，请以店内当日公示为准。",
       "address": "서울 중구 명동8가길 27, 선샤인빌딩 B1 (충무로2가 11-1)",
       "map_query": "원조함초간장게장",
-      "cover": "/static/food-photos/hamcho-myeongdong-cover.jpg",
+      "cover": "/static/food-photos/hamcho-myeongdong-cover.jpg?v=41",
       "photos": [
-        "/static/food-photos/hamcho-myeongdong-cover.jpg",
-        "/static/food-photos/hamcho-myeongdong-crab.jpg",
-        "/static/food-photos/hamcho-myeongdong-street.jpg",
-        "/static/food-photos/hamcho-myeongdong-entrance.jpg",
-        "/static/food-photos/hamcho-myeongdong-tv.jpg",
-        "/static/food-photos/hamcho-myeongdong-story.jpg"
+        "/static/food-photos/hamcho-myeongdong-cover.jpg?v=41",
+        "/static/food-photos/hamcho-myeongdong-crab.jpg?v=41",
+        "/static/food-photos/hamcho-myeongdong-street.jpg?v=41",
+        "/static/food-photos/hamcho-myeongdong-entrance.jpg?v=41",
+        "/static/food-photos/hamcho-myeongdong-tv.jpg?v=41",
+        "/static/food-photos/hamcho-myeongdong-story.jpg?v=41"
       ],
       "tags": [
         "chinese_fav"
@@ -181,12 +181,12 @@
       "hours": "灯牌写着一、二楼 OPEN AM 07:00；常见地图资料多写成约 08:30–24:00，请以店门口当日公示为准。",
       "address": "서울 중구 명동8가길 32",
       "map_query": "대가 명동 崔家の大家",
-      "cover": "/static/food-photos/daega-myeongdong-cover.jpg",
+      "cover": "/static/food-photos/daega-myeongdong-cover.jpg?v=41",
       "photos": [
-        "/static/food-photos/daega-myeongdong-cover.jpg",
-        "/static/food-photos/daega-myeongdong-building.jpg",
-        "/static/food-photos/daega-myeongdong-door.jpg",
-        "/static/food-photos/daega-myeongdong-corner.jpg"
+        "/static/food-photos/daega-myeongdong-cover.jpg?v=41",
+        "/static/food-photos/daega-myeongdong-building.jpg?v=41",
+        "/static/food-photos/daega-myeongdong-door.jpg?v=41",
+        "/static/food-photos/daega-myeongdong-corner.jpg?v=41"
       ],
       "tags": [
         "chinese_fav"
