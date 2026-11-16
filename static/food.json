@@ -125,6 +125,76 @@
   ],
   "items": [
     {
+      "id": "hamcho-myeongdong",
+      "name_zh": "元祖咸草酱蟹（明洞）",
+      "name_ko": "원조함초간장게장",
+      "city": "seoul",
+      "city_zh": "首尔",
+      "area": "中区 明洞",
+      "area_id": "myeongdong",
+      "category": "seafood",
+      "cuisine": "咸草酱油酱蟹",
+      "desc": "来明洞想吃酱蟹，很多人会直奔这家「元祖咸草酱蟹」。店从2011年起就在明洞开业，是街上口碑很好的人气老店，MBC、KBS、OBS等电视台都来拍过。这家的招牌是加了咸草腌制的酱油蟹。咸草长在海边滩涂，在韩国被叫做“海中的人参”，配上自家酱油，蟹肉嫩、蟹黄满，咸鲜里带一点回甘。酱蟹本身也是有讲究的传统菜，早在高丽时代就有记载。店在명동8가길 27 阳光大厦（선샤인빌딩）地下一层，入口有明显招牌。",
+      "transport": "地铁4号线明洞站（명동역）出站向명동8가길 步行，按「원조함초간장게장」招牌走阳光大厦地下一层。",
+      "tips": [
+        "推荐点一份酱油蟹套餐，喜欢辣的可以再加辣酱蟹，具体菜品以店内菜单为准。",
+        "店在地下一层，街上的入口招牌比较显眼。",
+        "饭点可能要等候，出行前可再确认营业和排队情况。"
+      ],
+      "station": "명동역",
+      "hours": "VisitSeoul 等资料写约 11:30–22:00，最后点餐约 21:30；也有来源写成稍早开门或稍晚打烊，请以店内当日公示为准。",
+      "address": "서울 중구 명동8가길 27, 선샤인빌딩 B1 (충무로2가 11-1)",
+      "map_query": "원조함초간장게장",
+      "cover": "/static/food-photos/hamcho-myeongdong-cover.jpg",
+      "photos": [
+        "/static/food-photos/hamcho-myeongdong-cover.jpg",
+        "/static/food-photos/hamcho-myeongdong-crab.jpg",
+        "/static/food-photos/hamcho-myeongdong-street.jpg",
+        "/static/food-photos/hamcho-myeongdong-entrance.jpg",
+        "/static/food-photos/hamcho-myeongdong-tv.jpg",
+        "/static/food-photos/hamcho-myeongdong-story.jpg"
+      ],
+      "tags": [
+        "chinese_fav"
+      ],
+      "source_note": "开业年份按店内招牌与已核对介绍为2011年（查阅 2026-11-16）。地址见公开地图资料；营业时间参考 VisitSeoul 等公开介绍，请出行前再确认。",
+      "pinned": 1
+    },
+    {
+      "id": "daega-myeongdong",
+      "name_zh": "崔家の大家烤肉（明洞）",
+      "name_ko": "대가",
+      "city": "seoul",
+      "city_zh": "首尔",
+      "area": "中区 明洞",
+      "area_id": "myeongdong",
+      "category": "bbq",
+      "cuisine": "韩牛烤肉 / 酱蟹 / 粥",
+      "desc": "明洞这家「崔家の大家 B·B·Q 烤肉」，是把牛肉、猪肉烧烤，韩式石锅拌饭，传统韩餐和海鲜都做在一起的综合餐厅。门口玻璃上写着韩牛，转角墙面上还能看到酱蟹、绿茶五花肉。楼顶灯牌写着「37年」，三楼标着海鲜锅，粥的字也很大。想来烤肉，可以点韩牛和各种牛肉部位，比如牛舌、牛胸肉、调味牛排骨、牛肋条，也有生五花肉、薄切五花肉，还有带水芹菜的五花肉；墙上另外写了绿茶五花肉。海鲜这边有酱油酱蟹、辣酱蟹，也可以点海鲜锅，或者辣炒章鱼肥肠虾。喜欢传统韩餐的，菜单上有石锅拌饭、山菜拌饭、参鸡汤、大酱汤、冷面。粥的种类也不少，比如鲍鱼粥、松茸粥、野菜粥。按店家介绍，一到五楼都是店面，整栋连在一起，规模在明洞很少见。一个人来吃可以，旅游团一起订也合适。价格、营业和座位情况都以店内当天为准。",
+      "transport": "地铁4号线明洞站（명동역）出站向명동8가길 步行，按「대가」「崔家の大家」转角灯牌找整栋楼。",
+      "tips": [
+        "灯牌上写着一、二楼从早上 7 点开始营业，适合一早就到明洞、想先坐下来吃饭的人；具体供应时间请以到店为准。",
+        "一到五楼都是店面是店家所述，有的地图写成一到四楼，请以进门指示为准。",
+        "门口有立牌菜单，想预约可以到店沟通。"
+      ],
+      "station": "명동역",
+      "hours": "灯牌写着一、二楼 OPEN AM 07:00；常见地图资料多写成约 08:30–24:00，请以店门口当日公示为准。",
+      "address": "서울 중구 명동8가길 32",
+      "map_query": "대가 명동 崔家の大家",
+      "cover": "/static/food-photos/daega-myeongdong-cover.jpg",
+      "photos": [
+        "/static/food-photos/daega-myeongdong-cover.jpg",
+        "/static/food-photos/daega-myeongdong-building.jpg",
+        "/static/food-photos/daega-myeongdong-door.jpg",
+        "/static/food-photos/daega-myeongdong-corner.jpg"
+      ],
+      "tags": [
+        "chinese_fav"
+      ],
+      "source_note": "介绍按店门口灯牌、立牌菜单与已核对文案整理（查阅 2026-11-16）。「37年」按楼顶灯牌书写，未再单独核实开业年份。地址见公开地图资料。",
+      "pinned": 2
+    },
+    {
       "id": "beansbins-myeongdong",
       "name_zh": "BEANSBINS COFFEE（明洞萨沃伊酒店店）",
       "name_ko": "빈스빈스 명동사보이호텔점",
@@ -246,74 +316,6 @@
         "/static/food-photos/hellokitty-myeongdong-facade.jpg"
       ],
       "source_note": "门面实拍与公开地图资料（查阅 2026-11-16）。与同一栋地下一层的韩食王妃家不是同一家店。"
-    },
-    {
-      "id": "hamcho-myeongdong",
-      "name_zh": "元祖咸草酱蟹（明洞）",
-      "name_ko": "원조함초간장게장",
-      "city": "seoul",
-      "city_zh": "首尔",
-      "area": "中区 明洞",
-      "area_id": "myeongdong",
-      "category": "seafood",
-      "cuisine": "咸草酱油酱蟹",
-      "desc": "来明洞想吃酱蟹，很多人会直奔这家「元祖咸草酱蟹」。店从2011年起就在明洞开业，是街上口碑很好的人气老店，MBC、KBS、OBS等电视台都来拍过。这家的招牌是加了咸草腌制的酱油蟹。咸草长在海边滩涂，在韩国被叫做“海中的人参”，配上自家酱油，蟹肉嫩、蟹黄满，咸鲜里带一点回甘。酱蟹本身也是有讲究的传统菜，早在高丽时代就有记载。店在명동8가길 27 阳光大厦（선샤인빌딩）地下一层，入口有明显招牌。",
-      "transport": "地铁4号线明洞站（명동역）出站向명동8가길 步行，按「원조함초간장게장」招牌走阳光大厦地下一层。",
-      "tips": [
-        "推荐点一份酱油蟹套餐，喜欢辣的可以再加辣酱蟹，具体菜品以店内菜单为准。",
-        "店在地下一层，街上的入口招牌比较显眼。",
-        "饭点可能要等候，出行前可再确认营业和排队情况。"
-      ],
-      "station": "명동역",
-      "hours": "VisitSeoul 等资料写约 11:30–22:00，最后点餐约 21:30；也有来源写成稍早开门或稍晚打烊，请以店内当日公示为准。",
-      "address": "서울 중구 명동8가길 27, 선샤인빌딩 B1 (충무로2가 11-1)",
-      "map_query": "원조함초간장게장",
-      "cover": "/static/food-photos/hamcho-myeongdong-cover.jpg",
-      "photos": [
-        "/static/food-photos/hamcho-myeongdong-cover.jpg",
-        "/static/food-photos/hamcho-myeongdong-crab.jpg",
-        "/static/food-photos/hamcho-myeongdong-street.jpg",
-        "/static/food-photos/hamcho-myeongdong-entrance.jpg",
-        "/static/food-photos/hamcho-myeongdong-tv.jpg",
-        "/static/food-photos/hamcho-myeongdong-story.jpg"
-      ],
-      "tags": [
-        "chinese_fav"
-      ],
-      "source_note": "开业年份按店内招牌与已核对介绍为2011年（查阅 2026-11-16）。地址见公开地图资料；营业时间参考 VisitSeoul 等公开介绍，请出行前再确认。"
-    },
-    {
-      "id": "daega-myeongdong",
-      "name_zh": "崔家の大家烤肉（明洞）",
-      "name_ko": "대가",
-      "city": "seoul",
-      "city_zh": "首尔",
-      "area": "中区 明洞",
-      "area_id": "myeongdong",
-      "category": "bbq",
-      "cuisine": "韩牛烤肉 / 酱蟹 / 粥",
-      "desc": "明洞这家「崔家の大家 B·B·Q 烤肉」，是把牛肉、猪肉烧烤，韩式石锅拌饭，传统韩餐和海鲜都做在一起的综合餐厅。门口玻璃上写着韩牛，转角墙面上还能看到酱蟹、绿茶五花肉。楼顶灯牌写着「37年」，三楼标着海鲜锅，粥的字也很大。想来烤肉，可以点韩牛和各种牛肉部位，比如牛舌、牛胸肉、调味牛排骨、牛肋条，也有生五花肉、薄切五花肉，还有带水芹菜的五花肉；墙上另外写了绿茶五花肉。海鲜这边有酱油酱蟹、辣酱蟹，也可以点海鲜锅，或者辣炒章鱼肥肠虾。喜欢传统韩餐的，菜单上有石锅拌饭、山菜拌饭、参鸡汤、大酱汤、冷面。粥的种类也不少，比如鲍鱼粥、松茸粥、野菜粥。按店家介绍，一到五楼都是店面，整栋连在一起，规模在明洞很少见。一个人来吃可以，旅游团一起订也合适。价格、营业和座位情况都以店内当天为准。",
-      "transport": "地铁4号线明洞站（명동역）出站向명동8가길 步行，按「대가」「崔家の大家」转角灯牌找整栋楼。",
-      "tips": [
-        "灯牌上写着一、二楼从早上 7 点开始营业，适合一早就到明洞、想先坐下来吃饭的人；具体供应时间请以到店为准。",
-        "一到五楼都是店面是店家所述，有的地图写成一到四楼，请以进门指示为准。",
-        "门口有立牌菜单，想预约可以到店沟通。"
-      ],
-      "station": "명동역",
-      "hours": "灯牌写着一、二楼 OPEN AM 07:00；常见地图资料多写成约 08:30–24:00，请以店门口当日公示为准。",
-      "address": "서울 중구 명동8가길 32",
-      "map_query": "대가 명동 崔家の大家",
-      "cover": "/static/food-photos/daega-myeongdong-cover.jpg",
-      "photos": [
-        "/static/food-photos/daega-myeongdong-cover.jpg",
-        "/static/food-photos/daega-myeongdong-building.jpg",
-        "/static/food-photos/daega-myeongdong-door.jpg",
-        "/static/food-photos/daega-myeongdong-corner.jpg"
-      ],
-      "tags": [
-        "chinese_fav"
-      ],
-      "source_note": "介绍按店门口灯牌、立牌菜单与已核对文案整理（查阅 2026-11-16）。「37年」按楼顶灯牌书写，未再单独核实开业年份。地址见公开地图资料。"
     },
     {
       "id": "jogaewa-myeongdong",

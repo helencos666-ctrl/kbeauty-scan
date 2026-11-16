@@ -231,6 +231,61 @@
       "source_url": "https://www.wackywilly.co.kr/"
     },
     {
+      "id": "hapakristin-myeongdong",
+      "name_zh": "Hapa Kristin（明洞店）",
+      "name_ko": "하파크리스틴 명동점",
+      "city": "seoul",
+      "city_zh": "首尔",
+      "area": "中区 明洞",
+      "area_id": "myeongdong",
+      "category": "beauty",
+      "desc": "Hapa Kristin 是韩国彩色隐形眼镜（美瞳）品牌，明洞店在명동8나길 2-1 的一楼，粉色门面，就在 Wacky Willy 旁边。试戴、度数、护理和购买规定请以店内说明为准，并按个人情况选择。",
+      "transport": "地铁4号线明洞站（명동역）出站向명동8나길 步行，在 Wacky Willy 黄色门面旁边按粉色 Hapa Kristin 招牌找명동8나길 2-1。",
+      "tips": [
+        "就在 Wacky Willy 旁边，粉色门面比较好认。",
+        "彩色隐形眼镜的佩戴和护理请遵循店内说明与自身情况。"
+      ],
+      "station": "명동역",
+      "hours": "品牌门店页写每天 10:30–22:30，请出行前再确认。",
+      "address": "서울 중구 명동8나길 2-1, 1층 (충무로1가 23-9)",
+      "map_query": "하파크리스틴 명동점",
+      "cover": "/static/shop-photos/hapakristin-myeongdong-cover.jpg",
+      "photos": [
+        "/static/shop-photos/hapakristin-myeongdong-cover.jpg"
+      ],
+      "source_note": "品牌门店页与公开地图资料（주소 명동8나길 2-1，每天 10:30–22:30，查阅 2026-11-16）。门牌 2-1 见店门口。",
+      "source_url": "https://hapakristin.co.kr/"
+    },
+    {
+      "id": "8seconds-myeongdong",
+      "name_zh": "8seconds（明洞站店）",
+      "name_ko": "에잇세컨즈 명동역점",
+      "city": "seoul",
+      "city_zh": "首尔",
+      "area": "中区 明洞",
+      "area_id": "myeongdong",
+      "category": "fashion",
+      "desc": "8seconds（에잇세컨즈）是三星物产（Samsung C&T）旗下的韩国快时尚品牌。这家是「明洞站店」（명동역점），在명동8나길 3，门面比较大，有多层，进门就能看到扶梯。门口立着 TAX REFUND 退税标识。VisitKorea 资料也写明可办理即时退税或事后退税。明洞还有其他 8seconds 门店，请按「명동역점」和명동8나길 3 来找这家。",
+      "transport": "地铁4号线明洞站（명동역）出站向명동8나길 步行，按灰色大楼上的红色 8seconds 招牌找명동8나길 3。",
+      "tips": [
+        "请按「명동역점」和명동8나길 3 寻找，不要和명동길 一带的其他 8seconds 搞混。",
+        "门口有退税标识，具体办理以店内说明为准。",
+        "楼层请以进门扶梯和店内指示为准。"
+      ],
+      "station": "명동역",
+      "hours": "品牌官方门店页和 VisitKorea 均写每天 10:30–22:00，请出行前再确认。",
+      "address": "서울 중구 명동8나길 3 (충무로1가)",
+      "map_query": "에잇세컨즈 명동역점",
+      "tax_refund": "门口有退税标识；VisitKorea 资料写明可即时退税或事后退税",
+      "cover": "/static/shop-photos/8seconds-myeongdong-cover.jpg",
+      "photos": [
+        "/static/shop-photos/8seconds-myeongdong-cover.jpg",
+        "/static/shop-photos/8seconds-myeongdong-street.jpg"
+      ],
+      "source_note": "品牌官方门店页「에잇세컨즈 명동역점」与 VisitKorea「8 Seconds Myeongdong Station Branch」（주소 명동8나길 3，每天 10:30–22:00，查阅 2026-11-16）。退税见门面标识与 VisitKorea。",
+      "source_url": "https://english.visitkorea.or.kr/svc/whereToGo/locIntrdn/rgnContentsView.do?vcontsId=1574035"
+    },
+    {
       "id": "matinkim-myeongdong",
       "name_zh": "Matin Kim（明洞店）",
       "name_ko": "마뗑킴 명동점",

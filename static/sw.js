@@ -1,5 +1,5 @@
 /* 旅韩助手 service worker: cache app shell, never cache API or POST. */
-const CACHE = 'lvhan-shell-v37';
+const CACHE = 'lvhan-shell-v38';
 const SHELL = [
   '/',
   '/attractions',
