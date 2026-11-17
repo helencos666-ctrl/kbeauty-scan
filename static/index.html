@@ -431,14 +431,34 @@ function showErr(m){$('err').textContent=m;$('err').style.display='block';window
 // 常用句已预生成（/static/audio/<sha1>.mp3，可离线缓存）；其他句子走 /api/tts（服务器与浏览器都会缓存）。
 // 只有服务器音频失败时才用手机自带的系统朗读兜底。
 const TTS_MANIFEST=window.LH_TTS||{};
-const player=new Audio();
-player.setAttribute('playsinline','');player.setAttribute('webkit-playsinline','');player.preload='auto';
+// iOS Safari 的已知问题（WebKit bug 321436 / 317741）：页面里任何 <audio> 元素播放过后，网页语音识别会静默失效
+// （不出字、不报错）。所以朗读改用 Web Audio 播放（实测不影响识别），<audio> 只在不支持 Web Audio 时兜底。
+let player=null, actx=null, curSrc=null;
 let spkBtn=null, spkTimer=null, spkToken=0;
 function ttsUrl(ko){const f=TTS_MANIFEST[ko];return f?'/static/audio/'+f:'/api/tts?text='+encodeURIComponent(ko)}
+function audioCtx(){
+  if(!actx){const C=window.AudioContext||window.webkitAudioContext;if(C){try{actx=new C()}catch(e){actx=null}}}
+  return actx;
+}
+const _bufs=new Map();
+function loadBuf(url){
+  if(_bufs.has(url)) return _bufs.get(url);
+  const ctx=audioCtx();if(!ctx) return Promise.reject(new Error('no webaudio'));
+  const p=fetch(url).then(r=>{if(!r.ok) throw new Error('tts '+r.status);return r.arrayBuffer()})
+    .then(ab=>new Promise((res,rej)=>{const q=ctx.decodeAudioData(ab,res,rej);if(q&&q.then) q.then(res,rej)}));
+  _bufs.set(url,p);p.catch(()=>_bufs.delete(url));
+  if(_bufs.size>40){_bufs.delete(_bufs.keys().next().value)}
+  return p;
+}
+function setAudioSession(t){try{if(navigator.audioSession&&navigator.audioSession.type!==t) navigator.audioSession.type=t}catch(e){}}
 const _warm=new Set();
-function prefetchTTS(ko){ // 卡片出来后提前生成音频，点朗读时几乎立即出声
-  if(!ko||TTS_MANIFEST[ko]||_warm.has(ko)) return;_warm.add(ko);
-  setTimeout(()=>{fetch(ttsUrl(ko)).catch(()=>{_warm.delete(ko)})},300);
+function prefetchTTS(ko){ // 卡片出来后提前下载并解码音频，点朗读时几乎立即出声
+  if(!ko||_warm.has(ko)) return;_warm.add(ko);
+  setTimeout(()=>{loadBuf(ttsUrl(ko)).catch(()=>{_warm.delete(ko)})},300);
+}
+function stopAudio(){
+  if(curSrc){try{curSrc.onended=null;curSrc.stop()}catch(e){}curSrc=null}
+  if(player){try{player.pause()}catch(e){}}
 }
 function clearSpeakUI(){
   document.querySelectorAll('.spk-on').forEach(el=>{
@@ -458,25 +478,36 @@ function speakFallback(ko, done){
 }
 function speak(ko, btn){
   const tok=++spkToken;
-  try{player.pause()}catch(e){}
-  clearTimeout(spkTimer);clearSpeakUI();
-  let finished=false;
+  stopAudio();clearTimeout(spkTimer);clearSpeakUI();
+  let finished=false, started=false;
   const done=()=>{
-    if(finished||tok!==spkToken) return;finished=true;clearTimeout(spkTimer);
+    if(finished||tok!==spkToken) return;finished=true;clearTimeout(spkTimer);curSrc=null;
+    setAudioSession('auto');
     if(btn){btn.classList.remove('spk-on');if(btn.dataset.spkLabel!=null) btn.textContent=btn.dataset.spkLabel}
   };
-  const fallback=()=>{if(finished||tok!==spkToken) return;try{player.pause()}catch(e){};speakFallback(ko,done)};
+  const fallback=()=>{if(finished||tok!==spkToken) return;stopAudio();speakFallback(ko,done)};
   if(btn){
     if(btn.dataset.spkLabel==null) btn.dataset.spkLabel=btn.textContent;
     btn.classList.add('spk-on');
     btn.textContent=(btn.id==='cSpk'||btn.id==='bigSpk')?'🔈 播放中':'🔈';
   }
-  player.onended=done;
-  player.onerror=fallback;
-  player.src=ttsUrl(ko);
-  const p=player.play(); // 必须在点击回调里同步调用（iPhone/微信），静音拨片下也能出声
+  const url=ttsUrl(ko), ctx=audioCtx();
+  if(ctx){
+    setAudioSession('playback'); // iOS 17+：静音拨片打开时也能出声
+    try{const r=ctx.resume();if(r&&r.catch) r.catch(()=>{})}catch(e){} // 必须在点击回调里同步调用
+    loadBuf(url).then(buf=>{
+      if(finished||tok!==spkToken) return;
+      const src=ctx.createBufferSource();src.buffer=buf;src.connect(ctx.destination);
+      src.onended=done;curSrc=src;src.start(0);started=true;
+    }).catch(fallback);
+    spkTimer=setTimeout(()=>{if(!started&&!finished) fallback()},9000);
+    return;
+  }
+  if(!player){player=new Audio();player.setAttribute('playsinline','');player.setAttribute('webkit-playsinline','')}
+  player.onended=done;player.onerror=fallback;player.src=url;
+  const p=player.play();
   if(p&&p.catch) p.catch(err=>{if(err&&err.name==='AbortError') return;fallback()});
-  spkTimer=setTimeout(()=>{if(player.paused&&!finished) fallback()},9000); // 网络太慢时兜底
+  spkTimer=setTimeout(()=>{if(player.paused&&!finished) fallback()},9000);
 }
 function fitBig(){
   const el=$('bigKo');if(!el) return;
@@ -495,7 +526,7 @@ function showBig(main,sub,ro,say){
   $('bigSpk').onclick=()=>say&&speak(say,$('bigSpk'));
   requestAnimationFrame(fitBig);
 }
-$('bigClose').onclick=()=>{$('big').style.display='none';try{player.pause()}catch(e){}};
+$('bigClose').onclick=()=>{$('big').style.display='none';stopAudio()};
 $('bigFlip').onclick=()=>{$('bigKo').classList.toggle('flip');$('bigZh').classList.toggle('flip')};
 window.addEventListener('resize',()=>{if($('big').style.display==='flex') fitBig()});
 
@@ -816,13 +847,18 @@ drawModeUI();drawScenesT();drawHist();
     btn.addEventListener('click',e=>{e.preventDefault();toKeyboard()});
     return;
   }
-  const MAX_MS=180000, MAXLEN=600, STOP_WAIT=1500, NO_TEXT_MS=6000;
+  // 松手后 iPhone 往往要 stop() 之后才给出最终结果，所以要多等一会儿，不能 1 秒就判“没听清”
+  const MAX_MS=180000, MAXLEN=600, STOP_WAIT=isIOS?4000:2500, STOP_WAIT_TXT=isIOS?2500:1500, NO_TEXT_MS=6000;
+  // iOS 已知问题：识别器有时“启动了”但麦克风根本没开（不出字、不报错、不结束）。
+  // 用 audiostart 事件判断麦克风是否真的开了，没开就换新实例按 0.3/1/2 秒重试。
+  const ALIVE_MS=2200, RETRY=[300,1000,2000];
   let rec=null, want=false, holding=false, t0=0, skipUp=false, committed='', cur='', timer=null, fatal=false;
   let gotText=false, sessStart=0, quickEnds=0, stopGuard=null, done=true, hinted=false, gen=0;
+  let alive=false, aliveTimer=null, retries=0, primed=false;
   const errMap={
     'not-allowed':'没有麦克风权限，请在设置里允许麦克风后重试',
     'permission-denied':'没有麦克风权限，请在设置里允许麦克风后重试',
-    'service-not-allowed':'这个浏览器不让网页使用语音识别',
+    'service-not-allowed':isIOS?'iPhone 需要打开听写：设置 → 通用 → 键盘 → 打开「启用听写」，然后重试':'这个浏览器不让网页使用语音识别',
     'audio-capture':'找不到麦克风，请检查设备后重试',
     'network':'语音识别网络错误，请稍后再试'
   };
@@ -851,41 +887,84 @@ drawModeUI();drawScenesT();drawHist();
       let fin='',interim='';
       for(let i=0;i<e.results.length;i++){const x=e.results[i][0].transcript||'';if(e.results[i].isFinal) fin=joinTxt(fin,x); else interim=joinTxt(interim,x)}
       cur=joinTxt(fin,interim);
+      markAlive();
       if(cur.trim()){if(!gotText){gotText=true;hideErr()}}
       render();
     };
+    r.onaudiostart=()=>{if(myGen===gen) markAlive()};
+    r.onsoundstart=r.onspeechstart=r.onaudiostart;
     r.onerror=e=>{
       if(myGen!==gen) return;
       if(e.error==='aborted'||e.error==='no-speech') return;
+      // 麦克风被音频会话占用（iOS 播放过声音后常见）：先自动重试，不直接报错
+      if(e.error==='audio-capture'&&want&&!gotText&&retries<RETRY.length){retry();return}
       const m=errMap[e.error];
       if(m){fatal=true;want=false;showErr(m);if(e.error==='service-not-allowed')toKeyboard()}
     };
     r.onend=()=>{
       if(myGen!==gen) return;
+      clearTimeout(aliveTimer);
       committed=joinTxt(committed,cur);cur='';
       const short=Date.now()-sessStart<1200;
       quickEnds=short?quickEnds+1:0;
       // 自动续听：但如果连续很快结束（iOS/微信常见），不要反复重启以免卡顿
       if(want&&!fatal&&quickEnds<2&&Date.now()-t0<MAX_MS&&committed.length<MAXLEN){
-        try{rec=newRec(myGen);sessStart=Date.now();rec.start();return}catch(err){}
+        try{rec=newRec(myGen);sessStart=Date.now();alive=false;rec.start();watchAlive();return}catch(err){}
       }
       finish();
     };
     return r;
   }
+  function markAlive(){if(!alive){alive=true;clearTimeout(aliveTimer)}}
+  function watchAlive(){
+    clearTimeout(aliveTimer);
+    const myGen=gen;
+    aliveTimer=setTimeout(()=>{if(myGen===gen&&want&&!alive) retry()},ALIVE_MS);
+  }
+  function retry(){
+    // 旧实例卡死：作废它，换新实例重开
+    if(retries>=RETRY.length){
+      want=false;fatal=true;finish();
+      showErr('麦克风没有打开（iPhone 系统问题）');
+      toKeyboard('网页语音暂时打不开：请关掉这个网页重新打开再试；或'+kbHint);
+      return;
+    }
+    const delay=RETRY[retries++];
+    const old=rec;gen++;const myGen=gen;
+    try{old&&old.abort()}catch(e){}
+    setState('正在打开麦克风…（第'+retries+'次重试）');
+    const go=()=>{
+      if(myGen!==gen||!want) return;
+      try{rec=newRec(myGen);sessStart=Date.now();alive=false;rec.start();watchAlive()}catch(e){retry()}
+    };
+    setTimeout(()=>{
+      if(myGen!==gen||!want) return;
+      // 首次重试前用 getUserMedia 唤醒一次音频会话（只做一次，马上关掉）
+      if(isIOS&&!primed&&navigator.mediaDevices&&navigator.mediaDevices.getUserMedia){
+        primed=true;
+        navigator.mediaDevices.getUserMedia({audio:true})
+          .then(ms=>{ms.getTracks().forEach(t=>t.stop());go()})
+          .catch(err=>{if(err&&(err.name==='NotAllowedError'||err.name==='SecurityError')){fatal=true;want=false;finish();showErr(errMap['not-allowed'])}else go()});
+      }else go();
+    },delay);
+  }
   function startRec(){
     if(want) return;
-    gen++;clearTimeout(stopGuard);
+    gen++;clearTimeout(stopGuard);clearTimeout(aliveTimer);
+    if(typeof stopAudio==='function'){stopAudio();clearSpeakUI()} // 别和朗读抢麦克风/音频会话
+    if(typeof setAudioSession==='function') setAudioSession('auto');
     committed='';cur='';fatal=false;want=true;done=false;gotText=false;quickEnds=0;t0=Date.now();sessStart=t0;
+    alive=false;retries=0;
     hideErr();markOldCard(true);box.value='';
     ui(true);setState('正在听… 0秒（边说边出字，松手后自动翻译）');
-    try{rec=newRec(gen);rec.start()}
+    try{rec=newRec(gen);rec.start()} // 必须在按下的回调里同步调用
     catch(err){want=false;done=true;ui(false);setState('');markOldCard(false);toKeyboard();return}
+    watchAlive();
     clearInterval(timer);timer=setInterval(tick,500);
   }
   function finish(){
     if(done) return;
-    done=true;want=false;clearInterval(timer);timer=null;clearTimeout(stopGuard);ui(false);setState('');
+    done=true;want=false;clearInterval(timer);timer=null;clearTimeout(stopGuard);clearTimeout(aliveTimer);ui(false);setState('');
     gen++; // 之后到达的旧事件全部忽略
     try{rec&&rec.abort()}catch(e){}
     const v=full().trim();box.value=v;
@@ -898,9 +977,11 @@ drawModeUI();drawScenesT();drawHist();
   function stopRec(){
     if(!want) return;
     want=false;setState('正在识别，请稍等…');
+    clearTimeout(aliveTimer);
     try{rec&&rec.stop()}catch(e){finish();return}
-    // 有些 iPhone 浏览器 stop 后不回调 onend，最多等 1.5 秒
-    clearTimeout(stopGuard);stopGuard=setTimeout(finish,gotText?600:STOP_WAIT);
+    // iPhone 常在 stop() 之后才送来最终文字；有些浏览器 stop 后又不回调 onend。
+    // 所以等最终结果（最多 2.5–4 秒），超时就用已经显示的中间文字，不轻易判“没听清”。
+    clearTimeout(stopGuard);stopGuard=setTimeout(finish,gotText?STOP_WAIT_TXT:STOP_WAIT);
   }
   btn.addEventListener('contextmenu',e=>e.preventDefault());
   btn.addEventListener('selectstart',e=>e.preventDefault());
