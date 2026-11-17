@@ -1862,6 +1862,35 @@ def api_admin_overview(req: Request):
             s["visits"] = {"today": {"day": None, "pv": 0, "uv": 0}, "days": [], "sources": [], "today_sources": []}
     return s
 
+
+@router.get("/api/admin/tab-counts")
+def api_admin_tab_counts(req: Request):
+    """后台标签栏待处理数量。仅管理员。键名与按钮 data-t 一致。"""
+    keys = ("payproofs", "reports", "review", "merchants", "chicken", "promo",
+            "friends", "idv", "consult", "providers", "referral", "feedback")
+    with db() as conn:
+        need_admin(conn, req)
+        row = q(conn, """SELECT
+            (SELECT count(*) FROM c_pay_proofs WHERE status='pending') AS payproofs,
+            (SELECT count(*) FROM c_reports WHERE NOT resolved) AS reports,
+            (SELECT count(*) FROM c_posts WHERE status='pending' AND NOT deleted)
+          + (SELECT count(*) FROM c_shop_recs WHERE status='pending')
+          + (SELECT count(*) FROM c_fan_place_subs WHERE status IN ('pending','flagged')) AS review,
+            (SELECT count(*) FROM c_shop_reviews WHERE status='pending') AS merchants,
+            (SELECT count(*) FROM c_chicken_orders WHERE status='pending_review')
+          + (SELECT count(*) FROM c_chicken_merchants WHERE status='pending') AS chicken,
+            (SELECT count(*) FROM c_promo_applications WHERE status='pending') AS promo,
+            (SELECT count(*) FROM c_dating_profiles
+              WHERE auto_hidden AND NOT COALESCE(hidden_by_admin, FALSE)) AS friends,
+            (SELECT count(*) FROM c_id_verifications WHERE status='pending') AS idv,
+            (SELECT count(*) FROM c_consult_threads
+              WHERE merchant_id IS NULL AND merch_unread > 0) AS consult,
+            (SELECT count(*) FROM c_providers WHERE status='pending') AS providers,
+            (SELECT count(*) FROM c_ref_invites WHERE status='frozen') AS referral,
+            (SELECT count(*) FROM c_feedback WHERE status='new') AS feedback""", one=True)
+    return {k: int(row[k] or 0) for k in keys}
+
+
 @router.get("/api/admin/users")
 def api_admin_users(req: Request, s: str = ""):
     with db() as conn:

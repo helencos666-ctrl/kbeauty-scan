@@ -15,6 +15,37 @@
 <link rel="stylesheet" href="/static/pwa.css?v=61">
 <link rel="stylesheet" href="/static/community.css?v=61">
 <meta name="robots" content="noindex,nofollow">
+<style>
+/* 标签栏待处理数量角标：只在本页生效，不改 community.css / sw.js */
+#tabs button{
+  white-space:nowrap;
+  display:inline-flex;
+  align-items:center;
+  gap:5px;
+  flex:0 0 auto;
+}
+#tabs .tab-badge{
+  display:inline-block;
+  min-width:16px;
+  padding:1px 5px;
+  border-radius:999px;
+  background:#B85A12;
+  color:#fff;
+  font-size:11px;
+  line-height:15px;
+  font-weight:600;
+  text-align:center;
+  letter-spacing:0;
+}
+/* 选中态是青底白字，角标仍用 CTA 橙以便一眼看出还有待办 */
+#tabs button.on .tab-badge{
+  background:#B85A12;
+  color:#fff;
+}
+#tabs .tab-badge[hidden]{
+  display:none;
+}
+</style>
 </head>
 <body>
 <header>
@@ -42,7 +73,7 @@
       <div style="overflow-x:auto"><table class="adm" id="visit-sources"></table></div>
     </div>
     <div class="boards" id="tabs">
-      <button data-t="users" class="on">用户/会员</button><button data-t="payproofs">付款审核<span id="pppend"></span></button><button data-t="reports">举报</button><button data-t="posts">帖子</button><button data-t="review">审核</button><button data-t="merchants">商家/评价</button><button data-t="chicken">代点</button><button data-t="promo">推广统计</button><button data-t="settings">设置</button><button data-t="friends">交友</button><button data-t="idv">实名核验</button><button data-t="opening">开业活动</button><button data-t="banners">横幅广告</button><button data-t="consult">站内咨询</button><button data-t="providers">入驻申请</button><button data-t="splash">开屏广告</button><button data-t="referral">邀请奖励</button><button data-t="feedback">意见反馈</button><button data-t="ops">运营·徽章</button><button data-t="hits">拦截记录</button>
+      <button data-t="users" class="on">用户/会员</button><button data-t="payproofs">付款审核<span class="tab-badge" hidden></span></button><button data-t="reports">举报<span class="tab-badge" hidden></span></button><button data-t="posts">帖子</button><button data-t="review">内容审核<span class="tab-badge" hidden></span></button><button data-t="merchants">商家/评价<span class="tab-badge" hidden></span></button><button data-t="chicken">代点<span class="tab-badge" hidden></span></button><button data-t="promo">推广统计<span class="tab-badge" hidden></span></button><button data-t="settings">设置</button><button data-t="friends">交友<span class="tab-badge" hidden></span></button><button data-t="idv">实名核验<span class="tab-badge" hidden></span></button><button data-t="opening">开业活动</button><button data-t="banners">横幅广告</button><button data-t="consult">站内咨询<span class="tab-badge" hidden></span></button><button data-t="providers">入驻申请<span class="tab-badge" hidden></span></button><button data-t="splash">开屏广告</button><button data-t="referral">邀请奖励<span class="tab-badge" hidden></span></button><button data-t="feedback">意见反馈<span class="tab-badge" hidden></span></button><button data-t="ops">运营·徽章</button><button data-t="hits">拦截记录</button>
     </div>
     <div class="card" id="t-users">
       <div class="row"><input class="f" id="us" placeholder="搜索编号/昵称/手机号/邮箱" style="flex:1"><button class="btn primary" id="usgo">搜索</button></div>
@@ -244,7 +275,28 @@
 <script>
 var E = LH.esc, err = document.getElementById('err'), okEl = document.getElementById('ok');
 function msg(t, isErr){ LH.showErr(isErr ? err : okEl, t); LH.showErr(isErr ? okEl : err, ''); if (t) window.scrollTo(0, 0); }
-async function call(m, u, b){ try { return await LH.api(m, u, b); } catch(e){ if (e.status === 401){ showLogin(); } msg(e.message, true); throw e; } }
+async function call(m, u, b){
+  try {
+    var r = await LH.api(m, u, b);
+    // 开通/驳回/通过/拒绝等改数据成功后刷新标签角标（loadTabCounts 走 LH.api，不走 call，不会递归）
+    if (String(m).toUpperCase() !== 'GET') loadTabCounts();
+    return r;
+  } catch(e){ if (e.status === 401){ showLogin(); } msg(e.message, true); throw e; }
+}
+// 标签栏待处理数量：键名与按钮的 data-t 一致；失败静默，不打断登录与页面加载
+async function loadTabCounts(){
+  var d;
+  try { d = await LH.api('GET', '/api/admin/tab-counts'); } catch(e){ return; }
+  if (!d || typeof d !== 'object') return;
+  document.querySelectorAll('#tabs button').forEach(function(b){
+    var sp = b.querySelector('.tab-badge');
+    if (!sp) return;
+    var n = d[b.dataset.t];
+    n = (typeof n === 'number' && isFinite(n) && n > 0) ? Math.floor(n) : 0;
+    if (n > 0){ sp.textContent = String(n); sp.hidden = false; }
+    else { sp.textContent = ''; sp.hidden = true; }
+  });
+}
 function showLogin(){ document.getElementById('loginBox').style.display = 'block'; document.getElementById('panel').style.display = 'none'; }
 document.getElementById('linkfmt').textContent = location.origin + '/?ref=推广码';
 document.getElementById('alogin').onclick = async function(){
@@ -259,7 +311,6 @@ document.querySelectorAll('#tabs button').forEach(function(b){
 });
 async function payProofs(){
   var d = await call('GET', '/api/admin/pay-proofs?status=' + encodeURIComponent(document.getElementById('ppst').value));
-  document.getElementById('pppend').textContent = d.pending ? ' (' + d.pending + ')' : '';
   var ST = {pending: '待审核', approved: '已开通', rejected: '已驳回'};
   document.getElementById('pplist').innerHTML = d.items.length ? d.items.map(function(x){
     return '<div class="cmt" style="display:block" id="pp' + x.id + '"><div class="who">#' + x.id + ' · 编号 ' + E(String(x.member_no || x.user_id)) + ' ' + E(x.nickname) + ' · <b>' + E(x.kind_label) + (x.kind === 'extra' ? ' ×' + x.extra_n : '') + '</b> · 应付 ¥' + x.expect + ' · ' + (ST[x.status] || E(x.status)) + '</div>' +
@@ -285,6 +336,7 @@ async function boot(){
   var vt = (s.visits && s.visits.today) ? s.visits.today : {pv:0,uv:0,day:''};
   document.getElementById('stats').textContent = '今日 PV ' + (vt.pv||0) + ' · UV ' + (vt.uv||0) + ' · 用户 ' + s.users + ' · 会员 ' + s.members + ' · 高级 ' + s.premium + ' · 商家 ' + s.merchants + ' · 待审核 ' + s.pending + ' · 待审店铺 ' + (s.shop_pending || 0) + ' · 待审评价 ' + (s.review_pending || 0) + ' · 帖子 ' + s.posts + ' · 评论 ' + s.comments + ' · 待处理举报 ' + s.reports + ' · 交友资料 ' + s.profiles + ' · 7天可疑私信 ' + s.flagged7 + ' · 数据库 ' + s.db_mb + 'MB/1024MB';
   renderVisits(s.visits);
+  loadTabCounts();
   users();
 }
 function renderVisits(v){
