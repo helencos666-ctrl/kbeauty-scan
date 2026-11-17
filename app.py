@@ -326,7 +326,7 @@ async def translate(request: Request):
         out["cached"] = True
     if res.get("engine"):
         out["engine"] = res["engine"]
-    if res.get("src") and res["src"] != text:
+    if from_asr and res.get("src") and res["src"] != text:
         out["src"] = res["src"]
     return out
 
