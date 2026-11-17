@@ -344,6 +344,29 @@ async def _m2m(account, token, text, direction, timeout):
     return raw.strip()
 
 
+def missing_places(src: str, out: str, direction: str):
+    """译文漏掉已知地名时返回缺失对照，例如把 홍대 译成「洪水」。"""
+    src, out = src or "", out or ""
+    hits = []
+    if direction == "zh2ko":
+        hits = [(zh, ko) for zh, ko in _PLACE_ZH if zh in src]
+    else:
+        hits = [(ko, zh) for ko, zh in _PLACE_KO if ko in src]
+    ok = set()
+    for a, b in hits:
+        if b in out or a in out:
+            ok.add(a)
+            ok.add(b)
+    miss = []
+    for a, b in hits:
+        if a in ok or b in ok:
+            continue
+        if any(len(x) > len(a) and a in x and x in ok for x, _ in hits):
+            continue
+        miss.append(f"{a}={b}")
+    return miss
+
+
 def _ok_ko(src: str, ko: str) -> bool:
     if not ko or not HANGUL.search(ko):
         return False
@@ -408,6 +431,7 @@ async def translate_text(text: str, direction: str = "zh2ko", scene: str = "gene
     account, token = cf_creds()
     engine = ""
     result: dict = {}
+    rejected_out = ""
 
     if account and token:
         places = place_hints(src, direction)
@@ -426,18 +450,44 @@ async def translate_text(text: str, direction: str = "zh2ko", scene: str = "gene
             obj = parse_obj(raw)
             if direction == "zh2ko":
                 ko = apply_place_ko(_pick_ko(obj, raw), src)
-                if _ok_ko(src, ko):
+                if _ok_ko(src, ko) and not missing_places(src, ko, "zh2ko"):
                     result = {"ko": ko, "roman": romanize(ko) if want_roman else ""}
                     engine = "llm"
+                elif ko:
+                    rejected_out = ko
             else:
                 zh = _pick_zh(obj, raw)
-                if _ok_zh(src, zh):
+                if _ok_zh(src, zh) and not missing_places(src, zh, "ko2zh"):
                     result = {"zh": zh}
                     engine = "llm"
+                elif zh:
+                    rejected_out = zh
         except (httpx.TimeoutException, asyncio.TimeoutError):
             log.warning("llm timeout %s", direction)
         except Exception:
             log.warning("llm failed %s", direction, exc_info=False)
+
+        # 地名漏译（如 홍대→洪水）时再试一次，不把错误结果写入缓存
+        if not engine and rejected_out and account and token:
+            try:
+                hint = "请务必使用这些地名：" + "、".join(place_hints(src, direction).split("、")[:8])
+                raw = await _llm(account, token, [
+                    {"role": "system", "content": sys},
+                    {"role": "user", "content": user + "\n" + hint},
+                ], max(0.8, LLM_TIMEOUT - 0.3))
+                obj = parse_obj(raw)
+                if direction == "zh2ko":
+                    ko = apply_place_ko(_pick_ko(obj, raw), src)
+                    if _ok_ko(src, ko) and not missing_places(src, ko, "zh2ko"):
+                        result = {"ko": ko, "roman": romanize(ko) if want_roman else ""}
+                        engine = "llm"
+                else:
+                    zh = _pick_zh(obj, raw)
+                    if _ok_zh(src, zh) and not missing_places(src, zh, "ko2zh"):
+                        result = {"zh": zh}
+                        engine = "llm"
+            except Exception:
+                log.warning("llm retry failed %s", direction, exc_info=False)
 
         if not engine:
             try:
