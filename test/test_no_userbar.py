@@ -115,12 +115,16 @@ check("me.html 头像入口调用 LH.pickAvatar",
 check("me.html 未登录仍有免费注册 / 登录文案",
       "免费注册 / 登录" in me and "/login" in me)
 
-# ---------- 4. 韩友圈顶栏不受影响 ----------
+# ---------- 4. 韩友圈顶栏已精简：通知 / 私信入口移到「我的」页 ----------
 comm = read("community.html")
-check("community.html 保留通知铃铛 #notiIc", 'id="notiIc"' in comm)
-check("community.html 保留私信入口 #inboxIc", 'id="inboxIc"' in comm)
-check("community.html 保留未读小红点逻辑",
-      "notif_unread" in comm and "user.unread" in comm)
+check("community.html 不再有通知铃铛 #notiIc",
+      'id="notiIc"' not in comm and "notiIc" not in comm)
+check("community.html 不再有私信入口 #inboxIc",
+      'id="inboxIc"' not in comm and "inboxIc" not in comm)
+check("community.html 不再给通知 / 私信节点插未读角标",
+      "notif_unread" not in comm and "user.unread" not in comm)
+check("community.html 仍保留全部频道入口 /community/boards",
+      "/community/boards" in comm)
 
 # ---------- 5. 不误删解除拉黑 ----------
 msgs = read("messages.html")

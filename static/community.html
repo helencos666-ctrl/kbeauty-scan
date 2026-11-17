@@ -10,21 +10,16 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="旅韩助手">
 <link rel="manifest" href="/manifest.webmanifest">
-<link rel="apple-touch-icon" href="/static/icons/apple-touch-icon.png?v=68">
-<link rel="icon" type="image/png" sizes="192x192" href="/static/icons/icon-192.png?v=68">
-<link rel="stylesheet" href="/static/pwa.css?v=68">
-<link rel="stylesheet" href="/static/community.css?v=68">
+<link rel="apple-touch-icon" href="/static/icons/apple-touch-icon.png?v=69">
+<link rel="icon" type="image/png" sizes="192x192" href="/static/icons/icon-192.png?v=69">
+<link rel="stylesheet" href="/static/pwa.css?v=69">
+<link rel="stylesheet" href="/static/community.css?v=69">
 </head>
 <body>
 <header class="thero">
   <div class="thero-in">
-    <div>
-      <h1>🧭 韩友圈</h1>
-      <p>去韩国前，问问走过的人</p>
-    </div>
+    <h1>🧭 韩友圈</h1>
     <div class="thero-act">
-      <a href="/community/notices" id="notiIc" title="通知" aria-label="通知">🔔</a>
-      <a href="/community/messages" id="inboxIc" title="私信" aria-label="私信">💬</a>
       <a href="/community/boards" title="全部频道" aria-label="全部频道">🗂️</a>
     </div>
   </div>
@@ -32,11 +27,9 @@
 <main class="home">
   <div class="seg" id="tabs">
     <button data-t="recommend">推荐</button>
-    <button data-t="featured">🌟 精选</button>
-    <button data-t="news">实用干货</button>
-    <button data-t="hot">今日热议</button>
+    <button data-t="featured">精选</button>
     <button data-t="latest">刚发布</button>
-    <button data-t="follow" id="tFollow" style="display:none">我关注的</button>
+    <button data-t="follow">我关注</button>
   </div>
 
   <div id="boardBanner"></div>
@@ -128,7 +121,7 @@
   <a href="/?tab=more"><i>☰</i>全部</a>
   <a href="/me"><i>👤</i>我的</a>
 </nav>
-<script src="/static/community.js?v=68"></script>
+<script src="/static/community.js?v=69"></script>
 <script src="/static/banners.js"></script>
 <script>
 var WARN = {
@@ -149,6 +142,8 @@ var WARN = {
   logistics: '📦 物流信息由商家自行发布并负责。请确认运费、时效、保价和清关责任，违禁品不得寄递，谨慎预付全款并保留单号凭证。',
 };
 var MB = ['hotel','car','clinic','agency','daigou','guide','kpop','logistics'], SUBC = {}, btag = LH.qs('tag') || '';
+// 允许的 tab：news / hot 已从 tab 栏移除（数据仍由推荐页栏目调用），旧链接改由下方 init 回退到 recommend
+var ALLOWED_TABS = ['recommend', 'featured', 'latest', 'follow', 'topic'];
 var board = LH.qs('board') || '', tab = LH.qs('tab') || 'recommend', next = 0, fb = false, boards = {}, user = null;
 var listEl = document.getElementById('list'), moreEl = document.getElementById('more');
 function setTab(t){
@@ -239,6 +234,7 @@ async function section(el, url, ranked, titleEl){
   } catch(e){ el.innerHTML = '<div class="empty" style="padding:10px">' + LH.esc(e.message) + '</div>'; }
 }
 async function loadHome(){
+  // 保留推荐页栏目对 feed?tab=hot 与 feed?tab=latest&boards=pit,visa 的调用
   section(document.getElementById('hotList'), '/api/community/feed?tab=hot&limit_n=5', true, document.getElementById('hotTitle'));
   section(document.getElementById('sfList'), '/api/community/feed?tab=latest&boards=pit,visa&limit_n=5', false);
   var fr = document.getElementById('frow'), note = document.getElementById('fnote');
@@ -255,16 +251,15 @@ async function loadHome(){
   if (d){ boards = d.boards || {}; user = d.user; if (d.merchant_boards) MB = d.merchant_boards; }
   try { SUBC = (await LH.api('GET', '/api/merch/meta')).subcats || {}; } catch(e){}
   if (board && !boards[board]) board = '';
-  document.getElementById('tFollow').style.display = '';
-  if (user){
-    if (user.unread) document.getElementById('inboxIc').insertAdjacentHTML('beforeend', '<span class="dot">' + (user.unread > 99 ? '99+' : user.unread) + '</span>');
-  }
-  // 未登录也保留 ?tab=follow，由 load() 的 login_required 提示去登录，不改写成 recommend
-  if (user && user.notif_unread) document.getElementById('notiIc').insertAdjacentHTML('beforeend', '<span class="dot">' + (user.notif_unread > 99 ? '99+' : user.notif_unread) + '</span>');
-  if (['recommend', 'news', 'hot', 'latest', 'follow', 'featured', 'topic'].indexOf(tab) < 0) tab = 'recommend';
+  // 旧链接 /community?tab=news、/community?tab=hot 回退到「推荐」（feed?tab=news/hot 仍由推荐页栏目调用）
+  if (tab === 'news' || tab === 'hot'){
+    tab = 'recommend'; board = '';
+    try { history.replaceState(null, '', '/community'); } catch(e){}
+  } else if (ALLOWED_TABS.indexOf(tab) < 0) tab = 'recommend';
+  // ?tab=topic（往期话题）和 ?tab=follow（未登录也留在 follow，由 load() 提示登录）都不改写
   render();
 })();
 </script>
-<script src="/static/pwa.js?v=68" defer></script>
+<script src="/static/pwa.js?v=69" defer></script>
 </body>
 </html>
