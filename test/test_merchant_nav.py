@@ -51,7 +51,7 @@ check("home 扫描识别副标题用拍照", "拍照查成分" in coreblk and "�
 check("home 吃喝玩乐五格", "吃喝玩乐" in home and all(
     u in home for u in ["/food", "/food?cat=cafe", "/shopping", "/attractions", "/places?category=hotel"]))
 check("home 五格文案", all(w in home for w in [">美食<", ">咖啡<", ">购物<", ">景点<", ">酒店<"]))
-check("home 广告轮播四张", all("/static/home-ads/ad-%d.jpg?v=69" % i in home for i in (1, 2, 3, 4)) and "蓝憬通讯" in home and 'data-ad="lanjing"' in home
+check("home 广告轮播四张", all("/static/home-ads/ad-%d.jpg?v=70" % i in home for i in (1, 2, 3, 4)) and "蓝憬通讯" in home and 'data-ad="lanjing"' in home
       and 'class="ads' in home and "adsDots" in home)
 check("home 附近推荐", "附近推荐" in home and 'data-sort="dist"' in home and 'data-sort="rec"' in home
       and "/api/places" in index)
@@ -86,6 +86,34 @@ check("home 广告字幕 #adsCap 且四张齐全",
       'id="adsCap"' in home and all(x in home for x in ("咸草酱蟹", "大家烤肉", "DAYONE", "蓝憬通讯")))
 check("home 第 4 张副标题：推荐好友领手机卡",
       "推荐2位好友注册 免费领韩国手机卡" in home)
+
+
+# ---- 首页三张核心卡强调（深绿渐变 + 白字 + 白色 SVG 图标） ----
+def css_first(sel):
+    m = re.search(re.escape(sel) + r"\{([^}]*)\}", index)
+    return m.group(1) if m else ""
+
+core_a = css_first(".core a")
+core_b = css_first(".core b")
+core_span = css_first(".core span")
+core_ico = css_first(".core .ico")
+
+check("home 三卡上方有小标题 旅韩三件套", 'class="core-lab"' in home and "旅韩三件套" in home)
+check("home .core 仍是三列 grid", "grid-template-columns:1fr 1fr 1fr" in css_first(".core"))
+check("home 三卡 href/data-go 不变",
+      'href="/?tab=sub" data-go="sub"' in coreblk
+      and 'href="/?tab=card" data-go="card"' in coreblk
+      and 'href="/?tab=cos" data-go="cos"' in coreblk)
+check("home .core a 深绿渐变底", "linear-gradient" in core_a
+      and ("#146E68" in core_a or "#0F5A55" in core_a))
+check("home .core a 不再是白底", "background:#fff" not in core_a and "background: #fff" not in core_a)
+check("home .core b 文字为白色", "color:#fff" in core_b)
+check("home .core span 为实色浅白", ("#E6F3F1" in core_span or "#F3FAF9" in core_span)
+      and "var(--sub)" not in core_span)
+check("home .core b 字号至少 15px", bool(re.search(r"font-size:(1[5-9]|[2-9]\d)px", core_b)), core_b)
+check("home .core .ico 内为 svg 而非 emoji", "<svg" in coreblk
+      and not any(e in coreblk for e in ("🚇", "💬", "📷")))
+check("home .core .ico 保留 36×36", "width:36px" in core_ico and "height:36px" in core_ico)
 
 print("%s passed, %s failed" % (ok, fail))
 if fail:

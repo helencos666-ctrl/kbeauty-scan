@@ -163,7 +163,7 @@ check("顶栏压缩只作用于 header.thero",
 check("main.home 单独微调上边距", bool(rule(css, "main.home")))
 
 # ---------- 7. 版本号与第三方资源未被改动 ----------
-check("community.html 的 ?v= 仍为 69", html.count("?v=69") >= 4 and "?v=70" not in html)
+check("community.html 的 ?v= 仍为 70", html.count("?v=70") >= 4 and "?v=71" not in html)
 check("未新增外链 http(s) 资源",
       "http://" not in html and "https://" not in html.replace("https://schema.org", ""))
 
