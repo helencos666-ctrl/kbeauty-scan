@@ -1,0 +1,143 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>推荐一个地点 · 旅韩助手</title>
+<meta name="description" content="向旅韩助手吃喝玩推荐你去过的韩国店铺、咖啡馆、酒店或景点。">
+<meta name="theme-color" content="#ff6b8f">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="旅韩助手">
+<link rel="manifest" href="/manifest.webmanifest">
+<link rel="apple-touch-icon" href="/static/icons/apple-touch-icon.png">
+<link rel="icon" type="image/png" sizes="192x192" href="/static/icons/icon-192.png">
+<link rel="stylesheet" href="/static/pwa.css">
+<link rel="stylesheet" href="/static/community.css?v=53">
+<link rel="stylesheet" href="/static/places.css?v=57">
+</head>
+<body class="fp-page">
+<header class="fp-hd">
+  <h1>推荐一个地点</h1>
+  <p>请先在地图上确认这家店，再写一句真实感受。不要用「最」「第一」「唯一」，也不要留微信或电话。</p>
+</header>
+<main>
+  <div class="card userbar" id="ub">加载中…</div>
+  <div class="err" id="err" style="display:none"></div>
+  <div class="ok" id="ok" style="display:none"></div>
+  <form class="card" id="f" autocomplete="off">
+    <label class="lab">名称</label>
+    <input class="f" id="name" name="name" maxlength="60" required placeholder="店名、酒店或景点名称">
+    <label class="lab">分类</label>
+    <select class="f" id="category" name="category" required>
+      <option value="">请选择</option>
+    </select>
+    <label class="lab">地址或附近地标</label>
+    <input class="f" id="address" name="address" maxlength="80" placeholder="例如：首尔中区明洞">
+    <div class="row" style="margin:10px 0">
+      <button class="btn" type="button" id="find">在地图上查找</button>
+    </div>
+    <div id="picks"></div>
+    <input type="hidden" id="kakao_id" name="kakao_id" value="">
+    <label class="lab">现场照片（1–6 张）</label>
+    <label class="btn" for="photos">选择照片</label>
+    <input id="photos" type="file" accept="image/*" multiple style="display:none">
+    <div class="fp-previews" id="previews"></div>
+    <label class="lab">一句话推荐（200 字以内）</label>
+    <textarea class="f" id="rec" name="rec_text" maxlength="200" rows="3" required placeholder="写你真实的到店感受，例如人不多、餐品干净、离地铁很近。"></textarea>
+    <p class="tip">每人每天最多推荐 5 家。通过审核后会公开，并给你 10 旅行豆。照片会压缩并去掉定位信息。</p>
+    <button class="btn primary block" type="submit" id="go">提交审核</button>
+  </form>
+  <p style="text-align:center;margin:14px 0"><a href="/places">返回列表</a></p>
+</main>
+<nav>
+  <a href="/"><i>🏠</i>首页</a>
+  <a href="/?tab=sub"><i>🚇</i>地铁</a>
+  <a href="/?tab=card"><i>💬</i>翻译</a>
+  <a href="/community"><i>🧭</i>韩友圈</a>
+  <a href="/?tab=more"><i>☰</i>全部</a>
+  <a href="/me"><i>👤</i>我的</a>
+</nav>
+<script src="/static/community.js?v=53"></script>
+<script src="/static/pwa.js"></script>
+<script>
+(async function(){
+  var err = document.getElementById('err'), ok = document.getElementById('ok');
+  function show(el,t){ el.textContent=t||''; el.style.display=t?'block':'none'; }
+  var d = await LH.userbar(document.getElementById('ub'));
+  if (!d || !d.user){ location.href='/login?next='+encodeURIComponent('/places/new'); return; }
+  var meta = await LH.api('GET','/api/places/meta');
+  document.getElementById('category').innerHTML = '<option value="">请选择</option>' +
+    meta.categories.map(function(c){ return '<option value="'+LH.esc(c.id)+'">'+LH.esc(c.label)+'</option>'; }).join('');
+  var files = [];
+  document.getElementById('photos').addEventListener('change', async function(){
+    var incoming = Array.prototype.slice.call(this.files||[]);
+    for (var i=0;i<incoming.length && files.length<6;i++){
+      files.push(await LH.compress(incoming[i]));
+    }
+    if (incoming.length && files.length>=6) show(err, '最多 6 张照片'); else show(err,'');
+    var box=document.getElementById('previews'); box.innerHTML='';
+    files.forEach(function(f){ var url=URL.createObjectURL(f); var img=document.createElement('img'); img.src=url; box.appendChild(img); });
+    this.value='';
+  });
+  var picked=null;
+  document.getElementById('find').onclick = async function(){
+    show(err,''); show(ok,'');
+    var name=document.getElementById('name').value.trim();
+    var addr=document.getElementById('address').value.trim();
+    var q=(name+' '+addr).trim();
+    if (!q){ show(err,'请先填写名称或地址'); return; }
+    try {
+      var r = await LH.api('GET', '/api/place/search?'+new URLSearchParams({q:q}));
+      var items = r.items || r.places || r.results || [];
+      if (!items.length && r.id) items=[r];
+      // 兼容 /api/place/search 的返回结构
+      if (!items.length && Array.isArray(r)) items=r;
+      if (r && r.ok && r.list) items=r.list;
+      if (!items.length){ document.getElementById('picks').innerHTML='<p class="tip">没有找到匹配的地点。你仍可以提交，管理员会再核对。</p>'; picked=null; document.getElementById('kakao_id').value=''; return; }
+      renderPicks(items);
+    } catch(e){ show(err, e.message); }
+  };
+  function renderPicks(items){
+    var box=document.getElementById('picks');
+    box.innerHTML = '<p class="tip">请点选地图上的地点：</p><ul class="fp-pick">' + items.map(function(it,i){
+      var id=it.id||it.kakao_id||'';
+      var name=it.name||it.place_name||'';
+      var addr=it.addr||it.address||it.road_address_name||it.address_name||'';
+      return '<li data-i="'+i+'" data-id="'+LH.esc(id)+'"><b>'+LH.esc(name)+'</b><span>'+LH.esc(addr)+'</span></li>';
+    }).join('') + '</ul>';
+    box.querySelectorAll('li').forEach(function(li){
+      li.onclick=function(){
+        box.querySelectorAll('li').forEach(function(x){ x.classList.remove('on'); });
+        li.classList.add('on');
+        var it=items[+li.dataset.i];
+        picked=it;
+        document.getElementById('kakao_id').value=it.id||it.kakao_id||'';
+        if (it.name||it.place_name) document.getElementById('name').value=it.name||it.place_name;
+        var addr=it.addr||it.address||it.road_address_name||it.address_name;
+        if (addr) document.getElementById('address').value=addr;
+      };
+    });
+  }
+  document.getElementById('f').addEventListener('submit', async function(ev){
+    ev.preventDefault();
+    show(err,''); show(ok,'');
+    if (files.length<1){ show(err,'请至少上传 1 张现场照片'); return; }
+    var fd=new FormData();
+    fd.append('name', document.getElementById('name').value.trim());
+    fd.append('category', document.getElementById('category').value);
+    fd.append('address', document.getElementById('address').value.trim());
+    fd.append('rec_text', document.getElementById('rec').value.trim());
+    fd.append('kakao_id', document.getElementById('kakao_id').value.trim());
+    files.forEach(function(f){ fd.append('photos', f, f.name||'img.jpg'); });
+    document.getElementById('go').disabled=true;
+    try {
+      var r = await LH.api('POST', '/api/places', fd);
+      show(ok, r.message || '已提交，请等待审核。');
+      setTimeout(function(){ location.href='/places'; }, 1200);
+    } catch(e){ show(err, e.message); document.getElementById('go').disabled=false; }
+  });
+})();
+</script>
+</body>
+</html>

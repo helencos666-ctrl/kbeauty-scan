@@ -71,6 +71,21 @@
         <p class="tip" style="margin-top:0">用户提交的店铺推荐和避雷经验。通过后公开，并向提交人发放 10 旅行豆；拒绝后仅提交人可见理由。简介不得含网址、电话或联系方式。</p>
         <div id="shoplist"></div>
       </div>
+      <div class="card">
+        <h2>会员推荐地点审核 <span id="fppend" class="pill pending" style="display:none"></span></h2>
+        <p class="tip" style="margin-top:0">吃喝玩里会员提交的店铺、酒店、咖啡馆和景点。服务器会用 Kakao 地图核对；找不到的会标「待核对」。通过后公开，并向提交人发放 10 旅行豆。拒绝时请填写理由（提交人可见）。</p>
+        <div class="row" style="gap:8px;margin-bottom:8px;flex-wrap:wrap">
+          <select class="f" id="fpstatus" style="flex:1;min-width:110px">
+            <option value="pending">待审核</option>
+            <option value="flagged">待核对（地图未找到）</option>
+            <option value="approved">已通过</option>
+            <option value="rejected">未通过</option>
+            <option value="all">全部</option>
+          </select>
+          <button class="btn primary" type="button" id="fpgo">刷新</button>
+        </div>
+        <div id="fplist"></div>
+      </div>
       <div class="card"><p class="tip" style="margin:0">商家资料（照片、地址、价格、菜单）和用户评价审核在「商家/评价」标签里。</p></div>
     </div>
     <div id="t-merchants" style="display:none">
@@ -346,13 +361,15 @@ document.getElementById('usgo').onclick = users;
 async function reports(){
   var d = await call('GET', '/api/admin/reports');
   document.getElementById('rlist').innerHTML = d.reports.length ? d.reports.map(function(r){
-    var TN = {post: '帖子', comment: '评论', profile: '交友资料', message: '私信', user: '用户'};
+    var TN = {post: '帖子', comment: '评论', profile: '交友资料', message: '私信', user: '用户', fan_review: '地点评价'};
     return '<div class="cmt"><div class="who">' + (TN[r.type] || r.type) + ' #' + r.target_id + ' · 举报人 ' + E(r.reporter || '-') + ' · ' + E(r.time) + '</div>' +
       '<div class="ct">内容：' + E(r.text) + '<br>理由：' + E(r.reason) + '</div><div class="row" style="margin-top:6px">' +
       (r.post_id ? '<a class="btn sm ghost" target="_blank" href="/community/post/' + r.post_id + '">查看</a>' : '') +
+      (r.type === 'fan_review' && r.place_id ? '<a class="btn sm ghost" target="_blank" href="/places/' + r.place_id + '">查看地点</a>' : '') +
       (r.type === 'user' && r.target_user ? '<a class="btn sm ghost" target="_blank" href="/community/u/' + r.target_user + '">查看主页</a>' : '') +
       (r.type === 'profile' ? '<button class="btn sm primary" data-hidep="' + r.target_id + '">隐藏资料</button>' :
-       (r.type === 'user' ? '' : '<button class="btn sm primary" data-del="' + r.type + ':' + r.target_id + '">删除该内容</button>')) +
+       (r.type === 'fan_review' ? '<button class="btn sm primary" data-fphide="' + r.target_id + '">隐藏评价</button>' :
+       (r.type === 'user' ? '' : '<button class="btn sm primary" data-del="' + r.type + ':' + r.target_id + '">删除该内容</button>'))) +
       (r.target_user ? '<button class="btn sm gray" data-ban="' + r.target_user + '">封禁' + (r.type === 'user' ? '该用户' : '作者') + '</button>' : '') +
       '<button class="btn sm gray" data-res="' + r.id + '">忽略</button></div></div>';
   }).join('') : '<div class="empty">没有待处理的举报</div>';
@@ -362,6 +379,12 @@ async function reports(){
   document.querySelectorAll('#rlist [data-hidep]').forEach(function(b){ b.onclick = async function(){ if (!confirm('隐藏该交友资料？')) return; await call('POST', '/api/admin/friends/' + b.dataset.hidep, {action: 'hide'}); reports(); }; });
   document.querySelectorAll('#rlist [data-ban]').forEach(function(b){ b.onclick = async function(){ if (!confirm('封禁该用户？')) return; await call('POST', '/api/admin/users/' + b.dataset.ban, {action: 'ban'}); msg('已封禁', false); }; });
   document.querySelectorAll('#rlist [data-res]').forEach(function(b){ b.onclick = async function(){ await call('POST', '/api/admin/reports/' + b.dataset.res + '/resolve', {}); reports(); }; });
+  document.querySelectorAll('#rlist [data-fphide]').forEach(function(b){ b.onclick = async function(){
+    if (!confirm('隐藏这条地点评价？')) return;
+    await call('POST', '/api/admin/fanplaces/ratings/' + b.dataset.fphide, {action: 'hide'});
+    await call('POST', '/api/admin/reports/' + (b.closest('.cmt').querySelector('[data-res]') || {}).dataset.res + '/resolve', {}).catch(function(){});
+    reports();
+  }; });
 }
 var plast = 0;
 async function posts(reset){
@@ -496,7 +519,43 @@ async function review(){
     var body=editShopExtras(x); if(!body) return;
     await call('POST', '/api/admin/shop-recs/' + x.id + '/extras', body); msg('已保存菜单/地址', false); review();
   }; });
+  await loadFanplaces();
 }
+async function loadFanplaces(){
+  var st = (document.getElementById('fpstatus') || {}).value || 'pending';
+  var fp = await call('GET', '/api/admin/fanplaces?status=' + encodeURIComponent(st));
+  var pe = document.getElementById('fppend');
+  if (pe){ pe.textContent = fp.pending + ' 条待审'; pe.style.display = fp.pending ? 'inline-block' : 'none'; }
+  var SN = {pending:'待审核', flagged:'待核对', approved:'已通过', rejected:'未通过'};
+  document.getElementById('fplist').innerHTML = fp.items.length ? fp.items.map(function(x){
+    var photos = (x.photo_ids||[]).map(function(id){ return '<img src="/api/admin/fanplaces/photos/' + id + '?thumb=1" alt="" style="width:72px;height:72px;object-fit:cover;border-radius:8px;margin:0 6px 6px 0">'; }).join('');
+    var map = x.map_url ? '<a class="btn sm ghost" target="_blank" rel="noopener noreferrer" href="' + E(x.map_url) + '">Kakao 地图</a>' : '';
+    var flag = x.kakao_found ? ('地图已核对' + (x.kakao_id ? (' · ' + E(x.kakao_id)) : '')) : '地图未找到，请人工核对';
+    return '<div class="fp-admin" id="fp' + x.id + '" style="display:block;border-top:1px solid #f0e3e7;padding:10px 0"><div class="who">#' + E(String(x.member_no||'')) + ' ' + E(x.nickname) + ' · ' + E(x.name) + ' <span class="pill">' + E(SN[x.status]||x.status) + '</span></div>' +
+      '<div class="meta"><span class="tag">' + E(x.category_label) + '</span><span>' + E(x.address||x.address_user||'') + '</span><span>' + E(x.time) + '</span></div>' +
+      (x.name_user && x.name_user !== x.name ? '<p class="tip" style="margin:6px 0">会员填写名称：' + E(x.name_user) + '</p>' : '') +
+      '<p class="tip" style="margin:6px 0">' + flag + '</p>' +
+      '<p style="margin:8px 0;line-height:1.7">' + E(x.rec_text) + '</p>' +
+      (photos ? '<div>' + photos + '</div>' : '') +
+      '<div class="row" style="gap:8px;flex-wrap:wrap">' +
+        (x.status==='approved'?'':'<button class="btn sm primary" data-fpok="' + x.id + '">通过（+10旅行豆）</button>') +
+        (x.status==='rejected'?'':'<button class="btn sm gray" data-fpno="' + x.id + '">拒绝</button>') +
+        map + '</div></div>';
+  }).join('') : '<div class="empty">没有该状态的地点投稿</div>';
+  document.querySelectorAll('#fplist [data-fpok]').forEach(function(b){ b.onclick = async function(){
+    var r = await call('POST', '/api/admin/fanplaces/subs/' + b.dataset.fpok, {action: 'approve'});
+    document.getElementById('fp' + b.dataset.fpok).remove();
+    msg(r.awarded ? ('已通过，旅行豆 +' + r.awarded) : '已通过', false);
+    loadFanplaces();
+  }; });
+  document.querySelectorAll('#fplist [data-fpno]').forEach(function(b){ b.onclick = async function(){
+    var why = prompt('拒绝理由（提交人可见）', '信息不足或不符合约定');
+    if (why === null) return;
+    await call('POST', '/api/admin/fanplaces/subs/' + b.dataset.fpno, {action: 'reject', reason: why});
+    document.getElementById('fp' + b.dataset.fpno).remove();
+  }; });
+}
+
 async function loadReviews(){
   var st=document.getElementById('revstatus').value, kind=document.getElementById('revkind').value, hid=document.getElementById('revhid').value;
   var q='/api/admin/shop-reviews?status='+encodeURIComponent(st)+'&';
@@ -769,6 +828,7 @@ async function chickenAdmin(){
 }
 document.getElementById('ckgo').onclick = chickenAdmin;
 document.getElementById('revgo').onclick = loadReviews;
+document.getElementById('fpgo').onclick = loadFanplaces;
 document.getElementById('revstatus').onchange = loadReviews;
 document.getElementById('madd').onclick = function(){ openMerchantForm(null, document.getElementById('mform')); };
 document.getElementById('ckadd').onclick = function(){

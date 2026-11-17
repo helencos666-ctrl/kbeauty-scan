@@ -416,6 +416,8 @@ def db():
                         cur.execute(MIGRATE_ME)
                         from chat import MIGRATE_CHAT
                         cur.execute(MIGRATE_CHAT)
+                        from fanplaces import MIGRATE_FANPLACES
+                        cur.execute(MIGRATE_FANPLACES)
                     ensure_bot(conn)
                     from chicken import ensure_chicken_shops
                     ensure_chicken_shops(conn)
@@ -1732,7 +1734,7 @@ async def api_report(req: Request):
     csrf(req)
     d = await _json(req)
     tt = d.get("type")
-    if tt not in ("post", "comment", "profile", "message", "user"):
+    if tt not in ("post", "comment", "profile", "message", "user", "fan_review"):
         raise HTTPException(400, "举报对象无效")
     try:
         tid = int(d.get("id"))
@@ -1741,7 +1743,7 @@ async def api_report(req: Request):
     reason = clean_text(d.get("reason"), 200, "举报理由")
     with db() as conn:
         # 私信和用户举报：登录即可（方便处理骚扰）。帖子/评论/交友资料仍需会员。
-        if tt in ("message", "user"):
+        if tt in ("message", "user", "fan_review"):
             u = need_user(conn, req)
         else:
             u = need_tier(conn, req, 1, "开通会员（¥{t1}）后才能举报；遇到严重违规也可直接联系管理员")
@@ -1757,6 +1759,12 @@ async def api_report(req: Request):
             peer = q(conn, "SELECT id, COALESCE(is_bot,FALSE) AS is_bot FROM c_users WHERE id=%s AND NOT is_banned", (tid,), one=True)
             if not peer or peer["is_bot"]:
                 raise HTTPException(404, "用户不存在")
+        if tt == "fan_review":
+            row = q(conn, "SELECT id, user_id FROM c_fan_place_ratings WHERE id=%s AND NOT hidden", (tid,), one=True)
+            if not row:
+                raise HTTPException(404, "评价不存在")
+            if row["user_id"] == u["id"]:
+                raise HTTPException(400, "不能举报自己的评价")
         q(conn, "INSERT INTO c_reports(target_type,target_id,user_id,reason) VALUES (%s,%s,%s,%s)", (tt, tid, u["id"], reason))
     return {"ok": True}
 
@@ -2035,6 +2043,12 @@ def api_admin_reports(req: Request):
                  WHEN r.target_type='comment' THEN (SELECT body FROM c_comments WHERE id=r.target_id)
                  WHEN r.target_type='message' THEN (SELECT body FROM c_messages WHERE id=r.target_id)
                  WHEN r.target_type='user' THEN (SELECT nickname FROM c_users WHERE id=r.target_id)
+                 WHEN r.target_type='fan_review' THEN (
+                   SELECT COALESCE(p.name,'地点') || ' · ' || COALESCE(u2.nickname,'') || '：' || COALESCE(fr.body,'')
+                   FROM c_fan_place_ratings fr
+                   JOIN c_fan_places p ON p.id=fr.place_id
+                   JOIN c_users u2 ON u2.id=fr.user_id
+                   WHERE fr.id=r.target_id)
                  ELSE (SELECT nickname || '：' || intro FROM c_dating_profiles WHERE user_id=r.target_id) END AS target_text,
             CASE WHEN r.target_type='post' THEN r.target_id
                  WHEN r.target_type='comment' THEN (SELECT post_id FROM c_comments WHERE id=r.target_id) END AS post_id,
@@ -2042,10 +2056,13 @@ def api_admin_reports(req: Request):
                  WHEN r.target_type='comment' THEN (SELECT user_id FROM c_comments WHERE id=r.target_id)
                  WHEN r.target_type='message' THEN (SELECT sender_id FROM c_messages WHERE id=r.target_id)
                  WHEN r.target_type='user' THEN r.target_id
-                 ELSE r.target_id END AS target_user
+                 WHEN r.target_type='fan_review' THEN (SELECT user_id FROM c_fan_place_ratings WHERE id=r.target_id)
+                 ELSE r.target_id END AS target_user,
+            CASE WHEN r.target_type='fan_review' THEN (SELECT place_id FROM c_fan_place_ratings WHERE id=r.target_id) END AS place_id
             FROM c_reports r LEFT JOIN c_users u ON u.id=r.user_id
             WHERE NOT r.resolved ORDER BY r.id DESC LIMIT 100""")
     return {"reports": [{"id": r["id"], "type": r["target_type"], "target_id": r["target_id"], "post_id": r["post_id"],
+                         "place_id": r.get("place_id"),
                          "target_user": r["target_user"], "text": (r["target_text"] or "")[:120], "reason": r["reason"],
                          "reporter": r["reporter"] or ("系统自动标记" if r["user_id"] is None else None),
                          "time": _ts(r["created_at"])} for r in rows]}
@@ -2386,3 +2403,5 @@ from me import router as _me_router  # noqa: E402
 router.include_router(_me_router)
 from chat import router as _chat_router  # noqa: E402
 router.include_router(_chat_router)
+from fanplaces import router as _fanplaces_router  # noqa: E402
+router.include_router(_fanplaces_router)

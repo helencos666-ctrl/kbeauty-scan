@@ -233,6 +233,18 @@ PAGES = {
         "用户协议,免责声明,旅韩助手",
         True,
     ),
+    "/places": (
+        "吃喝玩｜会员推荐地点 · 旅韩助手",
+        "旅韩助手吃喝玩：会员推荐的韩国美食、咖啡、酒店住宿、景点和购物地点，审核通过后公开，可评分并查看地图。",
+        "韩国美食,韩国景点,韩国咖啡,旅韩助手,吃喝玩",
+        True,
+    ),
+    "/places/new": (
+        "推荐一个地点 · 旅韩助手",
+        "向旅韩助手吃喝玩推荐你去过的韩国店铺、咖啡馆、酒店或景点。",
+        "韩国美食,韩国景点,旅韩助手",
+        False,
+    ),
     "/admin": (
         "管理后台 · 旅韩助手",
         "旅韩助手管理后台",
@@ -279,6 +291,9 @@ FILE_PATHS = {
     "friend.html": "/community/friends/id",
     "messages.html": "/community/messages",
     "chat.html": "/community/messages",
+    "places.html": "/places",
+    "places-new.html": "/places/new",
+    "places-one.html": "/places",
     "rate.html": "/community/rate",
     "admin.html": "/admin",
     "promo.html": "/promo",
@@ -309,7 +324,7 @@ SITEMAP_PATHS = [
     "/", "/attractions", "/food", "/shopping", "/tips", "/beauty", "/faq",
     "/community", "/community/boards", "/community/rate", "/community/friends",
     "/rules", "/member", "/shops", "/pay", "/tax-refund", "/visa", "/itineraries", "/privacy", "/terms", "/promo/rules",
-    "/services", "/partner", "/deals",
+    "/services", "/partner", "/deals", "/places",
 ]
 
 router = APIRouter()

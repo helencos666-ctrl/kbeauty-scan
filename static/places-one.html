@@ -1,0 +1,123 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>地点详情 · 旅韩助手</title>
+<meta name="description" content="旅韩助手吃喝玩会员推荐地点详情、照片、评分和 Kakao 地图。">
+<meta name="theme-color" content="#ff6b8f">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="旅韩助手">
+<link rel="manifest" href="/manifest.webmanifest">
+<link rel="apple-touch-icon" href="/static/icons/apple-touch-icon.png">
+<link rel="icon" type="image/png" sizes="192x192" href="/static/icons/icon-192.png">
+<link rel="stylesheet" href="/static/pwa.css">
+<link rel="stylesheet" href="/static/community.css?v=53">
+<link rel="stylesheet" href="/static/places.css?v=57">
+</head>
+<body class="fp-page">
+<header class="fp-hd">
+  <h1 id="ttl">地点详情</h1>
+  <p id="sub"></p>
+</header>
+<main>
+  <div class="card userbar" id="ub">加载中…</div>
+  <div class="err" id="err" style="display:none"></div>
+  <div class="ok" id="ok" style="display:none"></div>
+  <div id="box">加载中…</div>
+  <p style="text-align:center;margin:14px 0"><a href="/places">返回列表</a></p>
+</main>
+<nav>
+  <a href="/"><i>🏠</i>首页</a>
+  <a href="/?tab=sub"><i>🚇</i>地铁</a>
+  <a href="/?tab=card"><i>💬</i>翻译</a>
+  <a href="/community"><i>🧭</i>韩友圈</a>
+  <a href="/?tab=more"><i>☰</i>全部</a>
+  <a href="/me"><i>👤</i>我的</a>
+</nav>
+<script src="/static/community.js?v=53"></script>
+<script src="/static/pwa.js"></script>
+<script>
+(async function(){
+  var err=document.getElementById('err'), ok=document.getElementById('ok');
+  function show(el,t){ el.textContent=t||''; el.style.display=t?'block':'none'; }
+  var d = await LH.userbar(document.getElementById('ub'));
+  var pid=parseInt((location.pathname.split('/')[2]||'0'),10);
+  if (!pid){ document.getElementById('box').textContent='地点不存在'; return; }
+  var picked=0;
+  function starBtns(cur){
+    return '<div class="fp-stars-pick" id="spick">' + [1,2,3,4,5].map(function(n){
+      return '<button type="button" data-n="'+n+'" class="'+(n<=cur?'on':'')+'">★</button>';
+    }).join('') + '</div>';
+  }
+  try {
+    var x = await LH.api('GET', '/api/places/'+pid);
+    document.title = (x.name||'地点') + ' · 旅韩助手';
+    document.getElementById('ttl').textContent = x.name;
+    document.getElementById('sub').textContent = (x.category_label||'') + (x.address?(' · '+x.address):'');
+    var gal = (x.photos||[]).map(function(p){
+      return '<img src="/api/places/photos/'+p.id+'" alt="">';
+    }).join('') || '<div class="empty">暂无照片</div>';
+    var recs = (x.recs||[]).map(function(r){
+      return '<div class="fp-rev"><div class="who">由 '+LH.esc(r.nickname)+' 推荐</div><div class="ct">'+LH.esc(r.text)+'</div></div>';
+    }).join('');
+    var avg = x.rating_count ? (x.avg_rating.toFixed(1)+' 分 · '+x.rating_count+' 人评') : '暂无评分';
+    var reviews = (x.ratings||[]).map(function(r){
+      var canRep = d && d.user && d.user.id !== r.user_id && r.body;
+      return '<div class="fp-rev"><div class="who">'+LH.esc(r.nickname)+' · <span class="fp-star">'+'★'.repeat(r.stars)+'</span> · '+LH.esc(r.time)+
+        (canRep?' <button class="btn sm ghost" data-rep="'+r.id+'">举报</button>':'') +
+        '</div>'+(r.body?'<div class="ct">'+LH.esc(r.body)+'</div>':'')+'</div>';
+    }).join('') || '<p class="tip">还没有文字评价。</p>';
+    var mine = x.my_rating || {};
+    picked = mine.stars || 0;
+    var rateBox = (d && d.user) ? (
+      '<div class="card"><h2>我来评分</h2><p class="tip" style="margin-top:0">每位会员对同一地点只能保留一条评分，之后可修改。评价请写客观感受，不要用「最」「第一」「唯一」，也不要留联系方式。</p>' +
+      starBtns(picked) +
+      '<textarea class="f" id="rbody" maxlength="300" rows="3" placeholder="选填，最多 300 字">'+LH.esc(mine.body||'')+'</textarea>' +
+      '<button class="btn primary" type="button" id="rsave" style="margin-top:8px">保存评分</button></div>'
+    ) : '<div class="card"><a class="btn primary" href="/login?next='+encodeURIComponent(location.pathname)+'">登录后评分</a></div>';
+    document.getElementById('box').innerHTML =
+      '<div class="fp-gal">'+gal+'</div>' +
+      '<div class="card">' +
+        '<div class="fp-meta"><span>'+LH.esc(x.category_label||'')+'</span><span>'+LH.esc(x.address||'')+'</span></div>' +
+        '<div class="fp-star" style="margin-top:6px">'+avg+'</div>' +
+        recs +
+        (x.map_url ? '<a class="btn primary fp-map" href="'+LH.esc(x.map_url)+'" target="_blank" rel="noopener noreferrer">在 Kakao 地图打开</a>' : '') +
+      '</div>' + rateBox +
+      '<div class="card"><h2>评价</h2>'+reviews+'</div>';
+    var sp=document.getElementById('spick');
+    if (sp){
+      sp.querySelectorAll('button').forEach(function(b){
+        b.onclick=function(){
+          picked=+b.dataset.n;
+          sp.querySelectorAll('button').forEach(function(x){ x.className = (+x.dataset.n<=picked)?'on':''; });
+        };
+      });
+    }
+    var save=document.getElementById('rsave');
+    if (save) save.onclick=async function(){
+      show(err,''); show(ok,'');
+      if (!picked){ show(err,'请先点选 1 到 5 星'); return; }
+      try {
+        var r=await LH.api('POST','/api/places/'+pid+'/rate',{stars:picked, body:document.getElementById('rbody').value});
+        show(ok, '已保存。当前 '+r.avg_rating.toFixed(1)+' 分，共 '+r.rating_count+' 人评。');
+        setTimeout(function(){ location.reload(); }, 800);
+      } catch(e){ show(err, e.message); }
+    };
+    document.querySelectorAll('[data-rep]').forEach(function(b){
+      b.onclick=async function(){
+        var why=prompt('举报理由（管理员可见）','不实或不当内容');
+        if (why===null) return;
+        try { await LH.api('POST','/api/places/reviews/'+b.dataset.rep+'/report',{reason:why}); alert('已提交给管理员'); }
+        catch(e){ alert(e.message); }
+      };
+    });
+  } catch(e){
+    document.getElementById('box').innerHTML='';
+    show(err, e.message||'地点不存在');
+  }
+})();
+</script>
+</body>
+</html>

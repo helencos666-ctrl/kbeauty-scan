@@ -1,0 +1,108 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>吃喝玩 · 会员推荐地点 · 旅韩助手</title>
+<meta name="description" content="旅韩助手吃喝玩：会员推荐的韩国美食、咖啡、酒店住宿、景点和购物地点，审核通过后公开，可评分。">
+<meta name="theme-color" content="#ff6b8f">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="旅韩助手">
+<link rel="manifest" href="/manifest.webmanifest">
+<link rel="apple-touch-icon" href="/static/icons/apple-touch-icon.png">
+<link rel="icon" type="image/png" sizes="192x192" href="/static/icons/icon-192.png">
+<link rel="stylesheet" href="/static/pwa.css">
+<link rel="stylesheet" href="/static/community.css?v=53">
+<link rel="stylesheet" href="/static/places.css?v=57">
+</head>
+<body class="fp-page">
+<header class="fp-hd">
+  <h1>📍 会员推荐地点</h1>
+  <p>吃喝玩里由会员推荐的店、咖啡馆、酒店和景点，审核通过后才会公开</p>
+</header>
+<main>
+  <div class="card userbar" id="ub">加载中…</div>
+  <div class="err" id="err" style="display:none"></div>
+  <p class="row" style="gap:8px;margin:0 0 12px">
+    <a class="btn primary" href="/places/new" style="flex:1;text-align:center">推荐一个地点</a>
+  </p>
+  <div class="fp-search">
+    <input class="f" id="q" type="search" placeholder="搜店名或地址" enterkeyhint="search">
+    <button class="btn" type="button" id="qgo">搜索</button>
+  </div>
+  <div class="fp-chips" id="chips"></div>
+  <div id="list">加载中…</div>
+  <div class="card" id="minebox" style="display:none"><h2>我提交的</h2><div id="minelist"></div></div>
+  <div class="footlinks"><a href="/food">美食</a>·<a href="/attractions">景点</a>·<a href="/shops">推荐店铺</a>·<a href="/community">社区</a></div>
+  <p style="font-size:12px;color:#888;text-align:center;margin:10px 0 16px;line-height:1.7">资料由会员提供，仅供参考，请以实地和官方信息为准。<br><a href="/terms" style="color:#2c7be5">用户协议</a> · <a href="/privacy" style="color:#2c7be5">隐私政策</a></p>
+</main>
+<nav>
+  <a href="/"><i>🏠</i>首页</a>
+  <a href="/?tab=sub"><i>🚇</i>地铁</a>
+  <a href="/?tab=card"><i>💬</i>翻译</a>
+  <a href="/community"><i>🧭</i>韩友圈</a>
+  <a href="/?tab=more"><i>☰</i>全部</a>
+  <a href="/me"><i>👤</i>我的</a>
+</nav>
+<script src="/static/community.js?v=53"></script>
+<script src="/static/pwa.js"></script>
+<script>
+(async function(){
+  var err = document.getElementById('err');
+  var d = await LH.userbar(document.getElementById('ub'));
+  var cats = [], cat = new URLSearchParams(location.search).get('cat') || '';
+  try { var meta = await LH.api('GET', '/api/places/meta'); cats = meta.categories || []; } catch(e){}
+  function chips(){
+    var box = document.getElementById('chips');
+    var all = [{id:'', label:'全部'}].concat(cats);
+    box.innerHTML = all.map(function(c){
+      return '<button type="button" class="'+(c.id===cat?'on':'')+'" data-c="'+LH.esc(c.id)+'">'+LH.esc(c.label)+'</button>';
+    }).join('');
+    box.querySelectorAll('button').forEach(function(b){
+      b.onclick = function(){ cat = b.dataset.c; chips(); load(); };
+    });
+  }
+  function stars(avg, n){
+    if (!n) return '<span class="fp-meta">暂无评分</span>';
+    return '<span class="fp-star">' + '★'.repeat(Math.round(avg)) + '☆'.repeat(5-Math.round(avg)) + '</span> <span class="fp-meta">' + avg.toFixed(1) + ' · ' + n + ' 人评</span>';
+  }
+  async function load(){
+    var q = document.getElementById('q').value.trim();
+    var url = '/api/places?' + new URLSearchParams({category: cat, query: q});
+    try {
+      var r = await LH.api('GET', url);
+      if (!cats.length) { cats = r.categories || []; chips(); }
+      document.getElementById('list').innerHTML = r.items.length ? r.items.map(function(x){
+        return '<a class="fp-card" href="/places/'+x.id+'">' +
+          (x.cover_id ? '<img class="cover" src="/api/places/photos/'+x.cover_id+'?thumb=1" alt="">' : '<div class="cover"></div>') +
+          '<div class="body"><h3>'+LH.esc(x.name)+'</h3>' +
+          '<div class="fp-meta"><span>'+LH.esc(x.category_label)+'</span><span>'+LH.esc(x.address||'')+'</span></div>' +
+          (x.recommended_by ? '<div class="fp-by">由 '+LH.esc(x.recommended_by)+' 推荐</div>' : '') +
+          stars(x.avg_rating, x.rating_count) +
+          (x.rec_text ? '<p class="fp-rec">'+LH.esc(x.rec_text)+'</p>' : '') +
+          '</div></a>';
+      }).join('') : '<div class="empty">还没有已公开的推荐，欢迎你来分享去过的店。</div>';
+    } catch(e){ LH.showErr(err, e.message); }
+  }
+  async function mine(){
+    if (!d || !d.user) return;
+    try {
+      var r = await LH.api('GET', '/api/places/mine');
+      if (!r.items.length) return;
+      var SN = {pending:'审核中', flagged:'待核对', approved:'已通过', rejected:'未通过'};
+      document.getElementById('minebox').style.display = 'block';
+      document.getElementById('minelist').innerHTML = r.items.map(function(x){
+        var link = x.status==='approved' ? ('/places/'+x.place_id) : '#';
+        return '<div class="cmt"><div class="who"><a href="'+link+'">'+LH.esc(x.name)+'</a> <span class="fp-status '+x.status+'">'+LH.esc(SN[x.status]||x.status)+'</span></div>' +
+          '<div class="ct">'+LH.esc(x.rec_text)+ (x.review_note && x.status==='rejected' ? '<br>理由：'+LH.esc(x.review_note) : '') +'</div></div>';
+      }).join('');
+    } catch(e){}
+  }
+  document.getElementById('qgo').onclick = load;
+  document.getElementById('q').addEventListener('keydown', function(ev){ if (ev.key==='Enter') load(); });
+  chips(); load(); mine();
+})();
+</script>
+</body>
+</html>

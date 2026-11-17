@@ -29,6 +29,7 @@ POINT_RULES = {
     "card": {"points": 2, "daily_cap": 5, "label": "使用沟通卡"},
     "profile": {"points": 20, "daily_cap": 0, "once": True, "label": "完善资料"},
     "shop_approve": {"points": 10, "daily_cap": 0, "label": "推荐店铺通过审核"},
+    "fanplace_approve": {"points": 10, "daily_cap": 0, "label": "推荐地点通过审核"},
     "opening_bonus": {"points": 50, "daily_cap": 0, "once": True, "label": "开业前100名奖励"},
     "post": {"points": 5, "daily_cap": 3, "label": "发帖"},
     "comment": {"points": 2, "daily_cap": 5, "label": "评论"},
@@ -153,6 +154,8 @@ def _item_key(kind, target_type, target_id):
         return "checkin"
     if kind == "shop_approve" and tid:
         return f"shop:{tid}"
+    if kind == "fanplace_approve" and tid:
+        return f"fanplace:{tid}"
     return None
 
 
@@ -262,7 +265,7 @@ def user_points_summary(conn, uid):
 def _rules_out(counts):
     out = []
     for kind, rule in POINT_RULES.items():
-        if kind in ("shop_approve", "opening_bonus", "featured", "streak_bonus"):
+        if kind in ("shop_approve", "fanplace_approve", "opening_bonus", "featured", "streak_bonus"):
             continue
         cap = rule.get("daily_cap") or 0
         used = counts.get(kind, 0)
