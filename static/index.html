@@ -10,9 +10,9 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="旅韩助手">
 <link rel="manifest" href="/manifest.webmanifest">
-<link rel="apple-touch-icon" href="/static/icons/apple-touch-icon.png?v=64">
-<link rel="icon" type="image/png" sizes="192x192" href="/static/icons/icon-192.png?v=64">
-<link rel="stylesheet" href="/static/pwa.css?v=64">
+<link rel="apple-touch-icon" href="/static/icons/apple-touch-icon.png?v=65">
+<link rel="icon" type="image/png" sizes="192x192" href="/static/icons/icon-192.png?v=65">
+<link rel="stylesheet" href="/static/pwa.css?v=65">
 <style>
 :root{--primary:#146E68;--secondary:#3D8F88;--accent:#B85A12;--pink:var(--primary);--ink:#1A2330;--sub:#4A5560;--bg:#F3F7F6;--card:#fff;--line:#D5E4E1;--success:#1B7A45;--warning:#B45309}
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
@@ -140,6 +140,12 @@ html.sp-on,html.sp-on body{overflow:hidden}
 #splash .sp-strip{position:absolute;left:0;right:0;bottom:0;height:calc(110px + env(safe-area-inset-bottom));padding-bottom:env(safe-area-inset-bottom);background:#fff;display:flex;align-items:center;justify-content:center;gap:10px}
 #splash .sp-strip img{width:44px;height:44px;border-radius:12px}#splash .sp-strip b{font-size:22px;letter-spacing:2px;color:#1A2330}#splash .sp-strip b span{display:block;font-size:12px;color:#4A5560;font-weight:400;letter-spacing:0}
 
+/* 品牌开屏：整屏 contain，背景色由 splash.js 按图设置，无广告标与底部品牌条 */
+#splash.sp-brand{background:#144254}
+#splash.sp-brand .sp-ad{left:0;right:0;top:0;bottom:0;background-color:inherit;background-position:center;background-size:contain;background-repeat:no-repeat}
+#splash.sp-brand .sp-strip,#splash.sp-brand .sp-lbl{display:none}
+#splash.sp-brand .sp-skip{bottom:calc(20px + env(safe-area-inset-bottom));right:16px;z-index:2}
+
 .mic-btn:disabled{opacity:.5}
 #micState{display:none;margin-top:8px;font-size:13px;color:var(--primary);font-weight:600}
 #micState .lvl{display:block;height:8px;margin-top:6px;border-radius:4px;background:#E6F3F1;overflow:hidden}
@@ -248,14 +254,17 @@ body.is-home .disclaimer{display:none}
 
 /* C. 广告轮播 */
 .ads{margin:0 16px 12px}
-.ads-viewport{position:relative;overflow:hidden;border-radius:16px;background:#EAF6F4;height:0;padding-bottom:42%;touch-action:pan-y}
-.ads-track{position:absolute;left:0;top:0;right:0;bottom:0;display:flex;transition:transform .38s ease;will-change:transform}
+.ads-viewport{position:relative;overflow:hidden;border-radius:16px;background:#EAF6F4;height:0;padding-bottom:38%;touch-action:pan-y}
+.ads-track{position:absolute;left:0;top:0;right:0;bottom:0;display:flex;transition:transform .4s ease;will-change:transform}
 .ads-track .slide{flex:0 0 100%;height:100%;display:block;text-decoration:none}
-.ads-track .slide img{width:100%;height:100%;object-fit:cover;display:block}
-.ads .dots{display:flex;align-items:center;justify-content:center;gap:5px;margin-top:8px}
+.ads-track .slide img{width:100%;height:100%;object-fit:cover;object-position:left center;display:block;-webkit-user-drag:none;user-select:none;-webkit-user-select:none;pointer-events:none}
+.ads-track.dragging{transition:none}
+.ads-cap{display:flex;align-items:baseline;flex-wrap:wrap;gap:6px 8px;margin:8px 2px 0;min-height:22px;text-align:left}
+.ads-cap b{font-size:15px;font-weight:800;color:var(--ink);white-space:nowrap}
+.ads-cap span{font-size:12.5px;color:var(--sub);line-height:1.4}
+.ads .dots{display:flex;align-items:center;justify-content:center;gap:5px;margin-top:6px}
 .ads .dots i{width:6px;height:6px;border-radius:50%;background:#C5E0DC;display:block;transition:width .2s,background .2s}
 .ads .dots i.on{width:14px;border-radius:4px;background:var(--primary)}
-
 /* D. 附近推荐 */
 .near-blk{background:var(--bg);padding:2px 0 12px}
 .near-blk .bh{display:flex;align-items:center;justify-content:space-between;gap:8px;padding:12px 18px 8px}
@@ -344,7 +353,7 @@ body.is-home .disclaimer{display:none}
 <body class="is-home">
 <header></header>
 <div class="hero" id="hero">
-  <a class="brand" href="/"><img src="/static/icons/icon-192.png?v=64" alt="">旅韩助手</a>
+  <a class="brand" href="/"><img src="/static/icons/icon-192.png?v=65" alt="">旅韩助手</a>
   <a class="trip-entry" href="/trips"><i>🗓️</i>行程</a>
   <a class="me-ava" href="/me" title="我的" aria-label="我的"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="8.5" r="3.6" fill="#fff"/><path d="M5 19.2c.9-3.2 3.4-5 7-5s6.1 1.8 7 5" fill="#fff"/></svg></a>
 </div>
@@ -374,19 +383,19 @@ body.is-home .disclaimer{display:none}
       </div>
     </div>
 
-    <!-- C. 广告轮播（静态配置，自动轮播 + 左右滑动） -->
+    <!-- C. 广告轮播（静态配置，自动轮播 + 左右滑动 + 无缝循环） -->
     <div class="ads" id="homeAds">
       <div class="ads-viewport">
         <div class="ads-track" id="adsTrack">
-          <a class="slide" href="/food#hamcho-myeongdong"><img src="/static/home-ads/ad-1.jpg?v=64" alt="咸草酱蟹" width="640" height="320" loading="lazy" onerror="this.style.display=&#39;none&#39;"></a>
-          <a class="slide" href="/food#daega-myeongdong"><img src="/static/home-ads/ad-2.jpg?v=64" alt="大家烤肉" width="640" height="320" loading="lazy" onerror="this.style.display=&#39;none&#39;"></a>
-          <a class="slide" href="/shops?tab=services"><img src="/static/home-ads/ad-3.jpg?v=64" alt="DAYONE" width="640" height="320" loading="lazy" onerror="this.style.display=&#39;none&#39;"></a>
-          <a class="slide" data-ad="lanjing" href="/ads/lanjing"><img src="/static/home-ads/ad-4.jpg?v=64" alt="蓝憬通讯" width="640" height="320" loading="lazy" onerror="this.style.display=&#39;none&#39;"></a>
+          <a class="slide" href="/food#hamcho-myeongdong"><img src="/static/home-ads/ad-1.jpg?v=65" alt="咸草酱蟹：明洞酱蟹，点击查看" width="640" height="320" draggable="false" onerror="this.style.display=&#39;none&#39;;"></a>
+          <a class="slide" href="/food#daega-myeongdong"><img src="/static/home-ads/ad-2.jpg?v=65" alt="大家烤肉：明洞烤肉，点击查看" width="640" height="320" draggable="false" onerror="this.style.display=&#39;none&#39;;"></a>
+          <a class="slide" href="/shops?tab=services"><img src="/static/home-ads/ad-3.jpg?v=65" alt="DAYONE：商业服务，点击查看" width="640" height="320" draggable="false" onerror="this.style.display=&#39;none&#39;;"></a>
+          <a class="slide" data-ad="lanjing" href="/ads/lanjing"><img src="/static/home-ads/ad-4.jpg?v=65" alt="蓝憬通讯：推荐2位好友注册 免费领韩国手机卡" width="640" height="320" draggable="false" onerror="this.style.display=&#39;none&#39;;"></a>
         </div>
       </div>
+      <div class="ads-cap" id="adsCap"><b>咸草酱蟹</b><span>点击查看</span></div>
       <div class="dots" id="adsDots" aria-hidden="true"><i class="on"></i><i></i><i></i><i></i></div>
     </div>
-
     <!-- D. 附近推荐（只显示 /api/places 的真实数据） -->
     <section class="near-blk" id="nearBlk" aria-labelledby="nearTitle">
       <div class="bh">
@@ -565,7 +574,7 @@ body.is-home .disclaimer{display:none}
 </div>
 
 <script src="/static/ref.js"></script>
-<script src="/static/splash.js"></script>
+<script src="/static/splash.js?v=65"></script>
 <script src="/static/phrases.js"></script>
 <script src="/static/subway.js"></script>
 <script>
@@ -1653,7 +1662,7 @@ drawScenes();
 })();
 </script>
 <script src="/static/maps.js"></script>
-<script src="/static/pwa.js?v=64" defer></script>
+<script src="/static/pwa.js?v=65" defer></script>
 
 <script>
 (function(){
@@ -1673,42 +1682,259 @@ drawScenes();
     el.hidden = false;
   }).catch(function(){});
 
-  /* ---------- C. 广告轮播：静态配置，约 4 秒切换，可左右滑动 ---------- */
+  /* ---------- C. 广告轮播：四张，3 秒停留，0.4s 滑动，预加载 + 手势 + 无缝循环 ---------- */
   (function(){
-    var track=byId('adsTrack'), dots=byId('adsDots');
+    var track=byId('adsTrack'), dots=byId('adsDots'), cap=byId('adsCap');
     if(!track||!dots) return;
+
     // 蓝憬通讯商家帖发布后，把数字填到这里，轮播会改跳 /community/post/{id}
     var LANJING_POST_ID = '';
     var lanjing=track.querySelector('[data-ad="lanjing"]');
     if(lanjing && LANJING_POST_ID) lanjing.href='/community/post/'+encodeURIComponent(LANJING_POST_ID);
     else if(lanjing) lanjing.href='/ads/lanjing';
-    var n=track.querySelectorAll('.slide').length, idx=0, timer=null, downX=null, downY=null;
-    dots.innerHTML = Array(n).fill(0).map(function(_,i){ return i===0?'<i class="on"></i>':'<i></i>'; }).join('');
-    var ds=dots.querySelectorAll('i');
-    function paint(){
-      track.style.transform='translateX('+(-(n?idx*100/n:0))+'%)';
-      Array.prototype.forEach.call(ds,function(d,i){ d.classList.toggle('on',i===idx); });
+
+    // 字幕数据与首屏 HTML 保持一致；第 4 张必须带上推荐好友领卡文案。
+    var CAPS = [
+      {t:'咸草酱蟹', s:'点击查看'},
+      {t:'大家烤肉', s:'点击查看'},
+      {t:'DAYONE', s:'点击查看'},
+      {t:'蓝憬通讯', s:'推荐2位好友注册 免费领韩国手机卡'}
+    ];
+
+    var reals = Array.prototype.slice.call(track.querySelectorAll('.slide'));
+    var n = reals.length;
+    if(!n) return;
+
+    // 预加载全部图片，避免切到空白
+    for (var i = 0; i < n; i++){
+      var im = reals[i].querySelector('img');
+      if (im && im.getAttribute('src')){
+        var pre = new Image();
+        pre.src = im.getAttribute('src');
+      }
     }
-    function go(i){ if(!n) return; idx=(i%n+n)%n; paint(); }
-    function visible(){ var p=byId('p-home'); return !!(p&&p.classList.contains('on')); }
-    function stop(){ if(timer){ clearInterval(timer); timer=null; } }
+
+    // 无缝循环：节点顺序为 [最后一张的克隆, ...真实四张, 第一张的克隆]，pos 1..n 对应真实 0..n-1
+    if (n > 1){
+      var cloneLast = reals[n - 1].cloneNode(true);
+      var cloneFirst = reals[0].cloneNode(true);
+      cloneLast.setAttribute('aria-hidden', 'true');
+      cloneFirst.setAttribute('aria-hidden', 'true');
+      cloneLast.setAttribute('tabindex', '-1');
+      cloneFirst.setAttribute('tabindex', '-1');
+      track.insertBefore(cloneLast, reals[0]);
+      track.appendChild(cloneFirst);
+    }
+
+    // 指示点始终为真实张数，不含克隆
+    var dotHtml = '';
+    for (var d = 0; d < n; d++) dotHtml += (d === 0 ? '<i class="on"></i>' : '<i></i>');
+    dots.innerHTML = dotHtml;
+    var ds = dots.querySelectorAll('i');
+
+    var pos = 1;             // 1..n 为真实页，0 与 n+1 为克隆页
+    var timer = null;
+    var animating = false;
+    var fallback = null;
+    var dragging = false;
+    var moved = false;
+    var startX = 0, startY = 0, baseX = 0, dx = 0, dy = 0;
+    var suppressUntil = 0;
+    var w = 0;
+
+    function measure(){
+      var vp = track.parentNode;
+      w = track.offsetWidth || (vp && vp.offsetWidth) || 0;
+      return w;
+    }
+    function ensureWidth(){
+      var vp = track.parentNode;
+      var nw = track.offsetWidth || (vp && vp.offsetWidth) || 0;
+      if (nw && nw !== w){
+        w = nw;
+        setX(-pos * w, false);
+        updateUI();
+      }
+    }
+    function setX(x, animate){
+      if (animate){
+        track.style.transition = '';
+        track.style.transform = 'translate3d(' + x + 'px,0,0)';
+      } else {
+        track.style.transition = 'none';
+        track.style.transform = 'translate3d(' + x + 'px,0,0)';
+        void track.offsetWidth; // 强制回流，让瞬移不产生动画
+        track.style.transition = '';
+      }
+    }
+    function realIndex(){ return ((pos - 1) % n + n) % n; }
+    function updateUI(){
+      var idx = realIndex();
+      for (var k = 0; k < ds.length; k++) ds[k].classList.toggle('on', k === idx);
+      if (cap){
+        var c = CAPS[idx] || {t:'', s:''};
+        var b = cap.querySelector('b');
+        var s = cap.querySelector('span');
+        if (b) b.textContent = c.t;
+        if (s){
+          s.textContent = c.s || '';
+          s.style.display = c.s ? '' : 'none';
+        }
+      }
+    }
+    function paint(animate){
+      setX(-pos * w, animate !== false);
+      updateUI();
+    }
+    function finish(){
+      if (!animating) return;
+      animating = false;
+      if (fallback){ clearTimeout(fallback); fallback = null; }
+      if (pos > n){ pos = 1; paint(false); }
+      else if (pos < 1){ pos = n; paint(false); }
+    }
+    function begin(){
+      animating = true;
+      if (fallback) clearTimeout(fallback);
+      fallback = setTimeout(finish, 650);
+    }
+    function goReal(idx){
+      if (n < 2 || animating) return;
+      pos = idx + 1;
+      paint(true);
+      begin();
+    }
+    function visible(){ var p = byId('p-home'); return !!(p && p.classList.contains('on')); }
+    function canAuto(){ return n > 1 && visible() && !document.hidden && !dragging; }
+    function stop(){
+      if (timer){ clearInterval(timer); timer = null; }
+    }
     function start(){
       stop();
-      timer=setInterval(function(){ if(!visible()||document.hidden) return; go(idx+1); },4000);
+      timer = setInterval(function(){
+        if (!canAuto() || animating) return;
+        ensureWidth();
+        pos += 1;
+        paint(true);
+        begin();
+      }, 3000);
     }
-    track.addEventListener('pointerdown',function(e){ downX=e.clientX; downY=e.clientY; stop(); });
-    track.addEventListener('pointerup',function(e){
-      if(downX==null) return;
-      var dx=e.clientX-downX, dy=e.clientY-downY;
-      downX=null;
-      if(Math.abs(dx)>36&&Math.abs(dx)>Math.abs(dy)) go(idx+(dx<0?1:-1));
+
+    // 手指/鼠标跟手拖动；垂直滑动交还页面滚动，不翻页。
+    track.addEventListener('pointerdown', function(e){
+      if (e.button != null && e.button !== 0) return;
+      if (animating) return;
+      measure();
+      dragging = true;
+      moved = false;
+      startX = e.clientX;
+      startY = e.clientY;
+      dx = 0;
+      dy = 0;
+      baseX = -pos * w;
+      stop();
+      track.classList.add('dragging');
+      track.style.transition = 'none';
+      try { track.setPointerCapture(e.pointerId); } catch(x){}
+    });
+
+    track.addEventListener('pointermove', function(e){
+      if (!dragging) return;
+      dx = e.clientX - startX;
+      dy = e.clientY - startY;
+      if (Math.abs(dy) > Math.abs(dx) && Math.abs(dy) > 8){
+        // 垂直手势：取消拖动并回弹，不阻止页面上下滚动
+        dragging = false;
+        track.classList.remove('dragging');
+        dx = 0;
+        dy = 0;
+        paint(true);
+        start();
+        return;
+      }
+      if (Math.abs(dx) > 4) moved = true;
+      if (Math.abs(dx) > Math.abs(dy)){
+        if (e.cancelable) e.preventDefault();
+        track.style.transform = 'translate3d(' + (baseX + dx) + 'px,0,0)';
+      }
+    }, {passive: false});
+
+    track.addEventListener('pointerup', function(e){
+      if (!dragging) return;
+      dragging = false;
+      track.classList.remove('dragging');
+      try { track.releasePointerCapture(e.pointerId); } catch(x){}
+      var h = dx, v = dy;
+      dx = 0;
+      dy = 0;
+      // 超过约 40px 且水平位移大于垂直位移才翻页，否则回弹
+      if (Math.abs(h) > 40 && Math.abs(h) > Math.abs(v)){
+        suppressUntil = Date.now() + 450; // 有效滑动后拦掉随之而来的 click
+        pos += (h < 0 ? 1 : -1);
+      }
+      paint(true);
+      begin();
       start();
     });
-    track.addEventListener('pointercancel',function(){ downX=null; start(); });
-    document.addEventListener('visibilitychange',function(){ if(document.hidden) stop(); else start(); });
-    paint(); start();
-  })();
 
+    track.addEventListener('pointercancel', function(){
+      if (!dragging) return;
+      dragging = false;
+      track.classList.remove('dragging');
+      dx = 0;
+      dy = 0;
+      paint(true);
+      start();
+    });
+
+    track.addEventListener('click', function(e){
+      if (Date.now() < suppressUntil){
+        e.preventDefault();
+        e.stopPropagation();
+      }
+    }, true);
+    track.addEventListener('dragstart', function(e){ e.preventDefault(); });
+
+    track.addEventListener('transitionend', function(e){
+      if (e.target !== track || e.propertyName !== 'transform') return;
+      finish();
+    });
+
+    dots.addEventListener('click', function(e){
+      var t = e.target;
+      if (!t || t.tagName !== 'I') return;
+      var idx = -1;
+      for (var k = 0; k < ds.length; k++){
+        if (ds[k] === t){ idx = k; break; }
+      }
+      if (idx < 0) return;
+      goReal(idx);
+      start();
+    });
+
+    function relayout(){
+      measure();
+      setX(-pos * w, false);
+      updateUI();
+    }
+    window.addEventListener('resize', relayout);
+    window.addEventListener('orientationchange', function(){ setTimeout(relayout, 120); });
+    window.addEventListener('pageshow', relayout);
+    if (window.ResizeObserver){
+      try { new ResizeObserver(function(){ relayout(); }).observe(track.parentNode); } catch(e){}
+    }
+
+    document.addEventListener('visibilitychange', function(){
+      if (document.hidden) stop();
+      else { relayout(); start(); }
+    });
+
+    measure();
+    if(!w){ setTimeout(function(){ measure(); paint(false); }, 0); }
+    pos = 1;
+    paint(false);
+    start();
+  })();
   /* ---------- D. 附近推荐：只读 /api/places（已审核会员地点） ---------- */
   (function(){
     var list=byId('nearList'), sortBox=byId('nearSort'), hint=byId('nearHint');

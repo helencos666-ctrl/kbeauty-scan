@@ -1,4 +1,4 @@
-"""纯静态检查：首页五格底部导航、?v=64 缓存版本、新页面（trips/local）与禁词。
+"""纯静态检查：首页五格底部导航、?v=65 缓存版本、新页面（trips/local）与禁词。
 不需要启服务，直接 python test/test_home_nav.py 即可。"""
 import os, re
 
@@ -37,13 +37,13 @@ PAGES = {
 }
 
 # ---------- 1. 缓存版本 v63 ----------
-check("sw.js CACHE is lvhan-shell-v64", "'lvhan-shell-v64'" in sw or '"lvhan-shell-v64"' in sw)
-check("sw.js uses ?v=64", "?v=64" in sw)
+check("sw.js CACHE is lvhan-shell-v65", "'lvhan-shell-v65'" in sw or '"lvhan-shell-v65"' in sw)
+check("sw.js uses ?v=65", "?v=65" in sw)
 check("sw.js has no ?v=60", "?v=60" not in sw)
 for name, txt in PAGES.items():
-    check("%s uses ?v=64 (or tabbar)" % name, ("?v=64" in txt) or ("tabbar" in txt))
+    check("%s uses ?v=65 (or tabbar)" % name, ("?v=65" in txt) or ("tabbar" in txt))
     check("%s has no ?v=60" % name, "?v=60" not in txt)
-check("sw.js SHELL has four home ads", all("/static/home-ads/ad-%d.jpg?v=64" % i in sw for i in (1, 2, 3, 4)))
+check("sw.js SHELL has four home ads", all("/static/home-ads/ad-%d.jpg?v=65" % i in sw for i in (1, 2, 3, 4)))
 check("sw.js SHELL has /trips and /local", "'/trips'" in sw and "'/local'" in sw)
 check("sw.js SHELL has trips.html/local.html", "/static/trips.html" in sw and "/static/local.html" in sw)
 
@@ -94,7 +94,7 @@ check("trips links /itineraries", "/itineraries" in trips)
 check("trips has no sample store names",
       not any(w in trips for w in ["广藏市场", "星巴克", "明洞乐天免税", "北村韩屋"]))
 check("trips has back and me", 'href="/"' in trips and 'href="/me"' in trips)
-check("trips loads pwa.js?v=64", "/static/pwa.js?v=64" in trips)
+check("trips loads pwa.js?v=65", "/static/pwa.js?v=65" in trips)
 
 # ---------- 6. 禁词 ----------
 ALL = dict(PAGES)
@@ -149,6 +149,24 @@ check("community.css .lightbox 高于 tabbar", bool(_lb) and int(_lb.group(1)) >
       _lb.group(1) if _lb else "missing")
 check("community.css .preview-mask 高于 tabbar", bool(_pm) and int(_pm.group(1)) > 60,
       _pm.group(1) if _pm else "missing")
+
+
+# ---------- 首页广告轮播：字幕与四张指示点 ----------
+_ads = index.split('id="homeAds"')[1].split('id="nearBlk"')[0] if 'id="homeAds"' in index else ""
+check("home 广告字幕容器 #adsCap", 'class="ads-cap" id="adsCap"' in _ads)
+check("home 广告四张字幕",
+      all(x in _ads for x in ("咸草酱蟹", "大家烤肉", "DAYONE", "蓝憬通讯")))
+check("home 第 4 张推荐好友领手机卡文案",
+      "推荐2位好友注册 免费领韩国手机卡" in _ads)
+check("home 广告 4 个指示点且首个点亮",
+      re.search(r'id="adsDots"[^>]*>\s*<i class="on"></i>\s*<i></i>\s*<i></i>\s*<i></i>\s*</div>', index) is not None)
+check("home 广告四张 img 不再 lazy",
+      all('loading="lazy"' not in m
+          for m in re.findall(r'<img[^>]*ad-[1-4]\.jpg[^>]*>', _ads)))
+check("home 广告切换 0.4s transform",
+      re.search(r"transition\s*:\s*transform\s+0?\.4s\s+ease", index) is not None)
+check("home 广告停留 3000ms 且有无缝克隆",
+      "3000" in index and "cloneNode" in index and "pointermove" in index)
 
 
 print("%s passed, %s failed" % (ok, fail))

@@ -45,7 +45,7 @@ check("home 两大入口 路线/翻译", 'data-go="sub"' in home and 'data-go="c
 check("home 吃喝玩乐五格", "吃喝玩乐" in home and all(
     u in home for u in ["/food", "/food?cat=cafe", "/shopping", "/attractions", "/places?category=hotel"]))
 check("home 五格文案", all(w in home for w in [">美食<", ">咖啡<", ">购物<", ">景点<", ">酒店<"]))
-check("home 广告轮播四张", all("/static/home-ads/ad-%d.jpg?v=64" % i in home for i in (1, 2, 3, 4)) and "蓝憬通讯" in home and 'data-ad="lanjing"' in home
+check("home 广告轮播四张", all("/static/home-ads/ad-%d.jpg?v=65" % i in home for i in (1, 2, 3, 4)) and "蓝憬通讯" in home and 'data-ad="lanjing"' in home
       and 'class="ads' in home and "adsDots" in home)
 check("home 附近推荐", "附近推荐" in home and 'data-sort="dist"' in home and 'data-sort="rec"' in home
       and "/api/places" in index)
@@ -72,6 +72,12 @@ check("boards still listed on shops", all(w in shops for w in ["住宿推荐", "
 check("/services 301 in providers.py", 'RedirectResponse("/shops?' in prov and "status_code=301" in prov)
 check("services.html fallback redirect", "/shops?tab=services" in svc)
 check("me 有全部功能/识妆入口", "/?tab=more" in me and "/?tab=cos" in me)
+
+
+check("home 广告字幕 #adsCap 且四张齐全",
+      'id="adsCap"' in home and all(x in home for x in ("咸草酱蟹", "大家烤肉", "DAYONE", "蓝憬通讯")))
+check("home 第 4 张副标题：推荐好友领手机卡",
+      "推荐2位好友注册 免费领韩国手机卡" in home)
 
 print("%s passed, %s failed" % (ok, fail))
 if fail:
