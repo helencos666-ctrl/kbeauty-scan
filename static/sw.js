@@ -63,6 +63,7 @@ const SHELL = [
   '/static/home-ads/ad-1.jpg?v=61',
   '/static/home-ads/ad-2.jpg?v=61',
   '/static/home-ads/ad-3.jpg?v=61',
+  '/static/home-ads/ad-4.jpg?v=61',
   '/static/rate.html',
   '/static/privacy.html',
   '/static/terms.html',

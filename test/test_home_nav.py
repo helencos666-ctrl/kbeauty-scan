@@ -43,7 +43,7 @@ check("sw.js has no ?v=60", "?v=60" not in sw)
 for name, txt in PAGES.items():
     check("%s uses ?v=61 (or tabbar)" % name, ("?v=61" in txt) or ("tabbar" in txt))
     check("%s has no ?v=60" % name, "?v=60" not in txt)
-check("sw.js SHELL has three home ads", all("/static/home-ads/ad-%d.jpg?v=61" % i in sw for i in (1, 2, 3)))
+check("sw.js SHELL has four home ads", all("/static/home-ads/ad-%d.jpg?v=61" % i in sw for i in (1, 2, 3, 4)))
 check("sw.js SHELL has /trips and /local", "'/trips'" in sw and "'/local'" in sw)
 check("sw.js SHELL has trips.html/local.html", "/static/trips.html" in sw and "/static/local.html" in sw)
 
@@ -116,6 +116,7 @@ check("home 无示例标签", "示例" not in index)
 check("home 无示例店名", not any(w in home for w in ["广藏市场", "星巴克", "明洞乐天免税"]))
 check("home 附近推荐走 /api/places", "/api/places" in index)
 check("home 韩友圈走 /api/community/posts", "/api/community/posts" in index)
+check("lanjing ad fallback /community", 'data-ad="lanjing"' in index and "ad-4.jpg" in index and 'href="/community"' in index)
 check("home 空状态有去处链接", "/places/new" in index and "/community/new" in index)
 
 print("%s passed, %s failed" % (ok, fail))

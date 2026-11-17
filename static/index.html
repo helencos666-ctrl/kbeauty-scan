@@ -374,16 +374,17 @@ body.is-home .disclaimer{display:none}
       </div>
     </div>
 
-    <!-- C. 广告轮播（静态配置三张，自动轮播 + 左右滑动） -->
+    <!-- C. 广告轮播（静态配置，自动轮播 + 左右滑动） -->
     <div class="ads" id="homeAds">
       <div class="ads-viewport">
         <div class="ads-track" id="adsTrack">
           <a class="slide" href="/food#hamcho-myeongdong"><img src="/static/home-ads/ad-1.jpg?v=61" alt="咸草酱蟹" width="640" height="320" loading="lazy" onerror="this.style.display=&#39;none&#39;"></a>
           <a class="slide" href="/food#daega-myeongdong"><img src="/static/home-ads/ad-2.jpg?v=61" alt="大家烤肉" width="640" height="320" loading="lazy" onerror="this.style.display=&#39;none&#39;"></a>
           <a class="slide" href="/shops?tab=services"><img src="/static/home-ads/ad-3.jpg?v=61" alt="DAYONE" width="640" height="320" loading="lazy" onerror="this.style.display=&#39;none&#39;"></a>
+          <a class="slide" data-ad="lanjing" href="/community"><img src="/static/home-ads/ad-4.jpg?v=61" alt="蓝憬通讯" width="640" height="320" loading="lazy" onerror="this.style.display=&#39;none&#39;"></a>
         </div>
       </div>
-      <div class="dots" id="adsDots" aria-hidden="true"><i class="on"></i><i></i><i></i></div>
+      <div class="dots" id="adsDots" aria-hidden="true"><i class="on"></i><i></i><i></i><i></i></div>
     </div>
 
     <!-- D. 附近推荐（只显示 /api/places 的真实数据） -->
@@ -1672,11 +1673,16 @@ drawScenes();
     el.hidden = false;
   }).catch(function(){});
 
-  /* ---------- C. 广告轮播：三张静态配置，约 4 秒切换，可左右滑动 ---------- */
+  /* ---------- C. 广告轮播：静态配置，约 4 秒切换，可左右滑动 ---------- */
   (function(){
     var track=byId('adsTrack'), dots=byId('adsDots');
     if(!track||!dots) return;
+    // 蓝憬通讯商家帖发布后，把数字填到这里，轮播会改跳 /community/post/{id}
+    var LANJING_POST_ID = '';
+    var lanjing=track.querySelector('[data-ad="lanjing"]');
+    if(lanjing && LANJING_POST_ID) lanjing.href='/community/post/'+encodeURIComponent(LANJING_POST_ID);
     var n=track.querySelectorAll('.slide').length, idx=0, timer=null, downX=null, downY=null;
+    dots.innerHTML = Array(n).fill(0).map(function(_,i){ return i===0?'<i class="on"></i>':'<i></i>'; }).join('');
     var ds=dots.querySelectorAll('i');
     function paint(){
       track.style.transform='translateX('+(-(n?idx*100/n:0))+'%)';
