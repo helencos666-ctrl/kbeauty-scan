@@ -501,4 +501,12 @@ def static_html(name: str):
         raise HTTPException(404, "Not Found")
     return html_file_response(name + ".html")
 
+
+from lanjing_seed import router as lanjing_router, seed_once  # noqa: E402
+app.include_router(lanjing_router)
+
+@app.on_event("startup")
+def _lanjing_startup():
+    seed_once()
+
 app.mount("/static", StaticFiles(directory=os.path.join(BASE, "static")), name="static")
