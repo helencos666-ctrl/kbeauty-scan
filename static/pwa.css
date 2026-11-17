@@ -42,6 +42,7 @@ body nav.tabbar a.pub .plus{
 }
 body nav.tabbar a.pub.on .plus{background:#3D8F88}
 body nav.tabbar a.pub:active .plus{background:#0F5A55}
+body nav.tabbar a:active{opacity:.72}
 
 /* 页面有底部导航时留出 ＋ 按钮和 safe-area 的空间（优先级高于页面自带的 body 规则） */
 body.has-tabbar{padding-bottom:calc(82px + env(safe-area-inset-bottom))}

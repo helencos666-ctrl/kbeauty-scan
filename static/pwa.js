@@ -54,17 +54,36 @@
     );
   }
 
+  function onHomeDoc(){
+    var p = location.pathname;
+    return p === '/' || p === '/index.html' || p === '/static/index.html';
+  }
+
+  window.lhGoBack = function(fallback){
+    fallback = fallback || '/';
+    var same = false;
+    try {
+      same = !!(document.referrer && (new URL(document.referrer)).origin === location.origin);
+    } catch (e) {}
+    if (same && history.length > 1) history.back();
+    else location.href = fallback;
+  };
+
   function bindHomeLink(nav){
     if (nav.dataset.homeBound === '1') return; // 页面已自行绑定（index.html 内联脚本）时不重复绑定
     nav.dataset.homeBound = '1';
     nav.addEventListener('click', function(e){
-      var a = e.target.closest ? e.target.closest('a[data-nav="home"]') : null;
+      var a = e.target.closest ? e.target.closest('a[data-nav]') : null;
       if (!a) return;
-      if (typeof window.showTab !== 'function') return;
-      var p = location.pathname;
-      if (p !== '/' && p !== '/index.html' && p !== '/static/index.html') return;
-      e.preventDefault();
-      window.showTab('home', true);
+      // 立即点亮，跳转仍走 a.href，不 intercept 非首页文档
+      var links = nav.querySelectorAll('a[data-nav]');
+      for (var i = 0; i < links.length; i++) links[i].classList.toggle('on', links[i] === a);
+      var key = a.getAttribute('data-nav');
+      if (key === 'home' && onHomeDoc() && typeof window.showTab === 'function') {
+        e.preventDefault();
+        document.body.classList.remove('lh-overlay-open');
+        window.showTab('home', true);
+      }
     });
   }
 
@@ -102,11 +121,16 @@
     bindHomeLink(nav);
   }
 
-  if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', normalizeTabbar);
-  } else {
+  function refreshNav(){
+    document.body.classList.remove('lh-overlay-open');
     normalizeTabbar();
   }
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', refreshNav);
+  } else {
+    refreshNav();
+  }
+  window.addEventListener('pageshow', refreshNav);
   /* =================== 底部五格导航结束 =================== */
 
   if('serviceWorker' in navigator){

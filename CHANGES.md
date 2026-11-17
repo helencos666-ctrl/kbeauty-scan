@@ -1,3 +1,11 @@
+## 2026-11-17 修复页面切换卡顿、进了子页回不到首页
+
+- 根因一：Service Worker 在网络超过 1.5 秒或失败时，用缓存的首页 HTML（`/` 或 `/static/index.html`）顶替任意子页导航。地址栏仍是 `/trips`、`/community?tab=follow` 等，文档却是首页脚本；点「首页」只执行 `showTab('home')`，URL 不回 `/`，表现为回不了主页。现已取消跨路径回退，缓存只匹配同一路径（可对应 `/static/*.html`），缓存版本改为 `?v=64`、`lvhan-shell-v64`。
+- 根因二：首页只要 sessionStorage 里还有上次路线，打开 `/` 或切回前台时会 `restoreLastRoute()`，强制切到「地铁·路线」并 `replaceState` 成 `/?tab=sub`。现仅在当前就是 `tab=sub` 时恢复路线；顶部返回键（返回首页）始终回到首页 tab，不再 `history.back()`。
+- 底部五格：非首页文档点击「首页」走 `href="/"` 整页跳转；`pageshow` 时重新高亮并清掉残留的 `lh-overlay-open`，避免遮罩挡住点击。新增 `lhGoBack()`：没有同源上一页时回到 `/`。
+- 韩友圈：未登录访问 `/community?tab=follow` 不再改写成推荐流，保留关注 tab 并显示登录提示。商业服务 `/shops?tab=services`、行程 `/trips`、广告 `/ads/lanjing` 无循环重定向。
+- 新增测试 `test/test_nav_smooth.py`；`test/test_home_nav.py` 同步到 v64。
+
 ## 2026-11-17 管理后台「内容审核」：角标与列表口径对齐，帖子审核含商家帖
 
 - 会员推荐地点新增筛选值 `queue`（= `pending` + `flagged`，待审核和待核对），

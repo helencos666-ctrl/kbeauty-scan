@@ -10,10 +10,10 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="旅韩助手">
 <link rel="manifest" href="/manifest.webmanifest">
-<link rel="apple-touch-icon" href="/static/icons/apple-touch-icon.png?v=63">
-<link rel="icon" type="image/png" sizes="192x192" href="/static/icons/icon-192.png?v=63">
-<link rel="stylesheet" href="/static/pwa.css?v=63">
-<link rel="stylesheet" href="/static/community.css?v=63">
+<link rel="apple-touch-icon" href="/static/icons/apple-touch-icon.png?v=64">
+<link rel="icon" type="image/png" sizes="192x192" href="/static/icons/icon-192.png?v=64">
+<link rel="stylesheet" href="/static/pwa.css?v=64">
+<link rel="stylesheet" href="/static/community.css?v=64">
 </head>
 <body>
 <header class="thero">
@@ -129,7 +129,7 @@
   <a href="/?tab=more"><i>☰</i>全部</a>
   <a href="/me"><i>👤</i>我的</a>
 </nav>
-<script src="/static/community.js?v=63"></script>
+<script src="/static/community.js?v=64"></script>
 <script src="/static/banners.js"></script>
 <script>
 var WARN = {
@@ -256,15 +256,16 @@ async function loadHome(){
   if (d){ boards = d.boards || {}; user = d.user; if (d.merchant_boards) MB = d.merchant_boards; }
   try { SUBC = (await LH.api('GET', '/api/merch/meta')).subcats || {}; } catch(e){}
   if (board && !boards[board]) board = '';
+  document.getElementById('tFollow').style.display = '';
   if (user){
-    document.getElementById('tFollow').style.display = '';
     if (user.unread) document.getElementById('inboxIc').insertAdjacentHTML('beforeend', '<span class="dot">' + (user.unread > 99 ? '99+' : user.unread) + '</span>');
-  } else if (tab === 'follow') tab = 'recommend';
+  }
+  // 未登录也保留 ?tab=follow，由 load() 的 login_required 提示去登录，不改写成 recommend
   if (user && user.notif_unread) document.getElementById('notiIc').insertAdjacentHTML('beforeend', '<span class="dot">' + (user.notif_unread > 99 ? '99+' : user.notif_unread) + '</span>');
   if (['recommend', 'news', 'hot', 'latest', 'follow', 'featured', 'topic'].indexOf(tab) < 0) tab = 'recommend';
   render();
 })();
 </script>
-<script src="/static/pwa.js" defer></script>
+<script src="/static/pwa.js?v=64" defer></script>
 </body>
 </html>

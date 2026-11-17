@@ -1,5 +1,5 @@
 /* 旅韩助手 service worker: cache app shell, never cache API or POST. */
-const CACHE = 'lvhan-shell-v63';
+const CACHE = 'lvhan-shell-v64';
 const SHELL = [
   '/',
   '/attractions',
@@ -28,15 +28,15 @@ const SHELL = [
   '/static/tips.html',
   '/static/faq.html',
   '/static/beauty.html',
-  '/static/guide.css?v=63',
+  '/static/guide.css?v=64',
   '/static/maps.js',
   '/static/phrases.js',
   '/static/subway.js',
   '/static/subway.json',
   '/static/stations.json',
-  '/static/community.css?v=63',
-  '/static/chat.css?v=63',
-  '/static/community.js?v=63',
+  '/static/community.css?v=64',
+  '/static/chat.css?v=64',
+  '/static/community.js?v=64',
   '/static/community.html',
   '/static/community-post.html',
   '/static/community-new.html',
@@ -57,26 +57,26 @@ const SHELL = [
   '/static/places.html',
   '/static/places-new.html',
   '/static/places-one.html',
-  '/static/places.css?v=63',
+  '/static/places.css?v=64',
   '/static/trips.html',
   '/static/local.html',
-  '/static/home-ads/ad-1.jpg?v=63',
-  '/static/home-ads/ad-2.jpg?v=63',
-  '/static/home-ads/ad-3.jpg?v=63',
-  '/static/home-ads/ad-4.jpg?v=63',
+  '/static/home-ads/ad-1.jpg?v=64',
+  '/static/home-ads/ad-2.jpg?v=64',
+  '/static/home-ads/ad-3.jpg?v=64',
+  '/static/home-ads/ad-4.jpg?v=64',
   '/static/rate.html',
   '/static/privacy.html',
   '/static/terms.html',
-  '/static/pwa.js',
+  '/static/pwa.js?v=64',
   '/static/banners.js',
-  '/static/pwa.css?v=63',
+  '/static/pwa.css?v=64',
   '/manifest.webmanifest',
   '/static/manifest.webmanifest',
-  '/static/icons/icon-192.png?v=63',
-  '/static/icons/icon-512.png?v=63',
-  '/static/icons/icon-192-maskable.png?v=63',
-  '/static/icons/icon-512-maskable.png?v=63',
-  '/static/icons/apple-touch-icon.png?v=63'
+  '/static/icons/icon-192.png?v=64',
+  '/static/icons/icon-512.png?v=64',
+  '/static/icons/icon-192-maskable.png?v=64',
+  '/static/icons/icon-512-maskable.png?v=64',
+  '/static/icons/apple-touch-icon.png?v=64'
 ];
 
 self.addEventListener('install', event => {
@@ -96,6 +96,32 @@ self.addEventListener('activate', event => {
   );
 });
 
+// 只匹配同一路径的 HTML（忽略 query），以及对应的 /static/*.html。绝不把其它路径映射到首页。
+function samePathCandidates(url) {
+  const p = url.pathname;
+  if (p === '/' || p === '/index.html' || p === '/static/index.html') {
+    return ['/', '/index.html', '/static/index.html'];
+  }
+  const out = [p];
+  if (p.startsWith('/static/') && p.endsWith('.html')) {
+    const pretty = p.slice('/static'.length, -5);
+    if (pretty && pretty !== '/') out.push(pretty);
+  } else if (!p.endsWith('.html') && !p.includes('.')) {
+    out.push('/static' + p + '.html');
+  }
+  return out;
+}
+
+async function matchSamePath(cache, request, url) {
+  const exact = await cache.match(request, { ignoreSearch: true });
+  if (exact) return exact;
+  for (const c of samePathCandidates(url)) {
+    const hit = await cache.match(c, { ignoreSearch: true });
+    if (hit) return hit;
+  }
+  return null;
+}
+
 function isApi(url) {
   return url.pathname === '/api' || url.pathname.startsWith('/api/');
 }
@@ -110,7 +136,8 @@ function isHtml(request, url) {
 
 async function networkFirst(request) {
   const cache = await caches.open(CACHE);
-  const cachedP = cache.match(request, { ignoreSearch: true });
+  const url = new URL(request.url);
+  const cachedP = matchSamePath(cache, request, url);
   const freshP = fetch(request).then(fresh => {
     if (fresh && fresh.ok && fresh.type !== 'opaque') {
       cache.put(request, fresh.clone());
@@ -127,10 +154,7 @@ async function networkFirst(request) {
     try {
       return await freshP;
     } catch (err2) {
-      if (request.mode === 'navigate') {
-        const fallback = await cache.match('/') || await cache.match('/static/index.html');
-        if (fallback) return fallback;
-      }
+      // 不要用首页 HTML 顶替其它路径，否则 URL 还是子页、文档却是首页，会回不了 /
       throw err2;
     }
   }
