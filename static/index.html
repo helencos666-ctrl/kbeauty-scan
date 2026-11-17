@@ -106,6 +106,7 @@ nav button.on,nav a.on{color:var(--pink);font-weight:700}
 .mic-btn:disabled{opacity:.5}
 #micState{display:none;margin-top:8px;font-size:13px;color:var(--pink);font-weight:600}
 #micTip{display:none}
+.kocard.stale{opacity:.35;filter:grayscale(1);transition:opacity .15s}
 
 .phrase .sp.spk-on{background:var(--pink);color:#fff}
 #cSpk.spk-on{background:var(--pink);color:#fff}
@@ -684,60 +685,101 @@ $('rtSwap').onclick=()=>{const a=$('rtFrom'),b=$('rtTo'),x=a.value;a.value=b.val
 ['rtFrom','rtTo'].forEach(id=>$(id).addEventListener('keydown',e=>{if(e.key==='Enter'){e.preventDefault();findRoute()}}));
 
 // ---------- 沟通卡 ----------
-async function makeCard(text){
-  const t=(text??$('cardIn').value).trim();if(!t){showErr('请先输入中文');return}
+let cardBusy=false, cardLast='', cardCtl=null;
+function hideErr(){const e=$('err');if(e.style.display!=='none'){e.style.display='none';e.textContent=''}}
+function markOldCard(on){const k=$('cardOut').querySelector('.kocard');if(k)k.classList.toggle('stale',!!on)}
+async function makeCard(text,opts){
+  opts=opts||{};
+  const t=(text??$('cardIn').value).trim();
+  if(!t){showErr(opts.voice?'没听清，请再说一次':'请先输入中文');return}
+  if(cardBusy&&t===cardLast) return; // 同一句正在翻译，忽略重复点击
+  if(cardCtl){try{cardCtl.abort()}catch(e){}}
+  const ctl=new AbortController();cardCtl=ctl;cardBusy=true;cardLast=t;
   $('cardIn').value=t;
-  $('err').style.display='none';$('ld-card').style.display='block';$('cardBtn').disabled=true;$('cardOut').innerHTML='';
+  hideErr();$('ld-card').style.display='block';$('cardBtn').disabled=true;markOldCard(true);
   try{
-    const r=await fetch('/api/card',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({text:t})});
-    const j=await r.json();if(!r.ok)throw new Error(j.detail||'翻译失败');
+    const r=await fetch('/api/card',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({text:t}),signal:ctl.signal});
+    const j=await r.json().catch(()=>({}));if(!r.ok)throw new Error(j.detail||'翻译失败');
+    if(ctl!==cardCtl) return;
     $('cardOut').innerHTML=`<div class="kocard"><div class="ko${j.ko.length>60?' long':''}">${esc(j.ko)}</div><div class="roman">发音：${esc(j.roman)}</div>
       <div class="back">中文回译：${esc(j.back)}</div>
       <div class="acts"><button id="cSpk">🔊 朗读</button><button id="cBig">⛶ 全屏给对方看</button></div></div>`;
     $('cSpk').onclick=()=>speak(j.ko,$('cSpk'));$('cBig').onclick=()=>showBig(j.ko,t,j.roman);
-  }catch(e){showErr(e.message||'网络错误')}
-  finally{$('ld-card').style.display='none';$('cardBtn').disabled=false}
+  }catch(e){if(e&&e.name==='AbortError')return;markOldCard(false);showErr(e.message||'网络错误')}
+  finally{if(ctl===cardCtl){cardBusy=false;cardCtl=null;$('ld-card').style.display='none';$('cardBtn').disabled=false}}
 }
 $('cardBtn').onclick=()=>makeCard();
+$('cardIn').addEventListener('input',()=>{if($('cardIn').value.trim())hideErr()});
 
-// 沟通卡语音输入（仅浏览器端，不上传录音）：可连续说多句，松手后统一翻译
+// 沟通卡语音输入（浏览器自带识别，边说边出字；不上传录音）：可连续说多句，松手后自动翻译
 (function(){
-  const btn=$('micBtn'), tip=$('micTip'), st=$('micState');
+  const btn=$('micBtn'), tip=$('micTip'), st=$('micState'), box=$('cardIn');
   const SR=window.SpeechRecognition||window.webkitSpeechRecognition;
-  const unsupported='当前浏览器不支持语音，请用 Safari/Chrome 打开，或点输入框用键盘上的话筒说话';
-  if(!SR){tip.style.display='block';btn.onclick=()=>showErr(unsupported);return}
-  const MAX_MS=180000, MAXLEN=600;
+  const ua=navigator.userAgent||'';
+  const isIOS=/iP(hone|ad|od)/.test(ua)||(/Macintosh/.test(ua)&&navigator.maxTouchPoints>1);
+  const isWx=/MicroMessenger/i.test(ua);
+  const kbHint=isIOS?'点输入框，用键盘上的🎤话筒说话，文字会实时出来':'点输入框，用键盘上的话筒说话';
+  const fallbackMsg=(isWx?'微信里语音识别不稳定，建议点右上角「…」选「在Safari中打开」；或':'')+kbHint;
+  function setState(s){if(!s){st.style.display='none';st.textContent='';return}st.style.display='block';st.textContent=s}
+  function showTip(m){tip.textContent=m;tip.style.display='block'}
+  function toKeyboard(m){showTip(m||fallbackMsg);try{box.focus()}catch(e){}}
+  if(!SR){
+    showTip((isWx?'微信里不支持网页语音识别，建议点右上角「…」选「在Safari中打开」；或':'当前浏览器不支持网页语音识别，')+kbHint);
+    btn.addEventListener('click',e=>{e.preventDefault();toKeyboard()});
+    return;
+  }
+  const MAX_MS=180000, MAXLEN=600, STOP_WAIT=1500, NO_TEXT_MS=6000;
   let rec=null, want=false, holding=false, t0=0, skipUp=false, committed='', cur='', timer=null, fatal=false;
+  let gotText=false, sessStart=0, quickEnds=0, stopGuard=null, done=true, hinted=false, gen=0;
   const errMap={
-    'not-allowed':'没有麦克风权限，请在浏览器设置里允许后重试',
-    'permission-denied':'没有麦克风权限，请在浏览器设置里允许后重试',
-    'service-not-allowed':'没有麦克风权限，请在浏览器设置里允许后重试',
+    'not-allowed':'没有麦克风权限，请在设置里允许麦克风后重试',
+    'permission-denied':'没有麦克风权限，请在设置里允许麦克风后重试',
+    'service-not-allowed':'这个浏览器不让网页使用语音识别',
     'audio-capture':'找不到麦克风，请检查设备后重试',
     'network':'语音识别网络错误，请稍后再试'
   };
-  function setState(s){if(!s){st.style.display='none';st.textContent='';return}st.style.display='block';st.textContent=s}
-  function joinTxt(a,b){a=a.trim();b=b.trim();if(!a)return b;if(!b)return a;return /[。！？!?，,；;]$/.test(a)?a+b:a+'，'+b}
+  function joinTxt(a,b){a=a.trim();b=b.trim();if(!a)return b;if(!b)return a;if(b.startsWith(a))return b;return /[。！？!?，,；;]$/.test(a)?a+b:a+'，'+b}
   function full(){return joinTxt(committed,cur).slice(0,MAXLEN)}
   function secs(){return Math.floor((Date.now()-t0)/1000)}
   function ui(on){btn.classList.toggle('on',on);btn.querySelector('.lb').textContent=on?'正在听…':'按住说话'}
-  function tick(){if(want) setState('正在听… '+secs()+'秒（可以连续说很多句，松手后一起翻译）')}
-  function newRec(){
-    const r=new SR();r.lang='zh-CN';r.interimResults=true;r.continuous=true;
+  function tick(){
+    if(!want) return;
+    const el=Date.now()-t0;
+    if(!gotText&&el>NO_TEXT_MS){
+      setState('正在听… '+secs()+'秒，还没识别到文字。如一直没字，请松手后'+kbHint);
+    }else setState('正在听… '+secs()+'秒（边说边出字，松手后自动翻译）');
+    if(el>=MAX_MS) stopRec();
+  }
+  function render(){
+    const v=full();
+    // 只在文字变化时写入，避免频繁重排
+    if(box.value!==v){box.value=v;box.scrollTop=box.scrollHeight}
+  }
+  function newRec(myGen){
+    const r=new SR();r.lang='zh-CN';r.interimResults=true;r.continuous=true;r.maxAlternatives=1;
     r.onresult=e=>{
+      if(myGen!==gen) return;
+      // iOS Safari 连续模式下后面的结果可能包含前面全部文字，按前缀去重
       let fin='',interim='';
-      for(let i=0;i<e.results.length;i++){const x=e.results[i][0].transcript;if(e.results[i].isFinal) fin+=x; else interim+=x}
+      for(let i=0;i<e.results.length;i++){const x=e.results[i][0].transcript||'';if(e.results[i].isFinal) fin=joinTxt(fin,x); else interim=joinTxt(interim,x)}
       cur=joinTxt(fin,interim);
-      $('cardIn').value=full();
+      if(cur.trim()){if(!gotText){gotText=true;hideErr()}}
+      render();
     };
     r.onerror=e=>{
+      if(myGen!==gen) return;
       if(e.error==='aborted'||e.error==='no-speech') return;
       const m=errMap[e.error];
-      if(m){fatal=true;want=false;showErr(m)}
+      if(m){fatal=true;want=false;showErr(m);if(e.error==='service-not-allowed')toKeyboard()}
     };
     r.onend=()=>{
+      if(myGen!==gen) return;
       committed=joinTxt(committed,cur);cur='';
-      if(want&&!fatal&&Date.now()-t0<MAX_MS&&committed.length<MAXLEN){
-        try{rec=newRec();rec.start();return}catch(err){}
+      const short=Date.now()-sessStart<1200;
+      quickEnds=short?quickEnds+1:0;
+      // 自动续听：但如果连续很快结束（iOS/微信常见），不要反复重启以免卡顿
+      if(want&&!fatal&&quickEnds<2&&Date.now()-t0<MAX_MS&&committed.length<MAXLEN){
+        try{rec=newRec(myGen);sessStart=Date.now();rec.start();return}catch(err){}
       }
       finish();
     };
@@ -745,20 +787,32 @@ $('cardBtn').onclick=()=>makeCard();
   }
   function startRec(){
     if(want) return;
-    committed='';cur='';fatal=false;want=true;t0=Date.now();
-    $('cardIn').value='';
-    try{rec=newRec();rec.start();ui(true);tick();timer=setInterval(()=>{tick();if(Date.now()-t0>=MAX_MS) stopRec()},500)}
-    catch(err){want=false;showErr('无法开始语音识别，请改用键盘输入')}
+    gen++;clearTimeout(stopGuard);
+    committed='';cur='';fatal=false;want=true;done=false;gotText=false;quickEnds=0;t0=Date.now();sessStart=t0;
+    hideErr();markOldCard(true);box.value='';
+    ui(true);setState('正在听… 0秒（边说边出字，松手后自动翻译）');
+    try{rec=newRec(gen);rec.start()}
+    catch(err){want=false;done=true;ui(false);setState('');markOldCard(false);toKeyboard();return}
+    clearInterval(timer);timer=setInterval(tick,500);
   }
   function finish(){
-    want=false;clearInterval(timer);timer=null;ui(false);setState('');
-    const v=full().trim();$('cardIn').value=v;
-    if(v&&!fatal) makeCard(v);
+    if(done) return;
+    done=true;want=false;clearInterval(timer);timer=null;clearTimeout(stopGuard);ui(false);setState('');
+    gen++; // 之后到达的旧事件全部忽略
+    try{rec&&rec.abort()}catch(e){}
+    const v=full().trim();box.value=v;
+    if(fatal){markOldCard(false);return}
+    if(v){makeCard(v,{voice:true});return}
+    markOldCard(false);
+    showErr('没听清，请再说一次');
+    if(!hinted||isIOS){hinted=true;showTip(fallbackMsg)}
   }
   function stopRec(){
     if(!want) return;
     want=false;setState('正在识别，请稍等…');
-    try{rec&&rec.stop()}catch(e){finish()}
+    try{rec&&rec.stop()}catch(e){finish();return}
+    // 有些 iPhone 浏览器 stop 后不回调 onend，最多等 1.5 秒
+    clearTimeout(stopGuard);stopGuard=setTimeout(finish,gotText?600:STOP_WAIT);
   }
   btn.addEventListener('contextmenu',e=>e.preventDefault());
   btn.addEventListener('selectstart',e=>e.preventDefault());
