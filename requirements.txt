@@ -40,3 +40,5 @@ sherpa-onnx==2.0.1
 sherpa-onnx-core==2.0.1
 av==19.0.2
 numpy==2.5.5
+# 语音纠错：繁体转简体（纯 Python，免费）
+opencc-python-reimplemented==0.1.7
