@@ -201,9 +201,10 @@ async def asr_warm():
 
 
 @router.post("/api/asr")
-async def asr(request: Request, lang: str = "zh"):
+async def asr(request: Request, lang: str = "zh", fix: str = "1"):
     from app import rate_limit
     lang = "ko" if lang == "ko" else "zh"
+    do_fix = (fix or "1").lower() not in ("0", "false", "no")
     rate_limit(request, "asr", per_min=15, per_day=300)
     raw = bytearray()
     async for chunk in request.stream():
@@ -235,8 +236,12 @@ async def asr(request: Request, lang: str = "zh"):
         text, engine = await run_in_threadpool(_local, pcm), "local"
     raw_text, fixed_by = text, ""
     if lang == "zh" and text:
-        from asr_correct import correct_zh
-        text, fixed_by = await correct_zh(_fix(text), CF_ACCOUNT, CF_TOKEN)
+        text = _fix(text)
+        if do_fix:
+            from asr_correct import correct_zh
+            text, fixed_by = await correct_zh(text, CF_ACCOUNT, CF_TOKEN)
+        else:
+            fixed_by = "lexicon"
     return {"ok": True, "text": text[:600], "raw": raw_text[:600], "fixed": fixed_by, "engine": engine,
             "sec": round(dur, 1), "ms": int((time.time() - t0) * 1000)}
 

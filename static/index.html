@@ -110,6 +110,11 @@ nav button.on,nav a.on{color:var(--pink);font-weight:700}
 .route-links a.amap{background:#eef4ff;color:#1a66ff}
 .card-inrow{display:flex;gap:10px;align-items:stretch}
 .card-inrow textarea{flex:1;min-height:96px}
+.card-inwrap{position:relative;flex:1;min-width:0;display:flex}
+.card-inwrap textarea{flex:1;min-height:96px;width:100%;padding-right:40px}
+.card-clear{position:absolute;top:8px;right:8px;width:28px;height:28px;border:0;border-radius:50%;background:rgba(60,64,72,.16);color:#3b4252;font-size:18px;line-height:1;padding:0;cursor:pointer;display:flex;align-items:center;justify-content:center}
+.card-clear[hidden]{display:none!important}
+.card-clear:active{background:rgba(60,64,72,.28)}
 .mic-btn{flex:none;width:86px;border:0;border-radius:12px;background:#ffe8ee;color:var(--pink);font-size:13px;font-weight:700;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;cursor:pointer;user-select:none;-webkit-user-select:none;-webkit-touch-callout:none;touch-action:none;-webkit-user-drag:none}
 .mic-btn span.ico{font-size:26px;line-height:1;pointer-events:none}
 .mic-btn span.lb{pointer-events:none;text-align:center;line-height:1.2}
@@ -345,7 +350,10 @@ body.is-home .disclaimer{display:none}
       <div class="tmode" id="tMode"><button data-m="zh2ko" class="on">中文 → 韩文</button><button data-m="ko2zh">韩文 → 中文</button></div>
       <div class="tscene" id="tScene"></div>
       <div class="card-inrow">
-        <textarea id="cardIn" maxlength="600" placeholder="输入想说的话，例如：请帮我拿一个大一点的袋子"></textarea>
+        <div class="card-inwrap">
+          <textarea id="cardIn" maxlength="600" placeholder="输入想说的话，例如：请帮我拿一个大一点的袋子"></textarea>
+          <button type="button" class="card-clear" id="cardClear" hidden aria-label="清空">×</button>
+        </div>
         <button type="button" class="mic-btn" id="micBtn" aria-label="按住说话"><span class="ico">🎤</span><span class="lb">按住说话</span></button>
       </div>
       <div id="micState"></div>
@@ -1096,14 +1104,14 @@ function drawModeUI(){
   $('tScene').style.display=z?'flex':'none';$('quickPh').style.display=z?'block':'none';
   $('cardIn').lang=z?'zh-CN':'ko';
 }
-document.querySelectorAll('#tMode button').forEach(b=>b.onclick=()=>{if(tMode===b.dataset.m) return;tMode=b.dataset.m;$('cardIn').value='';hideErr();drawModeUI()});
+document.querySelectorAll('#tMode button').forEach(b=>b.onclick=()=>{if(tMode===b.dataset.m) return;tMode=b.dataset.m;$('cardIn').value='';hideErr();clearCardResult();drawModeUI();syncClearBtn()});
 function drawScenesT(){
   $('tScene').innerHTML=T_SCENES.map(s=>`<button type="button" data-s="${s[0]}" class="${s[0]===tScene?'on':''}">${s[1]}</button>`).join('');
   $('tScene').querySelectorAll('button').forEach(b=>b.onclick=()=>{tScene=b.dataset.s;drawScenesT()});
   const SC=window.LH_SCENES||{};const sc=T_SCENES.find(s=>s[0]===tScene);
   const list=[];sc[2].forEach(k=>(SC[k]||[]).forEach(p=>list.push(p)));
   $('quickPh').innerHTML=list.length?`<h3>常用句 · ${esc(sc[1])}（点一下直接出卡片，可离线）</h3><div class="chips">${list.map((p,i)=>`<button type="button" data-i="${i}">${esc(p[0])}</button>`).join('')}</div>`:'';
-  $('quickPh').querySelectorAll('button').forEach(b=>b.onclick=()=>{const p=list[+b.dataset.i];const it={mode:'zh2ko',src:p[0],ko:p[1],roman:p[2],back:p[0],t:Date.now()};$('cardIn').value=p[0];renderCard(it);addHist(it)});
+  $('quickPh').querySelectorAll('button').forEach(b=>b.onclick=()=>{const p=list[+b.dataset.i];const it={mode:'zh2ko',src:p[0],ko:p[1],roman:p[2],back:p[0],t:Date.now()};$('cardIn').value=p[0];syncClearBtn();renderCard(it);addHist(it)});
 }
 function renderCard(it,pending){
   curItem=it;
@@ -1139,12 +1147,33 @@ function drawHist(){
   $('tHist').querySelectorAll('.it').forEach(el=>el.onclick=e=>{
     const x=h[+el.dataset.i];
     if(e.target.closest('.sp')){speak(x.ko,e.target.closest('.sp'));return}
-    if(x.mode!==tMode){tMode=x.mode;drawModeUI()}$('cardIn').value=x.src;renderCard(x);window.scrollTo({top:$('cardOut').getBoundingClientRect().top+window.scrollY-80,behavior:'smooth'});
+    if(x.mode!==tMode){tMode=x.mode;drawModeUI()}$('cardIn').value=x.src;syncClearBtn();renderCard(x);window.scrollTo({top:$('cardOut').getBoundingClientRect().top+window.scrollY-80,behavior:'smooth'});
   });
 }
 async function postJSON(url,body,signal){
   const r=await fetch(url,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body),signal});
   const j=await r.json().catch(()=>({}));if(!r.ok) throw new Error(j.detail||'翻译失败，请重试');return j;
+}
+function syncClearBtn(){
+  const b=$('cardClear'), v=($('cardIn').value||'').trim();
+  if(b) b.hidden=!v;
+}
+function hideAsrNote(){
+  const n=$('asrNote');if(!n) return;n.hidden=true;n.classList.remove('edit');n.innerHTML='';
+}
+function clearCardResult(){
+  if(cardCtl){try{cardCtl.abort()}catch(e){}}
+  cardBusy=false;cardCtl=null;cardLast='';curItem=null;
+  const btn=$('cardBtn');if(btn) btn.disabled=false;
+  $('cardOut').innerHTML='';
+  hideAsrNote();
+}
+function clearCardInput(){
+  hideErr();
+  clearCardResult();
+  $('cardIn').value='';
+  syncClearBtn();
+  try{$('cardIn').focus()}catch(e){}
 }
 async function makeCard(text,opts){
   opts=opts||{};
@@ -1155,31 +1184,28 @@ async function makeCard(text,opts){
   const key=mode+'|'+scene+'|'+t;
   if(cardBusy&&key===cardLast) return; // 同一句正在翻译，忽略重复点击
   if(cardCtl){try{cardCtl.abort()}catch(e){}}
-  $('cardIn').value=t;hideErr();
+  $('cardIn').value=t;hideErr();syncClearBtn();
   const hit=tcGet(key);
   if(hit){const it=Object.assign({mode,src:t},hit);renderCard(it);addHist(it);if(mode==='zh2ko'&&!it.back) fillBack(it);return}
   const ctl=new AbortController();cardCtl=ctl;cardBusy=true;cardLast=key;
   $('cardBtn').disabled=true;renderCard({mode,src:t},true);
   try{
-    const j=await postJSON('/api/translate',{text:t,dir:mode,scene:scene||'general'},ctl.signal);
+    const payload={text:t,dir:mode,scene:scene||'general'};
+    if(opts.from_asr) payload.from_asr=true;
+    const j=await postJSON('/api/translate',payload,ctl.signal);
     if(ctl!==cardCtl) return;
-    const it=mode==='zh2ko'?{mode,src:t,ko:j.ko,roman:j.roman||'',back:''}:{mode,src:t,zh:j.zh};
+    if(j.src&&j.src!==t){$('cardIn').value=j.src;syncClearBtn()}
+    const src=$('cardIn').value.trim()||t;
+    const it=mode==='zh2ko'?{mode,src,ko:j.ko,roman:j.roman||'',back:''}:{mode,src,zh:j.zh};
     renderCard(it);tcPut(key,mode==='zh2ko'?{ko:it.ko,roman:it.roman}:{zh:it.zh});addHist(it);
     if(mode==='zh2ko') fillBack(it,key);
   }catch(e){if(e&&e.name==='AbortError')return;$('cardOut').innerHTML='';showErr(e.message||'网络错误，请重试')}
   finally{if(ctl===cardCtl){cardBusy=false;cardCtl=null;$('cardBtn').disabled=false}}
 }
-async function fillBack(it,key){
-  try{
-    const j=await postJSON('/api/back',{ko:it.ko});
-    it.back=j.zh||'';
-    if(curItem===it&&$('cBack')) $('cBack').textContent='中文回译：'+(it.back||'（暂无）');
-    if(key&&it.back){const c=tcGet(key);if(c){c.back=it.back;tcPut(key,c)}}
-    addHist(it);
-  }catch(e){if(curItem===it&&$('cBack')) $('cBack').textContent='中文回译：暂时无法核对'}
-}
 $('cardBtn').onclick=()=>makeCard();
-$('cardIn').addEventListener('input',()=>{if($('cardIn').value.trim())hideErr()});
+$('cardIn').addEventListener('input',()=>{if($('cardIn').value.trim())hideErr();syncClearBtn()});
+if($('cardClear')) $('cardClear').onclick=()=>clearCardInput();
+syncClearBtn();
 drawModeUI();drawScenesT();drawHist();
 // 空闲时把常用句音频预先存到本机（service worker 缓存），离线也能朗读
 (function(){
@@ -1320,7 +1346,7 @@ drawModeUI();drawScenesT();drawHist();
       const lang=tMode==='ko2zh'?'ko':'zh';
       let r, j={};
       for(let i=0;i<2;i++){ // 服务器刚唤醒、模型还在准备时（503）自动再试一次
-        r=await fetch('/api/asr?lang='+lang,{method:'POST',headers:{'Content-Type':type.split(';')[0]||'application/octet-stream'},body:blob});
+        r=await fetch('/api/asr?lang='+lang+'&fix=0',{method:'POST',headers:{'Content-Type':type.split(';')[0]||'application/octet-stream'},body:blob});
         j=await r.json().catch(()=>({}));
         if(r.status!==503||lang==='ko'||i) break;
         setState('识别服务正在启动，请稍等…');await new Promise(z=>setTimeout(z,4000));
@@ -1333,7 +1359,7 @@ drawModeUI();drawScenesT();drawHist();
         showErr(peak<0.04?'没有听到声音：请检查麦克风没被遮住，靠近手机说话':'没听清，请再说一次');
         return;
       }
-      box.value=v;showAsrNote(lang==='zh'?(j.raw||''):'',v);makeCard(v,{voice:true});
+      box.value=v;showAsrNote(lang==='zh'?(j.raw||''):'',v);syncClearBtn();makeCard(v,{voice:true,from_asr:true});
     }catch(e){
       setState('');markOldCard(false);showErr((e&&e.message)||'网络错误，请重试');
       if(tMode==='ko2zh') toKeyboard();
@@ -1420,11 +1446,8 @@ drawModeUI();drawScenesT();drawHist();
     const v=full().trim();box.value=v;
     if(fatal){markOldCard(false);return}
     if(v){
-      if(tMode==='ko2zh'){makeCard(v,{voice:true});return}
-      setState('正在校对识别结果…');
-      const ac=new AbortController(),to=setTimeout(()=>ac.abort(),3500);
-      fetch('/api/asr/fix',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({text:v}),signal:ac.signal})
-        .then(r=>r.ok?r.json():{}).catch(()=>({})).then(j=>{clearTimeout(to);setState('');const t=(j&&j.text||'').trim()||v;box.value=t;showAsrNote(v,t);makeCard(t,{voice:true})});
+      showAsrNote(tMode==='zh2ko'?v:'',v);syncClearBtn();
+      makeCard(v,{voice:true,from_asr:true});
       return;
     }
     markOldCard(false);showErr('没听清，请再说一次');

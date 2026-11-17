@@ -339,33 +339,15 @@ def _cf_creds():
 
 
 async def _cf_translate(text: str, dir_: str) -> str:
+    """与沟通卡共用 translate.py（免费档 mistral-small，超时回退 m2m100）。"""
     account, token = _cf_creds()
     if not account or not token:
         return ""
-    model = os.getenv("CF_FIX_MODEL", "@cf/mistralai/mistral-small-3.1-24b-instruct")
-    if dir_ == "ko2zh":
-        sys = ("你是翻译助手。把用户给出的韩文译成简体中文。只输出译文，不要解释，不要加引号。"
-               "人名、店名、地名、数字和价格保持原样或常用中文写法。")
-    else:
-        sys = ("你是翻译助手。把用户给出的中文译成自然的韩语（해요体）。只输出译文，不要解释，不要加引号。"
-               "人名、店名、地名、数字和价格保持原样。")
-    import httpx
-    url = f"https://api.cloudflare.com/client/v4/accounts/{account}/ai/run/{model}"
-    body = {"messages": [{"role": "system", "content": sys}, {"role": "user", "content": text}],
-            "max_tokens": 400, "temperature": 0}
     try:
-        async with httpx.AsyncClient(timeout=TR_TIMEOUT) as c:
-            r = await c.post(url, json=body, headers={"Authorization": "Bearer " + token})
-        if r.status_code != 200:
-            return ""
-        j = r.json()
-        res = j.get("result") or {}
-        out = res.get("response")
-        if out is None and res.get("choices"):
-            out = res["choices"][0].get("message", {}).get("content")
-        out = (out if isinstance(out, str) else "") or ""
-        out = out.strip().strip("\"“”「」'")
-        return out.split("\n\n")[0].strip()[:800]
+        from translate import translate_text
+        r = await translate_text(text, dir_ or "zh2ko", scene="general", want_roman=False)
+        out = (r.get("ko") if (dir_ or "zh2ko") == "zh2ko" else r.get("zh")) or ""
+        return str(out).strip()[:800]
     except Exception:
         return ""
 
