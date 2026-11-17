@@ -159,6 +159,18 @@ PAGES = {
         "站内咨询,旅韩助手",
         False,
     ),
+    "/partner": (
+        "商家/服务商入驻 · 旅韩助手",
+        "门店代订、接送机、中文应急协助与短时口译服务商入驻申请（中韩双语），审核通过后展示。",
+        "商家入驻,服务商入驻,입점 신청,旅韩助手",
+        True,
+    ),
+    "/services": (
+        "服务商家 · 旅韩助手",
+        "经平台审核的门店代订、接送机、中文应急协助服务商，仅供参考。",
+        "门店代订,接送机,中文协助,旅韩助手",
+        True,
+    ),
     "/chicken/join": (
         "炸鸡商家入驻 · 旅韩助手",
         "炸鸡店商家入驻旅韩助手代点：提交店铺资料，保证金到账且审核通过后上架，可随时切换营业或休息。",
@@ -244,6 +256,8 @@ FILE_PATHS = {
     "itineraries.html": "/itineraries",
     "chicken.html": "/chicken",
     "chicken-join.html": "/chicken/join",
+    "partner.html": "/partner",
+    "services.html": "/services",
     "consult.html": "/consult",
     "notices.html": "/community/notices",
     "user.html": "/community/u",
@@ -283,6 +297,7 @@ SITEMAP_PATHS = [
     "/", "/attractions", "/food", "/shopping", "/tips", "/beauty", "/faq",
     "/community", "/community/boards", "/community/rate", "/community/friends",
     "/rules", "/member", "/shops", "/pay", "/tax-refund", "/visa", "/itineraries", "/privacy", "/terms", "/promo/rules",
+    "/services", "/partner",
 ]
 
 router = APIRouter()

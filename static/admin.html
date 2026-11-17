@@ -42,7 +42,7 @@
       <div style="overflow-x:auto"><table class="adm" id="visit-sources"></table></div>
     </div>
     <div class="boards" id="tabs">
-      <button data-t="users" class="on">用户/会员</button><button data-t="payproofs">付款审核<span id="pppend"></span></button><button data-t="reports">举报</button><button data-t="posts">帖子</button><button data-t="review">审核</button><button data-t="merchants">商家/评价</button><button data-t="chicken">代点</button><button data-t="promo">推广统计</button><button data-t="settings">设置</button><button data-t="friends">交友</button><button data-t="idv">实名核验</button><button data-t="opening">开业活动</button><button data-t="banners">横幅广告</button><button data-t="consult">站内咨询</button><button data-t="ops">运营·徽章</button><button data-t="hits">拦截记录</button>
+      <button data-t="users" class="on">用户/会员</button><button data-t="payproofs">付款审核<span id="pppend"></span></button><button data-t="reports">举报</button><button data-t="posts">帖子</button><button data-t="review">审核</button><button data-t="merchants">商家/评价</button><button data-t="chicken">代点</button><button data-t="promo">推广统计</button><button data-t="settings">设置</button><button data-t="friends">交友</button><button data-t="idv">实名核验</button><button data-t="opening">开业活动</button><button data-t="banners">横幅广告</button><button data-t="consult">站内咨询</button><button data-t="providers">入驻申请</button><button data-t="ops">运营·徽章</button><button data-t="hits">拦截记录</button>
     </div>
     <div class="card" id="t-users">
       <div class="row"><input class="f" id="us" placeholder="搜索编号/昵称/手机号/邮箱" style="flex:1"><button class="btn primary" id="usgo">搜索</button></div>
@@ -56,6 +56,7 @@
     </div>
     <div id="t-banners" style="display:none"></div>
     <div id="t-consult" style="display:none"></div>
+    <div id="t-providers" style="display:none"></div>
     <div id="t-ops" style="display:none"></div>
     <div id="t-hits" style="display:none"></div>
     <div class="card" id="t-reports" style="display:none"><div id="rlist"></div></div>
@@ -235,7 +236,7 @@ document.getElementById('alogout').onclick = async function(){ await call('POST'
 document.querySelectorAll('#tabs button').forEach(function(b){
   b.onclick = function(){
     document.querySelectorAll('#tabs button').forEach(function(x){ x.className = x === b ? 'on' : ''; document.getElementById('t-' + x.dataset.t).style.display = x === b ? 'block' : 'none'; });
-    ({users: users, reports: reports, posts: function(){ posts(true); }, promo: promo, review: review, settings: settings, friends: friends, chicken: chickenAdmin, idv: idvQueue, opening: openingPromo, payproofs: payProofs, banners: bannersAdmin, consult: consultAdmin, ops: opsAdmin, hits: hitsAdmin, merchants: function(){ loadReviews(); merchants(); }})[b.dataset.t]();
+    ({users: users, reports: reports, posts: function(){ posts(true); }, promo: promo, review: review, settings: settings, friends: friends, chicken: chickenAdmin, idv: idvQueue, opening: openingPromo, payproofs: payProofs, banners: bannersAdmin, consult: consultAdmin, providers: providersAdmin, ops: opsAdmin, hits: hitsAdmin, merchants: function(){ loadReviews(); merchants(); }})[b.dataset.t]();
   };
 });
 async function payProofs(){

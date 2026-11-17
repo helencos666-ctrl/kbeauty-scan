@@ -1,0 +1,125 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>商家/服务商入驻 · 旅韩助手</title>
+<meta name="description" content="门店代订、接送机、中文应急协助服务商入驻申请（中韩双语）。">
+<meta name="theme-color" content="#ff6b8f">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="旅韩助手">
+<link rel="manifest" href="/manifest.webmanifest">
+<link rel="apple-touch-icon" href="/static/icons/apple-touch-icon.png">
+<link rel="icon" type="image/png" sizes="192x192" href="/static/icons/icon-192.png">
+<link rel="stylesheet" href="/static/pwa.css">
+<link rel="stylesheet" href="/static/community.css">
+<style>
+.ko{color:#8a8f99;font-size:12px;font-weight:400;margin-left:4px}
+.hp{position:absolute;left:-9999px;width:1px;height:1px;overflow:hidden}
+.cats{display:flex;flex-direction:column;gap:8px;margin:6px 0}
+.cats label{display:flex;gap:10px;align-items:flex-start;border:1px solid #eceef2;border-radius:12px;padding:10px 12px;font-size:14px;line-height:1.5}
+.cats label b{display:block;font-size:15px}
+.no{background:#fff5f5;border-radius:12px;padding:10px 12px;font-size:13px;line-height:1.7;color:#a33}
+.terms{font-size:13px;line-height:1.75;color:#555}
+.terms li{margin-bottom:4px}
+</style>
+</head>
+<body>
+<header>
+  <h1>🤝 商家/服务商入驻 <span class="ko" style="color:#fff;opacity:.85">입점 신청</span></h1>
+  <p>提交资料 → 平台审核 → 通过后在「服务商家」页展示 · 신청 → 심사 → 승인 후 게시</p>
+</header>
+<main>
+  <div class="err" id="err" style="display:none"></div>
+  <div class="ok" id="ok" style="display:none"></div>
+  <div class="card">
+    <h2>可入驻的服务 <span class="ko">입점 가능 업종</span></h2>
+    <div id="catinfo" class="terms"></div>
+    <div class="no"><b>不接受 · 받지 않는 업종：</b>医美/皮肤科/医院中介（성형·피부과·병원 알선），代办签证（비자 대행），打包一日游（패키지 일일투어），加价代抢票（웃돈 티켓팅 대행）。</div>
+  </div>
+  <div class="card" id="formcard">
+    <h2>入驻申请 <span class="ko">입점 신청서</span></h2>
+    <label class="f">服务类别 <span class="ko">업종</span></label>
+    <div class="cats" id="f_cat"></div>
+    <label class="f">店名/服务名称（中文）<span class="ko">상호명(중국어)</span></label><input class="f" id="f_name" maxlength="40" placeholder="例如：弘大某某写真馆">
+    <label class="f">韩文店名（选填）<span class="ko">상호명(한국어, 선택)</span></label><input class="f" id="f_name_ko" maxlength="60" lang="ko">
+    <label class="f">区域 <span class="ko">지역</span></label><select class="f" id="f_area"></select>
+    <label class="f">地址（门店必填）<span class="ko">주소(매장 필수)</span></label><input class="f" id="f_addr" maxlength="120" placeholder="韩文道路名地址 · 도로명 주소">
+    <label class="f">服务内容 <span class="ko">서비스 내용</span></label><textarea class="f" id="f_services" rows="4" maxlength="600" placeholder="提供什么服务、适合什么客人、注意事项 · 제공 서비스, 유의사항"></textarea>
+    <label class="f">价格 <span class="ko">가격</span></label><textarea class="f" id="f_price" rows="2" maxlength="300" placeholder="例如：餐厅代订手续费 10,000韩元/次 · 예: 예약 대행 수수료 1회 10,000원"></textarea>
+    <label class="f">营业时间 <span class="ko">영업시간</span></label><input class="f" id="f_hours" maxlength="80" placeholder="例如：每天 10:00–20:00 · 매일 10:00–20:00">
+    <div id="licbox" style="display:none">
+      <label class="f">营业执照号/营运资质（接送机必填）<span class="ko">사업자등록번호·운송 자격(필수)</span></label>
+      <input class="f" id="f_license" maxlength="80" autocomplete="off" placeholder="如：사업자등록번호、여객자동차운송사업 면허 등">
+      <p class="tip" style="margin-top:4px">接送机仅限单程交通服务（机场↔酒店），须持有合法营运资质；不接受包车游览。</p>
+    </div>
+    <h3 style="font-size:15px;margin:16px 0 4px">联系方式（加密保存，仅管理员审核时可见）<span class="ko">연락처(암호화 보관, 관리자만 열람)</span></h3>
+    <label class="f">联系人 <span class="ko">담당자</span></label><input class="f" id="f_cname" maxlength="30" autocomplete="name">
+    <label class="f">电话 <span class="ko">전화</span></label><input class="f" id="f_phone" maxlength="30" inputmode="tel" autocomplete="tel" placeholder="+82 10-0000-0000">
+    <label class="f">邮箱 <span class="ko">이메일</span></label><input class="f" id="f_email" maxlength="120" inputmode="email" autocomplete="email">
+    <label class="f">KakaoTalk ID</label><input class="f" id="f_kakao" maxlength="40" autocomplete="off">
+    <p class="tip" style="margin-top:4px">三项至少填一项。· 셋 중 하나 이상 입력해 주세요.</p>
+    <label class="f">门店/服务照片（选填）<span class="ko">사진(선택)</span></label><input type="file" id="f_photo" accept="image/jpeg,image/png,image/webp">
+    <div class="hp" aria-hidden="true"><label>Website<input id="f_website" tabindex="-1" autocomplete="off"></label></div>
+    <details style="margin-top:14px" open><summary style="cursor:pointer;font-weight:700;font-size:14px">入驻须知 · 입점 안내</summary>
+      <ul class="terms">
+        <li>提交的信息由平台人工审核，通过后才会公开展示；资料不实、超出上述类别或收到有效投诉时，平台可随时下架。· 모든 정보는 심사 후 게시되며, 허위·업종 외·민원 시 게시 중단될 수 있습니다.</li>
+        <li>目前不收取入驻费（暂定，如有调整会提前告知，不会自动扣费）。· 현재 입점비 없음(변경 시 사전 안내, 자동 결제 없음).</li>
+        <li>公开展示：店名、类别、区域、地址、服务内容、价格、营业时间、照片。联系人、电话、邮箱、KakaoTalk、执照号仅用于审核和联系你，加密保存，不公开、不出售。· 연락처·사업자번호는 심사와 연락에만 사용하며 암호화 보관, 비공개입니다.</li>
+        <li>公开内容里请不要写电话、微信、二维码等站外联系方式。· 공개 내용에 외부 연락처를 적지 마세요.</li>
+        <li>平台只做信息展示，不是旅行社，不参与交易；服务由服务商自行提供并负责，须遵守韩国相关法规。· 플랫폼은 정보 게시만 하며 거래 당사자가 아닙니다.</li>
+        <li>想撤回申请或删除资料，请在站内咨询联系管理员。· 신청 철회·삭제는 사이트 내 문의로 요청해 주세요.</li>
+      </ul>
+    </details>
+    <label style="display:flex;gap:8px;align-items:flex-start;font-size:13px;color:var(--sub);margin-top:10px;line-height:1.6">
+      <input type="checkbox" id="f_agree" style="margin-top:3px"> 我已阅读并同意入驻须知和<a href="/privacy" target="_blank" style="color:#2c7be5">隐私政策</a>，确认所填信息真实。· 안내와 개인정보 처리방침에 동의하며 정보가 사실임을 확인합니다.
+    </label>
+    <button class="btn primary block" type="button" id="fsend" style="margin-top:12px">提交申请 · 신청하기</button>
+  </div>
+  <p style="font-size:12px;color:#888;text-align:center;margin:10px 0 16px;line-height:1.7">旅韩助手为个人运营的信息网站，仅作信息展示，不是旅行社，不代办签证。<br><a href="/services" style="color:#2c7be5">查看服务商家</a> · <a href="/terms" style="color:#2c7be5">用户协议</a> · <a href="/privacy" style="color:#2c7be5">隐私政策</a></p>
+</main>
+<nav>
+  <a href="/"><i>🏠</i>首页</a>
+  <a href="/?tab=sub"><i>🚇</i>地铁</a>
+  <a href="/?tab=card"><i>💬</i>翻译</a>
+  <a href="/community"><i>🧭</i>韩友圈</a>
+  <a href="/?tab=more"><i>☰</i>全部</a>
+</nav>
+<script src="/static/community.js"></script>
+<script>
+(async function(){
+  var $ = function(id){ return document.getElementById(id); };
+  var err = $('err'), ok = $('ok');
+  function show(el, t){ el.textContent = t || ''; el.style.display = t ? 'block' : 'none'; if (t) window.scrollTo(0, 0); }
+  var meta;
+  try { meta = await LH.api('GET', '/api/providers/meta'); } catch(e){ show(err, e.message); return; }
+  var T0 = meta.t;
+  $('catinfo').innerHTML = '<ol style="padding-left:18px;margin:0">' + meta.cats.map(function(c){ return '<li><b>' + LH.esc(c.name) + '</b> <span class="ko">' + LH.esc(c.name_ko) + '</span><br>' + LH.esc(c.desc) + '</li>'; }).join('') + '</ol>';
+  $('f_cat').innerHTML = meta.cats.map(function(c, i){ return '<label><input type="radio" name="cat" value="' + c.key + '"' + (i === 0 ? ' checked' : '') + '><span><b>' + LH.esc(c.name) + '</b><span class="ko" style="margin:0">' + LH.esc(c.name_ko) + '</span></span></label>'; }).join('');
+  $('f_area').innerHTML = meta.areas.map(function(a){ return '<option>' + LH.esc(a) + '</option>'; }).join('');
+  function cat(){ var r = document.querySelector('input[name=cat]:checked'); return r ? r.value : ''; }
+  function syncCat(){ $('licbox').style.display = cat() === 'transfer' ? 'block' : 'none'; }
+  document.querySelectorAll('input[name=cat]').forEach(function(r){ r.onchange = syncCat; }); syncCat();
+  if (!meta.open){ show(err, '入驻申请暂未开放，请稍后再来。'); $('fsend').disabled = true; }
+  $('fsend').onclick = async function(){
+    show(err, ''); show(ok, '');
+    if (!$('f_agree').checked){ show(err, '请先勾选同意入驻须知 · 동의에 체크해 주세요'); return; }
+    if (!$('f_phone').value.trim() && !$('f_email').value.trim() && !$('f_kakao').value.trim()){ show(err, '电话、邮箱、KakaoTalk ID 至少填一项'); return; }
+    var fd = new FormData();
+    fd.append('category', cat());
+    [['name','f_name'],['name_ko','f_name_ko'],['area','f_area'],['address','f_addr'],['services','f_services'],['price','f_price'],['hours','f_hours'],['license','f_license'],['contact_name','f_cname'],['phone','f_phone'],['email','f_email'],['kakao','f_kakao'],['website','f_website']].forEach(function(p){ fd.append(p[0], $(p[1]).value); });
+    fd.append('agree', '1'); fd.append('t', String(T0));
+    var ph = $('f_photo').files[0];
+    if (ph) fd.append('photo', await LH.compress(ph), 'photo.jpg');
+    var b = this; b.disabled = true; b.textContent = '提交中… · 제출 중…';
+    try {
+      var r = await LH.api('POST', '/api/providers/apply', fd);
+      $('formcard').innerHTML = '<h2>✅ 已提交 · 제출 완료</h2><p class="tip">' + LH.esc(r.message) + '</p><a class="btn primary block" href="/services">查看服务商家</a>';
+      show(ok, r.message);
+    } catch(e){ show(err, e.message); b.disabled = false; b.textContent = '提交申请 · 신청하기'; }
+  };
+})();
+</script>
+</body>
+</html>
