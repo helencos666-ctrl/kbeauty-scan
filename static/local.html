@@ -1,0 +1,78 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>本地生活 · 旅韩助手</title>
+<meta name="description" content="旅韩助手本地生活：租房、招聘、二手、签证、留学和在韩日常，给在韩国居住的中国人用的信息频道，内容由用户发布。">
+<meta name="theme-color" content="#146E68">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="旅韩助手">
+<link rel="manifest" href="/manifest.webmanifest">
+<link rel="apple-touch-icon" href="/static/icons/apple-touch-icon.png?v=61">
+<link rel="icon" type="image/png" sizes="192x192" href="/static/icons/icon-192.png?v=61">
+<link rel="stylesheet" href="/static/pwa.css?v=61">
+<link rel="stylesheet" href="/static/community.css?v=61">
+<style>
+:root{--primary:#146E68;--secondary:#3D8F88;--accent:#B85A12;--ink:#1A2330;--sub:#4A5560;--bg:#F3F7F6;--card:#fff;--line:#D5E4E1;--soft:#E6F3F1}
+body{background:#fff}
+main{max-width:560px;margin:0 auto;padding:0 16px 8px}
+.topbar{display:flex;align-items:center;gap:6px;padding:calc(10px + env(safe-area-inset-top)) 8px 4px 4px;max-width:560px;margin:0 auto}
+.topbar .back{width:34px;height:34px;display:flex;align-items:center;justify-content:center;font-size:26px;line-height:1;color:var(--ink);text-decoration:none;flex:none}
+.topbar b{flex:1;min-width:0;font-size:19px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.me-ava{width:30px;height:30px;border-radius:50%;background:#146E68;display:inline-flex;align-items:center;justify-content:center;flex:none;margin-right:6px;box-shadow:0 1px 4px rgba(20,110,104,.2);text-decoration:none}
+.me-ava svg{width:17px;height:17px;display:block}
+.loc-hero{margin:8px 0 14px;padding:16px;border-radius:18px;background:linear-gradient(150deg,#EAF6F4 0%,#FFFFFF 72%);border:1px solid #E2EFEC}
+.loc-hero h1{margin:0 0 6px;font-size:20px;line-height:1.4;font-weight:800}
+.loc-hero p{margin:0;font-size:13.5px;line-height:1.7;color:var(--sub)}
+.loc-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:0 0 14px}
+.loc-card{display:flex;flex-direction:column;gap:6px;padding:14px;border-radius:16px;background:#fff;border:1px solid #F0F6F5;box-shadow:0 4px 16px rgba(20,110,104,.06);text-decoration:none;color:var(--ink);min-height:104px}
+.loc-card .ico{width:38px;height:38px;border-radius:12px;background:#EAF6F4;display:flex;align-items:center;justify-content:center;font-size:20px}
+.loc-card b{font-size:15px;font-weight:800}
+.loc-card span{font-size:12px;line-height:1.55;color:var(--sub)}
+.loc-note{margin:0 0 14px;padding:12px 14px;border-radius:14px;background:#F7FBFA;border:1px solid #DDEDEA;font-size:12.5px;line-height:1.75;color:var(--sub)}
+.loc-note b{color:var(--ink)}
+.loc-foot{margin:4px 0 8px;text-align:center;font-size:12px;color:#999;line-height:1.7}
+.loc-foot a{color:#888}
+@media (max-width:339px){.loc-grid{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+<div class="topbar">
+  <a class="back" href="/" aria-label="返回首页">‹</a>
+  <b>本地生活</b>
+  <a class="me-ava" href="/me" title="我的" aria-label="我的"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="8.5" r="3.6" fill="#fff"/><path d="M5 19.2c.9-3.2 3.4-5 7-5s6.1 1.8 7 5" fill="#fff"/></svg></a>
+</div>
+
+<main>
+  <section class="loc-hero">
+    <h1>在韩国生活的信息频道</h1>
+    <p>给在韩国居住的中国人用的聚合入口：租房、工作、二手、签证、留学和日常，都挂在韩友圈的对应频道里，内容由用户发布。</p>
+  </section>
+
+  <div class="loc-grid">
+    <a class="loc-card" href="/community?board=rent"><span class="ico">🏠</span><b>租房</b><span>考试院、单间、合租与转租信息</span></a>
+    <a class="loc-card" href="/community?board=jobs"><span class="ico">💼</span><b>招聘 · 工作</b><span>兼职、全职与打工经验交流</span></a>
+    <a class="loc-card" href="/community?board=used"><span class="ico">🛋️</span><b>二手 · 闲置</b><span>家具、家电、生活用品的转让</span></a>
+    <a class="loc-card" href="/community?board=visa"><span class="ico">🛂</span><b>签证</b><span>居留、延期与材料准备的经验</span></a>
+    <a class="loc-card" href="/community?board=study"><span class="ico">🎓</span><b>留学</b><span>语学院、大学与入学后的生活</span></a>
+    <a class="loc-card" href="/community?board=daily"><span class="ico">☕</span><b>在韩日常</b><span>买菜、看病、办证与周末去处</span></a>
+  </div>
+
+  <p class="loc-note"><b>说明：</b>本页只做频道入口，帖子都由用户自己发布，仅供参考。涉及签约、汇款、押金和证件的事情，请当面核实对方身份与合同条款，不要提前转账。</p>
+
+  <p class="loc-foot">旅韩助手为个人运营的免费信息网站，不是中介，也不提供担保。<br><a href="/community/boards">全部频道</a> · <a href="/terms">用户协议</a> · <a href="/privacy">隐私政策</a></p>
+</main>
+
+<nav class="tabbar" aria-label="底部导航">
+  <a href="/" data-nav="home"><i>🏠</i>首页</a>
+  <a href="/community?tab=follow" data-nav="follow"><i>👥</i>关注</a>
+  <a href="/community/new" data-nav="post" class="pub"><span class="plus">＋</span>发布</a>
+  <a href="/shops?tab=services" data-nav="services" class="svc"><i>💼</i>商业服务</a>
+  <a href="/local" data-nav="local" class="loc on" aria-current="page"><i>🏘️</i>本地生活</a>
+</nav>
+
+<script src="/static/pwa.js?v=61" defer></script>
+</body>
+</html>

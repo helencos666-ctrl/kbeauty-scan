@@ -135,6 +135,18 @@ PAGES = {
         "首尔自由行,首尔路线,旅韩助手",
         True,
     ),
+    "/trips": (
+        "行程 · 旅韩助手",
+        "行程功能即将上线：我的行程、大家分享，以及根据以前游客常走路线整理的经典行程，可一键复制成自己的行程。",
+        "韩国行程,首尔行程,旅韩助手",
+        True,
+    ),
+    "/local": (
+        "本地生活 · 旅韩助手",
+        "给在韩国居住的中国人用的信息频道：租房、招聘、二手、签证、留学和在韩日常，内容由用户发布，仅供参考。",
+        "韩国租房,韩国招聘,在韩生活,旅韩助手",
+        True,
+    ),
     "/chicken": (
         "炸鸡代点 · 旅韩助手",
         "旅韩助手炸鸡代点：填写酒店地址后由客服确认再付款。个人代点协助，非持牌外卖。",
@@ -274,6 +286,8 @@ FILE_PATHS = {
     "tax-refund.html": "/tax-refund",
     "visa.html": "/visa",
     "itineraries.html": "/itineraries",
+    "trips.html": "/trips",
+    "local.html": "/local",
     "chicken.html": "/chicken",
     "chicken-join.html": "/chicken/join",
     "partner.html": "/partner",
@@ -324,7 +338,7 @@ SITEMAP_PATHS = [
     "/", "/attractions", "/food", "/shopping", "/tips", "/beauty", "/faq",
     "/community", "/community/boards", "/community/rate", "/community/friends",
     "/rules", "/member", "/shops", "/pay", "/tax-refund", "/visa", "/itineraries", "/privacy", "/terms", "/promo/rules",
-    "/services", "/partner", "/deals", "/places",
+    "/services", "/partner", "/deals", "/places", "/trips", "/local",
 ]
 
 router = APIRouter()
@@ -387,7 +401,7 @@ def json_ld(origin, title, desc, path, extra=None):
         "@id": origin + "/#org",
         "name": "旅韩助手",
         "url": origin + "/",
-        "logo": origin + "/static/icons/icon-512.png?v=60",
+        "logo": origin + "/static/icons/icon-512.png?v=61",
     }
     website = {
         "@type": "WebSite",

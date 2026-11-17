@@ -10,9 +10,9 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="旅韩助手">
 <link rel="manifest" href="/manifest.webmanifest">
-<link rel="apple-touch-icon" href="/static/icons/apple-touch-icon.png?v=60">
-<link rel="icon" type="image/png" sizes="192x192" href="/static/icons/icon-192.png?v=60">
-<link rel="stylesheet" href="/static/pwa.css?v=60">
+<link rel="apple-touch-icon" href="/static/icons/apple-touch-icon.png?v=61">
+<link rel="icon" type="image/png" sizes="192x192" href="/static/icons/icon-192.png?v=61">
+<link rel="stylesheet" href="/static/pwa.css?v=61">
 <style>
 :root{--primary:#146E68;--secondary:#3D8F88;--accent:#B85A12;--pink:var(--primary);--ink:#1A2330;--sub:#4A5560;--bg:#F3F7F6;--card:#fff;--line:#D5E4E1;--success:#1B7A45;--warning:#B45309}
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
@@ -90,10 +90,6 @@ textarea{width:100%;min-height:90px;border:1px solid var(--line);border-radius:1
 .live{position:fixed;left:0;right:0;bottom:calc(60px + env(safe-area-inset-bottom));background:#1A2330;color:#fff;padding:9px 14px;display:flex;align-items:center;justify-content:space-between;gap:10px;z-index:9;font-size:14px}
 .live b{font-weight:600}
 .live a{background:var(--primary);color:#fff;text-decoration:none;padding:6px 12px;border-radius:16px;font-size:13px;white-space:nowrap}
-nav{position:fixed;left:0;right:0;bottom:0;height:calc(60px + env(safe-area-inset-bottom));padding-bottom:env(safe-area-inset-bottom);background:#fff;border-top:1px solid var(--line);display:flex;z-index:10}
-nav button,nav a{flex:1;border:0;background:none;font-size:11px;color:var(--sub);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;text-decoration:none}
-nav button i,nav a i{font-style:normal;font-size:20px}
-nav button.on,nav a.on{color:var(--primary);font-weight:700}
 
 .route-box{margin-top:16px;padding-top:14px;border-top:1px dashed var(--line)}
 .route-box .rh{font-size:15px;font-weight:700;margin:0 0 10px}
@@ -203,108 +199,221 @@ html.sp-on,html.sp-on body{overflow:hidden}
 .extra a{display:flex;align-items:center;gap:10px;background:#fff;border-radius:16px;padding:14px 12px;text-decoration:none;color:var(--ink);box-shadow:0 4px 16px rgba(20,110,104,.08);font-size:15px;font-weight:700;min-height:64px}
 .extra a span{display:block;font-size:12px;font-weight:500;color:var(--sub);margin-top:2px}
 
-/* ===== 新主页（home v2） ===== */
+/* ===== 首页改版（v61）：hero / 两大入口 / 吃喝玩乐 / 广告 / 附近推荐 / 韩友圈分享 ===== */
 [hidden]{display:none!important}
-body{background:#fff}
-main{margin:0 auto}
+body{background:#fff;padding-bottom:calc(82px + env(safe-area-inset-bottom))}
+main{max-width:560px;margin:0 auto;padding:0}
 header{display:none}
-.hero{padding:22px 20px 8px}
-.brand{display:flex;align-items:center;gap:8px;font-size:15px;font-weight:700;color:var(--ink)}
-.brand img{width:28px;height:28px;border-radius:50%}
-.hero h1{margin:18px 0 6px;font-size:30px;line-height:1.25;font-weight:800;letter-spacing:.5px}
-.hero p{margin:0;font-size:15px;color:var(--sub)}
-.search{position:relative;margin-top:16px}
-.search input{width:100%;border:0;border-radius:14px;background:#f4f5f7;padding:14px 14px 14px 42px;font-size:16px;font-family:inherit;outline:none}
-.search:before{content:"🔍";position:absolute;left:14px;top:13px;font-size:16px;opacity:.6}
-#qres{position:absolute;left:0;right:0;top:54px;background:#fff;border-radius:14px;box-shadow:0 8px 24px rgba(0,0,0,.12);z-index:20;overflow:hidden}
-#qres a{display:flex;align-items:center;gap:10px;padding:12px 14px;color:var(--ink);text-decoration:none;font-size:15px;border-top:1px solid #f2f2f2}
-#qres a:first-child{border-top:0}
-#qres .none{padding:12px 14px;color:var(--sub);font-size:14px}
-.bar{display:none;align-items:center;gap:6px;padding:12px 14px 4px}
-.bar a{font-size:28px;line-height:1;color:var(--ink);text-decoration:none;padding:0 8px 4px 2px}
-.bar b{font-size:19px}
-.bar-sub{display:none;margin:0 0 10px;padding:0 20px;font-size:13px;color:var(--sub)}
-body:not(.is-home) .hero{display:none}
+
+/* 顶部 hero：只在首页显示（沿用 is-home 显隐） */
+.hero{display:flex;align-items:center;gap:8px;padding:calc(12px + env(safe-area-inset-top)) 16px 8px}
+.hero .brand{display:flex;align-items:center;gap:8px;flex:1;min-width:0;font-size:16px;font-weight:800;color:var(--ink);text-decoration:none}
+.hero .brand img{width:30px;height:30px;border-radius:50%;display:block;flex:none}
+.hero .trip-entry{display:inline-flex;align-items:center;gap:3px;flex:none;padding:6px 10px;border-radius:14px;background:#F3F7F6;color:var(--sub);font-size:13px;font-weight:700;text-decoration:none;white-space:nowrap}
+.hero .trip-entry i{font-style:normal;font-size:13px}
+.me-ava{width:30px;height:30px;border-radius:50%;background:#146E68;display:inline-flex;align-items:center;justify-content:center;flex:none;box-shadow:0 1px 4px rgba(20,110,104,.2);text-decoration:none}
+.me-ava svg{width:17px;height:17px;display:block}
+.hero-sub{margin:0;padding:0 16px 12px;font-size:13.5px;line-height:1.5;color:var(--sub)}
+
+/* 内部 tab 的顶栏（非首页显示） */
+.bar{display:none;align-items:center;gap:4px;padding:calc(10px + env(safe-area-inset-top)) 8px 4px 4px}
+.bar .back{font-size:30px;line-height:1;color:var(--ink);text-decoration:none;width:38px;text-align:center;flex:none}
+.bar b{flex:1;min-width:0;font-size:19px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.bar .me-ava{margin:0 8px 0 4px}
+.bar-sub{display:none;margin:0 0 10px;padding:0 20px;font-size:13px;line-height:1.55;color:var(--sub)}
+body:not(.is-home) .hero,body:not(.is-home) .hero-sub{display:none}
 body:not(.is-home) .bar{display:flex}
 body:not(.is-home) .bar-sub{display:block}
-body:not(.is-home) main{padding-top:4px}
-.grid{display:grid;grid-template-columns:repeat(4,1fr);gap:18px 8px;padding:22px 6px 6px}
-.grid a{display:flex;flex-direction:column;align-items:center;gap:8px;text-decoration:none;color:var(--ink);font-size:13px;font-weight:600}
-.grid i{font-style:normal;font-size:28px;width:60px;height:60px;border-radius:20px;display:flex;align-items:center;justify-content:center;background:#f4f5f7}
-.chips{display:flex;gap:8px;align-items:center;overflow-x:auto;padding:14px 6px 4px;scrollbar-width:none}
-.chips span{flex:none;font-size:13px;color:var(--sub)}
-.chips a{flex:none;font-size:13px;color:var(--ink);text-decoration:none;padding:7px 12px;border-radius:16px;background:#f4f5f7}
-.promo-bar{display:flex;align-items:center;gap:10px;margin:16px 6px 0;padding:14px;border-radius:16px;background:#fff4e8;color:var(--ink);text-decoration:none}
-.promo-bar .pt{flex:1}.promo-bar b{display:block;font-size:15px}.promo-bar span{display:block;font-size:12px;color:var(--sub);margin-top:3px;line-height:1.5}
-.promo-bar em{font-style:normal;font-size:13px;font-weight:700;color:var(--primary);white-space:nowrap}
-.blk{margin:26px 6px 0}
-.bh{display:flex;align-items:baseline;justify-content:space-between;margin-bottom:12px}
-.bh h2{margin:0;font-size:18px}.bh a{font-size:13px;color:var(--sub);text-decoration:none}
-.hs{display:flex;gap:12px;overflow-x:auto;padding-bottom:4px;scrollbar-width:none;margin:0 -20px;padding-left:20px;padding-right:20px}
-.sc{flex:none;width:150px;text-decoration:none;color:var(--ink)}
-.sc .im{width:150px;height:112px;border-radius:14px;background:#f4f5f7 center/cover no-repeat;display:flex;align-items:center;justify-content:center;font-size:30px}
-.sc b{display:block;font-size:14px;margin-top:8px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.sc span{display:block;font-size:12px;color:var(--sub);margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.pi{display:block;text-decoration:none;color:var(--ink);padding:12px 0;border-top:1px solid #f0f1f3}
-.pi:first-child{border-top:0;padding-top:2px}
-.pi b{display:block;font-size:15px;line-height:1.45;font-weight:600}
-.pi span{display:block;font-size:12px;color:var(--sub);margin-top:4px}
-.grp{margin:8px 6px 22px}.grp h3{font-size:14px;color:var(--sub);font-weight:600;margin:0 0 10px}
-.ml{display:grid;grid-template-columns:1fr 1fr;gap:10px}
-.ml a{display:flex;align-items:center;gap:10px;padding:13px 12px;border-radius:14px;background:#f6f7f9;color:var(--ink);text-decoration:none;font-size:15px;font-weight:600}
-.ml a i{font-style:normal;font-size:20px}
-.foot{font-size:12px;color:#999;text-align:center;margin:28px 0 16px;line-height:1.7}
-.foot a{color:#888}
-.more-join{text-align:center;margin:8px 6px 4px;font-size:13px;line-height:2;color:#d0d2d6}
-.more-join a{color:#8a8f99;text-decoration:none;margin:0 7px;white-space:nowrap;display:inline-block}
-.more-join a:hover{color:var(--primary)}
-.chips.home-low{padding-top:22px}
-nav{border-top:1px solid #f0f1f3}
 body.is-home .disclaimer{display:none}
+
+/* A. 两大入口 */
+.core{display:grid;grid-template-columns:1fr 1fr;gap:10px;padding:0 16px 12px}
+.core a{display:flex;align-items:center;gap:10px;min-width:0;padding:14px 12px;border-radius:16px;background:#fff;border:1px solid #F0F6F5;box-shadow:0 4px 16px rgba(20,110,104,.08);color:var(--ink);text-decoration:none}
+.core .ico{width:44px;height:44px;border-radius:14px;background:#EAF6F4;display:flex;align-items:center;justify-content:center;font-size:22px;flex:none}
+.core .tx{min-width:0}
+.core b{display:block;font-size:16px;font-weight:800}
+.core span{display:block;margin-top:2px;font-size:11px;font-weight:600;color:var(--sub);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+
+/* B. 吃喝玩乐 */
+.cats-wrap{padding:0 12px 12px}
+.cats-lab{padding:0 4px 8px;font-size:12px;font-weight:700;color:var(--sub)}
+.cats{display:grid;grid-template-columns:repeat(5,1fr);gap:4px}
+.cats a{display:flex;flex-direction:column;align-items:center;gap:6px;min-width:0;font-size:12px;font-weight:600;color:var(--ink);text-decoration:none}
+.cats i{font-style:normal;font-size:23px;width:52px;height:52px;max-width:100%;border-radius:18px;background:#F3F7F6;display:flex;align-items:center;justify-content:center}
+.cats a:nth-child(1) i{background:#EAF8FB}
+.cats a:nth-child(2) i{background:#FFF6E5}
+.cats a:nth-child(3) i{background:#F6EFF8}
+.cats a:nth-child(4) i{background:#EAF6F4}
+.cats a:nth-child(5) i{background:#FFF0E8}
+
+/* C. 广告轮播 */
+.ads{margin:0 16px 12px}
+.ads-viewport{position:relative;overflow:hidden;border-radius:16px;background:#EAF6F4;height:0;padding-bottom:42%;touch-action:pan-y}
+.ads-track{position:absolute;left:0;top:0;right:0;bottom:0;display:flex;transition:transform .38s ease;will-change:transform}
+.ads-track .slide{flex:0 0 100%;height:100%;display:block;text-decoration:none}
+.ads-track .slide img{width:100%;height:100%;object-fit:cover;display:block}
+.ads .dots{display:flex;align-items:center;justify-content:center;gap:5px;margin-top:8px}
+.ads .dots i{width:6px;height:6px;border-radius:50%;background:#C5E0DC;display:block;transition:width .2s,background .2s}
+.ads .dots i.on{width:14px;border-radius:4px;background:var(--primary)}
+
+/* D. 附近推荐 */
+.near-blk{background:var(--bg);padding:2px 0 12px}
+.near-blk .bh{display:flex;align-items:center;justify-content:space-between;gap:8px;padding:12px 18px 8px}
+.near-blk .bh h2{margin:0;font-size:17px;font-weight:800}
+.near-sort{display:flex;gap:6px}
+.near-sort button{border:1px solid var(--line);background:#fff;color:var(--sub);border-radius:14px;padding:5px 10px;font-size:12px;font-weight:700;font-family:inherit;cursor:pointer}
+.near-sort button.on{background:var(--primary);border-color:var(--primary);color:#fff}
+.near-hint{margin:0 18px 8px;font-size:12px;line-height:1.55;color:var(--sub)}
+.near-list{display:flex;flex-direction:column;gap:7px;padding:0 16px}
+.place{display:flex;align-items:center;gap:10px;padding:8px;border-radius:14px;background:#fff;box-shadow:0 2px 10px rgba(20,110,104,.05);color:var(--ink);text-decoration:none}
+.place .thumb{width:52px;height:52px;border-radius:12px;background:#EAF6F4;display:flex;align-items:center;justify-content:center;font-size:24px;flex:none;overflow:hidden}
+.place .thumb img{width:100%;height:100%;object-fit:cover;display:block}
+.place .meta{flex:1;min-width:0}
+.place .t{display:flex;align-items:center;gap:6px;min-width:0}
+.place b{font-size:14px;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.place .meta p{margin:3px 0 0;font-size:12px;color:var(--sub);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.place .dist{padding-right:4px;font-size:12px;font-weight:800;color:var(--primary);white-space:nowrap}
+.thumb.t1{background:#EAF8FB}.thumb.t2{background:#FFF6E5}.thumb.t3{background:#EAF6F4}.thumb.t4{background:#F6EFF8}.thumb.t5{background:#FFF0E8}
+
+/* E. 韩友圈分享 */
+.circle{background:var(--bg);padding:6px 0 16px}
+.circle .bh{display:flex;align-items:baseline;justify-content:space-between;gap:8px;padding:10px 18px}
+.circle .bh h2{margin:0;font-size:17px;font-weight:800}
+.circle .bh a{font-size:13px;font-weight:700;color:var(--sub);text-decoration:none}
+.feed-chips{display:flex;gap:6px;padding:0 16px 10px;overflow-x:auto;scrollbar-width:none}
+.feed-chips::-webkit-scrollbar{display:none}
+.feed-chips button{flex:none;border:1px solid var(--line);border-radius:14px;background:#fff;color:var(--sub);padding:5px 12px;font-size:12px;font-weight:700;font-family:inherit;cursor:pointer}
+.feed-chips button.on{background:var(--primary);border-color:var(--primary);color:#fff}
+.wf{display:flex;align-items:flex-start;gap:8px;padding:0 16px}
+.wf .col{flex:1;min-width:0;display:flex;flex-direction:column;gap:8px}
+.fc{position:relative;display:block;border-radius:14px;background:#fff;overflow:hidden;box-shadow:0 2px 10px rgba(20,110,104,.06);color:var(--ink);text-decoration:none}
+.fc .pic{width:100%;min-height:96px;display:block;object-fit:cover;background:#EAF6F4;font-size:0}
+.fc .k{position:absolute;top:8px;left:8px;font-size:10px;font-weight:800;padding:2px 6px;border-radius:6px;background:rgba(26,35,48,.62);color:#fff}
+.fc .cap{padding:8px 9px 0;font-size:12.5px;line-height:1.45;font-weight:600;overflow:hidden;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical}
+.fc .meta{display:flex;align-items:center;gap:6px;padding:7px 9px 9px}
+.fc .ava{width:18px;height:18px;border-radius:50%;background:#3D8F88;display:flex;align-items:center;justify-content:center;flex:none;overflow:hidden}
+.fc .ava img{width:100%;height:100%;object-fit:cover;display:block}
+.fc .ava svg{width:12px;height:12px;display:block}
+.fc .nick{flex:1;min-width:0;font-size:11px;font-weight:600;color:var(--sub);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.fc .likes{font-size:11px;font-weight:700;color:var(--sub);white-space:nowrap}
+.fc .likes i{font-style:normal;margin-right:2px;color:#C45C4A}
+
+/* 空状态（附近推荐 / 韩友圈） */
+.empty-box{margin:0 16px;padding:16px 14px;border-radius:14px;background:#fff;box-shadow:0 2px 10px rgba(20,110,104,.05);font-size:13px;line-height:1.7;color:var(--sub)}
+.empty-box p{margin:0}
+.empty-box .lnks{display:flex;flex-wrap:wrap;gap:8px;margin-top:10px}
+.empty-box .lnks a{padding:6px 10px;border-radius:12px;background:#E6F3F1;color:var(--primary);font-size:12.5px;font-weight:700;text-decoration:none}
+
+/* F. 开业活动条（默认 hidden，接口开启后由 JS 显示） */
+.promo-bar{display:flex;align-items:center;gap:10px;margin:4px 16px 16px;padding:14px;border-radius:16px;background:#FFF4E8;color:var(--ink);text-decoration:none;box-shadow:0 2px 10px rgba(184,90,18,.08)}
+.promo-bar .pt{flex:1;min-width:0}
+.promo-bar b{display:block;font-size:15px}
+.promo-bar span{display:block;margin-top:3px;font-size:12px;line-height:1.5;color:var(--sub)}
+.promo-bar em{font-style:normal;font-size:13px;font-weight:800;color:var(--primary);white-space:nowrap}
+
+/* #p-more：搜索框（自首页移入）+ 全部功能分组 */
+.more-search{position:relative;margin:4px 16px 18px}
+.more-search .qico{position:absolute;left:14px;top:12px;font-size:16px;opacity:.6;pointer-events:none}
+.more-search input#q{width:100%;border:1px solid #E7ECEB;border-radius:14px;background:#F4F7F6;padding:13px 14px 13px 40px;font-size:16px;font-family:inherit;color:var(--ink);outline:none}
+.more-search input#q:focus{background:#fff;border-color:#B7D4D1}
+#qres{position:absolute;left:0;right:0;top:calc(100% + 6px);z-index:20;background:#fff;border:1px solid #EDF1F0;border-radius:14px;overflow:hidden;box-shadow:0 8px 24px rgba(0,0,0,.12)}
+#qres a{display:flex;align-items:center;gap:10px;padding:12px 14px;font-size:15px;color:var(--ink);text-decoration:none;border-top:1px solid #f2f2f2}
+#qres a:first-child{border-top:0}
+#qres .none{padding:12px 14px;font-size:14px;color:var(--sub)}
+.grp{margin:6px 16px 20px}
+.grp h3{margin:0 0 10px;font-size:14px;font-weight:600;color:var(--sub)}
+.ml{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.ml a{display:flex;align-items:center;gap:10px;padding:13px 12px;border-radius:14px;background:#F6F7F9;color:var(--ink);text-decoration:none;font-size:15px;font-weight:600;min-height:52px}
+.ml a i{font-style:normal;font-size:20px;flex:none}
+.foot{margin:26px 16px 16px;font-size:12px;line-height:1.7;text-align:center;color:#999}
+.foot a{color:#888}
+.more-join{margin:10px 16px 4px;font-size:13px;line-height:2;text-align:center;color:#d0d2d6}
+.more-join a{display:inline-block;margin:0 7px;color:#8a8f99;text-decoration:none;white-space:nowrap}
+.more-join a:hover{color:var(--primary)}
 #p-cos .card,#p-sub .card,#p-card .card{box-shadow:none;border:1px solid #f0f1f3}
 
-/* 入口卡片 */
-.grid{background:#fff;border-radius:20px;margin-top:18px;padding:18px 6px;box-shadow:0 6px 24px rgba(31,35,48,.07)}
-.grid i{background:#EAF6F4}
-.grid a:nth-child(2) i{background:#eef5ff}
-.grid a:nth-child(3) i{background:#f6efff}
-.grid a:nth-child(4) i{background:#eafaf1}
-.grid a:nth-child(5) i{background:#fff6e5}
-.grid a:nth-child(6) i{background:#fff0e8}
-.grid a:nth-child(7) i{background:#eaf8fb}
-.grid a:nth-child(8) i{background:#f2f3f5}
-
+/* 窄屏微调 */
+@media (max-width:359px){
+  .core{gap:8px;padding:0 12px 10px}
+  .core .ico{width:38px;height:38px;font-size:20px}
+  .cats i{width:46px;height:46px;font-size:21px}
+  .cats a{font-size:11px}
+}
 </style>
 </head>
 <body class="is-home">
 <header></header>
 <div class="hero" id="hero">
-  <div class="brand"><img src="/static/icons/icon-192.png?v=60" alt="">旅韩助手</div>
-  <h1>您的韩国行程，我来搞定</h1>
-  <p>地铁 · 翻译 · 吃喝玩买，中文一站搞定</p>
-  <div class="search"><input id="q" type="search" placeholder="想找什么？如 地铁、炸鸡、退税" autocomplete="off" enterkeyhint="go" aria-label="搜索功能"><div id="qres" hidden></div></div>
+  <a class="brand" href="/"><img src="/static/icons/icon-192.png?v=61" alt="">旅韩助手</a>
+  <a class="trip-entry" href="/trips"><i>🗓️</i>行程</a>
+  <a class="me-ava" href="/me" title="我的" aria-label="我的"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="8.5" r="3.6" fill="#fff"/><path d="M5 19.2c.9-3.2 3.4-5 7-5s6.1 1.8 7 5" fill="#fff"/></svg></a>
 </div>
-<div class="bar"><a href="/" id="back" aria-label="返回首页">‹</a><b id="htitle">旅韩助手</b></div>
+<p class="hero-sub">地铁 · 翻译 · 吃喝玩，中文一站搞定</p>
+<div class="bar"><a href="/" id="back" aria-label="返回首页">‹</a><b id="htitle">旅韩助手</b><a class="me-ava" href="/me" title="我的" aria-label="我的"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="8.5" r="3.6" fill="#fff"/><path d="M5 19.2c.9-3.2 3.4-5 7-5s6.1 1.8 7 5" fill="#fff"/></svg></a></div>
 <p class="bar-sub" id="hsub"></p>
 <main>
   <div class="err" id="err"></div>
 
   <!-- 首页 -->
   <section class="page on" id="p-home">
-    <div class="grid">
-      <a href="/?tab=sub" data-go="sub"><i>🚇</i>地铁路线</a>
-      <a href="/?tab=card" data-go="card"><i>💬</i>中韩翻译</a>
-      <a href="/?tab=ph" data-go="ph"><i>🗣️</i>常用韩语</a>
-      <a href="/?tab=cos" data-go="cos"><i>📷</i>拍照识妆</a>
-      <a href="/community/rate"><i>💱</i>汇率换算</a>
-      <a href="/shops"><i>🏪</i>找商家</a>
-      <a href="/food"><i>🍜</i>韩国美食</a>
-      <a href="/?tab=more" data-go="more"><i>☰</i>全部功能</a>
+    <!-- A. 两大入口 -->
+    <div class="core">
+      <a href="/?tab=sub" data-go="sub"><div class="ico">🚇</div><div class="tx"><b>路线</b><span>地铁 · 公交查询</span></div></a>
+      <a href="/?tab=card" data-go="card"><div class="ico">💬</div><div class="tx"><b>翻译</b><span>中韩沟通卡片</span></div></a>
     </div>
+
+    <!-- B. 吃喝玩乐 -->
+    <div class="cats-wrap">
+      <div class="cats-lab">吃喝玩乐</div>
+      <div class="cats">
+        <a href="/food"><i>🍜</i>美食</a>
+        <a href="/food?cat=cafe"><i>☕</i>咖啡</a>
+        <a href="/shopping"><i>🛍️</i>购物</a>
+        <a href="/attractions"><i>🏯</i>景点</a>
+        <a href="/places?category=hotel"><i>🏨</i>酒店</a>
+      </div>
+    </div>
+
+    <!-- C. 广告轮播（静态配置三张，自动轮播 + 左右滑动） -->
+    <div class="ads" id="homeAds">
+      <div class="ads-viewport">
+        <div class="ads-track" id="adsTrack">
+          <a class="slide" href="/food#hamcho-myeongdong"><img src="/static/home-ads/ad-1.jpg?v=61" alt="咸草酱蟹" width="640" height="320" loading="lazy" onerror="this.style.display=&#39;none&#39;"></a>
+          <a class="slide" href="/food#daega-myeongdong"><img src="/static/home-ads/ad-2.jpg?v=61" alt="大家烤肉" width="640" height="320" loading="lazy" onerror="this.style.display=&#39;none&#39;"></a>
+          <a class="slide" href="/shops?tab=services"><img src="/static/home-ads/ad-3.jpg?v=61" alt="DAYONE" width="640" height="320" loading="lazy" onerror="this.style.display=&#39;none&#39;"></a>
+        </div>
+      </div>
+      <div class="dots" id="adsDots" aria-hidden="true"><i class="on"></i><i></i><i></i></div>
+    </div>
+
+    <!-- D. 附近推荐（只显示 /api/places 的真实数据） -->
+    <section class="near-blk" id="nearBlk" aria-labelledby="nearTitle">
+      <div class="bh">
+        <h2 id="nearTitle">附近推荐</h2>
+        <div class="near-sort" id="nearSort" role="group" aria-label="附近推荐排序">
+          <button type="button" data-sort="dist">按距离</button>
+          <button type="button" data-sort="rec" class="on">会员推荐</button>
+        </div>
+      </div>
+      <p class="near-hint" id="nearHint" hidden></p>
+      <div class="near-list" id="nearList"></div>
+    </section>
+
+    <!-- E. 韩友圈分享（只显示真实帖子） -->
+    <section class="circle" id="circleBlk" aria-labelledby="circleTitle">
+      <div class="bh"><h2 id="circleTitle">韩友圈分享</h2><a href="/community">更多 ›</a></div>
+      <div class="feed-chips" id="feedChips" role="group" aria-label="分享筛选">
+        <button type="button" data-f="all" class="on">全部</button>
+        <button type="button" data-f="food">美食</button>
+        <button type="button" data-f="scenery">风景</button>
+        <button type="button" data-f="selfie">自拍</button>
+      </div>
+      <div class="wf" id="feedWrap"><div class="col" id="feedColA"></div><div class="col" id="feedColB"></div></div>
+      <div id="feedEmpty" hidden></div>
+    </section>
+
+    <!-- F. 开业活动条（默认 hidden，/api/opening-promo 开启后显示） -->
     <a class="promo-bar" id="openPromo" href="/points" hidden></a>
-    <section class="blk" id="shopBlk" hidden><div class="bh"><h2>热门商家</h2><a href="/shops">全部 ›</a></div><div class="hs" id="shopList"></div></section>
-    <section class="blk" id="postBlk" hidden><div class="bh"><h2>韩友圈 · 最新</h2><a href="/community">进入 ›</a></div><div id="postList"></div></section>
-    <div class="chips home-low"><span>出发前</span><a href="/visa">签证须知</a><a href="/tax-refund">退税</a><a href="/pay">支付</a><a href="/itineraries">路线卡</a><a href="/tips">攻略</a></div>
   </section>
 
   <!-- 化妆品识别 -->
@@ -381,6 +490,11 @@ body.is-home .disclaimer{display:none}
 
   <!-- 全部功能 -->
   <section class="page" id="p-more">
+    <div class="more-search search">
+      <span class="qico" aria-hidden="true">🔍</span>
+      <input id="q" type="search" placeholder="搜功能，如 地铁、退税、常用句" autocomplete="off" enterkeyhint="go" aria-label="搜索功能">
+      <div id="qres" hidden></div>
+    </div>
     <div class="grp"><h3>常用工具</h3><div class="ml">
       <a href="/?tab=sub" data-go="sub" data-k="地铁 路线 换乘 站牌 公交 巴士 导航 subway bus"><i>🚇</i>地铁·公交路线</a>
       <a href="/?tab=card" data-go="card" data-k="翻译 沟通卡 韩语 说话 语音"><i>💬</i>中韩翻译</a>
@@ -428,13 +542,12 @@ body.is-home .disclaimer{display:none}
   <p class="foot">旅韩助手为个人运营的免费信息网站，内容仅供参考，不是旅行社，不代办签证。<br><a href="/terms" style="color:#2c7be5">用户协议与免责声明</a> · <a href="/privacy" style="color:#2c7be5">隐私政策</a> · <a href="/rules" style="color:#2c7be5">社区约定</a></p>
 </main>
 
-<nav>
-  <button class="on" data-tab="home"><i>🏠</i>首页</button>
-  <button data-tab="sub"><i>🚇</i>地铁</button>
-  <button data-tab="card"><i>💬</i>翻译</button>
-  <a href="/community"><i>🧭</i>韩友圈</a>
-  <button data-tab="more"><i>☰</i>全部</button>
-  <a href="/me"><i>👤</i>我的</a>
+<nav class="tabbar" aria-label="底部导航">
+  <a href="/" data-nav="home" class="on"><i>🏠</i>首页</a>
+  <a href="/community?tab=follow" data-nav="follow"><i>👥</i>关注</a>
+  <a href="/community/new" data-nav="post" class="pub"><span class="plus">＋</span>发布</a>
+  <a href="/shops?tab=services" data-nav="services" class="svc"><i>💼</i>商业服务</a>
+  <a href="/local" data-nav="local" class="loc"><i>🏘️</i>本地生活</a>
 </nav>
 <input type="file" id="fCam" accept="image/*" capture="environment" hidden>
 <input type="file" id="fPick" accept="image/*" hidden>
@@ -461,14 +574,18 @@ const SUBS={home:'',cos:'拍一下韩国化妆品包装，马上看中文名称�
 const TITLES={home:'旅韩助手',cos:'拍照识妆',sub:'地铁·路线',card:'中韩翻译',ph:'常用韩语',more:'全部功能'};
 function showTab(t,push){
   if(!TITLES[t]) t='home';
-  document.querySelectorAll('nav button').forEach(x=>x.classList.toggle('on',x.dataset.tab===t));
+  // 底部五格没有「地铁/翻译/全部」等内部 tab：只有回到首页时点亮「首页」，其它内部 tab 都不点亮
+  document.querySelectorAll('nav.tabbar a[data-nav]').forEach(x=>x.classList.toggle('on',t==='home'&&x.dataset.nav==='home'));
   document.querySelectorAll('.page').forEach(p=>p.classList.toggle('on',p.id==='p-'+t));
   document.body.classList.toggle('is-home',t==='home');
   $('htitle').textContent=TITLES[t];$('hsub').textContent=SUBS[t]||'';$('err').style.display='none';window.scrollTo(0,0);
   if(push){history.pushState({t:t},'',t==='home'?'/':'/?tab='+t)}
 }
+window.showTab=showTab;
 document.body.classList.add('is-home');
-document.querySelectorAll('nav button').forEach(b=>b.onclick=()=>showTab(b.dataset.tab,true));
+// 底部「首页」：本来就在 index 文档里，直接切 tab，不做整页刷新
+document.querySelectorAll('nav.tabbar a[data-nav="home"]').forEach(a=>a.addEventListener('click',e=>{e.preventDefault();showTab('home',true)}));
+document.querySelectorAll('nav.tabbar').forEach(n=>{n.dataset.homeBound='1'}); // 告诉 pwa.js 已绑定，避免重复处理
 document.querySelectorAll('[data-go]').forEach(a=>a.addEventListener('click',e=>{e.preventDefault();showTab(a.dataset.go,true)}));
 $('back').onclick=e=>{e.preventDefault();if(history.state&&history.state.t){history.back()}else{showTab('home',true)}};
 window.addEventListener('popstate',()=>showTab(new URLSearchParams(location.search).get('tab')||'home',false));
@@ -652,7 +769,7 @@ async function handle(file){
   if(!file)return;const m=mode;
   $('err').style.display='none';$('rs-'+m).style.display='none';
   let blob;try{blob=await shrink(file,$('pv-'+m))}catch(e){blob=file}
-  if(blob.size>8*1024*1024){showErr('图片太大（最大 8MB），请换一张');return}
+  if(blob.size>8*1024*1024){showErr('图片太大（上限 8MB），请换一张');return}
   $('ld-'+m).style.display='block';document.querySelectorAll('[data-pick]').forEach(b=>b.disabled=true);
   try{
     const fd=new FormData();fd.append('image',blob,'photo.jpg');
@@ -983,7 +1100,7 @@ async function resolveSt(id){
   const list=LHSub.search(raw,3), n=LHSub.norm(raw);
   const strong=list[0]&&list[0].keys.some(k=>{const kk=LHSub.norm(k);return kk===n||(n.length>=2&&kk.indexOf(n)===0&&kk.length-n.length<=2)});
   if(strong) return {s:list[0],alt:(list[1]&&n.length<=4&&/机场|공항|airport/i.test(raw))?list[1]:null};
-  // 不是站名：按地点搜索，取第一个结果
+  // 不是站名：按地点搜索，取排序靠前的结果
   try{
     const ps=await placeSearch(raw);
     if(ps.length){const p=Object.assign({kind:'place'},ps[0]);return {s:p,alt:null,guess:`「${raw}」按地点「${p.name}」（${p.addr||''}）查询，如不对请在下拉列表里重新选`}}
@@ -1135,7 +1252,7 @@ function addHist(it){
 function drawHist(){
   const h=LS.get(HIST_KEY,[]);
   if(!h.length){$('tHist').innerHTML='';return}
-  $('tHist').innerHTML=`<h3>最近翻译（保存在本机）<button type="button" id="hClr">清空</button></h3>`+h.map((x,i)=>`<div class="it" data-i="${i}"><div class="t"><div class="a">${esc(x.mode==='zh2ko'?x.ko:x.zh)}</div><div class="b">${x.mode==='zh2ko'?'中→韩':'韩→中'} · ${esc(x.src)}</div></div>${x.mode==='zh2ko'?`<button type="button" class="sp" data-i="${i}" aria-label="朗读">🔊</button>`:''}</div>`).join('');
+  $('tHist').innerHTML=`<h3>翻译记录（保存在本机）<button type="button" id="hClr">清空</button></h3>`+h.map((x,i)=>`<div class="it" data-i="${i}"><div class="t"><div class="a">${esc(x.mode==='zh2ko'?x.ko:x.zh)}</div><div class="b">${x.mode==='zh2ko'?'中→韩':'韩→中'} · ${esc(x.src)}</div></div>${x.mode==='zh2ko'?`<button type="button" class="sp" data-i="${i}" aria-label="朗读">🔊</button>`:''}</div>`).join('');
   $('hClr').onclick=e=>{e.stopPropagation();LS.set(HIST_KEY,[]);drawHist()};
   $('tHist').querySelectorAll('.it').forEach(el=>el.onclick=e=>{
     const x=h[+el.dataset.i];
@@ -1254,7 +1371,7 @@ drawModeUI();drawScenesT();drawHist();
   function joinTxt(a,b){a=a.trim();b=b.trim();if(!a)return b;if(!b)return a;if(b.startsWith(a))return b;if(tMode==='ko2zh')return a+' '+b;return /[。！？!?，,；;]$/.test(a)?a+b:a+'，'+b}
 
   // ================= 录音 + 服务器识别 =================
-  const REC_MAX=30000, REC_MIN=500; // 每次最长录 30 秒，到时自动停止并识别
+  const REC_MAX=30000, REC_MIN=500; // 单次录音 30 秒，到时自动停止并识别
   let mr=null, stream=null, chunks=[], recT0=0, recTimer=null, meterRAF=0, analyser=null, srcNode=null, recBusy=false, recWant=false, recCancel=false, warmed=false;
   let peak=0;
   function warm(){if(warmed) return;warmed=true;fetch('/api/asr/warm',{method:'POST'}).catch(()=>{})}
@@ -1274,7 +1391,7 @@ drawModeUI();drawScenesT();drawHist();
   }
   function recText(sec){
     const left=Math.ceil((REC_MAX-(Date.now()-recT0))/1000);
-    return left<=10?('⏳ 还剩 '+Math.max(0,left)+' 秒，到时自动识别'):'🔴 正在录音，松手后识别（最长 '+(REC_MAX/1000)+' 秒）';
+    return left<=10?('⏳ 还剩 '+Math.max(0,left)+' 秒，到时自动识别'):'🔴 正在录音，松手后识别（单次 '+(REC_MAX/1000)+' 秒）';
   }
   function bigTimer(sec){ // 按钮里显示大号秒数，每秒递增
     const lb=btn.querySelector('.lb');const t=sec+'秒';
@@ -1302,7 +1419,7 @@ drawModeUI();drawScenesT();drawHist();
     if(typeof setAudioSession==='function') setAudioSession('auto');
     const ctx=(typeof audioCtx==='function')?audioCtx():null;
     if(ctx){try{const r=ctx.resume();if(r&&r.catch)r.catch(()=>{})}catch(e){}} // 在按下时同步解锁
-    ui(true,'正在录音…');setState('正在打开麦克风…（第一次会弹出权限，请点「允许」）');
+    ui(true,'正在录音…');setState('正在打开麦克风…（首次会弹出权限，请点「允许」）');
     const t0=Date.now();
     try{
       stream=await navigator.mediaDevices.getUserMedia({audio:{channelCount:1,echoCancellation:true,noiseSuppression:true,autoGainControl:true}});
@@ -1535,15 +1652,17 @@ drawScenes();
 })();
 </script>
 <script src="/static/maps.js"></script>
-<script src="/static/pwa.js" defer></script>
+<script src="/static/pwa.js?v=61" defer></script>
 
 <script>
 (function(){
   var E=function(x){return String(x==null?'':x).replace(/[&<>"']/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];});};
-  // 开业活动：只在后台开启时显示
+  var byId=function(id){return document.getElementById(id);};
+
+  /* ---------- F. 开业活动：只在后台开启时显示（保留原有加载逻辑） ---------- */
   fetch('/api/opening-promo').then(function(r){ return r.json(); }).then(function(d){
     if (!d || !d.enabled) return;
-    var el = document.getElementById('openPromo'); if (!el) return;
+    var el = byId('openPromo'); if (!el) return;
     var dates = (d.starts_at ? String(d.starts_at).slice(0,10) : '') + (d.ends_at ? (' 至 ' + String(d.ends_at).slice(0,10)) : '');
     var line = d.active
       ? ('签到 ' + d.checkin_points + ' 旅行豆（双倍）· 前 ' + d.cap + ' 名新用户 +' + d.bonus_points + ' · 还剩 ' + d.remaining + ' 名额')
@@ -1552,46 +1671,236 @@ drawScenes();
     el.title = d.rules || '';
     el.hidden = false;
   }).catch(function(){});
-  // 热门商家：优先有照片的
-  fetch('/api/shops').then(function(r){ return r.json(); }).then(function(d){
-    var items = (d && d.items) || []; if (!items.length) return;
-    var withPh = items.filter(function(s){ return s.cover; }), noPh = items.filter(function(s){ return !s.cover; });
-    var list = withPh.concat(noPh).slice(0, 6);
-    document.getElementById('shopList').innerHTML = list.map(function(s){
-      var im = s.cover ? '<div class="im" style="background-image:url(/api/shop-photos/' + encodeURIComponent(s.cover) + '?t=1)"></div>' : '<div class="im">🏪</div>';
-      var sub = [s.area, s.price_text].filter(Boolean).join(' · ');
-      return '<a class="sc" href="/shops/' + encodeURIComponent(s.id) + '">' + im + '<b>' + E(s.name) + '</b><span>' + E(sub || s.shop_type) + '</span></a>';
-    }).join('');
-    document.getElementById('shopBlk').hidden = false;
-  }).catch(function(){});
-  // 韩友圈最新 3 帖
-  fetch('/api/community/posts?limit_n=3').then(function(r){ return r.json(); }).then(function(d){
-    var ps = (d && d.posts) || []; if (!ps.length) return;
-    document.getElementById('postList').innerHTML = ps.map(function(p){
-      var t = (p.time || '').slice(5, 10).replace('-', '/');
-      return '<a class="pi" href="/community/post/' + encodeURIComponent(p.id) + '"><b>' + E(p.title) + '</b><span>' + E(p.board_name) + (t ? (' · ' + E(t)) : '') + ' · ' + (p.comments || 0) + ' 评论</span></a>';
-    }).join('');
-    document.getElementById('postBlk').hidden = false;
-  }).catch(function(){});
-  // 首页搜索：从「全部功能」里找
-  var q = document.getElementById('q'), box = document.getElementById('qres');
-  var all = Array.prototype.map.call(document.querySelectorAll('#p-more a[href]'), function(a){
-    return {a: a, text: a.textContent.trim(), k: (a.textContent + ' ' + (a.dataset.k || '')).toLowerCase()};
-  });
-  function run(){
-    var v = q.value.trim().toLowerCase();
-    if (!v) { box.hidden = true; box.innerHTML = ''; return []; }
-    var hit = all.filter(function(x){ return x.k.indexOf(v) >= 0; }).slice(0, 6);
-    box.innerHTML = hit.length ? hit.map(function(x, i){ return '<a href="' + x.a.getAttribute('href') + '" data-i="' + all.indexOf(x) + '">' + x.a.innerHTML + '</a>'; }).join('') : '<div class="none">没找到，试试「全部功能」</div>';
-    box.hidden = false;
-    Array.prototype.forEach.call(box.querySelectorAll('a'), function(el){
-      el.addEventListener('click', function(e){ var src = all[+el.dataset.i].a; if (src.dataset.go) { e.preventDefault(); box.hidden = true; q.value=''; src.click(); } });
+
+  /* ---------- C. 广告轮播：三张静态配置，约 4 秒切换，可左右滑动 ---------- */
+  (function(){
+    var track=byId('adsTrack'), dots=byId('adsDots');
+    if(!track||!dots) return;
+    var n=track.querySelectorAll('.slide').length, idx=0, timer=null, downX=null, downY=null;
+    var ds=dots.querySelectorAll('i');
+    function paint(){
+      track.style.transform='translateX('+(-(n?idx*100/n:0))+'%)';
+      Array.prototype.forEach.call(ds,function(d,i){ d.classList.toggle('on',i===idx); });
+    }
+    function go(i){ if(!n) return; idx=(i%n+n)%n; paint(); }
+    function visible(){ var p=byId('p-home'); return !!(p&&p.classList.contains('on')); }
+    function stop(){ if(timer){ clearInterval(timer); timer=null; } }
+    function start(){
+      stop();
+      timer=setInterval(function(){ if(!visible()||document.hidden) return; go(idx+1); },4000);
+    }
+    track.addEventListener('pointerdown',function(e){ downX=e.clientX; downY=e.clientY; stop(); });
+    track.addEventListener('pointerup',function(e){
+      if(downX==null) return;
+      var dx=e.clientX-downX, dy=e.clientY-downY;
+      downX=null;
+      if(Math.abs(dx)>36&&Math.abs(dx)>Math.abs(dy)) go(idx+(dx<0?1:-1));
+      start();
     });
-    return hit;
+    track.addEventListener('pointercancel',function(){ downX=null; start(); });
+    document.addEventListener('visibilitychange',function(){ if(document.hidden) stop(); else start(); });
+    paint(); start();
+  })();
+
+  /* ---------- D. 附近推荐：只读 /api/places（已审核会员地点） ---------- */
+  (function(){
+    var list=byId('nearList'), sortBox=byId('nearSort'), hint=byId('nearHint');
+    if(!list||!sortBox) return;
+    var ICON={food:'🍜',cafe:'☕',coffee:'☕',shopping:'🛍️',shop:'🛍️',attraction:'🏯',sight:'🏯',hotel:'🏨',stay:'🏨',beauty:'💄',etc:'📍'};
+    var items=[], mode='rec', pos=null, loading=true;
+    function arr(d){
+      if(!d) return [];
+      if(Array.isArray(d)) return d;
+      if(Array.isArray(d.items)) return d.items;
+      if(Array.isArray(d.places)) return d.places;
+      return [];
+    }
+    function dist(p){
+      if(!pos||p.x==null||p.y==null) return null;
+      var R=6371000, r=Math.PI/180;
+      var la1=(+pos.lat)*r, la2=(+p.y)*r, dla=((+p.y)-(+pos.lat))*r, dlo=((+p.x)-(+pos.lng))*r;
+      var h=Math.sin(dla/2)*Math.sin(dla/2)+Math.cos(la1)*Math.cos(la2)*Math.sin(dlo/2)*Math.sin(dlo/2);
+      return 2*R*Math.asin(Math.min(1,Math.sqrt(h)));
+    }
+    function fmt(m){ return m<1000 ? (Math.max(10,Math.round(m/10)*10))+' 米' : (m/1000).toFixed(1)+' 公里'; }
+    function emoji(p){ return ICON[String(p.category||'').toLowerCase()]||'📍'; }
+    function sub(p){
+      var a=[p.category_label||p.category||'', p.address||''].filter(Boolean).join(' · ');
+      if(p.recommended_by) a+=(a?' · ':'')+'由会员推荐';
+      return a;
+    }
+    function card(p,i){
+      var im=p.cover_id
+        ? '<img src="/api/places/photos/'+encodeURIComponent(p.cover_id)+'?thumb=1" alt="" loading="lazy" onerror="this.style.display=&#39;none&#39;">'
+        : E(emoji(p));
+      var d=dist(p);
+      return '<a class="place" href="/places/'+encodeURIComponent(p.id)+'">'
+        + '<div class="thumb t'+((i%5)+1)+'">'+im+'</div>'
+        + '<div class="meta"><div class="t"><b>'+E(p.name||'')+'</b></div><p>'+E(sub(p))+'</p></div>'
+        + (d==null?'':'<div class="dist">'+E(fmt(d))+'</div>')
+        + '</a>';
+    }
+    function emptyBox(){
+      return '<div class="empty-box"><p><b>还没有会员推荐的地点。</b>可以先看美食和景点，或自己推荐一家。</p>'
+        + '<div class="lnks"><a href="/food">看美食</a><a href="/attractions">看景点</a><a href="/places">全部地点</a><a href="/places/new">我推荐一家</a></div></div>';
+    }
+    function render(){
+      Array.prototype.forEach.call(sortBox.querySelectorAll('button'),function(b){
+        b.classList.toggle('on', b.getAttribute('data-sort')===mode);
+      });
+      hint.hidden=true; hint.textContent='';
+      if(loading){ list.innerHTML='<div class="empty-box"><p>正在加载附近推荐…</p></div>'; return; }
+      if(!items.length){ list.innerHTML=emptyBox(); return; }
+      var rows=items.slice();
+      if(mode==='dist'&&pos){
+        rows=rows.filter(function(p){ return dist(p)!=null; }).sort(function(a,b){ return dist(a)-dist(b); });
+      }
+      if(!rows.length){
+        list.innerHTML=emptyBox();
+        hint.textContent='这些地点还没有坐标信息，暂时无法按距离排列。';
+        hint.hidden=false;
+        return;
+      }
+      list.innerHTML=rows.slice(0,8).map(card).join('');
+    }
+    function load(){
+      loading=true; render();
+      fetch('/api/places').then(function(r){ return r.json(); }).then(function(d){
+        items=arr(d).slice(0,24); loading=false; render();
+      }).catch(function(){ items=[]; loading=false; render(); });
+    }
+    sortBox.addEventListener('click',function(e){
+      var b=e.target.closest?e.target.closest('button[data-sort]'):null;
+      if(!b) return;
+      mode=b.getAttribute('data-sort');
+      if(mode==='dist'&&!pos){
+        if(navigator.geolocation){
+          hint.textContent='正在获取定位…'; hint.hidden=false;
+          navigator.geolocation.getCurrentPosition(function(g){
+            pos={lng:+g.coords.longitude.toFixed(6), lat:+g.coords.latitude.toFixed(6)};
+            render();
+          },function(){
+            pos=null;
+            hint.textContent='打开定位后可按距离排列，下面先按会员推荐显示。';
+            hint.hidden=false; render();
+          },{enableHighAccuracy:false,timeout:10000,maximumAge:300000});
+        }else{
+          hint.textContent='这个浏览器不能定位，先按会员推荐显示。';
+          hint.hidden=false;
+        }
+      }
+      render();
+    });
+    load();
+  })();
+
+  /* ---------- E. 韩友圈分享：只读 /api/community/posts ---------- */
+  (function(){
+    var wrap=byId('feedWrap'), chips=byId('feedChips'), empty=byId('feedEmpty');
+    var A=byId('feedColA'), B=byId('feedColB');
+    if(!wrap||!chips||!empty) return;
+    var AVA='<svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="8.5" r="3.6" fill="#fff"/><path d="M5 19.2c.9-3.2 3.4-5 7-5s6.1 1.8 7 5" fill="#fff"/></svg>';
+    var posts=[], filter='all', state='loading';
+    function txt(p){ return ((p.title||'')+' '+(p.board||'')+' '+(p.board_name||'')).toLowerCase(); }
+    function tags(p){
+      var t=txt(p), o={};
+      if(/food|cafe|restaurant|美食|餐厅|咖啡|烤肉|小吃|餐饮|甜品|炸鸡|奶茶|海鲜|拌饭/.test(t)) o.food=1;
+      if(/scenery|attraction|landscape|风景|景点|宫|汉江|街|夜景|公园|山|海|散步|韩屋|拍照/.test(t)) o.scenery=1;
+      if(/selfie|自拍|出镜|拍照打卡|打卡|人像|合影/.test(t)) o.selfie=1;
+      return o;
+    }
+    function picOf(p){
+      if(p.cover) return p.cover;
+      if(Array.isArray(p.thumbs)&&p.thumbs.length) return p.thumbs[0];
+      if(p.thumbs&&typeof p.thumbs==='string'&&p.thumbs) return p.thumbs;
+      return null;
+    }
+    function imgUrl(p){
+      var src=picOf(p);
+      if(!src&&!(p.img_n>0)) return '';
+      return '/api/community/img/'+encodeURIComponent(src||p.id)+'?t=1';
+    }
+    function card(p){
+      var src=imgUrl(p), t=tags(p), h='';
+      h+='<a class="fc" href="/community/post/'+encodeURIComponent(p.id)+'">';
+      if(src) h+='<img class="pic" src="'+E(src)+'" alt="" loading="lazy" onerror="this.style.display=&#39;none&#39;;this.parentNode.querySelectorAll(&#39;.k&#39;).forEach(function(x){x.style.display=&#39;none&#39;});">';
+      if(src&&t.food) h+='<span class="k">美食</span>';
+      else if(src&&t.scenery) h+='<span class="k">风景</span>';
+      else if(src&&t.selfie) h+='<span class="k">自拍</span>';
+      h+='<div class="cap">'+E(p.title||'')+'</div>';
+      h+='<div class="meta">';
+      h+= p.has_avatar
+        ? '<span class="ava"><img src="/api/community/avatar/'+encodeURIComponent(p.author_id)+'" alt="" loading="lazy" onerror="this.style.display=&#39;none&#39;;"></span>'
+        : '<span class="ava">'+AVA+'</span>';
+      h+='<span class="nick">'+E(p.author||'韩友')+'</span>';
+      h+='<span class="likes" aria-label="点赞"><i>♥</i>'+E(p.likes==null?0:p.likes)+'</span>';
+      h+='</div></a>';
+      return h;
+    }
+    function emptyBox(msg, extra){
+      return '<div class="empty-box"><p>'+msg+'</p><div class="lnks"><a href="/community">去韩友圈</a><a href="/community/new">发一条</a>'+(extra||'')+'</div></div>';
+    }
+    function render(){
+      if(state==='loading'){
+        A.innerHTML=''; B.innerHTML=''; wrap.style.display='none';
+        empty.innerHTML='<div class="empty-box"><p>正在加载分享…</p></div>'; empty.hidden=false; return;
+      }
+      if(!posts.length){
+        A.innerHTML=''; B.innerHTML=''; wrap.style.display='none';
+        empty.innerHTML=emptyBox('还没有分享，来看看韩友圈，或自己发一条。'); empty.hidden=false; return;
+      }
+      var rows;
+      if(filter==='all'){
+        var withPic=posts.filter(function(p){ return !!imgUrl(p); });
+        var noPic=posts.filter(function(p){ return !imgUrl(p); });
+        rows=withPic.concat(noPic);
+      }else{
+        rows=posts.filter(function(p){ return !!tags(p)[filter]; });
+      }
+      if(!rows.length){
+        A.innerHTML=''; B.innerHTML=''; wrap.style.display='none';
+        empty.innerHTML=emptyBox('还没有这一类分享。'); empty.hidden=false; return;
+      }
+      empty.hidden=true; empty.innerHTML=''; wrap.style.display='flex';
+      var a='', b='';
+      rows.slice(0,12).forEach(function(p,i){ if(i%2===0) a+=card(p); else b+=card(p); });
+      A.innerHTML=a; B.innerHTML=b;
+    }
+    chips.addEventListener('click',function(e){
+      var b=e.target.closest?e.target.closest('button[data-f]'):null;
+      if(!b) return;
+      filter=b.getAttribute('data-f');
+      Array.prototype.forEach.call(chips.querySelectorAll('button'),function(x){ x.classList.toggle('on',x===b); });
+      render();
+    });
+    render();
+    fetch('/api/community/posts?limit_n=12').then(function(r){ return r.json(); }).then(function(d){
+      posts=((d&&d.posts)||[]).slice(0,12);
+      state='ready'; render();
+    }).catch(function(){ posts=[]; state='ready'; render(); });
+  })();
+
+  /* ---------- #p-more 顶部搜索：从「全部功能」里找 ---------- */
+  var q = byId('q'), box = byId('qres');
+  if(q&&box){
+    var all = Array.prototype.map.call(document.querySelectorAll('#p-more a[href]'), function(a){
+      return {a: a, text: a.textContent.trim(), k: (a.textContent + ' ' + (a.dataset.k || '')).toLowerCase()};
+    });
+    function run(){
+      var v = q.value.trim().toLowerCase();
+      if (!v) { box.hidden = true; box.innerHTML = ''; return []; }
+      var hit = all.filter(function(x){ return x.k.indexOf(v) >= 0; }).slice(0, 6);
+      box.innerHTML = hit.length ? hit.map(function(x, i){ return '<a href="' + x.a.getAttribute('href') + '" data-i="' + all.indexOf(x) + '">' + x.a.innerHTML + '</a>'; }).join('') : '<div class="none">没找到，试试下面的分组</div>';
+      box.hidden = false;
+      Array.prototype.forEach.call(box.querySelectorAll('a'), function(el){
+        el.addEventListener('click', function(e){ var src = all[+el.dataset.i].a; if (src.dataset.go) { e.preventDefault(); box.hidden = true; q.value=''; src.click(); } });
+      });
+      return hit;
+    }
+    q.addEventListener('input', run);
+    q.addEventListener('keydown', function(e){ if (e.key === 'Enter') { var h = run(); if (h.length) { e.preventDefault(); var f = box.querySelector('a'); if (f) f.click(); } } });
+    document.addEventListener('click', function(e){ if (!e.target.closest || !e.target.closest('.search')) box.hidden = true; });
   }
-  q.addEventListener('input', run);
-  q.addEventListener('keydown', function(e){ if (e.key === 'Enter') { var h = run(); if (h.length) { e.preventDefault(); var f = box.querySelector('a'); if (f) f.click(); } } });
-  document.addEventListener('click', function(e){ if (!e.target.closest('.search')) box.hidden = true; });
 })();
 </script>
 </body>

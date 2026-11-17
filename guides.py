@@ -26,6 +26,16 @@ def p_itineraries():
     return _page("itineraries.html", "/itineraries")
 
 
+@router.get("/trips")
+def p_trips():
+    return _page("trips.html", "/trips")
+
+
+@router.get("/local")
+def p_local():
+    return _page("local.html", "/local")
+
+
 @router.get("/rate")
 def p_rate_alias():
     return _page("rate.html", "/community/rate")

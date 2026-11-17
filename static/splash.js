@@ -20,7 +20,7 @@
       var el = document.createElement('div'); el.id = 'splash';
       el.innerHTML = '<div class="sp-ad" role="link" tabindex="0"></div>' + (d.label ? '<span class="sp-lbl">广告</span>' : '') +
         '<button type="button" class="sp-skip"><b>5</b>s 跳过</button>' +
-        '<div class="sp-strip"><img src="/static/icons/icon-192.png?v=60" alt=""><b>旅韩助手<span>地铁 · 翻译 · 吃喝玩买</span></b></div>';
+        '<div class="sp-strip"><img src="/static/icons/icon-192.png?v=61" alt=""><b>旅韩助手<span>地铁 · 翻译 · 吃喝玩买</span></b></div>';
       el.querySelector('.sp-ad').style.backgroundImage = 'url("' + d.img + '")';
       document.body.appendChild(el); document.documentElement.classList.add('sp-on');
       ev('show');
