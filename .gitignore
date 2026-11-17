@@ -13,3 +13,4 @@ venv/
 
 # 本地预览截图与示例数据脚本（不提交、不部署）
 /preview/
+asr_models/

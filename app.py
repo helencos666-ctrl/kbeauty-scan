@@ -27,7 +27,7 @@ _day = {"date": None, "count": defaultdict(int), "global": 0}
 
 from security import client_ip, SecurityMiddleware  # noqa: E402
 
-GLOBAL_KIND_DAY = {"scan": GLOBAL_DAY, "price": 300, "card": 600, "back": 600, "station": 600, "tts": 1500}
+GLOBAL_KIND_DAY = {"scan": GLOBAL_DAY, "price": 300, "card": 600, "back": 600, "station": 600, "tts": 1500, "asr": 3000}
 
 def rate_limit(req: Request, kind: str, per_min=PER_MIN, per_day=PER_DAY):
     """按 IP 每分钟/每天限次 + 每种接口全站每日上限（防止换 IP 刷 AI 接口产生费用）。"""
@@ -143,6 +143,9 @@ from seo import router as seo_router, html_file_response
 from visits import visit_middleware
 app.include_router(community_router)
 app.include_router(seo_router)
+from asr import router as asr_router, start_background_download  # noqa: E402
+app.include_router(asr_router)
+start_background_download()
 app.middleware("http")(ref_middleware)
 app.middleware("http")(visit_middleware)
 

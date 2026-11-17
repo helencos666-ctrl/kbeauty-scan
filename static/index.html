@@ -105,6 +105,8 @@ nav button.on,nav a.on{color:var(--pink);font-weight:700}
 .mic-btn.on{background:var(--pink);color:#fff}
 .mic-btn:disabled{opacity:.5}
 #micState{display:none;margin-top:8px;font-size:13px;color:var(--pink);font-weight:600}
+#micState .lvl{display:block;height:8px;margin-top:6px;border-radius:4px;background:#ffe8ee;overflow:hidden}
+#micState .lvl i{display:block;height:100%;width:4%;background:var(--pink);border-radius:4px;transition:width .08s linear}
 #micTip{display:none}
 .kocard.stale{opacity:.35;filter:grayscale(1);transition:opacity .15s}
 .kocard.pending .ko{color:#c9ccd3}
@@ -830,7 +832,9 @@ drawModeUI();drawScenesT();drawHist();
   setTimeout(()=>{(window.requestIdleCallback||setTimeout)(next)},8000);
 })();
 
-// 沟通卡语音输入（浏览器自带识别，边说边出字；不上传录音）：可连续说多句，松手后自动翻译
+// 沟通卡语音输入：两种方式
+// 1) 浏览器自带识别（安卓 Chrome / 电脑）：边说边出字
+// 2) 录音上传服务器识别（iPhone Safari、微信内置浏览器等不支持或不稳定的环境，或浏览器识别失败时自动切换）
 (function(){
   const btn=$('micBtn'), tip=$('micTip'), st=$('micState'), box=$('cardIn');
   const SR=window.SpeechRecognition||window.webkitSpeechRecognition;
@@ -838,68 +842,172 @@ drawModeUI();drawScenesT();drawHist();
   const isIOS=/iP(hone|ad|od)/.test(ua)||(/Macintosh/.test(ua)&&navigator.maxTouchPoints>1);
   const isWx=/MicroMessenger/i.test(ua);
   const kbHint=isIOS?'点输入框，用键盘上的🎤话筒说话，文字会实时出来':'点输入框，用键盘上的话筒说话';
-  const fallbackMsg=(isWx?'微信里语音识别不稳定，建议点右上角「…」选「在Safari中打开」；或':'')+kbHint;
+  const canRecord=!!(navigator.mediaDevices&&navigator.mediaDevices.getUserMedia&&window.MediaRecorder&&window.isSecureContext!==false);
+  // iPhone（含微信）和微信一律用录音识别；浏览器识别只在安卓 Chrome/电脑上用
+  let useServer=canRecord&&(isIOS||isWx||!SR);
+  try{if(canRecord&&localStorage.getItem('lh_asr_server')==='1') useServer=true}catch(e){}
   function setState(s){if(!s){st.style.display='none';st.textContent='';return}st.style.display='block';st.textContent=s}
+  function setStateHTML(h){st.style.display='block';st.innerHTML=h}
   function showTip(m){tip.textContent=m;tip.style.display='block'}
-  function toKeyboard(m){showTip(m||fallbackMsg);try{box.focus()}catch(e){}}
-  if(!SR){
-    showTip((isWx?'微信里不支持网页语音识别，建议点右上角「…」选「在Safari中打开」；或':'当前浏览器不支持网页语音识别，')+kbHint);
+  function hideTip(){tip.style.display='none'}
+  function toKeyboard(m){showTip(m||kbHint);try{box.focus()}catch(e){}}
+  function ui(on,label){btn.classList.toggle('on',on);btn.querySelector('.lb').textContent=on?(label||'正在听…'):'按住说话'}
+  if(!SR&&!canRecord){
+    showTip((isWx?'微信版本太旧，暂不支持网页录音，请升级微信或点右上角「…」选「在Safari中打开」；或':'当前浏览器不支持语音，')+kbHint);
     btn.addEventListener('click',e=>{e.preventDefault();toKeyboard()});
     return;
   }
-  // 松手后 iPhone 往往要 stop() 之后才给出最终结果，所以要多等一会儿，不能 1 秒就判“没听清”
-  const MAX_MS=180000, MAXLEN=600, STOP_WAIT=isIOS?4000:2500, STOP_WAIT_TXT=isIOS?2500:1500, NO_TEXT_MS=6000;
-  // iOS 已知问题：识别器有时“启动了”但麦克风根本没开（不出字、不报错、不结束）。
-  // 用 audiostart 事件判断麦克风是否真的开了，没开就换新实例按 0.3/1/2 秒重试。
-  const ALIVE_MS=2200, RETRY=[300,1000,2000];
-  let rec=null, want=false, holding=false, t0=0, skipUp=false, committed='', cur='', timer=null, fatal=false;
-  let gotText=false, sessStart=0, quickEnds=0, stopGuard=null, done=true, hinted=false, gen=0;
-  let alive=false, aliveTimer=null, retries=0, primed=false;
+  hideTip();
+  function joinTxt(a,b){a=a.trim();b=b.trim();if(!a)return b;if(!b)return a;if(b.startsWith(a))return b;if(tMode==='ko2zh')return a+' '+b;return /[。！？!?，,；;]$/.test(a)?a+b:a+'，'+b}
+
+  // ================= 录音 + 服务器识别 =================
+  const REC_MAX=15000, REC_MIN=500;
+  let mr=null, stream=null, chunks=[], recT0=0, recTimer=null, meterRAF=0, analyser=null, srcNode=null, recBusy=false, recWant=false, recCancel=false, warmed=false;
+  let peak=0;
+  function warm(){if(warmed) return;warmed=true;fetch('/api/asr/warm',{method:'POST'}).catch(()=>{})}
+  function pickMime(){
+    const c=['audio/mp4','audio/webm;codecs=opus','audio/webm','audio/ogg;codecs=opus','audio/aac'];
+    for(const m of c){try{if(MediaRecorder.isTypeSupported&&MediaRecorder.isTypeSupported(m)) return m}catch(e){}}
+    return '';
+  }
+  function releaseMic(){
+    cancelAnimationFrame(meterRAF);meterRAF=0;
+    try{srcNode&&srcNode.disconnect()}catch(e){}srcNode=null;analyser=null;
+    if(stream){stream.getTracks().forEach(t=>{try{t.stop()}catch(e){}});stream=null} // 用完立刻关麦克风，否则 iPhone 朗读会变成听筒小声
+  }
+  function meterHTML(sec,lv){
+    const w=Math.max(4,Math.min(100,Math.round(lv*100)));
+    return '<span>🔴 正在录音 '+sec+' 秒，松手后识别</span><span class="lvl"><i style="width:'+w+'%"></i></span>';
+  }
+  function meterLoop(){
+    let lv=0;
+    if(analyser){
+      const a=new Uint8Array(analyser.fftSize);analyser.getByteTimeDomainData(a);
+      let s=0;for(let i=0;i<a.length;i++){const v=(a[i]-128)/128;s+=v*v}
+      lv=Math.min(1,Math.sqrt(s/a.length)*4);peak=Math.max(peak,lv);
+    }
+    const sec=Math.floor((Date.now()-recT0)/1000);
+    const bar=st.querySelector('.lvl i');
+    if(bar){bar.style.width=Math.max(4,Math.round(lv*100))+'%';st.querySelector('span').textContent='🔴 正在录音 '+sec+' 秒，松手后识别'}
+    meterRAF=requestAnimationFrame(meterLoop);
+  }
+  async function recStart(){
+    if(recBusy||mr) return;
+    recWant=true;recCancel=false;peak=0;
+    hideErr();hideTip();
+    if(typeof stopAudio==='function'){stopAudio();clearSpeakUI()}
+    if(typeof setAudioSession==='function') setAudioSession('auto');
+    const ctx=(typeof audioCtx==='function')?audioCtx():null;
+    if(ctx){try{const r=ctx.resume();if(r&&r.catch)r.catch(()=>{})}catch(e){}} // 在按下时同步解锁
+    ui(true,'正在录音…');setState('正在打开麦克风…（第一次会弹出权限，请点「允许」）');
+    const t0=Date.now();
+    try{
+      stream=await navigator.mediaDevices.getUserMedia({audio:{channelCount:1,echoCancellation:true,noiseSuppression:true,autoGainControl:true}});
+    }catch(err){
+      stream=null;ui(false);setState('');
+      const n=err&&err.name;
+      if(n==='NotAllowedError'||n==='SecurityError'){
+        showErr(isWx?'没有麦克风权限：请在 iPhone「设置 → 微信 → 麦克风」打开，然后重新进入本页':'没有麦克风权限：请在浏览器/系统设置里允许麦克风后重试');
+      }else showErr('打不开麦克风，请稍后重试');
+      toKeyboard();return;
+    }
+    // 弹权限框期间已经松手：这次不录，提示再按一次
+    if(!recWant){releaseMic();ui(false);setState(Date.now()-t0>800?'麦克风已打开，请按住按钮说话':'');return}
+    try{
+      const m=pickMime();
+      mr=m?new MediaRecorder(stream,{mimeType:m,audioBitsPerSecond:32000}):new MediaRecorder(stream);
+    }catch(e){
+      try{mr=new MediaRecorder(stream)}catch(e2){mr=null;releaseMic();ui(false);setState('');showErr('这个浏览器不支持录音');toKeyboard();return}
+    }
+    chunks=[];
+    mr.ondataavailable=e=>{if(e.data&&e.data.size) chunks.push(e.data)};
+    mr.onstop=onRecStop;
+    if(ctx){try{srcNode=ctx.createMediaStreamSource(stream);analyser=ctx.createAnalyser();analyser.fftSize=1024;srcNode.connect(analyser)}catch(e){analyser=null}}
+    try{mr.start()}catch(e){mr=null;releaseMic();ui(false);setState('');showErr('录音启动失败，请重试');return}
+    recT0=Date.now();markOldCard(true);box.value='';
+    setStateHTML(meterHTML(0,0));meterLoop();
+    clearTimeout(recTimer);recTimer=setTimeout(()=>recStop(),REC_MAX);
+  }
+  function recStop(){
+    recWant=false;clearTimeout(recTimer);
+    if(!mr) return;
+    if(Date.now()-recT0<REC_MIN) recCancel=true;
+    try{if(mr.state!=='inactive') mr.stop(); else onRecStop()}catch(e){onRecStop()}
+  }
+  async function onRecStop(){
+    const type=(mr&&mr.mimeType)||(chunks[0]&&chunks[0].type)||'audio/mp4';
+    mr=null;releaseMic();ui(false);
+    if(recCancel){setState('');markOldCard(false);showErr('按住时间太短：请按住按钮说完整句话再松手');return}
+    const blob=new Blob(chunks,{type});chunks=[];
+    if(blob.size<200){setState('');markOldCard(false);showErr('没有录到声音，请再试一次');return}
+    recBusy=true;btn.disabled=true;setState('正在识别…');
+    try{
+      const lang=tMode==='ko2zh'?'ko':'zh';
+      let r, j={};
+      for(let i=0;i<2;i++){ // 服务器刚唤醒、模型还在准备时（503）自动再试一次
+        r=await fetch('/api/asr?lang='+lang,{method:'POST',headers:{'Content-Type':type.split(';')[0]||'application/octet-stream'},body:blob});
+        j=await r.json().catch(()=>({}));
+        if(r.status!==503||lang==='ko'||i) break;
+        setState('识别服务正在启动，请稍等…');await new Promise(z=>setTimeout(z,4000));
+      }
+      if(!r.ok) throw new Error(j.detail||'识别失败，请重试');
+      const v=(j.text||'').trim();
+      setState('');
+      if(!v){
+        markOldCard(false);
+        showErr(peak<0.04?'没有听到声音：请检查麦克风没被遮住，靠近手机说话':'没听清，请再说一次');
+        return;
+      }
+      box.value=v;makeCard(v,{voice:true});
+    }catch(e){
+      setState('');markOldCard(false);showErr((e&&e.message)||'网络错误，请重试');
+      if(tMode==='ko2zh') toKeyboard();
+    }finally{recBusy=false;btn.disabled=false}
+  }
+
+  // ================= 浏览器自带识别（安卓 Chrome / 电脑） =================
+  const MAX_MS=180000, MAXLEN=600, STOP_WAIT=2500, STOP_WAIT_TXT=1500, NO_TEXT_MS=6000, ALIVE_MS=2500;
+  let rec=null, want=false, t0=0, committed='', cur='', timer=null, fatal=false;
+  let gotText=false, sessStart=0, quickEnds=0, stopGuard=null, done=true, gen=0, alive=false, aliveTimer=null;
   const errMap={
     'not-allowed':'没有麦克风权限，请在设置里允许麦克风后重试',
     'permission-denied':'没有麦克风权限，请在设置里允许麦克风后重试',
-    'service-not-allowed':isIOS?'iPhone 需要打开听写：设置 → 通用 → 键盘 → 打开「启用听写」，然后重试':'这个浏览器不让网页使用语音识别',
-    'audio-capture':'找不到麦克风，请检查设备后重试',
-    'network':'语音识别网络错误，请稍后再试'
+    'audio-capture':'找不到麦克风，请检查设备后重试'
   };
-  function joinTxt(a,b){a=a.trim();b=b.trim();if(!a)return b;if(!b)return a;if(b.startsWith(a))return b;if(tMode==='ko2zh')return a+' '+b;return /[。！？!?，,；;]$/.test(a)?a+b:a+'，'+b}
+  function switchToServer(msg){
+    // 浏览器识别不可用：以后改用录音识别
+    if(!canRecord){toKeyboard();return}
+    useServer=true;try{localStorage.setItem('lh_asr_server','1')}catch(e){}
+    showErr(msg||'已切换为录音识别，请再按住说一次');
+  }
   function full(){return joinTxt(committed,cur).slice(0,MAXLEN)}
   function secs(){return Math.floor((Date.now()-t0)/1000)}
-  function ui(on){btn.classList.toggle('on',on);btn.querySelector('.lb').textContent=on?'正在听…':'按住说话'}
   function tick(){
     if(!want) return;
     const el=Date.now()-t0;
-    if(!gotText&&el>NO_TEXT_MS){
-      setState('正在听… '+secs()+'秒，还没识别到文字。如一直没字，请松手后'+kbHint);
-    }else setState('正在听… '+secs()+'秒（边说边出字，松手后自动翻译）');
+    if(!gotText&&el>NO_TEXT_MS) setState('正在听… '+secs()+'秒，还没识别到文字');
+    else setState('正在听… '+secs()+'秒（边说边出字，松手后自动翻译）');
     if(el>=MAX_MS) stopRec();
   }
-  function render(){
-    const v=full();
-    // 只在文字变化时写入，避免频繁重排
-    if(box.value!==v){box.value=v;box.scrollTop=box.scrollHeight}
-  }
+  function render(){const v=full();if(box.value!==v){box.value=v;box.scrollTop=box.scrollHeight}}
+  function markAlive(){if(!alive){alive=true;clearTimeout(aliveTimer)}}
   function newRec(myGen){
     const r=new SR();r.lang=(tMode==='ko2zh'?'ko-KR':'zh-CN');r.interimResults=true;r.continuous=true;r.maxAlternatives=1;
     r.onresult=e=>{
       if(myGen!==gen) return;
-      // iOS Safari 连续模式下后面的结果可能包含前面全部文字，按前缀去重
       let fin='',interim='';
       for(let i=0;i<e.results.length;i++){const x=e.results[i][0].transcript||'';if(e.results[i].isFinal) fin=joinTxt(fin,x); else interim=joinTxt(interim,x)}
-      cur=joinTxt(fin,interim);
-      markAlive();
-      if(cur.trim()){if(!gotText){gotText=true;hideErr()}}
+      cur=joinTxt(fin,interim);markAlive();
+      if(cur.trim()&&!gotText){gotText=true;hideErr()}
       render();
     };
     r.onaudiostart=()=>{if(myGen===gen) markAlive()};
-    r.onsoundstart=r.onspeechstart=r.onaudiostart;
     r.onerror=e=>{
       if(myGen!==gen) return;
       if(e.error==='aborted'||e.error==='no-speech') return;
-      // 麦克风被音频会话占用（iOS 播放过声音后常见）：先自动重试，不直接报错
-      if(e.error==='audio-capture'&&want&&!gotText&&retries<RETRY.length){retry();return}
-      const m=errMap[e.error];
-      if(m){fatal=true;want=false;showErr(m);if(e.error==='service-not-allowed')toKeyboard()}
+      if(errMap[e.error]){fatal=true;want=false;showErr(errMap[e.error]);return}
+      // service-not-allowed / network / language-not-supported 等：浏览器识别用不了，改用录音识别
+      fatal=true;want=false;switchToServer();
     };
     r.onend=()=>{
       if(myGen!==gen) return;
@@ -907,100 +1015,74 @@ drawModeUI();drawScenesT();drawHist();
       committed=joinTxt(committed,cur);cur='';
       const short=Date.now()-sessStart<1200;
       quickEnds=short?quickEnds+1:0;
-      // 自动续听：但如果连续很快结束（iOS/微信常见），不要反复重启以免卡顿
       if(want&&!fatal&&quickEnds<2&&Date.now()-t0<MAX_MS&&committed.length<MAXLEN){
-        try{rec=newRec(myGen);sessStart=Date.now();alive=false;rec.start();watchAlive();return}catch(err){}
+        try{rec=newRec(myGen);sessStart=Date.now();rec.start();return}catch(err){}
       }
       finish();
     };
     return r;
   }
-  function markAlive(){if(!alive){alive=true;clearTimeout(aliveTimer)}}
-  function watchAlive(){
-    clearTimeout(aliveTimer);
-    const myGen=gen;
-    aliveTimer=setTimeout(()=>{if(myGen===gen&&want&&!alive) retry()},ALIVE_MS);
-  }
-  function retry(){
-    // 旧实例卡死：作废它，换新实例重开
-    if(retries>=RETRY.length){
-      want=false;fatal=true;finish();
-      showErr('麦克风没有打开（iPhone 系统问题）');
-      toKeyboard('网页语音暂时打不开：请关掉这个网页重新打开再试；或'+kbHint);
-      return;
-    }
-    const delay=RETRY[retries++];
-    const old=rec;gen++;const myGen=gen;
-    try{old&&old.abort()}catch(e){}
-    setState('正在打开麦克风…（第'+retries+'次重试）');
-    const go=()=>{
-      if(myGen!==gen||!want) return;
-      try{rec=newRec(myGen);sessStart=Date.now();alive=false;rec.start();watchAlive()}catch(e){retry()}
-    };
-    setTimeout(()=>{
-      if(myGen!==gen||!want) return;
-      // 首次重试前用 getUserMedia 唤醒一次音频会话（只做一次，马上关掉）
-      if(isIOS&&!primed&&navigator.mediaDevices&&navigator.mediaDevices.getUserMedia){
-        primed=true;
-        navigator.mediaDevices.getUserMedia({audio:true})
-          .then(ms=>{ms.getTracks().forEach(t=>t.stop());go()})
-          .catch(err=>{if(err&&(err.name==='NotAllowedError'||err.name==='SecurityError')){fatal=true;want=false;finish();showErr(errMap['not-allowed'])}else go()});
-      }else go();
-    },delay);
-  }
   function startRec(){
     if(want) return;
     gen++;clearTimeout(stopGuard);clearTimeout(aliveTimer);
-    if(typeof stopAudio==='function'){stopAudio();clearSpeakUI()} // 别和朗读抢麦克风/音频会话
-    if(typeof setAudioSession==='function') setAudioSession('auto');
-    committed='';cur='';fatal=false;want=true;done=false;gotText=false;quickEnds=0;t0=Date.now();sessStart=t0;
-    alive=false;retries=0;
+    if(typeof stopAudio==='function'){stopAudio();clearSpeakUI()}
+    committed='';cur='';fatal=false;want=true;done=false;gotText=false;quickEnds=0;t0=Date.now();sessStart=t0;alive=false;
     hideErr();markOldCard(true);box.value='';
     ui(true);setState('正在听… 0秒（边说边出字，松手后自动翻译）');
-    try{rec=newRec(gen);rec.start()} // 必须在按下的回调里同步调用
-    catch(err){want=false;done=true;ui(false);setState('');markOldCard(false);toKeyboard();return}
-    watchAlive();
+    try{rec=newRec(gen);rec.start()}
+    catch(err){want=false;done=true;ui(false);setState('');markOldCard(false);switchToServer();return}
+    const g=gen;aliveTimer=setTimeout(()=>{ // 麦克风一直没打开：浏览器识别卡死，改用录音识别
+      if(g===gen&&want&&!alive){fatal=true;want=false;finish();switchToServer('浏览器语音没反应，已切换为录音识别，请再按住说一次')}
+    },ALIVE_MS);
     clearInterval(timer);timer=setInterval(tick,500);
   }
   function finish(){
     if(done) return;
     done=true;want=false;clearInterval(timer);timer=null;clearTimeout(stopGuard);clearTimeout(aliveTimer);ui(false);setState('');
-    gen++; // 之后到达的旧事件全部忽略
+    gen++;
     try{rec&&rec.abort()}catch(e){}
     const v=full().trim();box.value=v;
     if(fatal){markOldCard(false);return}
     if(v){makeCard(v,{voice:true});return}
-    markOldCard(false);
-    showErr('没听清，请再说一次');
-    if(!hinted||isIOS){hinted=true;showTip(fallbackMsg)}
+    markOldCard(false);showErr('没听清，请再说一次');
   }
   function stopRec(){
     if(!want) return;
-    want=false;setState('正在识别，请稍等…');
-    clearTimeout(aliveTimer);
+    want=false;setState('正在识别，请稍等…');clearTimeout(aliveTimer);
     try{rec&&rec.stop()}catch(e){finish();return}
-    // iPhone 常在 stop() 之后才送来最终文字；有些浏览器 stop 后又不回调 onend。
-    // 所以等最终结果（最多 2.5–4 秒），超时就用已经显示的中间文字，不轻易判“没听清”。
     clearTimeout(stopGuard);stopGuard=setTimeout(finish,gotText?STOP_WAIT_TXT:STOP_WAIT);
   }
+
+  // ================= 按钮：按住说话，松手结束 =================
+  let holding=false, skipUp=false, downAt=0, tapMode=false;
+  function busy(){return useServer?(!!mr||recWant):want}
   btn.addEventListener('contextmenu',e=>e.preventDefault());
   btn.addEventListener('selectstart',e=>e.preventDefault());
   btn.addEventListener('pointerdown',e=>{
     if(e.button!=null&&e.button!==0) return;
     e.preventDefault();
+    if(recBusy) return;
     try{btn.setPointerCapture(e.pointerId)}catch(ex){}
-    if(want){skipUp=true;holding=false;stopRec();return}
-    skipUp=false;holding=true;startRec();
+    if(busy()){skipUp=true;holding=false;useServer?recStop():stopRec();return} // 点按模式：再点一次结束
+    skipUp=false;holding=true;downAt=Date.now();
+    if(useServer) recStart(); else startRec();
   });
-  function endHold(e){
+  function endHold(){
     if(skipUp){skipUp=false;return}
     if(!holding) return;
     holding=false;
-    if(Date.now()-t0>=250) stopRec(); // 长按松手结束；短按保持聆听，再点一次结束
+    if(Date.now()-downAt<250) return; // 只是点了一下：保持录音/聆听，再点一次结束
+    useServer?recStop():stopRec();
   }
   btn.addEventListener('pointerup',endHold);
   btn.addEventListener('pointercancel',endHold);
   btn.addEventListener('lostpointercapture',endHold);
+  if(useServer){
+    // 进入翻译页时预热服务器识别（免费实例可能在休眠）
+    const w=()=>{if(document.getElementById('p-card')&&document.getElementById('p-card').offsetParent!==null) warm()};
+    setTimeout(w,1500);document.addEventListener('click',e=>{if(e.target.closest&&e.target.closest('[data-go="card"]')) setTimeout(warm,300)},true);
+    btn.addEventListener('pointerdown',warm,{once:true});
+  }
 })();
 
 // ---------- 常用句 ----------
