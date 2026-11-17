@@ -76,7 +76,7 @@ async function load(){
   document.getElementById('warn').innerHTML = (p.status === 'pending' ? '<div class="pending">⏳ 这篇帖子正在等待管理员审核，目前只有你自己能看到。' + (p.review_note ? '（' + LH.esc(p.review_note) + '）' : '') + '住宿、包车用车、医美等商业信息请开通商家会员后在商家专区发布。详见<a href="/rules#r3">社区约定</a>。</div>' : '') +
     (p.status === 'rejected' ? '<div class="pending">❌ 这篇帖子未通过审核：' + LH.esc(p.review_note || '') + '</div>' : '') +
     (WARN[p.board] ? '<div class="warn">' + WARN[p.board] + '</div>' : '');
-  var g = p.images.length ? '<div class="gallery' + (p.images.length === 1 ? ' one' : '') + '">' + p.images.map(function(i){
+  var g = p.images.length ? '<div class="post-gallery n' + Math.min(p.images.length, 3) + (p.images.length === 1 ? ' one' : '') + '">' + p.images.map(function(i){
     return '<img loading="lazy" alt="" src="/api/community/img/' + i.id + (p.images.length === 1 ? '' : '?t=1') + '" data-full="/api/community/img/' + i.id + '">';
   }).join('') + '</div>' : '';
   box.innerHTML = '<div class="meta" style="margin-top:0">' + LH.postFlags(p) + (p.merchant ? '<span class="tag biz">商家</span>' : '') + '<span class="tag">' + LH.esc(p.board_name) + '</span>' + (p.tag_name ? '<span class="tag">' + LH.esc(p.tag_name) + '</span>' : '') + '<span>' + LH.esc(p.time) + '</span>' + (p.merchant || p.views ? '<span>👁 ' + (p.views || 0) + '</span>' : '') + '</div>' +
@@ -93,7 +93,7 @@ async function load(){
     '<div class="row" style="margin-top:14px;justify-content:space-between"><span class="row" style="gap:8px"><button class="btn sm ghost" id="like">' + (p.liked ? '❤️ 已赞 ' : '🤍 点赞 ') + p.likes + '</button>' +
     '<button class="btn sm ghost" type="button" id="share">分享</button></span>' +
     '<span class="row">' + (p.mine ? '<button class="linkbtn" id="delp">删除</button>' : '') + '<button class="linkbtn" id="repp">🚩 举报</button></span></div>';
-  box.querySelectorAll('.gallery img').forEach(function(im){ im.onclick = function(){ zoom(im.dataset.full); }; });
+  box.querySelectorAll('.post-gallery img').forEach(function(im){ im.onclick = function(){ zoom(im.dataset.full); }; });
   document.getElementById('like').onclick = async function(){
     if (!me || !me.user){ location.href = '/login?next=' + encodeURIComponent(location.pathname); return; }
     if (me.user.tier < 1){ if (confirm('开通会员后才能点赞。去了解会员？')) location.href = '/member'; return; }

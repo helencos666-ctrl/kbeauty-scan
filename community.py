@@ -772,8 +772,8 @@ def p_community():
             for r in rows:
                 ex = (r["body"] or "").replace("\n", " ").strip()[:80]
                 items.append(
-                    f'<a class="post" href="/community/post/{r["id"]}"><div class="txt"><h3>{_esc_html(r["title"])}</h3>'
-                    f'<p class="ex">{_esc_html(ex)}</p><div class="meta">{_esc_html(r["nickname"])}</div></div></a>'
+                    f'<a class="post" href="/community/post/{r["id"]}"><div class="author"><div class="who">{_esc_html(r["nickname"])}</div></div>'
+                    f'<h3>{_esc_html(r["title"])}</h3><p class="ex">{_esc_html(ex)}</p></a>'
                 )
             if items:
                 ssr = "".join(items)
@@ -1276,6 +1276,20 @@ def schedule_ai_reply(kind, post_id, trigger_user_id, comment_body=None):
         _ai_threads.append(th)
     th.start()
 
+
+IMG_COLS = """(SELECT id FROM c_images i WHERE i.post_id=p.id ORDER BY pos LIMIT 1) AS cover,
+                 (SELECT count(*) FROM c_images i WHERE i.post_id=p.id) AS img_n,
+                 (SELECT ARRAY(SELECT id FROM c_images i WHERE i.post_id=p.id ORDER BY pos LIMIT 3)) AS thumbs"""
+
+def _with_images(o, r):
+    o["cover"] = r["cover"]
+    o["img_n"] = r["img_n"] or 0
+    thumbs = r.get("thumbs") or []
+    if thumbs and not isinstance(thumbs, (list, tuple)):
+        thumbs = list(thumbs)
+    o["thumbs"] = [int(x) for x in thumbs] if thumbs else ([int(r["cover"])] if r.get("cover") else [])
+    return o
+
 # ---------------- 帖子 API ----------------
 def _post_out(r, full=False):
     o = {"id": r["id"], "board": r["board"], "board_name": BOARDS.get(r["board"], ""), "title": r["title"],
@@ -1324,8 +1338,7 @@ def api_posts(req: Request, board: str = "", before: int = 0, limit_n: int = 20,
         if board and before <= 0 and not tag:
             pinned_rows = q(conn, f"""SELECT p.*, {AUTHOR_COLS}, (CASE WHEN au.merchant_until>now() THEN 3 ELSE au.tier END) AS tier,
                  (au.avatar IS NOT NULL OR COALESCE(au.is_bot, FALSE)) AS has_avatar,
-                 (SELECT id FROM c_images i WHERE i.post_id=p.id ORDER BY pos LIMIT 1) AS cover,
-                 (SELECT count(*) FROM c_images i WHERE i.post_id=p.id) AS img_n
+                 {IMG_COLS}
                  FROM c_posts p JOIN c_users au ON au.id=p.user_id
                  WHERE {' AND '.join(cond)} AND p.pinned ORDER BY p.pinned_at DESC NULLS LAST LIMIT 3""", tuple(args))
         if board and not tag:
@@ -1334,17 +1347,16 @@ def api_posts(req: Request, board: str = "", before: int = 0, limit_n: int = 20,
             cond.append("p.id<%s"); args.append(before)
         rows = q(conn, f"""SELECT p.*, {AUTHOR_COLS}, (CASE WHEN au.merchant_until>now() THEN 3 ELSE au.tier END) AS tier,
                  (au.avatar IS NOT NULL OR COALESCE(au.is_bot, FALSE)) AS has_avatar,
-                 (SELECT id FROM c_images i WHERE i.post_id=p.id ORDER BY pos LIMIT 1) AS cover,
-                 (SELECT count(*) FROM c_images i WHERE i.post_id=p.id) AS img_n
+                 {IMG_COLS}
                  FROM c_posts p JOIN c_users au ON au.id=p.user_id
                  WHERE {' AND '.join(cond)} ORDER BY p.id DESC LIMIT %s""", (*args, limit_n + 1))
     more = len(rows) > limit_n
     out = []
     for r in rows[:limit_n]:
-        o = _post_out(r); o["cover"] = r["cover"]; o["img_n"] = r["img_n"]; out.append(o)
+        o = _with_images(_post_out(r), r); out.append(o)
     pins = []
     for r in pinned_rows:
-        o = _post_out(r); o["cover"] = r["cover"]; o["img_n"] = r["img_n"]; pins.append(o)
+        o = _with_images(_post_out(r), r); pins.append(o)
     return {"posts": out, "more": more, "pinned": pins}
 
 FEED_TABS = ("recommend", "news", "hot", "latest", "follow", "featured", "topic")
@@ -1397,8 +1409,7 @@ def api_feed(req: Request, tab: str = "recommend", boards: str = "", offset: int
             return q(conn, f"""SELECT p.*, {AUTHOR_COLS}, au.verified, (CASE WHEN au.merchant_until>now() THEN 3 ELSE au.tier END) AS tier,
                      (au.avatar IS NOT NULL OR COALESCE(au.is_bot, FALSE)) AS has_avatar,
                      {score} AS score,
-                     (SELECT id FROM c_images i WHERE i.post_id=p.id ORDER BY pos LIMIT 1) AS cover,
-                     (SELECT count(*) FROM c_images i WHERE i.post_id=p.id) AS img_n
+                     {IMG_COLS}
                      FROM c_posts p JOIN c_users au ON au.id=p.user_id
                      WHERE {' AND '.join(cond + extra)} ORDER BY {order} LIMIT %s OFFSET %s""",
                      (*args, *eargs, limit_n + 1, offset))
@@ -1419,7 +1430,7 @@ def api_feed(req: Request, tab: str = "recommend", boards: str = "", offset: int
     more = len(rows) > limit_n
     out = []
     for r in rows[:limit_n]:
-        o = _post_out(r); o["cover"] = r["cover"]; o["img_n"] = r["img_n"]; o["author_verified"] = bool(r["verified"]); out.append(o)
+        o = _with_images(_post_out(r), r); o["author_verified"] = bool(r["verified"]); out.append(o)
     return {"posts": out, "more": more, "fallback": fallback, "next": offset + limit_n}
 
 @router.get("/api/community/boards")

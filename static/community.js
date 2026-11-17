@@ -125,23 +125,59 @@ var LH = (function(){
     return h;
   }
   function postFlags(p){ return (p.pinned ? '<span class="tag pin">置顶</span>' : '') + (p.featured ? '<span class="tag feat">精选</span>' : '') + (p.topic ? '<span class="tag topic">话题</span>' : ''); }
+  function relTime(s){
+    if (!s) return '';
+    var m = String(s).match(/^(\d{4})-(\d{2})-(\d{2})[ T](\d{2}):(\d{2})/);
+    if (!m) return s;
+    var d = new Date(m[1] + '-' + m[2] + '-' + m[3] + 'T' + m[4] + ':' + m[5] + ':00+09:00');
+    if (isNaN(d.getTime())) return s;
+    var sec = Math.round((Date.now() - d.getTime()) / 1000);
+    if (sec < 45) return '刚刚';
+    if (sec < 3600) return Math.max(1, Math.floor(sec / 60)) + '分钟前';
+    if (sec < 86400) return Math.floor(sec / 3600) + '小时前';
+    if (sec < 172800) return '昨天 ' + m[4] + ':' + m[5];
+    if (d.getFullYear() === new Date().getFullYear()) return m[2] + '-' + m[3] + ' ' + m[4] + ':' + m[5];
+    return s;
+  }
+  function toast(msg, kind, ms){
+    var el = document.getElementById('lhToast');
+    if (!el){
+      el = document.createElement('div');
+      el.id = 'lhToast';
+      el.className = 'lh-toast';
+      el.setAttribute('role', 'status');
+      document.body.appendChild(el);
+    }
+    el.textContent = msg;
+    el.className = 'lh-toast show' + (kind === 'ok' ? ' ok' : '');
+    clearTimeout(el._t);
+    el._t = setTimeout(function(){ el.classList.remove('show'); }, ms || (kind === 'ok' ? 2800 : 2500));
+  }
+  function postPhotos(p){
+    var ids = (p.thumbs && p.thumbs.length) ? p.thumbs : (p.cover ? [p.cover] : []);
+    if (!ids.length) return '';
+    if (ids.length === 1) return '<img class="photo" loading="lazy" alt="" src="/api/community/img/' + ids[0] + '?t=1">';
+    var n = p.img_n || ids.length;
+    var cells = ids.slice(0, 3).map(function(id, i){
+      var more = (i === 2 && n > 3) ? '<span class="more">+' + (n - 2) + '</span>' : '';
+      return '<span class="ph">' + more + '<img loading="lazy" alt="" src="/api/community/img/' + id + '?t=1"></span>';
+    }).join('');
+    return '<div class="photos n' + Math.min(ids.length, 3) + '">' + cells + '</div>';
+  }
   function postItem(p, rank){
-    var cover = p.cover ? '<img class="cover" loading="lazy" alt="" src="/api/community/img/' + p.cover + '?t=1">' : '';
+    var pin = (p.pinned ? '置顶 · ' : '') + (p.featured ? '精选 · ' : '');
+    var title = (p.tag_name ? '[' + p.tag_name + '] ' : '') + p.title;
     return '<a class="post" href="/community/post/' + p.id + '">' + (rank ? '<span class="rank' + (rank <= 3 ? ' t' : '') + '">' + rank + '</span>' : '') +
-      avatar(p.author_id, p.author, p.has_avatar, 'sm') +
-      '<div class="txt"><h3>' + esc(p.title) + '</h3><p class="ex">' + esc(p.excerpt) + '</p><div class="meta">' +
-      postFlags(p) + (p.merchant ? '<span class="tag biz">商家</span>' : '') + '<span class="tag">' + esc(p.board_name) + '</span>' +
-      '<span>' + esc(p.author) + badge(p.author_tier) + vb(p.author_verified) + ubadges(p.author_badges, p.author_official, 2) + '</span><span>' + esc(p.time) + '</span>' +
-      '<span>❤️ ' + p.likes + '</span><span>💬 ' + p.comments + '</span>' + (p.img_n > 1 ? '<span>🖼 ' + p.img_n + '</span>' : '') +
-      '</div></div>' + cover + '</a>';
+      '<div class="author">' + avatar(p.author_id, p.author, p.has_avatar, 'xs') +
+      '<div class="who">' + esc(p.author) + '<small>' + esc(relTime(p.time)) + '</small></div></div>' +
+      '<h3>' + (pin ? '<span style="color:var(--pink);font-weight:700;font-size:13px">' + pin + '</span>' : '') + esc(title) + '</h3>' +
+      (p.excerpt ? '<p class="ex">' + esc(p.excerpt) + '</p>' : '') +
+      (p.offer ? '<div class="offer">🎁 ' + esc(p.offer) + '</div>' : '') +
+      postPhotos(p) +
+      '<div class="meta"><span class="tag">' + esc(p.board_name) + '</span>' +
+      '<span class="acts"><span>🤍 ' + p.likes + '</span><span>💬 ' + p.comments + '</span></span></div></a>';
   }
-  // 商家活动列表：标题 + 缩略图 + 阅读数 + 时间
-  function bizItem(p){
-    var cover = p.cover ? '<img class="cover" loading="lazy" alt="" src="/api/community/img/' + p.cover + '?t=1">' : '<span class="cover bzph">🏷️</span>';
-    return '<a class="post biz-item" href="/community/post/' + p.id + '"><div class="txt"><h3>' + postFlags(p) + (p.tag_name ? '<span class="btag">[' + esc(p.tag_name) + ']</span>' : '') + esc(p.title) + '</h3>' +
-      (p.offer ? '<p class="offer">🎁 ' + esc(p.offer) + '</p>' : '') +
-      '<div class="meta"><span>👁 ' + (p.views || 0) + '</span><span>' + esc(p.time) + '</span>' + (p.valid_until ? '<span>有效至 ' + esc(p.valid_until) + '</span>' : '') + '</div></div>' + cover + '</a>';
-  }
+  function bizItem(p){ return postItem(p); }
   function consultHref(kind, id){ return '/consult/new?kind=' + encodeURIComponent(kind) + '&id=' + encodeURIComponent(id); }
   function consultBtn(kind, id, label){ return '<a class="btn primary block consult-btn" href="' + consultHref(kind, id) + '">💬 ' + esc(label || '立即咨询') + '</a>'; }
   // 站内咨询未读提醒：页面角标 + （已授权时）系统通知
@@ -289,7 +325,7 @@ var LH = (function(){
       });
     }
   }
-  return {prices: prices, esc: esc, api: api, me: me, badge: badge, showErr: showErr, qs: qs, compress: compress, userbar: userbar, report: report,
+  return {prices: prices, esc: esc, api: api, me: me, badge: badge, showErr: showErr, qs: qs, compress: compress, userbar: userbar, report: report, toast: toast, relTime: relTime,
           vb: vb, avatar: avatar, pickAvatar: pickAvatar, postItem: postItem, bizItem: bizItem, ubadges: ubadges, BADGES: BADGES, postFlags: postFlags, consultHref: consultHref, consultBtn: consultBtn, startConsultPoll: startConsultPoll, friendCard: friendCard, lockedPrompt: lockedPrompt, ANTISCAM: ANTISCAM, share: share,
           mapLinks: mapLinks, copyText: copyText, krwCny: krwCny, menuHtml: menuHtml, locHtml: locHtml, ratingText: ratingText, bindShopExtras: bindShopExtras, starsHtml: starsHtml, priceLine: priceLine};
 })();

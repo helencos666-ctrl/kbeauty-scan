@@ -15,39 +15,27 @@
 <link rel="stylesheet" href="/static/pwa.css">
 <link rel="stylesheet" href="/static/community.css">
 </head>
-<body>
+<body class="compose">
 <header>
   <h1>✏️ 发帖</h1>
   <p><a href="/community">← 返回社区</a></p>
 </header>
+<div class="compose-top">
+  <a class="back" href="/community">取消</a>
+  <h1>写帖子</h1>
+  <div class="acts">
+    <button type="button" class="btn ghost" id="preview" disabled>预览</button>
+    <button type="button" class="btn primary" id="send" disabled>发布</button>
+  </div>
+</div>
 <main>
   <div class="card" id="gate"><div class="loading">加载中…</div></div>
   <div class="card" id="form" style="display:none">
+    <div class="draftnote" id="draftnote"></div>
     <div class="err" id="err"></div>
     <label class="f">发到哪个频道</label>
-    <select class="f" id="board">
-      <option value="">请选择频道</option>
-      <option value="daily">🌸 在韩日常</option>
-      <option value="pit">踩坑避雷</option>
-      <option value="group">结伴同行</option>
-      <option value="visa">签证问答</option>
-      <option value="study">留学打听</option>
-      <option value="friends">旅韩交友</option>
-      <option value="news">出行提醒</option>
-      <option value="rent">租房找房</option>
-      <option value="used">闲置转让</option>
-      <option value="jobs">工作机会</option>
-      <optgroup label="商家专区（仅限商家会员）">
-        <option value="hotel">🛏️ 住宿推荐</option>
-        <option value="car">🚐 包车用车</option>
-        <option value="clinic">✨ 皮肤管理·医美</option>
-        <option value="agency">🏫 留学机构</option>
-        <option value="daigou">🛍️ 代购商家</option>
-        <option value="guide">🙋 地陪</option>
-        <option value="kpop">🎤 追星活动</option>
-        <option value="logistics">📦 中韩物流</option>
-      </optgroup>
-    </select>
+    <input type="hidden" id="board" value="">
+    <div class="chips" id="chips"></div>
     <div class="tip" id="quota" style="display:none"></div>
     <div class="warn" id="bwarn" style="display:none;margin-top:10px"></div>
     <div id="actbox" style="display:none">
@@ -62,18 +50,29 @@
     </div>
     <label class="f" id="tlab">标题（4–40 字）</label>
     <input class="f" id="title" maxlength="40" placeholder="一句话说清楚，例如：明洞换钱踩坑记录">
+    <div class="count" id="tcount">0 / 40</div>
     <label class="f" id="blab">正文（10–3000 字）</label>
-    <textarea class="f" id="body" maxlength="3000" placeholder="时间、地点、经过、建议……写得越具体越有用"></textarea>
+    <textarea class="f" id="body" maxlength="3000" placeholder="时间、地点、经过、建议……写得越具体越有用" style="min-height:200px;line-height:1.7"></textarea>
+    <div class="count" id="bcount">0 / 3000</div>
     <label class="f">图片（最多 6 张，会自动压缩）</label>
     <input type="file" id="pick" accept="image/*" multiple>
     <div class="thumbs" id="thumbs"></div>
-    <label style="display:flex;gap:8px;align-items:flex-start;font-size:13px;color:var(--sub);margin-top:14px;line-height:1.6">
-      <input type="checkbox" id="agree" style="margin-top:3px"> 我已阅读并同意<a href="/rules" target="_blank" style="color:#2c7be5">《社区约定》</a>：不发诈骗、违法、虚假、代办、违法医疗、色情赌博内容，不引流，不公开他人隐私。
+    <label class="agree-line">
+      <input type="checkbox" id="agree">
+      <span>我已阅读并同意<a href="/rules" target="_blank" style="color:#2c7be5">《社区约定》</a>：不发诈骗、违法、虚假、代办、违法医疗、色情赌博内容，不引流，不公开他人隐私。</span>
     </label>
-    <button class="btn primary block" id="send" style="margin-top:14px">发布</button>
     <p class="tip">请勿上传含证件号、二维码、手机号的图片。图片会去除拍摄定位等信息后保存。</p>
   </div>
 </main>
+<div class="preview-mask" id="previewMask">
+  <div class="preview-sheet">
+    <div class="meta" id="pvBoard"></div>
+    <h3 id="pvTitle"></h3>
+    <div class="body" id="pvBody"></div>
+    <div class="phs" id="pvPhotos"></div>
+    <button type="button" class="btn ghost block" id="pvClose" style="margin-top:16px">关闭预览</button>
+  </div>
+</div>
 <nav>
   <a href="/"><i>🏠</i>首页</a>
   <a href="/?tab=sub"><i>🚇</i>地铁</a>
@@ -99,7 +98,27 @@ var WARN = {visa: '签证问答仅限个人经验分享，禁止发布代办广�
 var MB = {hotel: 1, car: 1, clinic: 1, agency: 1, daigou: 1, guide: 1, kpop: 1, logistics: 1}, ME = null;
 var NORMAL_HINT = '普通频道里含酒店预订、租车包车、医美、微信号、代办等商业内容的帖子会先进入人工审核。';
 var files = [], SUBC = {}, MED = {}, MEDNOTE = '', lastTpl = '';
-// 按频道预填的一句话模板（可改，不是强制格式）
+var DRAFT_KEY = 'lh-post-draft-v1';
+var CHANNELS = [
+  {key:'daily', label:'🌸 在韩日常'},
+  {key:'pit', label:'踩坑避雷'},
+  {key:'group', label:'结伴同行'},
+  {key:'visa', label:'签证问答'},
+  {key:'study', label:'留学打听'},
+  {key:'friends', label:'旅韩交友'},
+  {key:'news', label:'出行提醒'},
+  {key:'rent', label:'租房找房'},
+  {key:'used', label:'闲置转让'},
+  {key:'jobs', label:'工作机会'},
+  {key:'hotel', label:'🛏️ 住宿推荐', merch:1},
+  {key:'car', label:'🚐 包车用车', merch:1},
+  {key:'clinic', label:'✨ 皮肤管理·医美', merch:1},
+  {key:'agency', label:'🏫 留学机构', merch:1},
+  {key:'daigou', label:'🛍️ 代购商家', merch:1},
+  {key:'guide', label:'🙋 地陪', merch:1},
+  {key:'kpop', label:'🎤 追星活动', merch:1},
+  {key:'logistics', label:'📦 中韩物流', merch:1}
+];
 var TPL = {
   daily: '今天在（地区），（一件小事）。\n想分享的是……',
   visa: '我的情况是……\n想问的是……\n已经查过……',
@@ -112,66 +131,181 @@ var TPL = {
   jobs: '岗位 / 地区：\n签证要求：\n工作内容和待遇：'
 };
 var TITLE_PH = {daily: '一句话也行，例如：今天在汉江边吃了炸鸡', visa: '例如：D-4 转 D-2 需要准备什么？', pit: '例如：明洞换钱踩坑记录'};
-document.getElementById('board').onchange = function(){
-  var bd = document.getElementById('body'), tv = TPL[this.value] || '';
-  if (!bd.value.trim() || bd.value === lastTpl){ bd.value = tv; lastTpl = tv; }
-  document.getElementById('title').placeholder = TITLE_PH[this.value] || '一句话说清楚';
-  var dly = this.value === 'daily';
+function currentBoard(){ return document.getElementById('board').value; }
+function applyBoard(val, fromDraft){
+  document.getElementById('board').value = val || '';
+  document.querySelectorAll('#chips button[data-board]').forEach(function(b){
+    b.classList.toggle('on', b.getAttribute('data-board') === val);
+  });
+  var bd = document.getElementById('body'), tv = TPL[val] || '';
+  if (!fromDraft && (!bd.value.trim() || bd.value === lastTpl)){ bd.value = tv; lastTpl = tv; }
+  document.getElementById('title').placeholder = TITLE_PH[val] || '一句话说清楚';
+  var dly = val === 'daily';
   document.getElementById('tlab').textContent = dly ? '标题（2–40 字）' : '标题（4–40 字）';
   document.getElementById('blab').textContent = dly ? '正文（5 字起，一句话也可以）' : '正文（10–3000 字）';
-  var ab = document.getElementById('actbox'), subs = SUBC[this.value] || [];
-  ab.style.display = MB[this.value] ? 'block' : 'none';
+  var ab = document.getElementById('actbox'), subs = SUBC[val] || [];
+  ab.style.display = MB[val] ? 'block' : 'none';
   document.getElementById('tag').innerHTML = '<option value="">请选择分类</option>' + subs.map(function(x){ return '<option value="' + x.key + '">' + x.icon + ' ' + LH.esc(x.name) + '</option>'; }).join('');
-  var mn = document.getElementById('mednote'); mn.style.display = MED[this.value] ? 'block' : 'none'; mn.textContent = '⚠️ ' + MEDNOTE + ' 不得使用“保证效果”“无副作用”“100%”等承诺性用语。';
-  var w = document.getElementById('bwarn'), t = WARN[this.value] || '';
+  var mn = document.getElementById('mednote'); mn.style.display = MED[val] ? 'block' : 'none'; mn.textContent = '⚠️ ' + MEDNOTE + ' 不得使用“保证效果”“无副作用”“100%”等承诺性用语。';
+  var w = document.getElementById('bwarn'), t = WARN[val] || '';
   var qd = document.getElementById('quota'), u = ME && ME.user;
-  if (MB[this.value]){
+  if (MB[val]){
     if (u && u.merchant_info){ var m = u.merchant_info; qd.innerHTML = '本周期剩余 <b>' + m.left + '</b> / 10 篇，增发次数 <b>' + m.credits + '</b>（周期至 ' + LH.esc(m.cycle_end) + '，商家会员有效期至 ' + LH.esc(m.until) + '）'; }
     else { qd.innerHTML = '你还不是商家会员，不能在商家专区发帖。<a href="/member#merchant" style="color:#2c7be5">了解商家会员</a>'; }
     qd.style.display = 'block';
-  } else { qd.style.display = 'none'; if (this.value && !(u && u.merchant)) t = (t ? t + ' ' : '') + NORMAL_HINT; }
+  } else { qd.style.display = 'none'; if (val && !(u && u.merchant)) t = (t ? t + ' ' : '') + NORMAL_HINT; }
   w.textContent = t; w.style.display = t ? 'block' : 'none';
-};
+  updateCounts();
+}
+function renderChips(){
+  var el = document.getElementById('chips'), u = ME && ME.user;
+  var normal = CHANNELS.filter(function(c){ return !c.merch; });
+  var merch = CHANNELS.filter(function(c){ return c.merch; });
+  function btn(c){
+    var dis = (c.key === 'friends' && u && u.tier < 2);
+    return '<button type="button" data-board="' + c.key + '"' + (dis ? ' disabled' : '') + '>' + (dis ? '旅韩交友（需高级会员）' : LH.esc(c.label)) + '</button>';
+  }
+  el.innerHTML = normal.map(btn).join('') + '<div class="chip-lab">商家专区（仅限商家会员）</div>' + merch.map(btn).join('');
+  el.querySelectorAll('button[data-board]').forEach(function(b){
+    b.onclick = function(){ if (b.disabled) return; applyBoard(b.getAttribute('data-board')); saveDraft(); };
+  });
+}
+function updateCounts(){
+  var t = document.getElementById('title').value.length;
+  var b = document.getElementById('body').value.length;
+  document.getElementById('tcount').textContent = t + ' / 40';
+  document.getElementById('bcount').textContent = b + ' / 3000';
+}
+function saveDraft(){
+  try {
+    var d = {
+      board: currentBoard(),
+      title: document.getElementById('title').value,
+      body: document.getElementById('body').value,
+      tag: document.getElementById('tag').value,
+      offer: document.getElementById('offer').value,
+      valid: document.getElementById('valid').value,
+      agree: document.getElementById('agree').checked,
+      t: Date.now()
+    };
+    if (!d.board && !d.title.trim() && (!d.body.trim() || d.body === lastTpl)){
+      var n = document.getElementById('draftnote'); if (n) n.style.display = 'none';
+      return;
+    }
+    localStorage.setItem(DRAFT_KEY, JSON.stringify(d));
+    var n = document.getElementById('draftnote');
+    n.style.display = 'block';
+    n.textContent = '草稿已自动保存 · 刚刚';
+  } catch(e){}
+}
+function loadDraft(){
+  try {
+    var raw = localStorage.getItem(DRAFT_KEY);
+    if (!raw) return null;
+    return JSON.parse(raw);
+  } catch(e){ return null; }
+}
+function clearDraft(){ try { localStorage.removeItem(DRAFT_KEY); } catch(e){} }
+var draftTimer = 0;
+function scheduleDraft(){ clearTimeout(draftTimer); draftTimer = setTimeout(saveDraft, 400); }
+['title','body','offer','valid','tag','agree'].forEach(function(id){
+  var el = document.getElementById(id);
+  el.addEventListener(id === 'agree' ? 'change' : 'input', function(){ updateCounts(); scheduleDraft(); });
+});
 (async function(){
   var gate = document.getElementById('gate'), d;
   try { d = ME = await LH.me(); } catch(e){ gate.innerHTML = '<div class="empty">' + LH.esc(e.message) + '</div>'; return; }
   if (!d.user){ gate.innerHTML = '<div class="empty">请先登录<br><br><a class="btn primary" href="/login?next=/community/new">登录 / 注册</a></div>'; return; }
   if (d.user.tier < 1){ gate.innerHTML = '<div class="empty">开通会员（¥' + d.prices.price_t1 + '）后即可在在韩日常、踩坑避雷、签证问答等频道发帖；旅韩交友发帖需高级会员；住宿、包车、医美、留学机构、代购、地陪、追星活动、中韩物流等商家请开通商家会员<br><br><a class="btn primary" href="/member">了解会员</a></div>'; return; }
-  if (d.user.tier < 2){ var fo = document.querySelector('#board option[value="friends"]'); if (fo){ fo.disabled = true; fo.textContent = '旅韩交友（需高级会员）'; } }
   gate.style.display = 'none'; document.getElementById('form').style.display = 'block';
+  document.getElementById('send').disabled = false; document.getElementById('preview').disabled = false;
+  renderChips();
   try { var mm = await LH.api('GET', '/api/merch/meta'); SUBC = mm.subcats || {}; MEDNOTE = mm.medical_note || ''; (mm.medical_boards || []).forEach(function(k){ MED[k] = 1; }); } catch(e){}
-  var b = LH.qs('board'); if (b) document.getElementById('board').value = b;
-  document.getElementById('board').onchange();
+  var draft = loadDraft();
+  var qBoard = LH.qs('board');
+  if (draft){
+    applyBoard(qBoard || draft.board || '', true);
+    if (draft.title) document.getElementById('title').value = draft.title;
+    if (draft.body){ document.getElementById('body').value = draft.body; if (TPL[draft.board] && draft.body === TPL[draft.board]) lastTpl = draft.body; }
+    if (MB[currentBoard()]){
+      if (draft.tag) document.getElementById('tag').value = draft.tag;
+      if (draft.offer) document.getElementById('offer').value = draft.offer;
+      if (draft.valid) document.getElementById('valid').value = draft.valid;
+    }
+    if (draft.agree) document.getElementById('agree').checked = true;
+    var n = document.getElementById('draftnote'); n.style.display = 'block'; n.textContent = '草稿已自动保存 · 刚刚';
+  } else {
+    applyBoard(qBoard || '', false);
+  }
+  updateCounts();
 })();
 function drawThumbs(){
   var el = document.getElementById('thumbs');
   el.innerHTML = '';
   files.forEach(function(f, i){
     var d = document.createElement('div'), im = document.createElement('img'), x = document.createElement('button');
-    im.src = URL.createObjectURL(f); x.textContent = '×'; x.onclick = function(){ files.splice(i, 1); drawThumbs(); };
+    d.className = 'tile';
+    im.src = URL.createObjectURL(f); x.type = 'button'; x.textContent = '×'; x.onclick = function(ev){ ev.preventDefault(); ev.stopPropagation(); files.splice(i, 1); drawThumbs(); };
     d.appendChild(im); d.appendChild(x); el.appendChild(d);
   });
+  if (files.length < 6){
+    var add = document.createElement('button');
+    add.type = 'button'; add.className = 'add'; add.innerHTML = '<b>+</b>添加';
+    add.onclick = function(){ document.getElementById('pick').click(); };
+    el.appendChild(add);
+  }
 }
+drawThumbs();
 document.getElementById('pick').onchange = async function(){
   var picked = Array.from(this.files || []); this.value = '';
-  for (var f of picked){ if (files.length >= 6){ alert('最多 6 张图片'); break; } files.push(await LH.compress(f)); }
+  for (var f of picked){ if (files.length >= 6){ LH.toast('最多 6 张图片'); break; } files.push(await LH.compress(f)); }
   drawThumbs();
 };
+function setSending(on){
+  ['send','preview'].forEach(function(id){
+    var b = document.getElementById(id); b.disabled = on;
+  });
+  document.getElementById('send').textContent = on ? '发布中…' : '发布';
+}
+document.getElementById('preview').onclick = function(){
+  var title = document.getElementById('title').value.trim();
+  var body = document.getElementById('body').value.trim();
+  var ch = CHANNELS.filter(function(c){ return c.key === currentBoard(); })[0];
+  document.getElementById('pvBoard').innerHTML = ch ? '<span class="tag">' + LH.esc(ch.label) + '</span>' : '';
+  document.getElementById('pvTitle').textContent = title || '（还没有标题）';
+  document.getElementById('pvBody').textContent = body || '（还没有正文）';
+  var box = document.getElementById('pvPhotos');
+  box.innerHTML = '';
+  files.forEach(function(f, i){
+    var im = document.createElement('img');
+    im.src = URL.createObjectURL(f);
+    if (files.length === 1) im.className = 'one';
+    box.appendChild(im);
+  });
+  document.getElementById('previewMask').classList.add('show');
+};
+document.getElementById('pvClose').onclick = function(){ document.getElementById('previewMask').classList.remove('show'); };
+document.getElementById('previewMask').addEventListener('click', function(e){ if (e.target === this) this.classList.remove('show'); });
 document.getElementById('send').onclick = async function(){
   var err = document.getElementById('err'); LH.showErr(err, '');
-  if (!document.getElementById('agree').checked){ LH.showErr(err, '请先勾选同意社区规则'); return; }
-  if (lastTpl && document.getElementById('body').value.trim() === lastTpl.trim()){ LH.showErr(err, '把模板里的括号和省略号换成你自己的内容再发吧'); return; }
+  if (!document.getElementById('agree').checked){ LH.showErr(err, '请先勾选同意社区规则'); window.scrollTo(0, 0); return; }
+  if (lastTpl && document.getElementById('body').value.trim() === lastTpl.trim()){ LH.showErr(err, '把模板里的括号和省略号换成你自己的内容再发吧'); window.scrollTo(0, 0); return; }
   var fd = new FormData();
-  fd.append('board', document.getElementById('board').value);
+  fd.append('board', currentBoard());
   fd.append('title', document.getElementById('title').value);
   fd.append('body', document.getElementById('body').value);
-  if (MB[document.getElementById('board').value]){
+  if (MB[currentBoard()]){
     fd.append('tag', document.getElementById('tag').value); fd.append('offer', document.getElementById('offer').value); fd.append('valid_until', document.getElementById('valid').value);
   }
   files.forEach(function(f){ fd.append('images', f, 'img.jpg'); });
-  this.disabled = true; this.textContent = '发布中…';
-  try { var r = await LH.api('POST', '/api/community/posts', fd); if (r.pending) alert(r.message); location.href = '/community/post/' + r.id; }
-  catch(e){ LH.showErr(err, e.message); this.disabled = false; this.textContent = '发布'; window.scrollTo(0, 0); }
+  setSending(true);
+  try {
+    var r = await LH.api('POST', '/api/community/posts', fd);
+    clearDraft();
+    if (r.pending){ LH.toast(r.message || '已提交，等待审核', 'ok', 4000); }
+    else { LH.toast('发布成功', 'ok'); }
+    setTimeout(function(){ location.href = '/community/post/' + r.id; }, r.pending ? 900 : 500);
+  } catch(e){ LH.showErr(err, e.message); LH.toast(e.message); setSending(false); window.scrollTo(0, 0); }
 };
 </script>
 <script src="/static/pwa.js" defer></script>
