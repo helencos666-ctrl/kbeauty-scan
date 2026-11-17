@@ -104,6 +104,7 @@ nav button.on,nav a.on{color:var(--pink);font-weight:700}
 .mic-btn span.lb{pointer-events:none;text-align:center;line-height:1.2}
 .mic-btn.on{background:var(--pink);color:#fff}
 .mic-btn.on span.lb{font-size:22px;font-weight:800;font-variant-numeric:tabular-nums;letter-spacing:.5px}
+.asr-note{font-size:12.5px;color:#8a5a00;background:#fff7e6;border-radius:10px;padding:7px 10px;margin-top:8px;line-height:1.5}.asr-note small{display:block;color:#8c8f99;margin-top:2px}.asr-note.edit{color:#d6336c;background:#fff0f6}
 .mic-btn.near{background:#e8590c}
 #micState .rtxt{display:block}
 #splash{position:fixed;inset:0;z-index:1000;background:#000;transition:opacity .3s}#splash.out{opacity:0}
@@ -324,6 +325,7 @@ body.is-home .disclaimer{display:none}
         <button type="button" class="mic-btn" id="micBtn" aria-label="按住说话"><span class="ico">🎤</span><span class="lb">按住说话</span></button>
       </div>
       <div id="micState"></div>
+      <div class="asr-note" id="asrNote" hidden></div>
       <div class="tip" id="micTip">当前浏览器不支持语音，请用 Safari/Chrome 打开，或点输入框用键盘上的话筒说话</div>
       <div class="btns" style="margin-top:10px"><button class="btn primary" id="cardBtn">生成韩文卡片</button></div>
       <div class="card loading" id="ld-card" style="box-shadow:none"><div class="spin"></div>正在翻译…</div>
@@ -863,6 +865,14 @@ drawModeUI();drawScenesT();drawHist();
   let useServer=canRecord&&(isIOS||isWx||!SR);
   try{if(canRecord&&localStorage.getItem('lh_asr_server')==='1') useServer=true}catch(e){}
   function setState(s){if(!s){st.style.display='none';st.textContent='';return}st.style.display='block';st.textContent=s}
+  const asrNote=$('asrNote');
+  function showAsrNote(raw,v){
+    const diff=raw&&raw.replace(/[\s，。？！,.?!]/g,'')!==v.replace(/[\s，。？！,.?!]/g,'');
+    asrNote.innerHTML='✏️ 识别结果，可点击上面文字修改，改完点“生成韩文卡片”重新翻译'+(diff?'<small>原始识别：'+esc(raw)+'（已按口音/同音词自动纠正）</small>':'');
+    asrNote.hidden=false;
+  }
+  box.addEventListener('focus',()=>{if(!asrNote.hidden) asrNote.classList.add('edit')});
+  box.addEventListener('input',()=>{if(!box.value.trim()){asrNote.hidden=true;asrNote.classList.remove('edit')}});
   function setStateHTML(h){st.style.display='block';st.innerHTML=h}
   function showTip(m){tip.textContent=m;tip.style.display='block'}
   function hideTip(){tip.style.display='none'}
@@ -984,7 +994,7 @@ drawModeUI();drawScenesT();drawHist();
         showErr(peak<0.04?'没有听到声音：请检查麦克风没被遮住，靠近手机说话':'没听清，请再说一次');
         return;
       }
-      box.value=v;makeCard(v,{voice:true});
+      box.value=v;showAsrNote(lang==='zh'?(j.raw||''):'',v);makeCard(v,{voice:true});
     }catch(e){
       setState('');markOldCard(false);showErr((e&&e.message)||'网络错误，请重试');
       if(tMode==='ko2zh') toKeyboard();
@@ -1070,7 +1080,14 @@ drawModeUI();drawScenesT();drawHist();
     try{rec&&rec.abort()}catch(e){}
     const v=full().trim();box.value=v;
     if(fatal){markOldCard(false);return}
-    if(v){makeCard(v,{voice:true});return}
+    if(v){
+      if(tMode==='ko2zh'){makeCard(v,{voice:true});return}
+      setState('正在校对识别结果…');
+      const ac=new AbortController(),to=setTimeout(()=>ac.abort(),3500);
+      fetch('/api/asr/fix',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({text:v}),signal:ac.signal})
+        .then(r=>r.ok?r.json():{}).catch(()=>({})).then(j=>{clearTimeout(to);setState('');const t=(j&&j.text||'').trim()||v;box.value=t;showAsrNote(v,t);makeCard(t,{voice:true})});
+      return;
+    }
     markOldCard(false);showErr('没听清，请再说一次');
   }
   function stopRec(){

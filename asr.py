@@ -5,7 +5,7 @@
 - 兜底：本机开源模型 sherpa-onnx Paraformer-zh-small（int8，约 82MB，仅中文；免费、不出网）
 录音只在内存里处理，不保存到磁盘、不写日志。
 """
-import asyncio, base64, hashlib, io, os, threading, time, wave, logging
+import asyncio, base64, hashlib, io, os, re, threading, time, wave, logging
 import httpx
 from fastapi import APIRouter, HTTPException, Request
 from starlette.concurrency import run_in_threadpool
@@ -233,9 +233,29 @@ async def asr(request: Request, lang: str = "zh"):
         if lang == "ko":
             raise HTTPException(503, ("韩语语音识别暂时不可用" if CF_ACCOUNT and CF_TOKEN else "韩语语音识别暂未开通") + "，请点输入框用键盘上的话筒说韩语")
         text, engine = await run_in_threadpool(_local, pcm), "local"
-    if lang == "zh":
-        text = _fix(text)
-    return {"ok": True, "text": text[:600], "engine": engine, "sec": round(dur, 1), "ms": int((time.time() - t0) * 1000)}
+    raw_text, fixed_by = text, ""
+    if lang == "zh" and text:
+        from asr_correct import correct_zh
+        text, fixed_by = await correct_zh(_fix(text), CF_ACCOUNT, CF_TOKEN)
+    return {"ok": True, "text": text[:600], "raw": raw_text[:600], "fixed": fixed_by, "engine": engine,
+            "sec": round(dur, 1), "ms": int((time.time() - t0) * 1000)}
+
+
+@router.post("/api/asr/fix")
+async def asr_fix(request: Request):
+    """浏览器自带识别（安卓/电脑）的结果也走同一套口音/同音词纠错。"""
+    from app import rate_limit
+    rate_limit(request, "asrfix", per_min=15, per_day=300)
+    try:
+        body = await request.json()
+    except Exception:  # noqa: BLE001
+        body = {}
+    raw = re.sub(r"\s+", " ", str((body or {}).get("text", ""))).strip()[:300]
+    if not raw:
+        raise HTTPException(400, "没有文字")
+    from asr_correct import correct_zh
+    text, how = await correct_zh(_fix(raw), CF_ACCOUNT, CF_TOKEN)
+    return {"ok": True, "text": text, "raw": raw, "fixed": how}
 
 
 def start_background_download():
