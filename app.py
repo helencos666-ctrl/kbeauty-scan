@@ -502,11 +502,13 @@ def static_html(name: str):
     return html_file_response(name + ".html")
 
 
-from lanjing_seed import router as lanjing_router, seed_once  # noqa: E402
+from lanjing_seed import router as lanjing_router, seed_once as seed_lanjing  # noqa: E402
+from guides_seed import seed_once as seed_guides  # noqa: E402
 app.include_router(lanjing_router)
 
 @app.on_event("startup")
-def _lanjing_startup():
-    seed_once()
+def _startup_seeds():
+    seed_lanjing()
+    seed_guides()
 
 app.mount("/static", StaticFiles(directory=os.path.join(BASE, "static")), name="static")

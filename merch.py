@@ -99,8 +99,15 @@ def subcats(board):
     return [{"key": k, "name": n, "icon": i} for k, n, i in SUBCATS.get(board, [])]
 
 
+# Non-merchant board tags (optional; do not require these when members post).
+EXTRA_TAGS = {"news": (("tax", "退税", "🧾"),)}
+
+
 def tag_name(board, tag):
     for k, n, _ in SUBCATS.get(board, []):
+        if k == tag:
+            return n
+    for k, n, _ in EXTRA_TAGS.get(board, ()):
         if k == tag:
             return n
     return ""

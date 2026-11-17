@@ -207,7 +207,8 @@ def after_checkin(conn, uid, streak):
 
 
 # ---------------- 官方号 ----------------
-OFFICIAL_NICK = "韩友圈小编"
+OFFICIAL_NICK = "旅韩助手·平台精选"
+OFFICIAL_NICK_OLD = "韩友圈小编"
 
 
 def is_official_uid(conn, uid):
@@ -216,8 +217,12 @@ def is_official_uid(conn, uid):
 
 
 def official_user(conn):
-    r = q(conn, "SELECT id FROM c_users WHERE is_official AND NOT is_banned ORDER BY id LIMIT 1", one=True)
+    r = q(conn, "SELECT id, nickname FROM c_users WHERE is_official AND NOT is_banned ORDER BY id LIMIT 1", one=True)
     if r:
+        if r["nickname"] != OFFICIAL_NICK:
+            taken = q(conn, "SELECT id FROM c_users WHERE nickname=%s AND id<>%s", (OFFICIAL_NICK, r["id"]), one=True)
+            if not taken:
+                q(conn, "UPDATE c_users SET nickname=%s WHERE id=%s AND is_official", (OFFICIAL_NICK, r["id"]))
         return r["id"]
     pw = hashlib.sha256(secrets.token_bytes(32)).hexdigest()   # 不可登录的随机口令，官方号只从后台发帖
     r = q(conn, """INSERT INTO c_users(nickname,pw_hash,email,is_official,tier,is_member)
