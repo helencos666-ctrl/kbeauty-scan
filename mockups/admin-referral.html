@@ -1,0 +1,30 @@
+<!doctype html><html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><link rel="stylesheet" href="m.css">
+<style>
+body{background:#f5f6f8}
+.tb{display:flex;gap:6px;overflow:hidden;padding:0 12px 10px}.tb span{white-space:nowrap;font-size:12px;padding:6px 10px;border-radius:8px;background:#fff;color:var(--sub)}.tb .on{background:var(--pink);color:#fff;font-weight:700}
+.kpi{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:12px}.kpi div{background:#fff;border-radius:12px;padding:10px 12px}.kpi b{display:block;font-size:19px}.kpi span{font-size:11.5px;color:var(--sub)}
+.bar{height:8px;background:#f0e3e7;border-radius:4px;overflow:hidden;margin:8px 0 4px}.bar i{display:block;height:100%;width:9.5%;background:var(--pink)}
+.r{border-bottom:1px solid #f1f1f4;padding:9px 0;font-size:12.5px}.r:last-child{border:0}
+.r .h{display:flex;justify-content:space-between;align-items:center;font-weight:700;font-size:13.5px}
+.r .d{color:var(--sub);margin-top:3px;line-height:1.5}
+.ac{display:flex;gap:6px;margin-top:6px}.ac span{font-size:11.5px;padding:4px 9px;border-radius:7px;background:#f0f1f4}.ac .ok{background:#e8f6ee;color:#1b7a3d}.ac .no{background:#ffecec;color:#c62828}
+.sw{display:flex;justify-content:space-between;align-items:center;font-size:13px;padding:6px 0}.tg{width:40px;height:22px;border-radius:11px;background:#34c759;position:relative}.tg:after{content:"";position:absolute;right:2px;top:2px;width:18px;height:18px;border-radius:50%;background:#fff}
+</style></head><body>
+<div class="sb"><span>9:41</span><span>●●● 📶 🔋</span></div>
+<div class="top">管理后台</div>
+<div class="tb"><span>用户/会员</span><span>入驻申请</span><span>横幅广告</span><span>开屏广告</span><span class="on">邀请奖励</span><span>设置</span></div>
+<div class="wrap" style="padding-bottom:20px">
+  <div class="card"><div class="sw"><b>活动状态：试运行中</b><span class="tg"></span></div>
+    <div class="tip">2026-11-18 至 2027-02-15（90 天）· 新券有效 60 天 · 单人上限 ¥150</div>
+    <div class="bar"><i></i></div><div class="tip">已发券面值 ¥285 / 总额度 ¥3,000（达到后自动停发并公告）</div></div>
+  <div class="kpi"><div><b>42</b><span>邀请注册</span></div><div><b>19</b><span>有效邀请（完成首次使用）</span></div><div><b>3</b><span>冻结待复核</span></div><div><b>7 / 26</b><span>已核销 / 已发券</span></div></div>
+  <div class="card"><b>待复核（先冻结发券）</b>
+    <div class="r"><div class="h"><span>邀请人 #1088 小鹿去首尔</span><span class="tag o">1 小时内 3 人</span></div><div class="d">被邀 #1203 #1204 #1205 · 同一 IP 段 · 设备指纹 2 个相同</div><div class="ac"><span class="ok">判为有效</span><span class="no">判为无效并追回</span><span>查看明细</span></div></div>
+    <div class="r"><div class="h"><span>邀请人 #977 Mina</span><span class="tag o">同设备</span></div><div class="d">被邀 #1199 与邀请人设备相同 → 自动不计入</div><div class="ac"><span class="ok">人工改为有效</span><span>维持不计入</span></div></div></div>
+  <div class="card"><b>邀请人排行（仅后台可见，不对外）</b>
+    <div class="r"><div class="h"><span>#1021 阿珍</span><span>有效 5 · 已得 ¥135</span></div><div class="d">15 ✓ · 40 ✓ · 80 ✓（已满档）</div></div>
+    <div class="r"><div class="h"><span>#1088 小鹿去首尔</span><span>有效 1 · 已得 ¥15</span></div><div class="d">3 人待复核</div></div>
+    <div class="r"><div class="h"><span>#1130 Leo</span><span>有效 3 · 已得 ¥55</span></div><div class="d">15 ✓ · 40 ✓</div></div></div>
+  <p class="tip">被邀请人联系方式不在此显示；IP/设备只存哈希，用于判断同设备与批量注册。</p>
+</div>
+</body></html>
