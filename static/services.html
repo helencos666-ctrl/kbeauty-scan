@@ -4,81 +4,12 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <title>服务商家 · 旅韩助手</title>
-<meta name="description" content="经审核的门店代订、接送机、中文应急协助服务商，仅供参考。">
-<meta name="theme-color" content="#ff6b8f">
-<meta name="mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-title" content="旅韩助手">
-<link rel="manifest" href="/manifest.webmanifest">
-<link rel="apple-touch-icon" href="/static/icons/apple-touch-icon.png">
-<link rel="icon" type="image/png" sizes="192x192" href="/static/icons/icon-192.png">
-<link rel="stylesheet" href="/static/pwa.css">
-<link rel="stylesheet" href="/static/community.css?v=53">
-<style>
-.tabs2{display:flex;gap:6px;overflow-x:auto;margin:0 0 10px}
-.tabs2 button{flex:none;border:1px solid #eceef2;background:#fff;border-radius:16px;padding:7px 12px;font-size:14px}
-.tabs2 button.on{background:#ff6b8f;border-color:#ff6b8f;color:#fff}
-.pv{display:flex;gap:12px;padding:12px 0;border-top:1px solid #f0f1f3}
-.pv:first-child{border-top:0}
-.pv img{width:84px;height:84px;object-fit:cover;border-radius:12px;flex:none;background:#f4f5f7}
-.pv .t{flex:1;min-width:0;font-size:14px;line-height:1.6}
-.pv b{font-size:16px}.pv .m{color:#8a8f99;font-size:12px}
-.pv .s{white-space:pre-wrap}
-</style>
+<meta name="description" content="服务商家已并入找商家页面。">
+<meta http-equiv="refresh" content="0;url=/shops?tab=services">
+<link rel="canonical" href="/shops">
+<script>location.replace('/shops?tab=services' + (location.search ? '&' + location.search.replace(/^\?/, '') : ''));</script>
 </head>
 <body>
-<header>
-  <h1>🧑‍💼 服务商家</h1>
-  <p>门店代订 · 接送机 · 中文应急协助，均经平台审核后展示</p>
-</header>
-<main>
-  <div class="card">
-    <div class="tabs2" id="tabs"></div>
-    <div id="list">加载中…</div>
-  </div>
-  <div class="card">
-    <h2>想预约？</h2>
-    <p class="tip" style="margin-top:0">请在<a href="/consult" style="color:#2c7be5">站内咨询</a>里告诉我们服务商名称和需求，由平台转达。服务由服务商自行提供，价格和细节以对方确认为准，仅供参考。本页不提供医美/医院中介、代办签证、打包一日游、加价代抢票。</p>
-    <a class="btn ghost block" href="/partner">我是商家，申请入驻</a>
-  </div>
-  <p style="font-size:12px;color:#888;text-align:center;margin:10px 0 16px;line-height:1.7">旅韩助手为个人运营的信息网站，仅作信息展示，不是旅行社，不代办签证，不参与交易。</p>
-</main>
-<nav>
-  <a href="/"><i>🏠</i>首页</a>
-  <a href="/?tab=sub"><i>🚇</i>地铁</a>
-  <a href="/?tab=card"><i>💬</i>翻译</a>
-  <a href="/community"><i>🧭</i>韩友圈</a>
-  <a href="/?tab=more"><i>☰</i>全部</a>
-  <a href="/me"><i>👤</i>我的</a>
-</nav>
-<script src="/static/community.js?v=53"></script>
-<script>
-(async function(){
-  var $ = function(id){ return document.getElementById(id); };
-  var meta = await LH.api('GET', '/api/providers/meta').catch(function(){ return {cats: []}; });
-  var cur = new URLSearchParams(location.search).get('cat') || '';
-  function tabs(){
-    $('tabs').innerHTML = [{key:'', name:'全部'}].concat(meta.cats).map(function(c){ return '<button type="button" data-c="' + c.key + '" class="' + (c.key === cur ? 'on' : '') + '">' + LH.esc(c.name) + '</button>'; }).join('');
-    $('tabs').querySelectorAll('button').forEach(function(b){ b.onclick = function(){ cur = b.dataset.c; tabs(); load(); }; });
-  }
-  async function load(){
-    $('list').textContent = '加载中…';
-    try {
-      var d = await LH.api('GET', '/api/providers' + (cur ? '?cat=' + cur : ''));
-      if (!d.items.length){
-        var c = meta.cats.filter(function(x){ return x.key === cur; })[0];
-        $('list').innerHTML = '<div class="empty" style="padding:18px 0;text-align:center;color:#8a8f99;font-size:14px;line-height:1.7">' + (c ? LH.esc(c.name) + '：' : '') + '还没有通过审核的服务商。<br>商家可<a href="/partner" style="color:#2c7be5">申请入驻</a>，审核通过后会显示在这里。</div>';
-        return;
-      }
-      $('list').innerHTML = d.items.map(function(x){
-        return '<div class="pv">' + (x.photo ? '<img src="' + x.photo + '" alt="" loading="lazy">' : '') + '<div class="t"><b>' + LH.esc(x.name) + '</b>' + (x.name_ko ? ' <span class="m">' + LH.esc(x.name_ko) + '</span>' : '') +
-          '<div class="m">' + LH.esc(x.category_name) + ' · ' + LH.esc(x.area) + (x.address ? ' · ' + LH.esc(x.address) : '') + '</div>' +
-          '<div class="s">' + LH.esc(x.services) + '</div><div><b style="font-size:14px">价格：</b>' + LH.esc(x.price) + '</div><div class="m">营业时间：' + LH.esc(x.hours) + '</div></div></div>';
-      }).join('');
-    } catch(e){ $('list').textContent = '加载失败：' + e.message; }
-  }
-  tabs(); load();
-})();
-</script>
+<p style="font-family:sans-serif;padding:24px;text-align:center"><a href="/shops?tab=services">服务商家已移到找商家，点这里查看</a></p>
 </body>
 </html>

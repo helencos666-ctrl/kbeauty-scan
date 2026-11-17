@@ -18,6 +18,7 @@ from __future__ import annotations
 import hashlib, io, json, os, re, time
 
 from fastapi import APIRouter, File, Form, HTTPException, Request, Response, UploadFile
+from fastapi.responses import RedirectResponse
 
 from community import (MAX_IMG_BYTES, POST_IMG_FMTS, _open_image, _json, _page, _ts, csrf, db, ip_of, limit,
                        need_admin, q)
@@ -130,9 +131,12 @@ def p_partner():
 
 
 @router.get("/services")
-def p_services():
-    return _page("services.html", "/services", extra={"title": "服务商家 · 旅韩助手",
-                                                       "description": "经审核的门店代订、接送机、中文应急协助服务商，仅供参考。"})
+def p_services(cat: str = ""):
+    # Old bookmark; the list now lives on the unified 找商家 page.
+    q = "tab=services"
+    if cat:
+        q += "&cat=" + cat
+    return RedirectResponse("/shops?" + q, status_code=301)
 
 
 # ---------------- 公开接口 ----------------

@@ -255,6 +255,10 @@ body:not(.is-home) main{padding-top:4px}
 .ml a i{font-style:normal;font-size:20px}
 .foot{font-size:12px;color:#999;text-align:center;margin:28px 0 16px;line-height:1.7}
 .foot a{color:#888}
+.more-join{text-align:center;margin:8px 6px 4px;font-size:13px;line-height:2;color:#d0d2d6}
+.more-join a{color:#8a8f99;text-decoration:none;margin:0 7px;white-space:nowrap;display:inline-block}
+.more-join a:hover{color:var(--pink)}
+.chips.home-low{padding-top:22px}
 nav{border-top:1px solid #f0f1f3}
 body.is-home .disclaimer{display:none}
 #p-cos .card,#p-sub .card,#p-card .card{box-shadow:none;border:1px solid #f0f1f3}
@@ -290,18 +294,17 @@ body.is-home .disclaimer{display:none}
     <div class="grid">
       <a href="/?tab=sub" data-go="sub"><i>🚇</i>地铁路线</a>
       <a href="/?tab=card" data-go="card"><i>💬</i>中韩翻译</a>
+      <a href="/?tab=ph" data-go="ph"><i>🗣️</i>常用韩语</a>
       <a href="/?tab=cos" data-go="cos"><i>📷</i>拍照识妆</a>
       <a href="/community/rate"><i>💱</i>汇率换算</a>
+      <a href="/shops"><i>🏪</i>找商家</a>
       <a href="/food"><i>🍜</i>韩国美食</a>
-      <a href="/chicken"><i>🍗</i>炸鸡代点</a>
-      <a href="/attractions"><i>🏯</i>景点介绍</a>
       <a href="/?tab=more" data-go="more"><i>☰</i>全部功能</a>
     </div>
-    <div class="chips"><span>出发前</span><a href="/visa">签证须知</a><a href="/tax-refund">退税</a><a href="/pay">支付</a><a href="/itineraries">路线卡</a><a href="/tips">攻略</a></div>
-    <div class="chips"><span>服务</span><a href="/deals">购物优惠</a><a href="/invite">邀请有奖</a><a href="/services">服务商家</a><a href="/partner">商家入驻</a></div>
     <a class="promo-bar" id="openPromo" href="/points" hidden></a>
     <section class="blk" id="shopBlk" hidden><div class="bh"><h2>热门商家</h2><a href="/shops">全部 ›</a></div><div class="hs" id="shopList"></div></section>
     <section class="blk" id="postBlk" hidden><div class="bh"><h2>韩友圈 · 最新</h2><a href="/community">进入 ›</a></div><div id="postList"></div></section>
+    <div class="chips home-low"><span>出发前</span><a href="/visa">签证须知</a><a href="/tax-refund">退税</a><a href="/pay">支付</a><a href="/itineraries">路线卡</a><a href="/tips">攻略</a></div>
   </section>
 
   <!-- 化妆品识别 -->
@@ -384,50 +387,39 @@ body.is-home .disclaimer{display:none}
       <a href="/?tab=ph" data-go="ph" data-k="常用句 韩语 明洞 朗读"><i>🗣️</i>常用韩语</a>
       <a href="/?tab=cos" data-go="cos" data-k="化妆品 识别 拍照 韩妆"><i>📷</i>拍照识妆</a>
       <a href="/community/rate" data-k="汇率 换算 韩元 人民币"><i>💱</i>汇率换算</a>
-    </div></div>
-    <div class="grp"><h3>服务与合作</h3><div class="ml">
-      <a href="/services" data-k="服务 代订 接送机 口译 跑腿 商家"><i>🧑‍💼</i>服务商家</a>
-      <a href="/partner" data-k="商家入驻 入驻 合作 服务商 입점"><i>🤝</i>商家入驻</a>
+      <a href="/shops" data-k="找商家 服务商家 推荐商家 推荐店铺 服务 代订 接送机 口译 跑腿 店铺 评价 住宿 酒店 民宿 包车 租车 用车 皮肤管理 医美 留学 机构 代购 地陪 导游 物流 快递"><i>🏪</i>找商家</a>
     </div></div>
     <div class="grp"><h3>吃喝玩</h3><div class="ml">
       <a href="/food" data-k="美食 餐厅 小吃 米其林 吃"><i>🍜</i>韩国美食</a>
       <a href="/chicken" data-k="炸鸡 外卖 代点 点餐"><i>🍗</i>炸鸡代点</a>
       <a href="/attractions" data-k="景点 介绍 宫殿 门票 免费 玩"><i>🏯</i>景点介绍</a>
       <a href="/itineraries" data-k="路线卡 行程 追星 购物 美食"><i>🗺️</i>路线卡片</a>
-      <a href="/shops" data-k="商家 推荐 店铺 评价"><i>🏪</i>推荐商家</a>
       <a href="/shops?type=避雷经验" data-k="避雷 踩坑 经验"><i>⚠️</i>避雷经验</a>
     </div></div>
-    <div class="grp"><h3>出发前</h3><div class="ml">
+    <div class="grp"><h3>韩友圈</h3><div class="ml">
+      <a href="/community" data-k="社区 韩友圈 经验 提问"><i>🧭</i>韩友圈</a>
+      <a href="/community/friends" data-k="交友 搭子 结伴"><i>🤝</i>旅韩交友</a>
+      <a href="/community/boards" data-k="频道 签证 留学 租房 工作"><i>📂</i>全部频道</a>
+    </div></div>
+    <div class="grp"><h3>出行指南</h3><div class="ml">
       <a href="/visa" data-k="签证 入境 K-ETA"><i>🛂</i>签证须知</a>
       <a href="/tips" data-k="攻略 交通卡 紧急电话"><i>📘</i>旅行攻略</a>
-      <a href="/faq" data-k="常见问题 FAQ"><i>❓</i>常见问题</a>
-    </div></div>
-    <div class="grp"><h3>购物</h3><div class="ml">
       <a href="/pay" data-k="支付 付款 支付宝 微信 银联"><i>💳</i>支付指南</a>
       <a href="/tax-refund" data-k="退税 免税"><i>🧾</i>购物退税</a>
       <a href="/shopping" data-k="购物 免税店 商场"><i>🛍️</i>购物攻略</a>
       <a href="/beauty" data-k="买妆 化妆品 护肤"><i>💄</i>买妆须知</a>
+      <a href="/faq" data-k="常见问题 FAQ"><i>❓</i>常见问题</a>
     </div></div>
-    <div class="grp"><h3>韩友圈与我的</h3><div class="ml">
-      <a href="/community" data-k="社区 韩友圈 经验 提问"><i>🧭</i>韩友圈</a>
-      <a href="/community/friends" data-k="交友 搭子 结伴"><i>🤝</i>旅韩交友</a>
-      <a href="/community/boards" data-k="频道 签证 留学 租房 工作"><i>📂</i>全部频道</a>
-      <a href="/points" data-k="签到 旅行豆 积分"><i>🫘</i>签到·旅行豆</a>
-      <a href="/coupons" data-k="优惠券 券"><i>🎟️</i>优惠券</a>
-      <a href="/member" data-k="会员 开通"><i>👑</i>会员</a>
-      <a href="/login" data-k="登录 注册 账号"><i>👤</i>登录 / 注册</a>
-      <a href="/promo" data-k="推广员 推广 佣金"><i>📣</i>推广员</a>
-    </div></div>
-    <div class="grp"><h3>找商家</h3><div class="ml">
-      <a href="/community?board=hotel" data-k="住宿 酒店 民宿 商家"><i>🛏️</i>住宿推荐</a>
-      <a href="/community?board=car" data-k="包车 租车 接送机 用车 商家"><i>🚐</i>包车用车</a>
-      <a href="/community?board=clinic" data-k="皮肤管理 医美 皮肤科 商家"><i>✨</i>皮肤管理·医美</a>
-      <a href="/community?board=agency" data-k="留学 机构 语学院 大学 申请 商家"><i>🏫</i>留学机构</a>
-      <a href="/community?board=daigou" data-k="代购 买货 免税 商家"><i>🛍️</i>代购商家</a>
-      <a href="/community?board=guide" data-k="地陪 导游 向导 陪同 翻译 商家"><i>🙋</i>地陪</a>
-      <a href="/community?board=kpop" data-k="追星 演唱会 应援 见面会 打歌 kpop 爱豆"><i>🎤</i>追星活动</a>
-      <a href="/community?board=logistics" data-k="物流 快递 海运 空运 集运 寄回国 搬家 中韩物流 商家"><i>📦</i>中韩物流</a>
-    </div></div>
+    <p class="more-join">
+      <a href="/partner" data-k="商家入驻 入驻 合作 服务商 입점 我是商家">我是商家 · 商家入驻</a>
+      <a href="/deals" data-k="购物优惠 免税 大促">购物优惠</a>
+      <a href="/invite" data-k="邀请有奖 邀请 奖励">邀请有奖</a>
+      <a href="/points" data-k="签到 旅行豆 积分">签到·旅行豆</a>
+      <a href="/coupons" data-k="优惠券 券">优惠券</a>
+      <a href="/member" data-k="会员 开通">会员</a>
+      <a href="/login" data-k="登录 注册 账号">登录 / 注册</a>
+      <a href="/promo" data-k="推广员 推广 佣金">推广员</a>
+    </p>
   </section>
 
   <div class="disclaimer">⚠️ AI识别仅供参考。成分、用法、线路请以包装、官方标识和现场工作人员为准。</div>
@@ -1582,7 +1574,7 @@ drawScenes();
   }).catch(function(){});
   // 首页搜索：从「全部功能」里找
   var q = document.getElementById('q'), box = document.getElementById('qres');
-  var all = Array.prototype.map.call(document.querySelectorAll('#p-more .ml a'), function(a){
+  var all = Array.prototype.map.call(document.querySelectorAll('#p-more a[href]'), function(a){
     return {a: a, text: a.textContent.trim(), k: (a.textContent + ' ' + (a.dataset.k || '')).toLowerCase()};
   });
   function run(){
