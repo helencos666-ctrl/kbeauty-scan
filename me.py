@@ -155,10 +155,13 @@ def api_me_summary(req: Request):
         nun = notif_unread(conn, u["id"])
         unread = q(conn, "SELECT count(*) AS n FROM c_messages WHERE recipient_id=%s AND read_at IS NULL AND NOT deleted",
                    (u["id"],), one=True)["n"]
+        from merch import consult_unread
+        cun = consult_unread(conn, u["id"])
     return {"user": {"id": u["id"], "member_no": u.get("member_no") or u["id"], "nickname": u["nickname"],
                      "bio": r["bio"] or "", "has_avatar": bool(u.get("has_avatar")), "joined": _ts(u["created_at"]),
                      "level": level_of(int(r["earned"])), "points": pts["balance"], "points_name": pts["name"],
-                     "coupons": pts["coupon_available"], "posts": int(r["posts"]), "notif_unread": nun, "msg_unread": int(unread)}}
+                     "coupons": pts["coupon_available"], "posts": int(r["posts"]), "notif_unread": nun, "msg_unread": int(unread),
+                     "consult_unread": cun}}
 
 BAD_NICK = re.compile(r"管理员|官方|admin|旅韩小助手", re.I)
 

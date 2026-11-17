@@ -1516,7 +1516,8 @@ def api_post(req: Request, pid: int):
     with db() as conn:
         u = current_user(conn, req)
         r = q(conn, f"""SELECT p.*, {AUTHOR_COLS}, au.verified, (CASE WHEN au.merchant_until>now() THEN 3 ELSE au.tier END) AS tier,
-                              (au.avatar IS NOT NULL OR COALESCE(au.is_bot, FALSE)) AS has_avatar
+                              (au.avatar IS NOT NULL OR COALESCE(au.is_bot, FALSE)) AS has_avatar,
+                              (au.merchant_until IS NOT NULL AND au.merchant_until>now()) AS author_merchant
                        FROM c_posts p JOIN c_users au ON au.id=p.user_id
                        WHERE p.id=%s AND NOT p.deleted AND NOT au.is_banned""", (pid,), one=True)
         if not r or (r["status"] != "published" and not (u and u["id"] == r["user_id"])):
@@ -1551,11 +1552,10 @@ def api_post(req: Request, pid: int):
     o["mine"] = bool(u and u["id"] == r["user_id"])
     o["comment_tier"] = 2 if r["board"] in LOGIN_ONLY_BOARDS else 1
     o["review_note"] = r.get("review_note")
-    if r["board"] in MERCHANT_BOARDS:
-        from merch import MEDICAL_BOARDS, MEDICAL_NOTE
-        o["consult"] = not o["mine"] and r["status"] == "published"
-        if r["board"] in MEDICAL_BOARDS:
-            o["medical_note"] = MEDICAL_NOTE
+    from merch import MEDICAL_BOARDS, MEDICAL_NOTE, post_offers_consult
+    o["consult"] = not o["mine"] and r["status"] == "published" and post_offers_consult(r)
+    if r["board"] in MEDICAL_BOARDS:
+        o["medical_note"] = MEDICAL_NOTE
     o["comment_list"] = [{"id": c["id"], "body": c["body"], "author": c["nickname"], "author_id": c["user_id"],
                           "author_tier": c["tier"], "has_avatar": has_avatar_row(c),
                           "time": _ts(c["created_at"]), "mine": bool(u and u["id"] == c["user_id"]),

@@ -9,11 +9,11 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="旅韩助手">
 <link rel="manifest" href="/manifest.webmanifest">
-<link rel="apple-touch-icon" href="/static/icons/apple-touch-icon.png?v=65">
-<link rel="icon" type="image/png" sizes="192x192" href="/static/icons/icon-192.png?v=65">
-<link rel="stylesheet" href="/static/pwa.css?v=65">
-<link rel="stylesheet" href="/static/community.css?v=65">
-<link rel="stylesheet" href="/static/me.css?v=65">
+<link rel="apple-touch-icon" href="/static/icons/apple-touch-icon.png?v=66">
+<link rel="icon" type="image/png" sizes="192x192" href="/static/icons/icon-192.png?v=66">
+<link rel="stylesheet" href="/static/pwa.css?v=66">
+<link rel="stylesheet" href="/static/community.css?v=66">
+<link rel="stylesheet" href="/static/me.css?v=66">
 </head>
 <body class="mepage">
 <div class="metop">我的<a class="bell" href="/community/notices" aria-label="通知">🔔<span class="dot" id="bellDot" hidden></span></a></div>
@@ -36,6 +36,7 @@
     <a href="/coupons"><span class="ic" style="background:#fff1e0">🎫</span>我的卡券</a>
     <a href="/member#mine"><span class="ic" style="background:#f3ecff">📝</span>我的帖子</a>
     <a href="/points"><span class="ic" style="background:#fff7d6">🫘</span>签到领豆</a>
+    <a href="/consult"><span class="ic" style="background:#EAF6F4">💬</span>咨询<span class="new" id="consultDot" hidden></span></a>
     <a href="/community/messages"><span class="ic" style="background:#e6f7f7">✉️</span>私信<span class="new" id="msgDot" hidden></span></a>
     <a href="/deals"><span class="ic" style="background:#EAF6F4">🛍️</span>购物优惠</a>
     <a href="/?tab=more"><span class="ic" style="background:#eef0f4">☰</span>全部功能</a>
@@ -60,7 +61,7 @@
   <a href="/shops?tab=services" data-nav="services" class="svc"><i>💼</i>商业服务</a>
   <a href="/local" data-nav="local" class="loc"><i>🏘️</i>本地生活</a>
 </nav>
-<script src="/static/community.js?v=65"></script>
+<script src="/static/community.js?v=66"></script>
 <script src="/static/ref.js"></script>
 <script>
 (function(){
@@ -103,6 +104,7 @@
       '<a href="/member#mine"><b>' + u.posts + '</b><span>帖子</span></a>';
     $('stats').hidden = false;
     $('bellDot').hidden = !u.notif_unread;
+    if (u.consult_unread){ $('consultDot').hidden = false; $('consultDot').textContent = u.consult_unread > 99 ? '99+' : u.consult_unread; }
     if (u.msg_unread){ $('msgDot').hidden = false; $('msgDot').textContent = u.msg_unread > 99 ? '99+' : u.msg_unread; }
     $('avBtn').onclick = function(){ LH.pickAvatar(function(){ load(); }); };
     $('edBtn').onclick = editProfile;

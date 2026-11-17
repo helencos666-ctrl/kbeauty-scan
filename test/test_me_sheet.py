@@ -124,7 +124,7 @@ check("community.css .preview-mask z-index 高于 60", pm_z is not None and pm_z
 # ---------- 7. 不回归：字号/版本/导航 ----------
 check("community.css input.f 字号仍是 16px",
       re.search(r"input\.f[^{]*\{[^}]*font-size:16px", comm_css) is not None)
-check("me.html 使用 ?v=65", "?v=65" in me_html)
+check("me.html 使用 ?v=66", "?v=66" in me_html)
 check("me.html 没有残留 ?v=61", "?v=61" not in me_html)
 check("pwa.css 未把 tabbar z-index 改为其它值", nav_z == 60, nav_z)
 

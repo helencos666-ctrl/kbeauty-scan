@@ -1,4 +1,4 @@
-"""纯静态检查：首页五格底部导航、?v=65 缓存版本、新页面（trips/local）与禁词。
+"""纯静态检查：首页五格底部导航、?v=66 缓存版本、新页面（trips/local）与禁词。
 不需要启服务，直接 python test/test_home_nav.py 即可。"""
 import os, re
 
@@ -37,13 +37,13 @@ PAGES = {
 }
 
 # ---------- 1. 缓存版本 v63 ----------
-check("sw.js CACHE is lvhan-shell-v65", "'lvhan-shell-v65'" in sw or '"lvhan-shell-v65"' in sw)
-check("sw.js uses ?v=65", "?v=65" in sw)
+check("sw.js CACHE is lvhan-shell-v66", "'lvhan-shell-v66'" in sw or '"lvhan-shell-v66"' in sw)
+check("sw.js uses ?v=66", "?v=66" in sw)
 check("sw.js has no ?v=60", "?v=60" not in sw)
 for name, txt in PAGES.items():
-    check("%s uses ?v=65 (or tabbar)" % name, ("?v=65" in txt) or ("tabbar" in txt))
+    check("%s uses ?v=66 (or tabbar)" % name, ("?v=66" in txt) or ("tabbar" in txt))
     check("%s has no ?v=60" % name, "?v=60" not in txt)
-check("sw.js SHELL has four home ads", all("/static/home-ads/ad-%d.jpg?v=65" % i in sw for i in (1, 2, 3, 4)))
+check("sw.js SHELL has four home ads", all("/static/home-ads/ad-%d.jpg?v=66" % i in sw for i in (1, 2, 3, 4)))
 check("sw.js SHELL has /trips and /local", "'/trips'" in sw and "'/local'" in sw)
 check("sw.js SHELL has trips.html/local.html", "/static/trips.html" in sw and "/static/local.html" in sw)
 
@@ -94,7 +94,7 @@ check("trips links /itineraries", "/itineraries" in trips)
 check("trips has no sample store names",
       not any(w in trips for w in ["广藏市场", "星巴克", "明洞乐天免税", "北村韩屋"]))
 check("trips has back and me", 'href="/"' in trips and 'href="/me"' in trips)
-check("trips loads pwa.js?v=65", "/static/pwa.js?v=65" in trips)
+check("trips loads pwa.js?v=66", "/static/pwa.js?v=66" in trips)
 
 # ---------- 6. 禁词 ----------
 ALL = dict(PAGES)

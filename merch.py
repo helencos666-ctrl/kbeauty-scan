@@ -413,14 +413,27 @@ PLATFORM_NAME = "旅韩助手客服"
 MSG_MAX = 500
 
 
+def post_offers_consult(row):
+    """商家活动帖、商家标记帖、或作者仍是有效商家时，走站内「立即咨询」，不走私聊。"""
+    if row.get("board") in MERCHANT_BOARDS:
+        return True
+    if row.get("is_merchant"):
+        return True
+    return bool(row.get("author_merchant"))
+
+
 def _target_for(conn, kind, oid):
     """返回 (merchant_id or None=平台客服, ref_title)"""
     if kind == "post":
-        r = q(conn, """SELECT p.user_id, p.title, p.board FROM c_posts p WHERE p.id=%s AND p.status='published' AND NOT p.deleted""",
+        r = q(conn, """SELECT p.user_id, p.title, p.board, p.is_merchant,
+                              (au.merchant_until IS NOT NULL AND au.merchant_until>now()) AS author_merchant
+                       FROM c_posts p JOIN c_users au ON au.id=p.user_id
+                       WHERE p.id=%s AND p.status='published' AND NOT p.deleted AND NOT au.is_banned""",
               (oid,), one=True)
-        if not r or r["board"] not in MERCHANT_BOARDS:
+        if not r or not post_offers_consult(r):
             raise HTTPException(404, "活动不存在或已下架")
-        return r["user_id"], "活动：" + r["title"]
+        label = "活动：" if r["board"] in MERCHANT_BOARDS else "帖子："
+        return r["user_id"], label + r["title"]
     if kind == "shop":
         r = q(conn, "SELECT owner_id, name FROM c_shop_recs WHERE id=%s AND status='approved'", (oid,), one=True)
         if not r:
