@@ -12,7 +12,7 @@ from urllib.parse import urlsplit
 from starlette.requests import Request
 
 HSTS = "max-age=31536000; includeSubDomains"
-PERMISSIONS = ("camera=(self), microphone=(self), geolocation=(), payment=(), usb=(), serial=(), "
+PERMISSIONS = ("camera=(self), microphone=(self), geolocation=(self), payment=(), usb=(), serial=(), "
                "magnetometer=(), gyroscope=(), accelerometer=(), midi=()")
 UNSAFE_METHODS = {"POST", "PUT", "PATCH", "DELETE"}
 LOCAL_HOSTS = {"127.0.0.1", "localhost", "::1", "testserver"}

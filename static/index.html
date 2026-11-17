@@ -104,6 +104,18 @@ nav button.on,nav a.on{color:var(--pink);font-weight:700}
 .mic-btn span.lb{pointer-events:none;text-align:center;line-height:1.2}
 .mic-btn.on{background:var(--pink);color:#fff}
 .mic-btn.on span.lb{font-size:22px;font-weight:800;font-variant-numeric:tabular-nums;letter-spacing:.5px}
+.rt-me{margin-top:8px;border:1px dashed #c7cbd4;background:#fff;border-radius:10px;padding:7px 12px;font-size:13.5px;color:#3b4252}
+.sug-h{font-size:12px;color:#8c8f99;padding:6px 12px;background:#f7f8fa}
+.rt-tabs{display:flex;gap:8px;overflow-x:auto;margin:4px 0 12px;padding-bottom:4px}
+.rt-tabs button{flex:0 0 auto;min-width:132px;text-align:left;border:1.5px solid #e3e5ea;background:#fff;border-radius:12px;padding:8px 10px;display:flex;flex-direction:column;gap:2px;font-size:12px;color:#6b7080}
+.rt-tabs button b{font-size:16px;color:#1f2330}.rt-tabs button.on{border-color:#ff4d6d;background:#fff5f7}
+.rt-map{border:1px solid #eceef2;border-radius:12px;background:linear-gradient(#fafbfc,#f3f5f8);margin:6px 0 12px;overflow:hidden}.rt-map svg{display:block;width:100%;height:auto}
+.rt-map-n{font-size:11px;color:#9aa0aa;padding:4px 10px 6px}
+.tstep{display:flex;gap:10px;padding:10px 0;border-bottom:1px dashed #eceef2;font-size:14px;line-height:1.55}.tstep>i{font-style:normal;font-size:18px;width:24px;flex:0 0 24px;text-align:center}
+.tstep small{color:#8c8f99;font-size:12px;margin-left:2px}.tstep.ride{border-left:4px solid var(--lc);padding-left:8px;margin-left:-2px}
+.tstep .th{font-size:15px;margin-bottom:2px}.tstep .vb{display:inline-block;background:var(--lc);color:#fff;border-radius:6px;padding:0 7px}
+.tstep .meta{color:#6b7080;font-size:12.5px}.tstep details{font-size:12.5px;color:#6b7080}
+.rt-more{width:100%;margin:10px 0 0;border:1.5px solid #ff4d6d;color:#ff4d6d;background:#fff;border-radius:12px;padding:10px;font-size:14px;font-weight:600}
 .asr-note{font-size:12.5px;color:#8a5a00;background:#fff7e6;border-radius:10px;padding:7px 10px;margin-top:8px;line-height:1.5}.asr-note small{display:block;color:#8c8f99;margin-top:2px}.asr-note.edit{color:#d6336c;background:#fff0f6}
 .mic-btn.near{background:#e8590c}
 #micState .rtxt{display:block}
@@ -291,19 +303,20 @@ body.is-home .disclaimer{display:none}
   <!-- 地铁 -->
   <section class="page" id="p-sub">
     <div class="card">
-      <h2>🚇 地铁路线（起点 → 终点）</h2>
+      <h2>🧭 路线（地点 → 地点，步行 + 公交 + 地铁）</h2>
       <div class="route-grid">
         <div class="route-fields">
-          <label>起点<div class="sug-wrap"><input id="rtFrom" maxlength="40" autocomplete="off" enterkeyhint="next" placeholder="中文/韩文/英文/拼音，如：明洞"><div class="sug" id="rtFromSug"></div></div></label>
-          <label>终点<div class="sug-wrap"><input id="rtTo" maxlength="40" autocomplete="off" enterkeyhint="search" placeholder="如：弘大、仁川机场、乐天世界"><div class="sug" id="rtToSug"></div></div></label>
+          <label>起点<div class="sug-wrap"><input id="rtFrom" maxlength="40" autocomplete="off" enterkeyhint="next" placeholder="地点、店名、地址或地铁站，如：明洞 Olive Young"><div class="sug" id="rtFromSug"></div></div></label>
+          <label>终点<div class="sug-wrap"><input id="rtTo" maxlength="40" autocomplete="off" enterkeyhint="search" placeholder="如：乐天免税店、景福宫、dayone 皮肤科"><div class="sug" id="rtToSug"></div></div></label>
         </div>
         <button type="button" id="rtSwap" aria-label="交换起点和终点" title="交换">⇅</button>
       </div>
+      <button type="button" class="rt-me" id="rtMe">📍 用我的位置作起点</button>
       <div class="hot-st" id="hotSt"></div>
       <div class="btns" style="margin-top:10px"><button type="button" class="btn primary" id="rtBtn">查路线</button></div>
       <div class="loading" id="ld-rt"><div class="spin"></div>正在计算路线…</div>
       <div class="route-out" id="rtOut"></div>
-      <div class="tip">路线按首都圈地铁线路数据在手机上计算（站数、换乘站、方向），时间和票价是估算，仅供参考，请以车站标识、列车终点站显示和现场工作人员为准。线路数据 © OpenStreetMap 贡献者（ODbL）。</div>
+      <div class="tip">输入地铁站时，按首都圈地铁数据在手机上计算；输入店名/地址等地点时，用 Kakao 地点和公交数据推荐“步行 + 公交 + 地铁”方案（不保存查询结果）。时间和票价是估算，请以站牌、车站标识和现场工作人员为准。地铁线路数据 © OpenStreetMap 贡献者（ODbL）；地点与公交数据 © Kakao。</div>
     </div>
     <div class="card">
       <h2>📷 地铁看图</h2>
@@ -347,7 +360,7 @@ body.is-home .disclaimer{display:none}
   <!-- 全部功能 -->
   <section class="page" id="p-more">
     <div class="grp"><h3>常用工具</h3><div class="ml">
-      <a href="/?tab=sub" data-go="sub" data-k="地铁 路线 换乘 站牌 subway"><i>🚇</i>地铁路线</a>
+      <a href="/?tab=sub" data-go="sub" data-k="地铁 路线 换乘 站牌 公交 巴士 导航 subway bus"><i>🚇</i>地铁·公交路线</a>
       <a href="/?tab=card" data-go="card" data-k="翻译 沟通卡 韩语 说话 语音"><i>💬</i>中韩翻译</a>
       <a href="/?tab=ph" data-go="ph" data-k="常用句 韩语 明洞 朗读"><i>🗣️</i>常用韩语</a>
       <a href="/?tab=cos" data-go="cos" data-k="化妆品 识别 拍照 韩妆"><i>📷</i>拍照识妆</a>
@@ -428,8 +441,8 @@ body.is-home .disclaimer{display:none}
 <script>
 const $=id=>document.getElementById(id);
 const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
-const SUBS={home:'',cos:'拍一下韩国化妆品包装，马上看中文名称、用法和规格',sub:'输入起点终点，查换乘站、乘车方向和站数；也可拍站牌',card:'中韩互译，大字卡片给对方看，网站自带韩语朗读',ph:'常用韩语，一键大字展示并朗读，可离线',more:'所有功能都在这里'};
-const TITLES={home:'旅韩助手',cos:'拍照识妆',sub:'地铁路线',card:'中韩翻译',ph:'常用韩语',more:'全部功能'};
+const SUBS={home:'',cos:'拍一下韩国化妆品包装，马上看中文名称、用法和规格',sub:'任意地点到任意地点：步行 + 公交 + 地铁，也可拍站牌',card:'中韩互译，大字卡片给对方看，网站自带韩语朗读',ph:'常用韩语，一键大字展示并朗读，可离线',more:'所有功能都在这里'};
+const TITLES={home:'旅韩助手',cos:'拍照识妆',sub:'地铁·路线',card:'中韩翻译',ph:'常用韩语',more:'全部功能'};
 function showTab(t,push){
   if(!TITLES[t]) t='home';
   document.querySelectorAll('nav button').forEach(x=>x.classList.toggle('on',x.dataset.tab===t));
@@ -633,6 +646,128 @@ const rtPick={rtFrom:null,rtTo:null};
 let rtFocus='rtFrom';
 function ldot(lid){const D=LHSub.data();const l=D.lines[D.lineIdx[lid]];return l?`<span class="ldot" style="background:${esc(l.color)}">${esc(l.zh)}</span>`:''}
 function stName(s){return LHSub.label(s)}
+// ---------- 任意地点路线（Kakao 地点搜索 + 公交/地铁/步行）----------
+let myPos=null;
+function isPlace(o){return o&&o.kind==='place'}
+function ptOf(o){return isPlace(o)?{x:+o.x,y:+o.y,name:o.ko||o.name}:{x:o.p[0],y:o.p[1],name:o.ko+'역'}}
+function labelOf(o){return isPlace(o)?o.name:stName(o)}
+function hav(a,b){const R=6371000,r=Math.PI/180,dla=(b[1]-a[1])*r,dlo=(b[0]-a[0])*r;const h=Math.sin(dla/2)**2+Math.cos(a[1]*r)*Math.cos(b[1]*r)*Math.sin(dlo/2)**2;return 2*R*Math.asin(Math.sqrt(h))}
+const placeCache={};
+async function placeSearch(q){
+  const k=q+'|'+(myPos?1:0);if(placeCache[k]) return placeCache[k];
+  const u='/api/place/search?q='+encodeURIComponent(q)+(myPos?'&x='+myPos.x+'&y='+myPos.y:'');
+  const r=await fetch(u);const j=await r.json().catch(()=>({}));
+  if(!r.ok) throw new Error(j.detail||'地点搜索失败');
+  placeCache[k]=j.places||[];return placeCache[k];
+}
+function placeHtml(list){
+  return list.map((p,i)=>`<button type="button" data-p="${i}"><span class="n">📍 ${esc(p.name)}<small>${esc(p.addr||'')}${p.cat?' · '+esc(p.cat):''}</small></span></button>`).join('');
+}
+$('rtMe').onclick=()=>{
+  if(!navigator.geolocation){showErr('这个浏览器不能定位，请直接输入起点');return}
+  $('rtMe').disabled=true;$('rtMe').textContent='📍 正在定位…';
+  navigator.geolocation.getCurrentPosition(p=>{
+    myPos={x:+p.coords.longitude.toFixed(6),y:+p.coords.latitude.toFixed(6)};
+    $('rtMe').disabled=false;$('rtMe').textContent='📍 用我的位置作起点';
+    if(myPos.x<124||myPos.x>132||myPos.y<33||myPos.y>39){showErr('你现在不在韩国境内，无法用当前位置作起点');myPos=null;return}
+    rtPick.rtFrom={kind:'place',name:'我的位置',ko:'현재 위치',x:myPos.x,y:myPos.y,addr:''};$('rtFrom').value='📍 我的位置';
+    if(!$('rtTo').value.trim()) $('rtTo').focus();
+  },e=>{
+    $('rtMe').disabled=false;$('rtMe').textContent='📍 用我的位置作起点';
+    showErr(e&&e.code===1?'没有定位权限：请在手机设置里允许微信/浏览器使用位置，或直接输入起点':'定位失败，请到室外再试，或直接输入起点');
+  },{enableHighAccuracy:true,timeout:12000,maximumAge:60000});
+};
+const BUS_K={'간선':['干线公交','#3D5BAB'],'지선':['支线公交','#5BB025'],'광역':['广域快速公交','#E60012'],'순환':['循环公交','#F2B70A'],'마을':['小区巴士','#8BC34A'],'공항':['机场巴士','#00A0E9'],'직행':['直达座席巴士','#E60012'],'좌석':['座席巴士','#33A02C'],'급행':['快速公交','#E60012'],'일반':['普通公交','#33A02C'],'시외':['市外巴士','#8E44AD'],'농어촌':['农村巴士','#7F8C8D'],'외곽':['外围公交','#5BB025']};
+function lineOf(n){const D=LHSub.data();const ko=String(n||'').replace(/\s/g,'');return D?D.lines.find(l=>l.ko.replace(/\s/g,'')===ko||ko.indexOf(l.ko.replace(/\s/g,''))===0):null}
+function stZh(n){const k=String(n||'').replace(/\(.*?\)/g,'').replace(/역$/,'').trim();const s=LHSub.byKo(k);return s?`${esc(stName(s))}<small>${esc(n)}</small>`:esc(n)}
+function stepColor(s){if(s.t==='bus'){const k=(s.veh[0]||{}).k;return (BUS_K[k]||['','#3D5BAB'])[1]}if(s.t==='subway'){const l=lineOf((s.veh[0]||{}).n);return l?l.color:'#555'}return '#9aa0aa'}
+function fareTxt(r){if(r.fare) return '约 '+r.fare.toLocaleString()+' 韩元';if(r.fmin) return r.fmin.toLocaleString()+(r.fmax&&r.fmax!==r.fmin?'–'+r.fmax.toLocaleString():'')+' 韩元';return '票价以刷卡为准'}
+const RT_T={BUS:'🚌 公交',SUBWAY:'🚇 地铁',BUS_AND_SUBWAY:'🚌+🚇'};
+function svgMap(r){
+  const pts=[].concat(...r.steps.map(s=>s.pts||[]));if(pts.length<2) return '';
+  const lat0=pts.reduce((a,p)=>a+p[1],0)/pts.length,cx=Math.cos(lat0*Math.PI/180);
+  const xs=pts.map(p=>p[0]*cx),ys=pts.map(p=>-p[1]);
+  const minx=Math.min(...xs),maxx=Math.max(...xs),miny=Math.min(...ys),maxy=Math.max(...ys);
+  const W=340,H=210,pad=18,sc=Math.min((W-2*pad)/((maxx-minx)||1e-6),(H-2*pad)/((maxy-miny)||1e-6));
+  const ox=(W-(maxx-minx)*sc)/2,oy=(H-(maxy-miny)*sc)/2;
+  const P=p=>[(p[0]*cx-minx)*sc+ox,(-p[1]-miny)*sc+oy].map(v=>v.toFixed(1)).join(',');
+  let g='';
+  r.steps.forEach(s=>{if(!s.pts||s.pts.length<2) return;const w=s.t==='walk'||s.t==='walking';g+=`<polyline points="${s.pts.map(P).join(' ')}" fill="none" stroke="${stepColor(s)}" stroke-width="${w?3:5}" stroke-linecap="round" stroke-linejoin="round"${w?' stroke-dasharray="2 6"':''}/>`});
+  r.steps.forEach((s,i)=>{if(i>0&&s.pts&&s.pts.length&&s.t!=='walk'&&s.t!=='walking') g+=`<circle cx="${P(s.pts[0]).split(',')[0]}" cy="${P(s.pts[0]).split(',')[1]}" r="4" fill="#fff" stroke="${stepColor(s)}" stroke-width="2"/>`});
+  const a=P(pts[0]).split(','),b=P(pts[pts.length-1]).split(',');
+  g+=`<circle cx="${a[0]}" cy="${a[1]}" r="9" fill="#12b76a"/><text x="${a[0]}" y="${+a[1]+4}" font-size="10" text-anchor="middle" fill="#fff" font-weight="700">起</text>`;
+  g+=`<circle cx="${b[0]}" cy="${b[1]}" r="9" fill="#e5484d"/><text x="${b[0]}" y="${+b[1]+4}" font-size="10" text-anchor="middle" fill="#fff" font-weight="700">终</text>`;
+  return `<div class="rt-map"><svg viewBox="0 0 ${W} ${H}" role="img" aria-label="路线示意图">${g}</svg><div class="rt-map-n">路线示意图（不含街道底图），实景地图请点下方 Kakao / Naver 地图</div></div>`;
+}
+function stepHtml(s,i,r,A,B){
+  const min=Math.max(1,Math.round(s.sec/60)), nx=r.steps[i+1], pv=r.steps[i-1];
+  if(s.t==='walk'||s.t==='walking'){
+    let to;
+    if(s.edge==='end') to=`到终点 <b>${esc(labelOf(B))}</b>`;
+    else if(nx&&nx.stops.length) to=`到 <b>${nx.t==='subway'?stZh(nx.stops[0]):esc(nx.stops[0])+' 公交站'}</b>`;
+    else to='';
+    const ex=(s.g.match(/\((\d+)번 출구\)/)||[])[1];
+    const xfer=pv&&nx&&pv.t==='subway'&&nx.t==='subway';
+    const head=s.edge==='start'?`从起点 <b>${esc(labelOf(A))}</b> 步行`:xfer?'站内换乘，步行':'步行';
+    return `<div class="tstep walk"><i>🚶</i><div>${head} 约 ${s.m.toLocaleString()} 米（约 ${min} 分钟）${xfer?'':to}${ex?`，从 <b>${ex} 号出口</b>出站`:''}${s.edge?'<small>（直线距离估算）</small>':''}</div></div>`;
+  }
+  const a=s.stops[0]||'', b=s.stops[s.stops.length-1]||'', n=Math.max(1,s.stops.length-1), via=s.stops.slice(1,-1);
+  if(s.t==='bus'){
+    const k=(s.veh[0]||{}).k, kz=(BUS_K[k]||[k||'公交'])[0];
+    const names=s.veh.map(v=>v.n).filter((v,j,arr)=>arr.indexOf(v)===j);
+    return `<div class="tstep ride" style="--lc:${stepColor(s)}"><i>🚌</i><div><div class="th">坐 <b class="vb">${esc(names[0])}</b> 路（${esc(kz)}）${names.length>1?`<small>也可坐 ${names.slice(1).map(esc).join('、')}</small>`:''}</div>
+      <div>在 <b>${esc(a)}</b> 上车 → 坐 ${n} 站 → 在 <b>${esc(b)}</b> 下车</div>
+      <div class="meta">约 ${min} 分钟 · ${(s.m/1000).toFixed(1)} 公里 · 上车刷交通卡，下车也要刷卡（换乘才有优惠）</div>
+      ${via.length?`<details><summary>途经 ${via.length} 站</summary>${via.map(esc).join(' → ')}</details>`:''}</div></div>`;
+  }
+  const l=lineOf((s.veh[0]||{}).n), lz=l?l.zh:((s.veh[0]||{}).n||'地铁');
+  const exp=s.veh.some(v=>v.k==='급행'||v.k==='직통');
+  return `<div class="tstep ride" style="--lc:${stepColor(s)}"><i>🚇</i><div><div class="th">坐 <span class="ldot" style="background:${esc(stepColor(s))}">${esc(lz)}</span>${exp?' <small>普通车/快车都可</small>':''}</div>
+    <div>${stZh(a)} 上车 → 坐 ${n} 站 → ${stZh(b)} 下车</div>
+    ${s.stops[1]?`<div class="meta">上车方向：站台上找「下一站 ${esc(s.stops[1])}」那一侧</div>`:''}
+    <div class="meta">约 ${min} 分钟</div>
+    ${via.length?`<details><summary>途经 ${via.length} 站</summary>${via.map(esc).join(' → ')}</details>`:''}</div></div>`;
+}
+function renderTransit(A,B,j,sel){
+  sel=sel||0;const rs=j.routes, r=rs[sel];
+  let h=`<div class="rt-tabs">${rs.map((x,i)=>`<button type="button" data-r="${i}" class="${i===sel?'on':''}"><b>${fmtMin(x.min)}</b><span>${RT_T[x.type]||''} · 换乘${x.xf}次</span><span>步行${x.walk}米 · ${esc(fareTxt(x))}</span></button>`).join('')}</div>`;
+  h+=`<div class="rsum"><span>约<b class="big">${esc(fmtMin(r.min))}</b></span><span>换乘 ${r.xf} 次</span><span>${esc(fareTxt(r))}</span></div>`;
+  h+=svgMap(r);
+  h+=r.steps.map((s,i)=>stepHtml(s,i,r,A,B)).join('');
+  h+=`<div class="arrive">🏁 到达 <b>${esc(labelOf(B))}</b>${isPlace(B)&&B.addr?`<small>${esc(B.addr)}</small>`:''}</div>`;
+  h+=`<div class="tip" style="margin-top:8px">按 Kakao 公交数据推荐，不是实时到站信息；时间、票价为参考，夜间/周末班次可能不同，请以站牌和 Kakao 地图为准。步行段为直线距离估算。</div>`;
+  h+=`<div class="rt-acts"><button type="button" class="staff" id="rtStaff">🪪 给司机/工作人员看（韩文）</button><div class="route-links" id="rtMaps"></div></div>`;
+  $('rtOut').innerHTML=h;
+  $('rtOut').querySelectorAll('.rt-tabs button').forEach(b=>b.onclick=()=>renderTransit(A,B,j,+b.dataset.r));
+  const ride=r.steps.filter(s=>s.t==='bus'||s.t==='subway');
+  const bn=ptOf(B).name;
+  const ko=`${bn}에 가려고 해요.\n`+ride.map(s=>s.t==='bus'?`${s.stops[0]}에서 ${(s.veh[0]||{}).n}번 버스 타고 ${s.stops[s.stops.length-1]}에서 내리기`:`${s.stops[0]}역에서 ${(s.veh[0]||{}).n} 타고 ${s.stops[s.stops.length-1]}역에서 내리기`).join(' → ')+'\n이렇게 가면 맞나요?';
+  const zh=`我想去${labelOf(B)}，这样坐对吗？`;
+  $('rtStaff').onclick=()=>showBig(ko,zh,'',ko);
+  const pa=ptOf(A),pb=ptOf(B);
+  const nv=LHMap.naverRoute({name:pa.name,lng:pa.x,lat:pa.y},{name:pb.name,lng:pb.x,lat:pb.y});
+  $('rtMaps').innerHTML=(j.link?`<a class="naver" href="${esc(j.link)}" target="_blank" rel="noopener">在 Kakao 地图看实景路线</a>`:'')+`<a class="amap" href="${esc(nv)}" target="_blank" rel="noopener">Naver 地图</a>`;
+}
+function kakaoLink(A,B){const a=ptOf(A),b=ptOf(B);return 'https://map.kakao.com/link/by/traffic/'+encodeURIComponent(a.name)+','+a.y+','+a.x+'/'+encodeURIComponent(b.name)+','+b.y+','+b.x}
+function nearestSt(o){const p=ptOf(o);let best=null,bd=1e12;LHSub.data().st.forEach(s=>{const d=hav([p.x,p.y],s.p);if(d<bd){bd=d;best=s}});return {s:best,d:bd}}
+function subwayFallback(A,B,why){
+  const x=isPlace(A)?nearestSt(A):{s:A,d:0}, y=isPlace(B)?nearestSt(B):{s:B,d:0};
+  const links=`<div class="rt-acts"><div class="route-links"><a class="naver" href="${esc(kakaoLink(A,B))}" target="_blank" rel="noopener">在 Kakao 地图查公交+地铁</a><a class="amap" href="${esc(LHMap.naverRoute({name:ptOf(A).name,lng:ptOf(A).x,lat:ptOf(A).y},{name:ptOf(B).name,lng:ptOf(B).x,lat:ptOf(B).y}))}" target="_blank" rel="noopener">Naver 地图</a></div></div>`;
+  if(!x.s||!y.s||x.d>2500||y.d>2500||x.s.i===y.s.i){
+    const d=hav([ptOf(A).x,ptOf(A).y],[ptOf(B).x,ptOf(B).y]);
+    $('rtOut').innerHTML=`<div class="rt-note">${esc(why)}</div><div class="tstep walk"><i>🚶</i><div>两地直线距离约 ${(d/1000).toFixed(1)} 公里${d<1500?`，步行约 ${Math.round(d*1.25/70)} 分钟`:'，附近没有首都圈地铁站或两地离同一个站很近，请用地图查公交/打车'}</div></div>`+links;return;
+  }
+  const r=LHSub.route(x.s.i,y.s.i);
+  if(!r){$('rtOut').innerHTML=`<div class="rt-note">${esc(why)}</div>`+links;return}
+  renderRoute(x.s,y.s,r,[]);
+  const w=(o,d)=>`约 ${Math.round(d*1.25)} 米，步行约 ${Math.max(1,Math.round(d*1.25/70))} 分钟`;
+  const pre=isPlace(A)?`<div class="tstep walk"><i>🚶</i><div>从 <b>${esc(labelOf(A))}</b> 步行到 <b>${esc(stName(x.s))}</b>（${w(A,x.d)}，直线估算）</div></div>`:'';
+  const post=isPlace(B)?`<div class="tstep walk"><i>🚶</i><div>出站后步行到 <b>${esc(labelOf(B))}</b>（${w(B,y.d)}，直线估算）</div></div>`:'';
+  $('rtOut').insertAdjacentHTML('afterbegin',`<div class="rt-note">${esc(why)}，下面是“步行 + 地铁”方案：</div>`+pre);
+  const arr=$('rtOut').querySelector('.arrive');if(arr&&post) arr.insertAdjacentHTML('afterend',post);
+  const m=$('rtMaps');if(m) m.insertAdjacentHTML('afterbegin',`<a class="naver" href="${esc(kakaoLink(A,B))}" target="_blank" rel="noopener">Kakao 地图（含公交）</a>`);
+}
+
 function sugHtml(list){
   return list.map(s=>`<button type="button" data-i="${s.i}"><span class="n">${esc(stName(s))}<small>${esc(s.ko)}역${s.en?' · '+esc(s.en):''}</small></span><span class="ldots">${s.lines.map(ldot).join('')}</span></button>`).join('');
 }
@@ -640,18 +775,33 @@ function bindSug(id){
   const inp=$(id), box=$(id+'Sug');
   let t=null;
   const hide=()=>{box.style.display='none'};
+  let pt=null, seq=0;
+  const after=()=>{if(id==='rtFrom'&&!$('rtTo').value.trim()) $('rtTo').focus(); else inp.blur()};
   const draw=()=>{
     LHSub.load().then(()=>{
       const q=inp.value.trim();
       if(!q){hide();return}
-      const list=LHSub.search(q,8);
-      if(!list.length){box.innerHTML='<button type="button" disabled><span class="n">没找到这个站，可换个写法（韩文/英文/拼音）</span></button>';box.style.display='block';return}
-      box.innerHTML=sugHtml(list);box.style.display='block';
+      const list=LHSub.search(q,4), my=++seq;
+      const stH=list.length?sugHtml(list):'';
+      box.innerHTML=stH+(q.length>=2?'<div class="sug-h" id="'+id+'PH">📍 正在搜索地点…</div>':'');
+      if(!stH&&q.length<2){hide();return}
+      box.style.display='block';
       box.querySelectorAll('button[data-i]').forEach(b=>b.addEventListener('pointerdown',e=>{
         e.preventDefault();
-        const s=LHSub.data().st[+b.dataset.i];rtPick[id]=s;inp.value=stName(s);hide();
-        if(id==='rtFrom'&&!$('rtTo').value.trim()) $('rtTo').focus(); else inp.blur();
+        const s=LHSub.data().st[+b.dataset.i];rtPick[id]=s;inp.value=stName(s);hide();after();
       }));
+      clearTimeout(pt);
+      if(q.length<2) return;
+      pt=setTimeout(()=>placeSearch(q).then(ps=>{
+        if(my!==seq) return;
+        const ph=$(id+'PH');if(!ph) return;
+        if(!ps.length){ph.textContent='📍 没找到这个地点，可换个写法（韩文店名、地址或附近地铁站）';return}
+        ph.outerHTML='<div class="sug-h">📍 地点（Kakao）</div>'+placeHtml(ps);
+        box.querySelectorAll('button[data-p]').forEach(b=>b.addEventListener('pointerdown',e=>{
+          e.preventDefault();
+          const p=ps[+b.dataset.p];rtPick[id]=Object.assign({kind:'place'},p);inp.value=p.name;hide();after();
+        }));
+      }).catch(err=>{const ph=$(id+'PH');if(ph&&my===seq) ph.textContent='📍 '+(err.message||'地点搜索暂不可用')}),350);
     }).catch(()=>{});
   };
   inp.addEventListener('input',()=>{rtPick[id]=null;clearTimeout(t);t=setTimeout(draw,80)});
@@ -668,14 +818,33 @@ $('hotSt').querySelectorAll('button').forEach(b=>b.onclick=()=>{
 async function resolveSt(id){
   if(rtPick[id]) return {s:rtPick[id],alt:null};
   const raw=$(id).value.trim();
-  const list=LHSub.search(raw,3);
-  if(list.length) return {s:list[0],alt:(list[1]&&LHSub.norm(raw).length<=4&&/机场|공항|airport/i.test(raw))?list[1]:null};
-  // 本地找不到时，再请服务器把写法转成官方韩文站名
+  const list=LHSub.search(raw,3), n=LHSub.norm(raw);
+  const strong=list[0]&&list[0].keys.some(k=>{const kk=LHSub.norm(k);return kk===n||(n.length>=2&&kk.indexOf(n)===0&&kk.length-n.length<=2)});
+  if(strong) return {s:list[0],alt:(list[1]&&n.length<=4&&/机场|공항|airport/i.test(raw))?list[1]:null};
+  // 不是站名：按地点搜索，取第一个结果
+  try{
+    const ps=await placeSearch(raw);
+    if(ps.length){const p=Object.assign({kind:'place'},ps[0]);return {s:p,alt:null,guess:`「${raw}」按地点「${p.name}」（${p.addr||''}）查询，如不对请在下拉列表里重新选`}}
+  }catch(e){}
+  if(list.length) return {s:list[0],alt:null};
   const r=await fetch('/api/station',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({name:raw})});
   const j=await r.json().catch(()=>({}));
   const s=j.station_ko&&LHSub.byKo(j.station_ko);
-  if(!s) throw new Error('没找到「'+raw+'」这个站，请换个写法或从下拉列表里选');
+  if(!s) throw new Error('没找到「'+raw+'」，请换个写法（韩文店名、地址或附近地铁站），或从下拉列表里选');
   return {s:s,alt:null};
+}
+async function planTransit(A,B,notes){
+  $('ld-rt').style.display='block';
+  try{
+    const r=await fetch('/api/route/plan',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({s:ptOf(A),e:ptOf(B)})});
+    const j=await r.json().catch(()=>({}));
+    if(!r.ok) throw new Error(j.detail||'公交路线暂时查不到');
+    if(j.routes&&j.routes.length) renderTransit(A,B,j);
+    else subwayFallback(A,B,j.walk&&j.walk.m<1500?`两地很近（约 ${j.walk.m} 米），建议步行约 ${j.walk.min} 分钟`:'没有查到公交方案');
+  }catch(err){subwayFallback(A,B,(err.message||'公交路线暂时查不到'))}
+  finally{$('ld-rt').style.display='none'}
+  if(notes&&notes.length) $('rtOut').insertAdjacentHTML('afterbegin',`<div class="rt-note">提示：${notes.map(esc).join('；')}</div>`);
+  $('rtOut').scrollIntoView({behavior:'smooth',block:'start'});
 }
 function fmtMin(m){return m>=60?Math.floor(m/60)+'小时'+(m%60?m%60+'分':''):m+'分钟'}
 function renderRoute(A,B,r,alts){
@@ -720,11 +889,17 @@ async function findRoute(){
   if(rtBusy) return;
   const a=$('rtFrom').value.trim(), b=$('rtTo').value.trim();
   if(!a||!b){showErr('请先填写起点和终点');return}
-  if(a.length>40||b.length>40){showErr('站名太长，请只输入车站名称');return}
+  if(a.length>40||b.length>40){showErr('名称太长，请只输入地点或车站名称');return}
   rtBusy=true;$('err').style.display='none';$('ld-rt').style.display='block';$('rtBtn').disabled=true;$('rtOut').innerHTML='';
   try{
     await LHSub.load();
     const [x,y]=await Promise.all([resolveSt('rtFrom'),resolveSt('rtTo')]);
+    if(isPlace(x.s)||isPlace(y.s)){
+      const notes=[x.guess,y.guess].filter(Boolean);
+      await planTransit(x.s,y.s,notes);
+      if(window.LHRef) LHRef.use('subway');
+      return;
+    }
     if(x.s.i===y.s.i) throw new Error('起点和终点是同一个站');
     const r=LHSub.route(x.s.i,y.s.i);
     if(!r) throw new Error('这两站之间没算出地铁路线，可能需要换乘火车或巴士，请用地图查询');
@@ -732,6 +907,8 @@ async function findRoute(){
     [x,y].forEach(o=>{if(o.alt) alts.push(`「${stName(o.s)}」也可能是「${stName(o.alt)}」，如不对请在下拉列表里选`)});
     if(/인천공항/.test(x.s.ko+y.s.ko)) alts.push('仁川机场有 1、2 号航站楼两个站，请按航班的航站楼选择；机场铁路分普通车和直达车，这里按普通车计算');
     renderRoute(x.s,y.s,r,alts);
+    const ra=$('rtOut').querySelector('.rt-acts');
+    if(ra){ra.insertAdjacentHTML('beforebegin','<button type="button" class="rt-more" id="rtBus">🚌 看看“步行 + 公交 + 地铁”综合方案</button>');$('rtBus').onclick=()=>planTransit(x.s,y.s,[])}
     if(window.LHRef) LHRef.use('subway').then(j=>{if(j&&j.status==='valid'&&j.reward) setTimeout(()=>alert('邀请奖励已到账：'+j.reward+'，可在「我的 → 我的卡券」查看'),300)});
   }catch(err){showErr(err.message||'查询失败，请稍后重试')}
   finally{rtBusy=false;$('ld-rt').style.display='none';$('rtBtn').disabled=false}
