@@ -10,10 +10,10 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="旅韩助手">
 <link rel="manifest" href="/manifest.webmanifest">
-<link rel="apple-touch-icon" href="/static/icons/apple-touch-icon.png?v=66">
-<link rel="icon" type="image/png" sizes="192x192" href="/static/icons/icon-192.png?v=66">
-<link rel="stylesheet" href="/static/pwa.css?v=66">
-<link rel="stylesheet" href="/static/community.css?v=66">
+<link rel="apple-touch-icon" href="/static/icons/apple-touch-icon.png?v=67">
+<link rel="icon" type="image/png" sizes="192x192" href="/static/icons/icon-192.png?v=67">
+<link rel="stylesheet" href="/static/pwa.css?v=67">
+<link rel="stylesheet" href="/static/community.css?v=67">
 <style>
 .ko{color:#8a8f99;font-size:12px;font-weight:400;margin-left:4px}
 .hp{position:absolute;left:-9999px;width:1px;height:1px;overflow:hidden}
@@ -28,7 +28,7 @@
 <body>
 <header>
   <h1>🤝 商家/服务商入驻 <span class="ko" style="color:#fff;opacity:.85">입점 신청</span></h1>
-  <p>提交资料 → 平台审核 → 通过后在「找商家」页的服务商家里展示 · 신청 → 심사 → 승인 후 게시</p>
+  <p>提交资料 → 平台审核 → 通过后在「商家」页展示 · 신청 → 심사 → 승인 후 게시</p>
 </header>
 <main>
   <div class="err" id="err" style="display:none"></div>
@@ -77,7 +77,7 @@
     </label>
     <button class="btn primary block" type="button" id="fsend" style="margin-top:12px">提交申请 · 신청하기</button>
   </div>
-  <p style="font-size:12px;color:#888;text-align:center;margin:10px 0 16px;line-height:1.7">旅韩助手为个人运营的信息网站，仅作信息展示，不是旅行社，不代办签证。<br><a href="/shops?tab=services" style="color:#2c7be5">去找商家看看</a> · <a href="/terms" style="color:#2c7be5">用户协议</a> · <a href="/privacy" style="color:#2c7be5">隐私政策</a></p>
+  <p style="font-size:12px;color:#888;text-align:center;margin:10px 0 16px;line-height:1.7">旅韩助手为个人运营的信息网站，仅作信息展示，不是旅行社，不代办签证。<br><a href="/shops" style="color:#2c7be5">去商家页看看</a> · <a href="/terms" style="color:#2c7be5">用户协议</a> · <a href="/privacy" style="color:#2c7be5">隐私政策</a></p>
 </main>
 <nav>
   <a href="/"><i>🏠</i>首页</a>
@@ -87,7 +87,7 @@
   <a href="/?tab=more"><i>☰</i>全部</a>
   <a href="/me"><i>👤</i>我的</a>
 </nav>
-<script src="/static/community.js?v=66"></script>
+<script src="/static/community.js?v=67"></script>
 <script>
 (async function(){
   var $ = function(id){ return document.getElementById(id); };
@@ -116,7 +116,7 @@
     var b = this; b.disabled = true; b.textContent = '提交中… · 제출 중…';
     try {
       var r = await LH.api('POST', '/api/providers/apply', fd);
-      $('formcard').innerHTML = '<h2>✅ 已提交 · 제출 완료</h2><p class="tip">' + LH.esc(r.message) + '</p><a class="btn primary block" href="/shops?tab=services">去找商家看看</a>';
+      $('formcard').innerHTML = '<h2>✅ 已提交 · 제출 완료</h2><p class="tip">' + LH.esc(r.message) + '</p><a class="btn primary block" href="/shops">去商家页看看</a>';
       show(ok, r.message);
     } catch(e){ show(err, e.message); b.disabled = false; b.textContent = '提交申请 · 신청하기'; }
   };

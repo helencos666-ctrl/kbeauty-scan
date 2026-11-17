@@ -10,10 +10,10 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="旅韩助手">
 <link rel="manifest" href="/manifest.webmanifest">
-<link rel="apple-touch-icon" href="/static/icons/apple-touch-icon.png?v=66">
-<link rel="icon" type="image/png" sizes="192x192" href="/static/icons/icon-192.png?v=66">
-<link rel="stylesheet" href="/static/pwa.css?v=66">
-<link rel="stylesheet" href="/static/community.css?v=66">
+<link rel="apple-touch-icon" href="/static/icons/apple-touch-icon.png?v=67">
+<link rel="icon" type="image/png" sizes="192x192" href="/static/icons/icon-192.png?v=67">
+<link rel="stylesheet" href="/static/pwa.css?v=67">
+<link rel="stylesheet" href="/static/community.css?v=67">
 </head>
 <body>
 <header>
@@ -21,8 +21,6 @@
   <p>完成日常任务即可累积，兑换权益即将上线</p>
 </header>
 <main>
-  <div class="card userbar" id="ub">加载中…</div>
-
   <div class="card" id="openPromo" style="display:none;background:#fff8f0"></div>
   <div class="err" id="err" style="display:none"></div>
   <div class="ok" id="ok" style="display:none"></div>
@@ -52,7 +50,7 @@
   <a href="/?tab=more"><i>☰</i>全部</a>
   <a href="/me"><i>👤</i>我的</a>
 </nav>
-<script src="/static/community.js?v=66"></script>
+<script src="/static/community.js?v=67"></script>
 
 <script>
 (async function(){
@@ -67,7 +65,7 @@
       (d.active ? ('每日签到 <b>' + d.checkin_points + ' 旅行豆</b><span class="tag">开业双倍</span>。前 ' + d.cap + ' 名新注册额外 +' + d.bonus_points + ' 旅行豆，' + slots + '。') : ('活动未开始或已结束。' + slots)) +
       '</p><p class="tip" style="margin:8px 0 0">' + LH.esc(d.rules||'') + '</p>';
   }
-  var d = await LH.userbar(document.getElementById('ub'));
+  var d = await LH.userbar();
   var err = document.getElementById('err'), ok = document.getElementById('ok');
   try { var pub = await fetch('/api/opening-promo').then(function(r){ return r.json(); }); paintPromo(pub); } catch(e){}
   function show(el, t){ el.textContent = t || ''; el.style.display = t ? 'block' : 'none'; }
@@ -118,6 +116,6 @@
 })();
 </script>
 
-<script src="/static/pwa.js?v=66" defer></script>
+<script src="/static/pwa.js?v=67" defer></script>
 </body>
 </html>

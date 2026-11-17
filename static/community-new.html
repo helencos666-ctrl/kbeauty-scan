@@ -10,10 +10,10 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="旅韩助手">
 <link rel="manifest" href="/manifest.webmanifest">
-<link rel="apple-touch-icon" href="/static/icons/apple-touch-icon.png?v=66">
-<link rel="icon" type="image/png" sizes="192x192" href="/static/icons/icon-192.png?v=66">
-<link rel="stylesheet" href="/static/pwa.css?v=66">
-<link rel="stylesheet" href="/static/community.css?v=66">
+<link rel="apple-touch-icon" href="/static/icons/apple-touch-icon.png?v=67">
+<link rel="icon" type="image/png" sizes="192x192" href="/static/icons/icon-192.png?v=67">
+<link rel="stylesheet" href="/static/pwa.css?v=67">
+<link rel="stylesheet" href="/static/community.css?v=67">
 </head>
 <body class="compose">
 <header>
@@ -36,6 +36,22 @@
     <label class="f">发到哪个频道</label>
     <input type="hidden" id="board" value="">
     <div class="chips" id="chips"></div>
+    <div id="mcatbox" style="display:none;margin-top:10px">
+      <label class="f" for="mcat">商家分类（选填）</label>
+      <select class="f" id="mcat">
+        <option value="">不选择</option>
+        <option value="car">租车</option>
+        <option value="food">餐饮美食（炸鸡等）</option>
+        <option value="guide">地陪向导</option>
+        <option value="clinic">医美</option>
+        <option value="logistics">物流快递</option>
+        <option value="daigou">代购</option>
+        <option value="sim">通讯电话卡</option>
+        <option value="other">其它</option>
+      </select>
+      <div class="tip">商家发布先审后发；分类会显示在商家页的「商家发布」信息流里，选「医美」时请遵守下面的医疗内容规范。</div>
+    </div>
+    <div class="mednote" id="mednote" style="display:none"></div>
     <div class="tip" id="quota" style="display:none"></div>
     <div class="warn" id="bwarn" style="display:none;margin-top:10px"></div>
     <div id="actbox" style="display:none">
@@ -45,7 +61,6 @@
       <input class="f" id="offer" maxlength="60" placeholder="例如：新客体验价 ₩59,000（原价 ₩89,000）">
       <label class="f">有效期至（选填）</label>
       <input class="f" id="valid" type="date">
-      <div class="mednote" id="mednote" style="display:none"></div>
       <div class="tip">商家活动帖<b>先审后发</b>。请勿填写微信、QQ、电话、二维码等站外联系方式，用户会通过站内「立即咨询」联系你。</div>
     </div>
     <label class="f" id="tlab">标题（4–40 字）</label>
@@ -81,7 +96,7 @@
   <a href="/?tab=more"><i>☰</i>全部</a>
   <a href="/me"><i>👤</i>我的</a>
 </nav>
-<script src="/static/community.js?v=66"></script>
+<script src="/static/community.js?v=67"></script>
 <script>
 var WARN = {visa: '签证问答仅限个人经验分享，禁止发布代办广告。', study: '留学打听仅限经验交流，禁止发布中介广告。',
   friends: '请勿在帖子里公开手机号、微信号、住址等隐私。想认识新朋友，也可以去“旅韩交友”发布交友资料。',
@@ -132,6 +147,16 @@ var TPL = {
 };
 var TITLE_PH = {daily: '一句话也行，例如：今天在汉江边吃了炸鸡', visa: '例如：D-4 转 D-2 需要准备什么？', pit: '例如：明洞换钱踩坑记录'};
 function currentBoard(){ return document.getElementById('board').value; }
+function syncMedNote(){
+  var mn = document.getElementById('mednote');
+  var mcs = document.getElementById('mcat');
+  var mc = mcs ? mcs.value : '';
+  var show = !!MED[currentBoard()] || mc === 'clinic';
+  mn.style.display = show ? 'block' : 'none';
+  mn.textContent = '⚠️ ' + (MEDNOTE || '医疗效果因人而异，请选择持证合法医疗机构。') +
+    ' 平台只展示商家信息，不提供医疗中介，请不要发布价格承诺或疗效承诺。' +
+    '不得使用“保证效果”“无副作用”“100%”等承诺性用语。';
+}
 function applyBoard(val, fromDraft){
   document.getElementById('board').value = val || '';
   document.querySelectorAll('#chips button[data-board]').forEach(function(b){
@@ -146,7 +171,7 @@ function applyBoard(val, fromDraft){
   var ab = document.getElementById('actbox'), subs = SUBC[val] || [];
   ab.style.display = MB[val] ? 'block' : 'none';
   document.getElementById('tag').innerHTML = '<option value="">请选择分类</option>' + subs.map(function(x){ return '<option value="' + x.key + '">' + x.icon + ' ' + LH.esc(x.name) + '</option>'; }).join('');
-  var mn = document.getElementById('mednote'); mn.style.display = MED[val] ? 'block' : 'none'; mn.textContent = '⚠️ ' + MEDNOTE + ' 不得使用“保证效果”“无副作用”“100%”等承诺性用语。';
+  syncMedNote();
   var w = document.getElementById('bwarn'), t = WARN[val] || '';
   var qd = document.getElementById('quota'), u = ME && ME.user;
   if (MB[val]){
@@ -185,6 +210,7 @@ function saveDraft(){
       tag: document.getElementById('tag').value,
       offer: document.getElementById('offer').value,
       valid: document.getElementById('valid').value,
+      mcat: (document.getElementById('mcat') || {}).value || '',
       agree: document.getElementById('agree').checked,
       t: Date.now()
     };
@@ -212,6 +238,7 @@ function scheduleDraft(){ clearTimeout(draftTimer); draftTimer = setTimeout(save
   var el = document.getElementById(id);
   el.addEventListener(id === 'agree' ? 'change' : 'input', function(){ updateCounts(); scheduleDraft(); });
 });
+document.getElementById('mcat').addEventListener('change', function(){ syncMedNote(); scheduleDraft(); });
 (async function(){
   var gate = document.getElementById('gate'), d;
   try { d = ME = await LH.me(); } catch(e){ gate.innerHTML = '<div class="empty">' + LH.esc(e.message) + '</div>'; return; }
@@ -220,6 +247,8 @@ function scheduleDraft(){ clearTimeout(draftTimer); draftTimer = setTimeout(save
   gate.style.display = 'none'; document.getElementById('form').style.display = 'block';
   document.getElementById('send').disabled = false; document.getElementById('preview').disabled = false;
   renderChips();
+  var isMerchant = !!(d.user && (d.user.merchant || d.user.merchant_info));
+  if (isMerchant) document.getElementById('mcatbox').style.display = 'block';
   try { var mm = await LH.api('GET', '/api/merch/meta'); SUBC = mm.subcats || {}; MEDNOTE = mm.medical_note || ''; (mm.medical_boards || []).forEach(function(k){ MED[k] = 1; }); } catch(e){}
   var draft = loadDraft();
   var qBoard = LH.qs('board');
@@ -232,7 +261,9 @@ function scheduleDraft(){ clearTimeout(draftTimer); draftTimer = setTimeout(save
       if (draft.offer) document.getElementById('offer').value = draft.offer;
       if (draft.valid) document.getElementById('valid').value = draft.valid;
     }
+    if (draft.mcat) document.getElementById('mcat').value = draft.mcat;
     if (draft.agree) document.getElementById('agree').checked = true;
+    syncMedNote();
     var n = document.getElementById('draftnote'); n.style.display = 'block'; n.textContent = '草稿已自动保存 · 刚刚';
   } else {
     applyBoard(qBoard || '', false);
@@ -292,6 +323,7 @@ document.getElementById('send').onclick = async function(){
   if (lastTpl && document.getElementById('body').value.trim() === lastTpl.trim()){ LH.showErr(err, '把模板里的括号和省略号换成你自己的内容再发吧'); window.scrollTo(0, 0); return; }
   var fd = new FormData();
   fd.append('board', currentBoard());
+  fd.append('merchant_cat', (document.getElementById('mcat') || {}).value || '');
   fd.append('title', document.getElementById('title').value);
   fd.append('body', document.getElementById('body').value);
   if (MB[currentBoard()]){
@@ -308,6 +340,6 @@ document.getElementById('send').onclick = async function(){
   } catch(e){ LH.showErr(err, e.message); LH.toast(e.message); setSending(false); window.scrollTo(0, 0); }
 };
 </script>
-<script src="/static/pwa.js?v=66" defer></script>
+<script src="/static/pwa.js?v=67" defer></script>
 </body>
 </html>

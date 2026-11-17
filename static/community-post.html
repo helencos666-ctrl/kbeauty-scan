@@ -10,11 +10,11 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="旅韩助手">
 <link rel="manifest" href="/manifest.webmanifest">
-<link rel="apple-touch-icon" href="/static/icons/apple-touch-icon.png?v=66">
-<link rel="icon" type="image/png" sizes="192x192" href="/static/icons/icon-192.png?v=66">
-<link rel="stylesheet" href="/static/pwa.css?v=66">
-<link rel="stylesheet" href="/static/community.css?v=66">
-<link rel="stylesheet" href="/static/chat.css?v=66">
+<link rel="apple-touch-icon" href="/static/icons/apple-touch-icon.png?v=67">
+<link rel="icon" type="image/png" sizes="192x192" href="/static/icons/icon-192.png?v=67">
+<link rel="stylesheet" href="/static/pwa.css?v=67">
+<link rel="stylesheet" href="/static/community.css?v=67">
+<link rel="stylesheet" href="/static/chat.css?v=67">
 </head>
 <body>
 <header>
@@ -22,7 +22,6 @@
   <p><a href="/community">← 返回社区</a></p>
 </header>
 <main>
-  <div class="card userbar" id="ub">加载中…</div>
   <div id="warn"></div>
   <div class="card" id="post"><div class="loading">加载中…</div></div>
   <div class="card" id="cbox" style="display:none">
@@ -43,7 +42,7 @@
   <a href="/?tab=more"><i>☰</i>全部</a>
   <a href="/me"><i>👤</i>我的</a>
 </nav>
-<script src="/static/community.js?v=66"></script>
+<script src="/static/community.js?v=67"></script>
 <script>
 var pid = parseInt(location.pathname.split('/').pop(), 10);
 var WARN = {visa: '⚠️ 本帖为网友个人签证经验，本站不提供签证代办。政策以韩国驻华使领馆、韩国签证申请中心和 K-ETA 官网为准。',
@@ -64,7 +63,7 @@ lb.onclick = function(){ lb.style.display = 'none'; };
 function zoom(src){ lb.querySelector('img').src = src; lb.style.display = 'flex'; }
 var me = null, booted = false;
 async function load(){
-  if (!booted){ me = await LH.userbar(document.getElementById('ub')); booted = true; }
+  if (!booted){ me = await LH.userbar(); booted = true; }
   var box = document.getElementById('post'), p;
   try {
     p = await LH.api('GET', '/api/community/posts/' + pid);
@@ -145,6 +144,6 @@ async function load(){
 }
 load();
 </script>
-<script src="/static/pwa.js?v=66" defer></script>
+<script src="/static/pwa.js?v=67" defer></script>
 </body>
 </html>

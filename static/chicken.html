@@ -10,10 +10,10 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="旅韩助手">
 <link rel="manifest" href="/manifest.webmanifest">
-<link rel="apple-touch-icon" href="/static/icons/apple-touch-icon.png?v=66">
-<link rel="icon" type="image/png" sizes="192x192" href="/static/icons/icon-192.png?v=66">
-<link rel="stylesheet" href="/static/pwa.css?v=66">
-<link rel="stylesheet" href="/static/guide.css?v=66">
+<link rel="apple-touch-icon" href="/static/icons/apple-touch-icon.png?v=67">
+<link rel="icon" type="image/png" sizes="192x192" href="/static/icons/icon-192.png?v=67">
+<link rel="stylesheet" href="/static/pwa.css?v=67">
+<link rel="stylesheet" href="/static/guide.css?v=67">
 <style>
 :root{--primary:#146E68;--secondary:#3D8F88;--accent:#B85A12;--pink:var(--primary);--ink:#1A2330;--sub:#4A5560;--bg:#F3F7F6;--card:#fff;--line:#D5E4E1;--success:#1B7A45;--warning:#B45309}
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
@@ -70,7 +70,6 @@ nav a.on{color:var(--primary);font-weight:700}
     <p class="note">本服务为个人代点协助，<strong>不是</strong>持牌外卖或食品配送企业。餐品由店铺制作配送，食品质量、过敏原和送达时间以店铺与客服确认为准。如有过敏或忌口，请务必写在备注里。</p>
     <p class="tip">下单后进入待确认。请等待客服确认菜单、价格和送达时间后再扫网站收款码付款，由人工核对。不要先自行付款。金额为参考估算，最终以客服确认为准。</p>
   </div>
-  <div class="card userbar" id="ub">加载中…</div>
   <div class="err" id="err" style="display:none;background:#fff0f0;color:#c0392b;border-radius:12px;padding:12px;font-size:14px;margin-bottom:14px"></div>
   <div class="ok" id="ok" style="display:none;background:#eefaf0;color:#1e7a3a;border-radius:12px;padding:12px;font-size:14px;margin-bottom:14px"></div>
   <div class="card" id="shopcards">
@@ -97,11 +96,11 @@ nav a.on{color:var(--primary);font-weight:700}
   <a href="/me"><i>👤</i>我的</a>
 </nav>
 
-<script src="/static/community.js?v=66"></script>
+<script src="/static/community.js?v=67"></script>
 <script src="/static/banners.js"></script>
 <script>
 (async function(){
-  var d = await LH.userbar(document.getElementById('ub'));
+  var d = await LH.userbar();
   var err = document.getElementById('err'), ok = document.getElementById('ok');
   function show(el,t){ el.textContent=t||''; el.style.display=t?'block':'none'; }
   var cfg;
@@ -243,6 +242,6 @@ nav a.on{color:var(--primary);font-weight:700}
 })();
 </script>
 
-<script src="/static/pwa.js?v=66" defer></script>
+<script src="/static/pwa.js?v=67" defer></script>
 </body>
 </html>

@@ -10,9 +10,9 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="旅韩助手">
 <link rel="manifest" href="/manifest.webmanifest">
-<link rel="apple-touch-icon" href="/static/icons/apple-touch-icon.png?v=66">
-<link rel="icon" type="image/png" sizes="192x192" href="/static/icons/icon-192.png?v=66">
-<link rel="stylesheet" href="/static/pwa.css?v=66">
+<link rel="apple-touch-icon" href="/static/icons/apple-touch-icon.png?v=67">
+<link rel="icon" type="image/png" sizes="192x192" href="/static/icons/icon-192.png?v=67">
+<link rel="stylesheet" href="/static/pwa.css?v=67">
 <style>
 :root{--primary:#146E68;--secondary:#3D8F88;--accent:#B85A12;--pink:var(--primary);--ink:#1A2330;--sub:#4A5560;--bg:#F3F7F6;--card:#fff;--line:#D5E4E1;--success:#1B7A45;--warning:#B45309}
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
@@ -217,15 +217,12 @@ header{display:none}
 .hero .brand img{width:30px;height:30px;border-radius:50%;display:block;flex:none}
 .hero .trip-entry{display:inline-flex;align-items:center;gap:3px;flex:none;padding:6px 10px;border-radius:14px;background:#F3F7F6;color:var(--sub);font-size:13px;font-weight:700;text-decoration:none;white-space:nowrap}
 .hero .trip-entry i{font-style:normal;font-size:13px}
-.me-ava{width:30px;height:30px;border-radius:50%;background:#146E68;display:inline-flex;align-items:center;justify-content:center;flex:none;box-shadow:0 1px 4px rgba(20,110,104,.2);text-decoration:none}
-.me-ava svg{width:17px;height:17px;display:block}
 .hero-sub{margin:0;padding:0 16px 12px;font-size:13.5px;line-height:1.5;color:var(--sub)}
 
 /* 内部 tab 的顶栏（非首页显示） */
 .bar{display:none;align-items:center;gap:4px;padding:calc(10px + env(safe-area-inset-top)) 8px 4px 4px}
 .bar .back{font-size:30px;line-height:1;color:var(--ink);text-decoration:none;width:38px;text-align:center;flex:none}
 .bar b{flex:1;min-width:0;font-size:19px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.bar .me-ava{margin:0 8px 0 4px}
 .bar-sub{display:none;margin:0 0 10px;padding:0 20px;font-size:13px;line-height:1.55;color:var(--sub)}
 body:not(.is-home) .hero,body:not(.is-home) .hero-sub{display:none}
 body:not(.is-home) .bar{display:flex}
@@ -353,12 +350,11 @@ body.is-home .disclaimer{display:none}
 <body class="is-home">
 <header></header>
 <div class="hero" id="hero">
-  <a class="brand" href="/"><img src="/static/icons/icon-192.png?v=66" alt="">旅韩助手</a>
+  <a class="brand" href="/"><img src="/static/icons/icon-192.png?v=67" alt="">旅韩助手</a>
   <a class="trip-entry" href="/trips"><i>🗓️</i>行程</a>
-  <a class="me-ava" href="/me" title="我的" aria-label="我的"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="8.5" r="3.6" fill="#fff"/><path d="M5 19.2c.9-3.2 3.4-5 7-5s6.1 1.8 7 5" fill="#fff"/></svg></a>
 </div>
 <p class="hero-sub">地铁 · 翻译 · 吃喝玩，中文一站搞定</p>
-<div class="bar"><a href="/" id="back" aria-label="返回首页">‹</a><b id="htitle">旅韩助手</b><a class="me-ava" href="/me" title="我的" aria-label="我的"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="8.5" r="3.6" fill="#fff"/><path d="M5 19.2c.9-3.2 3.4-5 7-5s6.1 1.8 7 5" fill="#fff"/></svg></a></div>
+<div class="bar"><a href="/" id="back" aria-label="返回首页">‹</a><b id="htitle">旅韩助手</b></div>
 <p class="bar-sub" id="hsub"></p>
 <main>
   <div class="err" id="err"></div>
@@ -387,10 +383,10 @@ body.is-home .disclaimer{display:none}
     <div class="ads" id="homeAds">
       <div class="ads-viewport">
         <div class="ads-track" id="adsTrack">
-          <a class="slide" href="/food#hamcho-myeongdong"><img src="/static/home-ads/ad-1.jpg?v=66" alt="咸草酱蟹：明洞酱蟹，点击查看" width="640" height="320" draggable="false" onerror="this.style.display=&#39;none&#39;;"></a>
-          <a class="slide" href="/food#daega-myeongdong"><img src="/static/home-ads/ad-2.jpg?v=66" alt="大家烤肉：明洞烤肉，点击查看" width="640" height="320" draggable="false" onerror="this.style.display=&#39;none&#39;;"></a>
-          <a class="slide" href="/shops?tab=services"><img src="/static/home-ads/ad-3.jpg?v=66" alt="DAYONE：商业服务，点击查看" width="640" height="320" draggable="false" onerror="this.style.display=&#39;none&#39;;"></a>
-          <a class="slide" data-ad="lanjing" href="/ads/lanjing"><img src="/static/home-ads/ad-4.jpg?v=66" alt="蓝憬通讯：推荐2位好友注册 免费领韩国手机卡" width="640" height="320" draggable="false" onerror="this.style.display=&#39;none&#39;;"></a>
+          <a class="slide" href="/food#hamcho-myeongdong"><img src="/static/home-ads/ad-1.jpg?v=67" alt="咸草酱蟹：明洞酱蟹，点击查看" width="640" height="320" draggable="false" onerror="this.style.display=&#39;none&#39;;"></a>
+          <a class="slide" href="/food#daega-myeongdong"><img src="/static/home-ads/ad-2.jpg?v=67" alt="大家烤肉：明洞烤肉，点击查看" width="640" height="320" draggable="false" onerror="this.style.display=&#39;none&#39;;"></a>
+          <a class="slide" href="/shops"><img src="/static/home-ads/ad-3.jpg?v=67" alt="DAYONE：商业服务，点击查看" width="640" height="320" draggable="false" onerror="this.style.display=&#39;none&#39;;"></a>
+          <a class="slide" data-ad="lanjing" href="/ads/lanjing"><img src="/static/home-ads/ad-4.jpg?v=67" alt="蓝憬通讯：推荐2位好友注册 免费领韩国手机卡" width="640" height="320" draggable="false" onerror="this.style.display=&#39;none&#39;;"></a>
         </div>
       </div>
       <div class="ads-cap" id="adsCap"><b>咸草酱蟹</b><span>点击查看</span></div>
@@ -553,11 +549,12 @@ body.is-home .disclaimer{display:none}
 </main>
 
 <nav class="tabbar" aria-label="底部导航">
-  <a href="/" data-nav="home" class="on"><i>🏠</i>首页</a>
+  <a href="/" data-nav="home" class="on" aria-current="page"><i>🏠</i>首页</a>
   <a href="/community?tab=follow" data-nav="follow"><i>👥</i>关注</a>
   <a href="/community/new" data-nav="post" class="pub"><span class="plus">＋</span>发布</a>
-  <a href="/shops?tab=services" data-nav="services" class="svc"><i>💼</i>商业服务</a>
-  <a href="/local" data-nav="local" class="loc"><i>🏘️</i>本地生活</a>
+  <a href="/shops" data-nav="services" class="svc"><i>💼</i>商业服务</a>
+  <a href="/local" data-nav="local" class="loc"><i>🏘️</i>生活在韩国</a>
+  <a href="/me" data-nav="me" class="me"><i>👤</i>我的</a>
 </nav>
 <input type="file" id="fCam" accept="image/*" capture="environment" hidden>
 <input type="file" id="fPick" accept="image/*" hidden>
@@ -574,7 +571,7 @@ body.is-home .disclaimer{display:none}
 </div>
 
 <script src="/static/ref.js"></script>
-<script src="/static/splash.js?v=66"></script>
+<script src="/static/splash.js?v=67"></script>
 <script src="/static/phrases.js"></script>
 <script src="/static/subway.js"></script>
 <script>
@@ -1662,7 +1659,7 @@ drawScenes();
 })();
 </script>
 <script src="/static/maps.js"></script>
-<script src="/static/pwa.js?v=66" defer></script>
+<script src="/static/pwa.js?v=67" defer></script>
 
 <script>
 (function(){

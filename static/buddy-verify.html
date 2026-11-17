@@ -10,10 +10,10 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="旅韩助手">
 <link rel="manifest" href="/manifest.webmanifest">
-<link rel="apple-touch-icon" href="/static/icons/apple-touch-icon.png?v=66">
-<link rel="icon" type="image/png" sizes="192x192" href="/static/icons/icon-192.png?v=66">
-<link rel="stylesheet" href="/static/pwa.css?v=66">
-<link rel="stylesheet" href="/static/community.css?v=66">
+<link rel="apple-touch-icon" href="/static/icons/apple-touch-icon.png?v=67">
+<link rel="icon" type="image/png" sizes="192x192" href="/static/icons/icon-192.png?v=67">
+<link rel="stylesheet" href="/static/pwa.css?v=67">
+<link rel="stylesheet" href="/static/community.css?v=67">
 <meta name="robots" content="noindex">
 </head>
 <body>
@@ -22,7 +22,6 @@
   <p><a href="/community/friends">‹ 返回旅韩交友</a></p>
 </header>
 <main>
-  <div class="card userbar" id="ub">加载中…</div>
   <div class="card">
     <p class="note" id="disc" style="background:#fff8f0;border-radius:10px;padding:10px 12px;line-height:1.7">仅限结伴旅游，不是交友/约会平台，禁止色情、诈骗、金钱往来，注意人身安全。</p>
     <p class="tip">按照韩国《个人信息保护法》，本站<b>不收集</b>完整住民登录号（주민등록번호）或完整护照号，只填写<b>证件号码后四位</b>。证件照片可以自行遮挡敏感部分，仅供管理员审核，通过或拒绝后立即删除。</p>
@@ -54,10 +53,10 @@
   <a href="/?tab=more"><i>☰</i>全部</a>
   <a href="/me"><i>👤</i>我的</a>
 </nav>
-<script src="/static/community.js?v=66"></script>
+<script src="/static/community.js?v=67"></script>
 <script>
 (async function(){
-  var d = await LH.userbar(document.getElementById('ub'));
+  var d = await LH.userbar();
   var err = document.getElementById('err'), ok = document.getElementById('ok');
   function show(el,t){ el.textContent=t||''; el.style.display=t?'block':'none'; }
   if (!d || !d.user){
@@ -115,6 +114,6 @@
   };
 })();
 </script>
-<script src="/static/pwa.js?v=66" defer></script>
+<script src="/static/pwa.js?v=67" defer></script>
 </body>
 </html>

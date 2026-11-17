@@ -10,10 +10,10 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="旅韩助手">
 <link rel="manifest" href="/manifest.webmanifest">
-<link rel="apple-touch-icon" href="/static/icons/apple-touch-icon.png?v=66">
-<link rel="icon" type="image/png" sizes="192x192" href="/static/icons/icon-192.png?v=66">
-<link rel="stylesheet" href="/static/pwa.css?v=66">
-<link rel="stylesheet" href="/static/community.css?v=66">
+<link rel="apple-touch-icon" href="/static/icons/apple-touch-icon.png?v=67">
+<link rel="icon" type="image/png" sizes="192x192" href="/static/icons/icon-192.png?v=67">
+<link rel="stylesheet" href="/static/pwa.css?v=67">
+<link rel="stylesheet" href="/static/community.css?v=67">
 </head>
 <body>
 <header class="thero">
@@ -30,7 +30,6 @@
   </div>
 </header>
 <main class="home">
-  <div class="card userbar" id="ub">加载中…</div>
   <div class="seg" id="tabs">
     <button data-t="recommend">推荐</button>
     <button data-t="featured">🌟 精选</button>
@@ -129,7 +128,7 @@
   <a href="/?tab=more"><i>☰</i>全部</a>
   <a href="/me"><i>👤</i>我的</a>
 </nav>
-<script src="/static/community.js?v=66"></script>
+<script src="/static/community.js?v=67"></script>
 <script src="/static/banners.js"></script>
 <script>
 var WARN = {
@@ -252,7 +251,7 @@ async function loadHome(){
   } catch(e){ fr.innerHTML = '<div class="empty" style="padding:10px">' + LH.esc(e.message) + '</div>'; }
 }
 (async function(){
-  var d = await LH.userbar(document.getElementById('ub'));
+  var d = await LH.userbar();
   if (d){ boards = d.boards || {}; user = d.user; if (d.merchant_boards) MB = d.merchant_boards; }
   try { SUBC = (await LH.api('GET', '/api/merch/meta')).subcats || {}; } catch(e){}
   if (board && !boards[board]) board = '';
@@ -266,6 +265,6 @@ async function loadHome(){
   render();
 })();
 </script>
-<script src="/static/pwa.js?v=66" defer></script>
+<script src="/static/pwa.js?v=67" defer></script>
 </body>
 </html>

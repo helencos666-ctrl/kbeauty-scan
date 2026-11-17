@@ -10,10 +10,10 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="旅韩助手">
 <link rel="manifest" href="/manifest.webmanifest">
-<link rel="apple-touch-icon" href="/static/icons/apple-touch-icon.png?v=66">
-<link rel="icon" type="image/png" sizes="192x192" href="/static/icons/icon-192.png?v=66">
-<link rel="stylesheet" href="/static/pwa.css?v=66">
-<link rel="stylesheet" href="/static/community.css?v=66">
+<link rel="apple-touch-icon" href="/static/icons/apple-touch-icon.png?v=67">
+<link rel="icon" type="image/png" sizes="192x192" href="/static/icons/icon-192.png?v=67">
+<link rel="stylesheet" href="/static/pwa.css?v=67">
+<link rel="stylesheet" href="/static/community.css?v=67">
 <style>
 .sw{display:flex;gap:10px;margin-top:10px}
 .sw button{flex:1;border:0;border-radius:12px;padding:14px;font-size:16px;font-weight:700;background:#f1f1f3;color:#666}
@@ -29,7 +29,6 @@
   <p>提交资料 → 交保证金 ¥<span id="dep">500</span> → 审核通过上架 → 自己切换营业/休息</p>
 </header>
 <main>
-  <div class="card userbar" id="ub">加载中…</div>
   <div class="err" id="err" style="display:none"></div>
   <div class="ok" id="ok" style="display:none"></div>
   <div class="card" id="statuscard" style="display:none"></div>
@@ -79,13 +78,13 @@
   <a href="/?tab=more"><i>☰</i>全部</a>
   <a href="/me"><i>👤</i>我的</a>
 </nav>
-<script src="/static/community.js?v=66"></script>
+<script src="/static/community.js?v=67"></script>
 <script>
 (async function(){
   var $ = function(id){ return document.getElementById(id); };
   var err = $('err'), ok = $('ok');
   function show(el, t){ el.textContent = t || ''; el.style.display = t ? 'block' : 'none'; if (t) window.scrollTo(0, 0); }
-  var u = await LH.userbar($('ub'));
+  var u = await LH.userbar();
   var meta = await LH.api('GET', '/api/chicken/merchant/meta');
   $('dep').textContent = meta.deposit; document.querySelectorAll('.depv').forEach(function(e){ e.textContent = meta.deposit; });
   $('f_area').innerHTML = meta.areas.map(function(a){ return '<option>' + LH.esc(a) + '</option>'; }).join('');
@@ -160,6 +159,6 @@
   await load();
 })();
 </script>
-<script src="/static/pwa.js?v=66" defer></script>
+<script src="/static/pwa.js?v=67" defer></script>
 </body>
 </html>

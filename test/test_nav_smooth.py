@@ -1,6 +1,6 @@
 """页面切换与返回：python test/test_nav_smooth.py
 纯静态检查，不启服务。覆盖 Service Worker 不再用首页顶替子页、
-首页不会被上次路线拽走、底部五格链接、子页返回键，以及关注/商业服务 tab。
+首页不会被上次路线拽走、底部六格链接、子页返回键，以及关注/商业服务 tab。
 """
 import os, re
 
@@ -32,10 +32,10 @@ seo = read("seo.py")
 lanjing = read("lanjing_seed.py")
 
 # ---------- Service Worker ----------
-check("sw.js CACHE is lvhan-shell-v66", "lvhan-shell-v66" in sw)
+check("sw.js CACHE is lvhan-shell-v67", "lvhan-shell-v67" in sw)
 check("sw.js 无旧缓存名 v63", "lvhan-shell-v63" not in sw)
-check("sw.js 使用 ?v=66", "?v=66" in sw)
-check("sw.js SHELL 含 pwa.js?v=66", "/static/pwa.js?v=66" in sw)
+check("sw.js 使用 ?v=67", "?v=67" in sw)
+check("sw.js SHELL 含 pwa.js?v=67", "/static/pwa.js?v=67" in sw)
 
 # 不应再把任意导航回退到首页文档
 fb = re.search(
@@ -60,9 +60,9 @@ check("lhGoBack 无同源上一页时回 /",
 check("pwa.js 只在首页文档拦「首页」点击", "onHomeDoc" in pwa and "showTab('home'" in pwa)
 check("pwa.js pageshow 刷新导航", "pageshow" in pwa and "normalizeTabbar" in pwa)
 check("pwa.js pageshow 清掉 lh-overlay-open", "classList.remove('lh-overlay-open')" in pwa)
-check("五格链接完整",
+check("六格链接完整",
       all(h in pwa for h in ("href:'/'", "href:'/community?tab=follow'",
-                             "href:'/community/new'", "href:'/shops?tab=services'", "href:'/local'")))
+                             "href:'/community/new'", "href:'/shops'", "href:'/local'", "href:'/me'")))
 
 # ---------- 首页：返回键与路线恢复 ----------
 check("首页 #back 不再 history.back()",
@@ -79,16 +79,15 @@ check("visibilitychange 只在 tab=sub 时恢复路线",
       re.search(r"visibilitychange[\s\S]{0,400}t==='sub'&&loadLastRoute\(\)", index) is not None)
 check("saveLastRoute 不再偷偷改成 tab=sub",
       "history.replaceState({t:'sub'},'','/?tab=sub')" not in index)
-check("首页仍有五格且首页 href=/",
+check("首页仍有六格且首页 href=/",
       'href="/" data-nav="home"' in index and 'href="/community?tab=follow"' in index
-      and 'href="/shops?tab=services"' in index and 'href="/local"' in index)
+      and 'href="/shops"' in index and 'href="/local"' in index and 'data-nav="me"' in index)
 
 # ---------- 关注 / 商业服务 / 行程 ----------
 check("community 未登录不再把 follow 改成 recommend",
       "tab === 'follow') tab = 'recommend'" not in community
       and "tab === 'follow') tab =" not in community)
 check("community 保留 login_required 登录入口", "login_required" in community and "/login?next=" in community)
-check("shops 接受 tab=services", "curTab === 'services'" in shops or "tab !== 'services'" in shops)
 check("shops 无循环 location 重定向",
       not re.search(r"location\.href\s*=\s*['\"]/shops", shops)
       and "location.replace" not in shops)

@@ -45,7 +45,7 @@ check("home 两大入口 路线/翻译", 'data-go="sub"' in home and 'data-go="c
 check("home 吃喝玩乐五格", "吃喝玩乐" in home and all(
     u in home for u in ["/food", "/food?cat=cafe", "/shopping", "/attractions", "/places?category=hotel"]))
 check("home 五格文案", all(w in home for w in [">美食<", ">咖啡<", ">购物<", ">景点<", ">酒店<"]))
-check("home 广告轮播四张", all("/static/home-ads/ad-%d.jpg?v=66" % i in home for i in (1, 2, 3, 4)) and "蓝憬通讯" in home and 'data-ad="lanjing"' in home
+check("home 广告轮播四张", all("/static/home-ads/ad-%d.jpg?v=67" % i in home for i in (1, 2, 3, 4)) and "蓝憬通讯" in home and 'data-ad="lanjing"' in home
       and 'class="ads' in home and "adsDots" in home)
 check("home 附近推荐", "附近推荐" in home and 'data-sort="dist"' in home and 'data-sort="rec"' in home
       and "/api/places" in index)
@@ -67,10 +67,12 @@ check("常用韩语保留", "p-ph" in index and "phraseList" in index)
 check("TTS 保留", "/api/tts" in index and "speak(" in index)
 
 # ---- 商家 hub ----
-check("shops is 找商家 hub", "找商家" in shops and "推荐店铺" in shops and "服务商家" in shops and "韩友圈商家" in shops)
-check("boards still listed on shops", all(w in shops for w in ["住宿推荐", "包车用车", "皮肤管理·医美", "留学机构", "代购商家", "地陪", "追星活动", "中韩物流"]))
-check("/services 301 in providers.py", 'RedirectResponse("/shops?' in prov and "status_code=301" in prov)
-check("services.html fallback redirect", "/shops?tab=services" in svc)
+check("shops is 商家 hub", "<h1>商家</h1>" in shops or "<h1>🏪 商家</h1>" in shops or "<title>商家" in shops)
+check("shops 有精选商家和商家发布", "精选商家" in shops and "商家发布" in shops)
+check("shops 有四张已有广告", all(x in shops for x in ("咸草酱蟹", "大家烤肉", "DAYONE", "蓝憬通讯", "/ads/lanjing")))
+check("shops 不再是旧三 tab", "shoptabs" not in shops and "推荐店铺" not in shops)
+check("/services 301 in providers.py", "RedirectResponse(\"/shops" in prov and "status_code=301" in prov)
+check("services.html fallback redirect", "/shops" in svc and "商家" in svc)
 check("me 有全部功能/识妆入口", "/?tab=more" in me and "/?tab=cos" in me)
 
 

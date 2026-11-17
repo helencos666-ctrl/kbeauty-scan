@@ -10,10 +10,10 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="旅韩助手">
 <link rel="manifest" href="/manifest.webmanifest">
-<link rel="apple-touch-icon" href="/static/icons/apple-touch-icon.png?v=66">
-<link rel="icon" type="image/png" sizes="192x192" href="/static/icons/icon-192.png?v=66">
-<link rel="stylesheet" href="/static/pwa.css?v=66">
-<link rel="stylesheet" href="/static/community.css?v=66">
+<link rel="apple-touch-icon" href="/static/icons/apple-touch-icon.png?v=67">
+<link rel="icon" type="image/png" sizes="192x192" href="/static/icons/icon-192.png?v=67">
+<link rel="stylesheet" href="/static/pwa.css?v=67">
+<link rel="stylesheet" href="/static/community.css?v=67">
 </head>
 <body>
 <header>
@@ -21,8 +21,6 @@
   <p>优惠券仅作展示，付款仍通过网站收款码由人工开通</p>
 </header>
 <main>
-  <div class="card userbar" id="ub">加载中…</div>
-
   <div class="card" id="box">加载中…</div>
   <div class="card">
     <h2>使用说明</h2>
@@ -40,11 +38,11 @@
   <a href="/?tab=more"><i>☰</i>全部</a>
   <a href="/me"><i>👤</i>我的</a>
 </nav>
-<script src="/static/community.js?v=66"></script>
+<script src="/static/community.js?v=67"></script>
 
 <script>
 (async function(){
-  var d = await LH.userbar(document.getElementById('ub'));
+  var d = await LH.userbar();
   var box = document.getElementById('box');
   if (!d || !d.user){
     box.innerHTML = '<h2>卡券</h2><p>登录后即可查看你的卡券。</p><a class="btn primary block" href="/login?next=/coupons">免费注册 / 登录</a>';
@@ -67,6 +65,6 @@
 })();
 </script>
 
-<script src="/static/pwa.js?v=66" defer></script>
+<script src="/static/pwa.js?v=67" defer></script>
 </body>
 </html>

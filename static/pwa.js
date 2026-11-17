@@ -1,28 +1,28 @@
-/* 旅韩助手：全站底部五格导航 + 注册 Service Worker + 可关闭的安装提示 */
+/* 旅韩助手：全站底部六格导航 + 注册 Service Worker + 可关闭的安装提示 */
 (function(){
-  /* ===================== 底部五格导航（必须在安装提示的 return 之前执行） ===================== */
+  /* ===================== 底部六格导航（必须在安装提示的 return 之前执行） ===================== */
   var TABS = [
     {k:'home',     href:'/',                    icon:'🏠', label:'首页'},
     {k:'follow',   href:'/community?tab=follow', icon:'👥', label:'关注'},
     {k:'post',     href:'/community/new',        icon:'＋', label:'发布', pub:true},
-    {k:'services', href:'/shops?tab=services',   icon:'💼', label:'商业服务', cls:'svc'},
-    {k:'local',    href:'/local',                icon:'🏘️', label:'本地生活', cls:'loc'}
+    {k:'services', href:'/shops',                icon:'💼', label:'商业服务', cls:'svc'},
+    {k:'local',    href:'/local',                icon:'🏘️', label:'生活在韩国', cls:'loc'},
+    {k:'me',       href:'/me',                   icon:'👤', label:'我的', cls:'me'}
   ];
 
   function currentKey(){
     var p = location.pathname, q = new URLSearchParams(location.search || '');
+    if (p === '/me' || p === '/static/me.html') return 'me';
     if (p === '/local' || p === '/static/local.html') return 'local';
     if (p === '/community/new') return 'post';
     if (p === '/services' || p === '/static/services.html') return 'services';
-    if (p === '/shops' || p === '/static/shops.html') {
-      return (q.get('tab') === 'services' || q.get('type') === 'services') ? 'services' : '';
-    }
+    if (p === '/shops' || p === '/static/shops.html') return 'services';
     if (p === '/community' || p === '/static/community.html') {
       return q.get('tab') === 'follow' ? 'follow' : '';
     }
     if (p === '/' || p === '/index.html' || p === '/static/index.html') {
-      var t = q.get('tab');
-      return (!t || t === 'home') ? 'home' : '';
+      var tab = q.get('tab');
+      return (!tab || tab === 'home') ? 'home' : '';
     }
     return '';
   }
@@ -101,7 +101,7 @@
       var old = document.querySelector('nav');
       var fresh = buildTabbar();
       if (old && (looksLikeOldNav(old) || isBottomNav(old))) {
-        // 旧版全站 6 格 nav（地铁 / 翻译 / 韩友圈 / 全部 / 我的）统一换成五格
+        // 旧版底部 nav（地铁 / 翻译 / 韩友圈 / 全部，或上一版五格）统一换成六格
         old.parentNode.replaceChild(fresh, old);
       } else {
         // 页面本来没有底部导航：补一个
@@ -109,6 +109,9 @@
       }
       nav = fresh;
     }
+    var expect = TABS.map(function(t){ return t.k; }).join(',');
+    var have = Array.prototype.map.call(nav.querySelectorAll('a[data-nav]'), function(a){ return a.getAttribute('data-nav'); }).join(',');
+    if (have !== expect) nav.innerHTML = tabbarHTML();
     var key = currentKey();
     var links = nav.querySelectorAll('a[data-nav]');
     for (var i = 0; i < links.length; i++) {
@@ -131,7 +134,42 @@
     refreshNav();
   }
   window.addEventListener('pageshow', refreshNav);
-  /* =================== 底部五格导航结束 =================== */
+
+  function paintMeBadge(n){
+    n = +n || 0;
+    var a = document.querySelector('nav.tabbar a[data-nav="me"]');
+    if (!a) return;
+    var d = a.querySelector('.tab-dot');
+    if (!n){
+      if (d) d.hidden = true;
+      return;
+    }
+    if (!d){
+      d = document.createElement('span');
+      d.className = 'tab-dot';
+      a.appendChild(d);
+    }
+    d.hidden = false;
+    d.textContent = n > 99 ? '99+' : String(n);
+  }
+  function loadMeBadge(){
+    try {
+      fetch('/api/me/summary', {credentials: 'same-origin', headers: {'X-LH': '1'}}).then(function(r){
+        return r.json();
+      }).then(function(j){
+        var u = j && j.user;
+        if (!u){ paintMeBadge(0); return; }
+        paintMeBadge((u.notif_unread || 0) + (u.consult_unread || 0) + (u.msg_unread || 0));
+      }).catch(function(){});
+    } catch (e) {}
+  }
+  window.addEventListener('pageshow', loadMeBadge);
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', loadMeBadge);
+  } else {
+    loadMeBadge();
+  }
+  /* =================== 底部六格导航结束 =================== */
 
   if('serviceWorker' in navigator){
     window.addEventListener('load', function(){

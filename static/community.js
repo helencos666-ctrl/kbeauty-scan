@@ -52,26 +52,17 @@ var LH = (function(){
     });
   }
   async function userbar(el){
+    // 顶部个人卡片已下线，相关入口统一由「我的」页提供。
+    // 保留 el 参数兼容旧调用：el 可能为 null，也可能没有 innerHTML，这里先做空值保护；
+    // 若旧页面仍把卡片容器传进来，只移除该容器，不再渲染任何个人卡片内容。
+    if (el && el.innerHTML !== undefined && el.parentNode && el.classList && el.classList.contains('userbar')){
+      el.parentNode.removeChild(el);
+    }
     try {
       var d = await me();
-      if (d.user){
-        el.innerHTML = '<span class="who">' + avatar(d.user.id, d.user.nickname, d.user.has_avatar, 'lg') +
-          '<span><a href="/community/u/' + d.user.id + '" style="color:inherit;text-decoration:none">' + esc(d.user.nickname) + '</a>' + badge(d.user.display_tier) + ubadges(d.user.badges, d.user.official, 3) + '</span></span>' +
-          '<span class="row"><button class="btn sm ghost" type="button" id="lhAv">设置头像</button>' +
-          '<a class="btn sm ghost" href="/points">🫘 ' + (d.user.points_balance != null ? d.user.points_balance : '') + ' 旅行豆</a>' +
-          '<a class="btn sm ghost" href="/community/notices" style="position:relative">🔔 通知' + (d.user.notif_unread ? '<span class="dot">' + (d.user.notif_unread > 99 ? '99+' : d.user.notif_unread) + '</span>' : '') + '</a>' +
-          '<a class="btn sm ghost" href="/consult" style="position:relative">💬 咨询<span class="dot" data-consult-dot' + (d.user.consult_unread ? '' : ' style="display:none"') + '>' + (d.user.consult_unread || '') + '</span></a>' +
-          '<a class="btn sm ghost" href="/community/messages" style="position:relative">✉️ 私信' + (d.user.unread ? '<span class="dot">' + (d.user.unread > 99 ? '99+' : d.user.unread) + '</span>' : '') + '</a>' + (d.user.tier >= 2 ? '' : '<a class="btn sm primary" href="/member">' + (d.user.tier === 1 ? '升级高级会员' : '开通会员') + '</a>') +
-          '<button class="btn sm gray" id="lhLogout">退出</button></span>';
-        startConsultPoll();
-        el.querySelector('#lhAv').onclick = function(){ pickAvatar(function(){ _me = null; userbar(el); }); };
-        el.querySelector('#lhLogout').onclick = async function(){ await api('POST', '/api/community/logout', {}); location.reload(); };
-      } else {
-        el.innerHTML = '<span class="who">游客</span><span class="row"><a class="btn sm primary" href="/login?next=' + encodeURIComponent(location.pathname + location.search) + '">登录 / 注册</a></span>';
-      }
+      if (d && d.user) startConsultPoll();
       return d;
     } catch(e){
-      el.innerHTML = '<span class="who">' + esc(e.message) + '</span>';
       return null;
     }
   }
@@ -187,7 +178,7 @@ var LH = (function(){
       var r = await api('GET', '/api/consult/unread'), n = r.n || 0;
       document.querySelectorAll('[data-consult-dot]').forEach(function(el){ el.textContent = n > 99 ? '99+' : n; el.style.display = n ? '' : 'none'; });
       if (_cn >= 0 && n > _cn && document.hidden && window.Notification && Notification.permission === 'granted' && !/^\/consult\/\d/.test(location.pathname)){
-        var opt = {body: '你有 ' + n + ' 条未读咨询消息', icon: '/static/icons/icon-192.png?v=66', tag: 'lh-consult', data: {url: '/consult'}};
+        var opt = {body: '你有 ' + n + ' 条未读咨询消息', icon: '/static/icons/icon-192.png?v=67', tag: 'lh-consult', data: {url: '/consult'}};
         try { var reg = navigator.serviceWorker && await navigator.serviceWorker.getRegistration(); if (reg) reg.showNotification('旅韩助手 · 站内咨询', opt); else new Notification('旅韩助手 · 站内咨询', opt); } catch(e){}
       }
       _cn = n;

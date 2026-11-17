@@ -10,11 +10,11 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="旅韩助手">
 <link rel="manifest" href="/manifest.webmanifest">
-<link rel="apple-touch-icon" href="/static/icons/apple-touch-icon.png?v=66">
-<link rel="icon" type="image/png" sizes="192x192" href="/static/icons/icon-192.png?v=66">
-<link rel="stylesheet" href="/static/pwa.css?v=66">
-<link rel="stylesheet" href="/static/community.css?v=66">
-<link rel="stylesheet" href="/static/chat.css?v=66">
+<link rel="apple-touch-icon" href="/static/icons/apple-touch-icon.png?v=67">
+<link rel="icon" type="image/png" sizes="192x192" href="/static/icons/icon-192.png?v=67">
+<link rel="stylesheet" href="/static/pwa.css?v=67">
+<link rel="stylesheet" href="/static/community.css?v=67">
+<link rel="stylesheet" href="/static/chat.css?v=67">
 <meta name="robots" content="noindex">
 </head>
 <header>
@@ -22,7 +22,6 @@
   <p><a href="/me">‹ 我的</a></p>
 </header>
 <main>
-  <div class="card userbar" id="ub">加载中…</div>
   <div class="hintbar">只显示对方的昵称和头像。手机号、邮箱不会出现在会话里。</div>
   <div class="card" id="box"><div class="loading">加载中…</div></div>
   <div class="card" id="bbox" style="display:none"><h2>黑名单</h2><div id="blist"></div></div>
@@ -36,12 +35,12 @@
   <a href="/?tab=more"><i>☰</i>全部</a>
   <a href="/me" class="on"><i>👤</i>我的</a>
 </nav>
-<script src="/static/community.js?v=66"></script>
+<script src="/static/community.js?v=67"></script>
 <script>
 var E = LH.esc;
 async function loadList(){
   var box = document.getElementById('box');
-  var m = await LH.userbar(document.getElementById('ub'));
+  var m = await LH.userbar();
   if (!m) { box.innerHTML = '<div class="empty">社区暂未开放</div>'; return; }
   if (!m.user){ box.innerHTML = '<div class="empty">登录后查看私信<br><br><a class="btn primary" href="/login?next=/community/messages">登录 / 注册</a></div>'; return; }
   try {
@@ -64,6 +63,6 @@ async function loadList(){
 loadList();
 setInterval(function(){ if (!document.hidden) loadList(); }, 30000);
 </script>
-<script src="/static/pwa.js?v=66" defer></script>
+<script src="/static/pwa.js?v=67" defer></script>
 </body>
 </html>

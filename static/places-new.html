@@ -10,11 +10,11 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="旅韩助手">
 <link rel="manifest" href="/manifest.webmanifest">
-<link rel="apple-touch-icon" href="/static/icons/apple-touch-icon.png?v=66">
-<link rel="icon" type="image/png" sizes="192x192" href="/static/icons/icon-192.png?v=66">
-<link rel="stylesheet" href="/static/pwa.css?v=66">
-<link rel="stylesheet" href="/static/community.css?v=66">
-<link rel="stylesheet" href="/static/places.css?v=66">
+<link rel="apple-touch-icon" href="/static/icons/apple-touch-icon.png?v=67">
+<link rel="icon" type="image/png" sizes="192x192" href="/static/icons/icon-192.png?v=67">
+<link rel="stylesheet" href="/static/pwa.css?v=67">
+<link rel="stylesheet" href="/static/community.css?v=67">
+<link rel="stylesheet" href="/static/places.css?v=67">
 </head>
 <body class="fp-page">
 <header class="fp-hd">
@@ -22,7 +22,6 @@
   <p>请先在地图上确认这家店，再写一句真实感受。不要用「最」「第一」「唯一」，也不要留微信或电话。</p>
 </header>
 <main>
-  <div class="card userbar" id="ub">加载中…</div>
   <div class="err" id="err" style="display:none"></div>
   <div class="ok" id="ok" style="display:none"></div>
   <form class="card" id="f" autocomplete="off">
@@ -58,13 +57,13 @@
   <a href="/?tab=more"><i>☰</i>全部</a>
   <a href="/me"><i>👤</i>我的</a>
 </nav>
-<script src="/static/community.js?v=66"></script>
-<script src="/static/pwa.js?v=66"></script>
+<script src="/static/community.js?v=67"></script>
+<script src="/static/pwa.js?v=67"></script>
 <script>
 (async function(){
   var err = document.getElementById('err'), ok = document.getElementById('ok');
   function show(el,t){ el.textContent=t||''; el.style.display=t?'block':'none'; }
-  var d = await LH.userbar(document.getElementById('ub'));
+  var d = await LH.userbar();
   if (!d || !d.user){ location.href='/login?next='+encodeURIComponent('/places/new'); return; }
   var meta = await LH.api('GET','/api/places/meta');
   document.getElementById('category').innerHTML = '<option value="">请选择</option>' +

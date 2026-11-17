@@ -8,10 +8,10 @@
 <meta name="theme-color" content="#146E68">
 <meta name="robots" content="noindex">
 <link rel="manifest" href="/manifest.webmanifest">
-<link rel="apple-touch-icon" href="/static/icons/apple-touch-icon.png?v=66">
-<link rel="icon" type="image/png" sizes="192x192" href="/static/icons/icon-192.png?v=66">
-<link rel="stylesheet" href="/static/pwa.css?v=66">
-<link rel="stylesheet" href="/static/community.css?v=66">
+<link rel="apple-touch-icon" href="/static/icons/apple-touch-icon.png?v=67">
+<link rel="icon" type="image/png" sizes="192x192" href="/static/icons/icon-192.png?v=67">
+<link rel="stylesheet" href="/static/pwa.css?v=67">
+<link rel="stylesheet" href="/static/community.css?v=67">
 </head>
 <body>
 <header>
@@ -19,7 +19,6 @@
   <p><a href="/member">‹ 会员</a> · <a href="/promo/rules">推广约定</a></p>
 </header>
 <main>
-  <div class="card userbar" id="ub">加载中…</div>
   <div class="err" id="err" style="display:none"></div>
   <div class="ok" id="ok" style="display:none"></div>
   <div id="box"><div class="card loading">加载中…</div></div>
@@ -32,12 +31,12 @@
   <a href="/?tab=more"><i>☰</i>全部</a>
   <a href="/me"><i>👤</i>我的</a>
 </nav>
-<script src="/static/community.js?v=66"></script>
+<script src="/static/community.js?v=67"></script>
 <script>
 (async function(){
   var box = document.getElementById('box'), err = document.getElementById('err'), ok = document.getElementById('ok');
   function show(el,t){ el.textContent=t||''; el.style.display=t?'block':'none'; }
-  var m = await LH.userbar(document.getElementById('ub'));
+  var m = await LH.userbar();
   if (!m || !m.user){
     box.innerHTML = '<div class="card empty">请先登录后申请或查看推广数据。<br><br><a class="btn primary" href="/login?next=/promo">登录 / 注册</a></div>';
     return;
@@ -101,6 +100,6 @@
   };
 })();
 </script>
-<script src="/static/pwa.js?v=66" defer></script>
+<script src="/static/pwa.js?v=67" defer></script>
 </body>
 </html>

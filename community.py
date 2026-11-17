@@ -61,6 +61,21 @@ HOT_HOURS, HOT_FALLBACK_DAYS = 24, 7             # 24 小时热门；24 小时�
 RECOMMEND_DAYS = 30
 MERCHANT_BOARDS = {"hotel", "car", "clinic", "agency", "daigou", "guide", "kpop", "logistics"}   # 仅有效商家会员可发
 MERCHANT_QUOTA = 10                            # 每 30 天周期 10 篇
+# 商家发布信息流分类（可空字段 merchant_cat；all 只用于筛选，不入库）
+MERCHANT_CATS = [
+    ("car", "租车"),
+    ("food", "餐饮美食"),
+    ("guide", "地陪向导"),
+    ("clinic", "医美"),
+    ("logistics", "物流快递"),
+    ("daigou", "代购"),
+    ("sim", "通讯电话卡"),
+    ("other", "其它"),
+]
+MERCHANT_CAT_KEYS = {k for k, _ in MERCHANT_CATS}
+MERCHANT_CAT_LABELS = {k: n for k, n in MERCHANT_CATS}
+# 旧帖没有 merchant_cat 时，仅用于筛选的只读兜底，不写回数据库
+BOARD_TO_MERCHANT_CAT = {"car": "car", "clinic": "clinic", "guide": "guide", "logistics": "logistics", "daigou": "daigou"}
 CYCLE_DAYS = 30
 PLAN_DAYS = {"month": 30, "year": 365}
 # 普通版块里非商家发布的明显商业信息 → 待审核
@@ -340,6 +355,13 @@ MIGRATE6 = """
 ALTER TABLE c_users ADD COLUMN IF NOT EXISTS avatar BYTEA;
 """
 
+# 商家发布分类：可空，不回填已有行
+MIGRATE7 = """
+ALTER TABLE c_posts ADD COLUMN IF NOT EXISTS merchant_cat TEXT;
+CREATE INDEX IF NOT EXISTS c_posts_merchant_feed_idx
+  ON c_posts(id DESC) WHERE is_merchant AND NOT deleted AND status='published';
+"""
+
 BOT_NICK = "旅韩小助手"
 BOT_PW_HASH = "disabled"          # 非 scrypt 格式，check_pw 恒为失败，不能登录
 AI_TIMEOUT = 20
@@ -390,6 +412,7 @@ def db():
                         cur.execute(MIGRATE4)
                         cur.execute(MIGRATE5)
                         cur.execute(MIGRATE6)
+                        cur.execute(MIGRATE7)
                         from points import MIGRATE_POINTS
                         cur.execute(MIGRATE_POINTS)
                         from chicken import MIGRATE_CHICKEN
@@ -1308,6 +1331,12 @@ def _post_out(r, full=False):
          "views": r.get("views") or 0,
          "pinned": bool(r.get("pinned")), "featured": bool(r.get("featured")), "topic": bool(r.get("topic")),
          "author_official": bool(r.get("is_official"))}
+    mc = r.get("merchant_cat") if r.get("merchant_cat") in MERCHANT_CAT_KEYS else None
+    if not mc and r.get("is_merchant"):
+        mc = BOARD_TO_MERCHANT_CAT.get(r.get("board"), "other")
+    if mc:
+        o["merchant_cat"] = mc
+        o["merchant_cat_name"] = MERCHANT_CAT_LABELS.get(mc, "")
     if r.get("badges"):
         from retention import badges_out
         o["author_badges"] = badges_out(r["badges"])
@@ -1563,9 +1592,61 @@ def api_post(req: Request, pid: int):
                           "badges": (__import__("retention").badges_out(c.get("badges")))} for c in cms]
     return o
 
+
+def _merchant_cat_clause(cat):
+    """只读分类过滤。返回 (sql, args)。cat 已是合法入库 key 或 'all'/空。"""
+    if not cat or cat == "all":
+        return "", []
+    mapped = [b for b, c in BOARD_TO_MERCHANT_CAT.items() if c == cat]
+    if cat == "other":
+        mapped_boards = list(BOARD_TO_MERCHANT_CAT.keys())
+        return (" AND (p.merchant_cat='other' OR ((p.merchant_cat IS NULL OR p.merchant_cat='') AND p.board <> ALL(%s)))",
+                [mapped_boards])
+    if mapped:
+        return (" AND (p.merchant_cat=%s OR ((p.merchant_cat IS NULL OR p.merchant_cat='') AND p.board=%s))",
+                [cat, mapped[0]])
+    return " AND p.merchant_cat=%s", [cat]
+
+
+@router.get("/api/community/merchant-feed")
+def api_merchant_feed(req: Request, cat: str = "", before: int = 0, limit_n: int = 20):
+    limit_n = max(1, min(limit_n, 30))
+    cat = (cat or "").strip()
+    if cat and cat != "all" and cat not in MERCHANT_CAT_KEYS:
+        raise HTTPException(400, "分类不存在")
+    extra, extra_args = _merchant_cat_clause(cat)
+    with db() as conn:
+        u = current_user(conn, req)
+        uid = u["id"] if u else None
+        args = list(extra_args)
+        before_sql = ""
+        if before > 0:
+            before_sql = " AND p.id<%s"
+            args.append(before)
+        args.append(limit_n + 1)
+        rows = q(conn, f"""SELECT p.*, {AUTHOR_COLS}, (CASE WHEN au.merchant_until>now() THEN 3 ELSE au.tier END) AS tier,
+                 (au.avatar IS NOT NULL OR COALESCE(au.is_bot, FALSE)) AS has_avatar,
+                 {IMG_COLS}
+                 FROM c_posts p JOIN c_users au ON au.id=p.user_id
+                 WHERE NOT p.deleted AND p.status='published' AND p.is_merchant AND NOT au.is_banned
+                 {extra}{before_sql}
+                 ORDER BY p.id DESC LIMIT %s""", tuple(args))
+    has_more = len(rows) > limit_n
+    rows = rows[:limit_n]
+    posts = []
+    for r in rows:
+        o = _with_images(_post_out(r), r)
+        o["consult"] = (uid is None) or (uid != (r.get("user_id") or r.get("author_id")))
+        o["mine"] = bool(uid and uid == (r.get("user_id") or r.get("author_id")))
+        posts.append(o)
+    cats = [{"key": "all", "name": "全部"}] + [{"key": k, "name": n} for k, n in MERCHANT_CATS]
+    return {"posts": posts, "has_more": has_more, "cats": cats}
+
+
 @router.post("/api/community/posts")
 async def api_new_post(req: Request, board: str = Form(...), title: str = Form(...), body: str = Form(...),
                        tag: str = Form(""), offer: str = Form(""), valid_until: str = Form(""),
+                       merchant_cat: str = Form(""),
                        images: list[UploadFile] = File(default=[])):
     csrf(req)
     if board not in BOARDS:
@@ -1574,6 +1655,12 @@ async def api_new_post(req: Request, board: str = Form(...), title: str = Form(.
     title = clean_text(title, 40, "标题", 2 if daily else 4)
     body = clean_text(body, 3000, "正文", 5 if daily else 10)
     images = [f for f in (images or []) if f and f.filename]
+    cat = (merchant_cat or "").strip()
+    if cat:
+        if cat not in MERCHANT_CAT_KEYS:
+            raise HTTPException(400, "分类不存在")
+    else:
+        cat = None
     need_t = post_tier(board)
     tier_msg = "开通高级会员（¥{t2}）后才能在旅韩交友发帖" if need_t >= 2 else "开通会员（¥{t1}）后即可发帖"
     if len(images) > MAX_IMAGES:
@@ -1581,14 +1668,17 @@ async def api_new_post(req: Request, board: str = Form(...), title: str = Form(.
     act = (None, None, None)
     with db() as conn:     # 先确认身份再处理图片，未登录者不能消耗服务器算力
         u0 = need_tier(conn, req, need_t, tier_msg)
-        if board in MERCHANT_BOARDS:
+        if cat and not u0["merchant"]:
+            raise HTTPException(400, "开通商家后才能选择商家分类")
+        if board in MERCHANT_BOARDS or cat:
             from merch import clean_activity, MEDICAL_BOARDS
             from contact_guard import guard_text, guard_medical
             if u0["merchant"]:
-                act = clean_activity(board, tag, offer, valid_until)
-                guard_text(conn, u0["id"], "商家活动帖", title, body, act[1] or "")
-                if board in MEDICAL_BOARDS:
-                    guard_medical(title + "\n" + body + "\n" + (act[1] or ""))
+                if board in MERCHANT_BOARDS:
+                    act = clean_activity(board, tag, offer, valid_until)
+                guard_text(conn, u0["id"], "商家活动帖", title, body, (act[1] if act else None) or "")
+                if board in MEDICAL_BOARDS or cat == "clinic":
+                    guard_medical(title + "\n" + body + "\n" + ((act[1] if act else None) or ""))
     processed, raws = [], []
     for f in images:
         raw = await f.read(MAX_IMG_BYTES + 1)
@@ -1606,9 +1696,10 @@ async def api_new_post(req: Request, board: str = Form(...), title: str = Form(.
                 raise HTTPException(429, f"「在韩日常」每天最多发 {DAILY_CAP} 篇，明天再来记录吧")
         st = get_settings(conn)
         status, quota_kind, note = "published", None, None
-        if board in MERCHANT_BOARDS:
+        listing = board in MERCHANT_BOARDS or bool(cat)
+        if listing:
             if not u["merchant"]:
-                raise HTTPException(403, f"{BOARDS[board]}频道仅限商家会员发布（月付 ¥{st['price_m_month']} / 年付 ¥{st['price_m_year']}），详见会员页")
+                raise HTTPException(403, f"{BOARDS.get(board, '该频道')}仅限商家会员发布（月付 ¥{st['price_m_month']} / 年付 ¥{st['price_m_year']}），详见会员页")
             mq = merchant_quota(conn, u)
             if mq["left"] > 0:
                 quota_kind = "quota"
@@ -1617,7 +1708,9 @@ async def api_new_post(req: Request, board: str = Form(...), title: str = Form(.
                 q(conn, "UPDATE c_users SET merchant_credits=merchant_credits-1 WHERE id=%s AND merchant_credits>0", (u["id"],))
             else:
                 raise HTTPException(403, f"本周期 {MERCHANT_QUOTA} 篇额度已用完（{mq['cycle_end']} 重置）。每增发 1 篇 ¥{st['price_extra']}，付款后联系管理员增加次数")
-            status, note = "pending", "商家活动帖，先审后发"
+            status, note = "pending", "商家帖，先审后发"
+        elif u["merchant"]:
+            status, note = "pending", "商家帖，先审后发"
         elif not u["merchant"]:
             hits = is_commercial(title + "\n" + body)
             if hits:
@@ -1628,13 +1721,13 @@ async def api_new_post(req: Request, board: str = Form(...), title: str = Form(.
               (u["id"],), one=True)["n"]
         if n >= 20:
             raise HTTPException(429, "今天发帖已达上限（20 篇）")
-        row = q(conn, """INSERT INTO c_posts(user_id,board,title,body,status,is_merchant,quota_kind,review_note,tag,offer,valid_until)
-                         VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s) RETURNING id""",
-                (u["id"], board, title, body, status, bool(u["merchant"]), quota_kind, note, *act), one=True)
+        row = q(conn, """INSERT INTO c_posts(user_id,board,title,body,status,is_merchant,quota_kind,review_note,tag,offer,valid_until,merchant_cat)
+                         VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s) RETURNING id""",
+                (u["id"], board, title, body, status, bool(u["merchant"]), quota_kind, note, *act, cat), one=True)
         for i, (big, th, w, h) in enumerate(processed):
             q(conn, "INSERT INTO c_images(post_id,pos,data,thumb,width,height) VALUES (%s,%s,%s,%s,%s,%s)",
               (row["id"], i, big, th, w, h))
-    if status == "pending" and board in MERCHANT_BOARDS:
+    if status == "pending" and (board in MERCHANT_BOARDS or cat):
         return {"ok": True, "id": row["id"], "pending": True,
                 "message": "活动已提交，管理员审核通过后公开（一般 1 个工作日内）。审核期间可在「我的帖子」查看状态。"}
     if status == "pending":

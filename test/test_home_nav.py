@@ -1,4 +1,4 @@
-"""纯静态检查：首页五格底部导航、?v=66 缓存版本、新页面（trips/local）与禁词。
+"""纯静态检查：首页六格底部导航、?v=67 缓存版本、新页面（trips/local）与禁词。
 不需要启服务，直接 python test/test_home_nav.py 即可。"""
 import os, re
 
@@ -37,38 +37,41 @@ PAGES = {
 }
 
 # ---------- 1. 缓存版本 v63 ----------
-check("sw.js CACHE is lvhan-shell-v66", "'lvhan-shell-v66'" in sw or '"lvhan-shell-v66"' in sw)
-check("sw.js uses ?v=66", "?v=66" in sw)
+check("sw.js CACHE is lvhan-shell-v67", "'lvhan-shell-v67'" in sw or '"lvhan-shell-v67"' in sw)
+check("sw.js uses ?v=67", "?v=67" in sw)
 check("sw.js has no ?v=60", "?v=60" not in sw)
 for name, txt in PAGES.items():
-    check("%s uses ?v=66 (or tabbar)" % name, ("?v=66" in txt) or ("tabbar" in txt))
+    check("%s uses ?v=67 (or tabbar)" % name, ("?v=67" in txt) or ("tabbar" in txt))
     check("%s has no ?v=60" % name, "?v=60" not in txt)
-check("sw.js SHELL has four home ads", all("/static/home-ads/ad-%d.jpg?v=66" % i in sw for i in (1, 2, 3, 4)))
+check("sw.js SHELL has four home ads", all("/static/home-ads/ad-%d.jpg?v=67" % i in sw for i in (1, 2, 3, 4)))
 check("sw.js SHELL has /trips and /local", "'/trips'" in sw and "'/local'" in sw)
 check("sw.js SHELL has trips.html/local.html", "/static/trips.html" in sw and "/static/local.html" in sw)
 
-# ---------- 2. 底部五格 ----------
+# ---------- 2. 底部六格 ----------
 m = re.search(r'<nav class="tabbar"[^>]*>.*?</nav>', index, re.S)
 navblock = m.group(0) if m else ""
 check("index has nav.tabbar", bool(navblock))
-check("五格文案 首页/关注/发布/商业服务/本地生活",
-      all(w in navblock for w in ["首页", "关注", "发布", "商业服务", "本地生活"]))
+check("六格文案 首页/关注/发布/商业服务/生活在韩国/我的",
+      all(w in navblock for w in ["首页", "关注", "发布", "商业服务", "生活在韩国", "我的"]))
 check("关注 -> /community?tab=follow", 'href="/community?tab=follow"' in navblock and 'data-nav="follow"' in navblock)
 check("发布 -> /community/new", 'href="/community/new"' in navblock and 'class="pub"' in navblock and "＋" in navblock)
-check("商业服务 -> /shops?tab=services", 'href="/shops?tab=services"' in navblock and 'data-nav="services"' in navblock)
-check("本地生活 -> /local", 'href="/local"' in navblock and 'data-nav="local"' in navblock)
+check("商业服务 -> /shops", 'href="/shops"' in navblock and 'data-nav="services"' in navblock)
+check("生活在韩国 -> /local", 'href="/local"' in navblock and 'data-nav="local"' in navblock and "生活在韩国" in navblock)
 check("首页 -> / 且 data-nav=home", re.search(r'<a href="/" data-nav="home"', navblock) is not None)
 check("首页默认点亮", 'data-nav="home" class="on"' in navblock)
 check("行程入口 -> /trips", 'href="/trips"' in index and "🗓️" in index)
-check("首页头像 -> /me", 'class="me-ava" href="/me"' in index or 'href="/me" title="我的"' in index)
+check("底部我的 -> /me", 'href="/me"' in navblock and 'data-nav="me"' in navblock and "我的" in navblock)
+check("首页不再放右上角我的头像", "me-ava" not in index)
+check("local 不再放右上角我的头像", "me-ava" not in local)
+check("trips 不再放右上角我的头像", "me-ava" not in trips)
 
 for name, txt in (("me.html", me), ("trips.html", trips), ("local.html", local)):
     n = re.search(r'<nav class="tabbar"[^>]*>.*?</nav>', txt, re.S)
     nb = n.group(0) if n else ""
-    check("%s has five-grid tabbar" % name,
-          bool(nb) and all(w in nb for w in ["首页", "关注", "发布", "商业服务", "本地生活"]))
-check("local.html 点亮 本地生活", 'data-nav="local" class="loc on"' in local)
-check("me.html 五项都不点亮", "class=\"on\"" not in re.search(r'<nav class="tabbar".*?</nav>', me, re.S).group(0))
+    check("%s has six-grid tabbar" % name,
+          bool(nb) and all(w in nb for w in ["首页", "关注", "发布", "商业服务", "生活在韩国", "我的"]))
+check("local.html 点亮 生活在韩国", 'data-nav="local" class="loc on"' in local)
+check("me.html 点亮最后一个「我的」", 'data-nav="me" class="me on"' in me)
 
 # ---------- 3. pwa.js 注入/校正 tabbar ----------
 check("pwa.js mentions nav.tabbar", "nav.tabbar" in pwa_js)
@@ -82,9 +85,19 @@ check("community.css does not override tabbar", "nav:not(.tabbar)" in comm_css)
 check("body has-tabbar padding", "body.has-tabbar" in pwa_css)
 
 # ---------- 4. local.html 六个频道 ----------
+check("local 韩友圈是六宫格第一张且链到韩友圈首页",
+      "loc-grid" in local and local.split('class="loc-grid"', 1)[1].find("韩友圈") < local.split('class="loc-grid"', 1)[1].find("租房")
+      and 'href="/community"' in local and "<b>韩友圈</b>" in local
+      and "/community?board=daily" not in local)
 for board, label in (("rent", "租房"), ("jobs", "招聘"), ("used", "二手"),
-                     ("visa", "签证"), ("study", "留学"), ("daily", "在韩日常")):
-    check("local has %s" % label, ("/community?board=%s" % board) in local)
+                     ("visa", "签证"), ("study", "留学")):
+    check("local has %s" % label, ("/community?board=%s" % board) in local and label in local)
+check("local 标题是生活在韩国", "生活在韩国" in local and "在韩国生活的信息频道" not in local)
+check("pwa.js 含生活在韩国和我的", "生活在韩国" in pwa_js and "label:'我的'" in pwa_js and "label:'本地生活'" not in pwa_js)
+check("pwa.js currentKey 会点亮 /me", "p === '/me'" in pwa_js or 'p === "/me"' in pwa_js)
+check("pwa.js 为「我的」拉未读角标", "/api/me/summary" in pwa_js and "tab-dot" in pwa_js and "paintMeBadge" in pwa_js)
+check("pwa.css 生活在韩国 tab 单行缩小字号",
+      "nav.tabbar a.loc" in pwa_css and "white-space:nowrap" in pwa_css and "font-size:8px" in pwa_css)
 
 # ---------- 5. trips.html 即将上线 ----------
 check("trips is 即将上线", "即将上线" in trips or "即将" in trips)
@@ -94,7 +107,7 @@ check("trips links /itineraries", "/itineraries" in trips)
 check("trips has no sample store names",
       not any(w in trips for w in ["广藏市场", "星巴克", "明洞乐天免税", "北村韩屋"]))
 check("trips has back and me", 'href="/"' in trips and 'href="/me"' in trips)
-check("trips loads pwa.js?v=66", "/static/pwa.js?v=66" in trips)
+check("trips loads pwa.js?v=67", "/static/pwa.js?v=67" in trips)
 
 # ---------- 6. 禁词 ----------
 ALL = dict(PAGES)
@@ -119,7 +132,7 @@ check("home 韩友圈走 /api/community/posts", "/api/community/posts" in index)
 check("lanjing ad links /ads/lanjing", 'data-ad="lanjing"' in index and "ad-4.jpg" in index and 'href="/ads/lanjing"' in index)
 check("home 空状态有去处链接", "/places/new" in index and "/community/new" in index)
 
-# ---------- 8. 弹层不被底部五格导航遮挡（2026-11-17） ----------
+# ---------- 8. 弹层不被底部六格导航遮挡（2026-11-17） ----------
 # 追加到 test_home_nav.py 末尾（print 汇总之前）。复用已有的 me / pwa_css / comm_css 变量。
 check("me.html 打开弹层时加 lh-overlay-open", "classList.add('lh-overlay-open')" in me)
 check("me.html 关闭弹层时移除 lh-overlay-open", "classList.remove('lh-overlay-open')" in me)
