@@ -1,9 +1,10 @@
-## 2026-11-17 汉江青配色（sw v59）
+## 2026-11-17 汉江青配色（sw v60）
 
 - 全站主色由粉珊瑚 `#FF4F7B` 改为汉江青 `#146E68`，辅色 `#3D8F88`，行动强调色 `#B85A12`（仅按钮与高亮）
 - 背景 `#F3F7F6`，正文 `#1A2330`，次要文字 `#4A5560`，成功 `#1B7A45`，警示 `#B45309`
 - 同步更新 CSS 变量、theme-color、manifest、PWA 图标，以及 `/places` 页与后台推荐地点审核队列
-- 静态资源缓存改为 `?v=59`，Service Worker `lvhan-shell-v59`
+- 静态资源缓存改为 `?v=60`，Service Worker `lvhan-shell-v60`
+- 给图标、`pwa.css`、`guide.css`、`me.css`、`places.css` 加上版本号，避开 Cloudflare 4 小时缓存里的旧粉色文件
 - 补清头像底色、商家活动标签等残留玫红
 
 ## 2026-11-17 吃喝玩会员推荐地点（sw v57）

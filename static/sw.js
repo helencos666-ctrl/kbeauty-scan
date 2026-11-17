@@ -1,5 +1,5 @@
 /* 旅韩助手 service worker: cache app shell, never cache API or POST. */
-const CACHE = 'lvhan-shell-v59';
+const CACHE = 'lvhan-shell-v60';
 const SHELL = [
   '/',
   '/attractions',
@@ -28,15 +28,15 @@ const SHELL = [
   '/static/tips.html',
   '/static/faq.html',
   '/static/beauty.html',
-  '/static/guide.css',
+  '/static/guide.css?v=60',
   '/static/maps.js',
   '/static/phrases.js',
   '/static/subway.js',
   '/static/subway.json',
   '/static/stations.json',
-  '/static/community.css?v=59',
-  '/static/chat.css?v=59',
-  '/static/community.js?v=59',
+  '/static/community.css?v=60',
+  '/static/chat.css?v=60',
+  '/static/community.js?v=60',
   '/static/community.html',
   '/static/community-post.html',
   '/static/community-new.html',
@@ -55,20 +55,20 @@ const SHELL = [
   '/static/places.html',
   '/static/places-new.html',
   '/static/places-one.html',
-  '/static/places.css?v=57',
+  '/static/places.css?v=60',
   '/static/rate.html',
   '/static/privacy.html',
   '/static/terms.html',
   '/static/pwa.js',
   '/static/banners.js',
-  '/static/pwa.css',
+  '/static/pwa.css?v=60',
   '/manifest.webmanifest',
   '/static/manifest.webmanifest',
-  '/static/icons/icon-192.png',
-  '/static/icons/icon-512.png',
-  '/static/icons/icon-192-maskable.png',
-  '/static/icons/icon-512-maskable.png',
-  '/static/icons/apple-touch-icon.png'
+  '/static/icons/icon-192.png?v=60',
+  '/static/icons/icon-512.png?v=60',
+  '/static/icons/icon-192-maskable.png?v=60',
+  '/static/icons/icon-512-maskable.png?v=60',
+  '/static/icons/apple-touch-icon.png?v=60'
 ];
 
 self.addEventListener('install', event => {

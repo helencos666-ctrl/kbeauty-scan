@@ -7,7 +7,7 @@ OUT = Path("/workspace/kbeauty-scan/static/icons")
 OUT.mkdir(parents=True, exist_ok=True)
 FONT = "/usr/share/fonts/opentype/noto/NotoSansCJK-Bold.ttc"
 
-def gradient(size, c1=(255, 107, 143), c2=(255, 154, 107)):
+def gradient(size, c1=(0x14, 0x6E, 0x68), c2=(0x3D, 0x8F, 0x88)):
     img = Image.new("RGB", (size, size), c1)
     px = img.load()
     for y in range(size):

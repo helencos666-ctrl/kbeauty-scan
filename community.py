@@ -717,7 +717,7 @@ def bot_default_avatar():
                 return _bot_av
             except Exception:
                 pass
-    im = Image.new("RGB", (AVATAR_SIDE, AVATAR_SIDE), (255, 107, 143))
+    im = Image.new("RGB", (AVATAR_SIDE, AVATAR_SIDE), (20, 110, 104))
     buf = io.BytesIO()
     im.save(buf, "JPEG", quality=85, optimize=True)
     _bot_av = buf.getvalue()
