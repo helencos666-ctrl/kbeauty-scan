@@ -1,0 +1,67 @@
+/* 会员私信效果图补充样式：比现网会话略松一些 */
+body.chatpage{background:#fff6f8}
+.hintbar{margin:0 14px 10px;background:#fff;border-radius:12px;padding:10px 12px;font-size:12px;color:var(--sub);line-height:1.55;box-shadow:0 2px 10px rgba(255,79,123,.06)}
+.thrl{background:#fff;border-radius:16px;margin:0 14px;box-shadow:0 4px 16px rgba(255,79,123,.07);overflow:hidden}
+.thr{display:flex;gap:12px;align-items:center;padding:16px 14px;border-bottom:1px solid #f6eef1;text-decoration:none;color:inherit}
+.thr:last-child{border:0}
+.av{width:52px;height:52px;border-radius:50%;display:flex;align-items:center;justify-content:center;color:#fff;font-size:20px;font-weight:800;flex:none;position:relative;letter-spacing:0}
+.av.sm{width:36px;height:36px;font-size:14px}
+.av.md{width:40px;height:40px;font-size:16px}
+.av.p1{background:linear-gradient(135deg,#ff8fab,#ff4f7b)}
+.av.p2{background:linear-gradient(135deg,#7eb8ff,#3b82f6)}
+.av.p3{background:linear-gradient(135deg,#8ad7b0,#2fa36b)}
+.av.p4{background:linear-gradient(135deg,#ffb38a,#f97316)}
+.av.p5{background:linear-gradient(135deg,#c4b5fd,#7c3aed)}
+.avwrap{position:relative;flex:none}
+.badge{position:absolute;top:-4px;right:-4px;min-width:18px;height:18px;border-radius:9px;background:#ff3b30;color:#fff;font-size:11px;line-height:18px;text-align:center;padding:0 5px;font-weight:800;border:2px solid #fff}
+.tx{flex:1;min-width:0}
+.tx b{display:block;font-size:16px;font-weight:700;letter-spacing:-.02em}
+.tx p{margin:4px 0 0;font-size:13.5px;color:var(--sub);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.tm{font-size:11px;color:var(--sub);flex:none;text-align:right;align-self:flex-start;padding-top:2px;line-height:1.3}
+/* chat window */
+body.thread{background:#fff7f9;padding-bottom:0}
+.chhd{position:sticky;top:44px;z-index:8;background:rgba(255,246,248,.94);backdrop-filter:blur(10px);display:flex;align-items:center;gap:10px;padding:8px 12px 10px;border-bottom:1px solid #f0e3e7}
+.chhd .who{flex:1;min-width:0;display:flex;flex-direction:column}
+.chhd .nm{font-size:16px;font-weight:800}
+.chhd .sub{font-size:11px;color:var(--sub)}
+.chhd .more{width:36px;height:36px;border:0;background:transparent;font-size:20px;color:var(--ink)}
+.refchip{margin:10px 14px 0;background:#fff;border:1px solid #f0e3e7;border-radius:12px;padding:8px 12px;font-size:12px;color:var(--sub);display:flex;gap:8px;align-items:center}
+.refchip b{color:var(--ink);font-weight:700}
+.msgs{padding:12px 14px 8px;display:flex;flex-direction:column;gap:12px}
+.day{align-self:center;font-size:11px;color:#9aa0ad;background:#fff;border-radius:999px;padding:3px 10px;box-shadow:0 1px 4px rgba(0,0,0,.04)}
+.rowm{display:flex;gap:8px;align-items:flex-start;max-width:100%}
+.rowm.me{flex-direction:row-reverse}
+.rowm .av{margin-top:4px}
+.bub{max-width:76%;display:flex;flex-direction:column;gap:4px}
+.msg{padding:10px 13px;border-radius:16px;font-size:15.5px;line-height:1.55;background:#fff;box-shadow:0 2px 8px rgba(0,0,0,.05);word-break:break-word}
+.rowm.me .msg{background:#ffe3eb;border-bottom-right-radius:6px}
+.rowm:not(.me) .msg{border-bottom-left-radius:6px}
+.msg img.pic{display:block;width:210px;height:auto;border-radius:12px;margin:-2px -4px 6px}
+.mt{font-size:11px;color:var(--sub);padding:0 4px;display:flex;gap:8px;align-items:center}
+.rowm.me .mt{justify-content:flex-end}
+.trbtn{border:0;background:#fff;color:var(--pink);font-size:11px;font-weight:700;border-radius:999px;padding:2px 8px;box-shadow:0 1px 4px rgba(255,79,123,.12)}
+.trbox{margin-top:2px;background:#f4f7ff;color:#345;border-radius:12px;padding:8px 10px;font-size:13px;line-height:1.5}
+.trbox em{display:block;font-style:normal;font-size:10px;color:#7b8494;margin-bottom:2px}
+.sendbar{position:fixed;left:0;right:0;bottom:0;background:#fff;border-top:1px solid var(--line);padding:8px 10px 12px;display:flex;gap:8px;align-items:center;z-index:9}
+.plus{width:36px;height:36px;border-radius:12px;border:1px solid #f0e3e7;background:#fff6f8;font-size:22px;line-height:34px;text-align:center;color:var(--pink);flex:none}
+.sendbar .inp{flex:1;border:1px solid var(--line);border-radius:18px;padding:9px 14px;font-size:15px;color:#9aa0ad;background:#fafafa;min-height:38px}
+.sendbar .go{border:0;background:var(--pink);color:#fff;font-weight:800;font-size:14px;border-radius:16px;padding:9px 14px;flex:none}
+/* post entry */
+body.postpage{background:var(--bg)}
+.post{background:#fff;border-radius:16px;margin:0 14px 12px;padding:16px;box-shadow:0 4px 16px rgba(255,79,123,.07)}
+.post .meta{display:flex;gap:6px;flex-wrap:wrap;align-items:center;font-size:12px;color:var(--sub)}
+.post h2{font-size:19px;line-height:1.35;margin:10px 0 12px;letter-spacing:-.02em}
+.author{display:flex;align-items:center;gap:10px;margin-bottom:14px}
+.author .who{flex:1;min-width:0}
+.author .nm{font-size:15px;font-weight:800;display:flex;align-items:center;gap:6px}
+.acts{display:flex;gap:8px;flex:none}
+.btn.sm{padding:7px 12px;font-size:13px;border-radius:999px}
+.bodyt{font-size:15.5px;line-height:1.7;margin:0 0 12px}
+.postpic{width:100%;border-radius:14px;display:block;object-fit:cover;height:168px}
+.rowact{display:flex;justify-content:space-between;align-items:center;margin-top:14px;padding-top:12px;border-top:1px solid #f6eef1;font-size:13px;color:var(--sub)}
+.rowact .l{display:flex;gap:14px}
+.cmtbox{background:#fff;border-radius:16px;margin:0 14px 90px;padding:14px 16px 16px;box-shadow:0 4px 16px rgba(255,79,123,.07)}
+.cmtbox h3{margin:0 0 10px;font-size:15px}
+.cmt{display:flex;gap:8px;padding:10px 0;border-bottom:1px solid #f6eef1;font-size:14px;line-height:1.55}
+.cmt:last-child{border:0}
+.cmt .cn{color:var(--sub);font-size:12px;margin-top:2px}
