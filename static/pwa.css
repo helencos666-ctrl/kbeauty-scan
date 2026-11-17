@@ -48,3 +48,22 @@ body.has-tabbar{padding-bottom:calc(82px + env(safe-area-inset-bottom))}
 @media (min-width:640px){
   body nav.tabbar{left:50%;right:auto;width:100%;max-width:560px;transform:translateX(-50%);border-radius:16px 16px 0 0;border:1px solid #EEF1F0;border-bottom:0}
 }
+
+/* ===== 弹层打开时隐藏底部五格导航（2026-11-17） =====
+   tabbar 的 z-index:60 是用来压过普通页面内容的，这里不改它；
+   有弹层 / 大图 / 大字卡时用 visibility:hidden + pointer-events:none 把它藏起来，
+   避免导航（以及中间上浮的 ＋）盖住弹层下沿、简介输入和保存按钮。
+   body.lh-overlay-open 是「我的」页弹层用的兜底 class，单独成条规则，
+   不支持 :has() 的浏览器会忽略下面的规则但不影响这条。 */
+body.lh-overlay-open nav.tabbar{
+  visibility:hidden;
+  pointer-events:none;
+}
+/* :has() 覆盖全站其它浮层（2026 年 iOS Safari 已支持） */
+body:has(.sheet:not([hidden])) nav.tabbar,
+body:has(.preview-mask.show) nav.tabbar,
+body:has(.lightbox[style*="flex"]) nav.tabbar,
+body:has(#big[style*="flex"]) nav.tabbar{
+  visibility:hidden;
+  pointer-events:none;
+}

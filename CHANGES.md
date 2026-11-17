@@ -1,3 +1,13 @@
+## 2026-11-17 修复「我的 · 编辑资料」弹层被底部五格导航遮挡
+
+- `static/me.css`：`.sheet` 的 z-index 60 → 80（高于 `body nav.tabbar` 的 60）；`.sheet-in` 增加 `-webkit-overflow-scrolling:touch`、`overscroll-behavior:contain`，`max-height` 扣掉顶部安全区避免被裁切；`padding-bottom` 只保留 `env(safe-area-inset-bottom)`，不再叠加 58px 导航高度（打开弹层时导航已隐藏，否则保存按钮会悬空）；弹层内输入与按钮显式 `pointer-events:auto`。
+- `static/me.html`：弹层交互收成 `openSheet()` / `closeSheet()`，打开时给 `body` 加 `lh-overlay-open`，关闭按钮、点遮罩、保存成功后都会移除；昵称/简介输入改为 `type="text"`（不加 readonly），简介 `maxlength="40"`、`autocomplete="off"`；保存按钮 `#pGo` 仍位于 `.sheet-in` 文档流末尾。
+- `static/pwa.css`：新增规则，`body.lh-overlay-open` 以及 `body:has(...)` 命中 `.sheet` / `.preview-mask.show` / `.lightbox` / `#big` 打开态时隐藏 `nav.tabbar`（`visibility:hidden;pointer-events:none`）。tabbar 自身 z-index 保持 60，`#splash` 不动。
+- `static/community.css`：`.lightbox` z-index 50 → 80；`.preview-mask` 70 → 80，避免全站同类浮层被五格导航压住。
+- `static/index.html`（内联 CSS）：`#big` 的 z-index 50 → 80，其余属性不变。
+- 新增测试：`test/test_me_sheet.py`（纯静态层级/输入检查）、`test/test_me_profile.py`（简介保存 API）；`test/test_home_nav.py` 末尾补充对应断言。
+- 静态资源缓存改为 `?v=62`，Service Worker `lvhan-shell-v62`。
+
 ## 2026-11-17 后台标签栏待处理数量角标
 
 - 新增 `GET /api/admin/tab-counts`（仅管理员）：一次查询返回 12 个待处理队列的整数，键名与标签按钮的 `data-t` 一致；没有队列的标签不出现在返回里

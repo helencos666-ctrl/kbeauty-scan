@@ -109,7 +109,7 @@ body.compose .compose-top{position:fixed;left:0;right:0;top:0;z-index:12}
 .lh-toast{position:fixed;left:50%;bottom:calc(24px + env(safe-area-inset-bottom));transform:translateX(-50%) translateY(12px);background:#1A2330;color:#fff;font-size:14px;line-height:1.5;padding:10px 16px;border-radius:12px;max-width:86%;z-index:80;opacity:0;pointer-events:none;transition:opacity .2s,transform .2s}
 .lh-toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
 .lh-toast.ok{background:#1B7A45}
-.preview-mask{position:fixed;inset:0;background:rgba(31,35,48,.45);z-index:70;display:none;align-items:flex-end;justify-content:center}
+.preview-mask{position:fixed;inset:0;background:rgba(31,35,48,.45);z-index:80;display:none;align-items:flex-end;justify-content:center}
 .preview-mask.show{display:flex}
 .preview-sheet{background:#fff;border-radius:16px 16px 0 0;padding:18px 16px calc(18px + env(safe-area-inset-bottom));width:100%;max-width:560px;max-height:86vh;overflow:auto}
 .preview-sheet h3{margin:0 0 8px;font-size:18px;line-height:1.5}
@@ -117,7 +117,8 @@ body.compose .compose-top{position:fixed;left:0;right:0;top:0;z-index:12}
 .preview-sheet .phs{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin-top:12px}
 .preview-sheet .phs img{width:100%;aspect-ratio:1;object-fit:cover;border-radius:10px}
 .preview-sheet .phs img.one{grid-column:1/-1;aspect-ratio:4/3}
-.lightbox{position:fixed;inset:0;background:rgba(0,0,0,.92);display:none;align-items:center;justify-content:center;z-index:50}
+/* 大图浮层要高于 pwa.css 的底部五格导航（nav.tabbar 为 z-index:60），否则会被导航盖住下沿 */
+.lightbox{position:fixed;inset:0;background:rgba(0,0,0,.92);display:none;align-items:center;justify-content:center;z-index:80}
 .lightbox img{max-width:100%;max-height:100%}
 .empty,.loading{text-align:center;padding:28px 10px;color:var(--sub);font-size:14px}
 .qr{border:2px dashed #B7D4D1;border-radius:14px;padding:22px 10px;text-align:center;color:var(--sub);font-size:14px;background:#F7FBFA}

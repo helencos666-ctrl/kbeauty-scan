@@ -1,4 +1,4 @@
-"""纯静态检查：首页五格底部导航、?v=61 缓存版本、新页面（trips/local）与禁词。
+"""纯静态检查：首页五格底部导航、?v=62 缓存版本、新页面（trips/local）与禁词。
 不需要启服务，直接 python test/test_home_nav.py 即可。"""
 import os, re
 
@@ -36,14 +36,14 @@ PAGES = {
     "pwa.css": pwa_css, "pwa.js": pwa_js,
 }
 
-# ---------- 1. 缓存版本 v61 ----------
-check("sw.js CACHE is lvhan-shell-v61", "'lvhan-shell-v61'" in sw or '"lvhan-shell-v61"' in sw)
-check("sw.js uses ?v=61", "?v=61" in sw)
+# ---------- 1. 缓存版本 v62 ----------
+check("sw.js CACHE is lvhan-shell-v62", "'lvhan-shell-v62'" in sw or '"lvhan-shell-v62"' in sw)
+check("sw.js uses ?v=62", "?v=62" in sw)
 check("sw.js has no ?v=60", "?v=60" not in sw)
 for name, txt in PAGES.items():
-    check("%s uses ?v=61 (or tabbar)" % name, ("?v=61" in txt) or ("tabbar" in txt))
+    check("%s uses ?v=62 (or tabbar)" % name, ("?v=62" in txt) or ("tabbar" in txt))
     check("%s has no ?v=60" % name, "?v=60" not in txt)
-check("sw.js SHELL has four home ads", all("/static/home-ads/ad-%d.jpg?v=61" % i in sw for i in (1, 2, 3, 4)))
+check("sw.js SHELL has four home ads", all("/static/home-ads/ad-%d.jpg?v=62" % i in sw for i in (1, 2, 3, 4)))
 check("sw.js SHELL has /trips and /local", "'/trips'" in sw and "'/local'" in sw)
 check("sw.js SHELL has trips.html/local.html", "/static/trips.html" in sw and "/static/local.html" in sw)
 
@@ -94,7 +94,7 @@ check("trips links /itineraries", "/itineraries" in trips)
 check("trips has no sample store names",
       not any(w in trips for w in ["广藏市场", "星巴克", "明洞乐天免税", "北村韩屋"]))
 check("trips has back and me", 'href="/"' in trips and 'href="/me"' in trips)
-check("trips loads pwa.js?v=61", "/static/pwa.js?v=61" in trips)
+check("trips loads pwa.js?v=62", "/static/pwa.js?v=62" in trips)
 
 # ---------- 6. 禁词 ----------
 ALL = dict(PAGES)
@@ -118,6 +118,38 @@ check("home 附近推荐走 /api/places", "/api/places" in index)
 check("home 韩友圈走 /api/community/posts", "/api/community/posts" in index)
 check("lanjing ad links /ads/lanjing", 'data-ad="lanjing"' in index and "ad-4.jpg" in index and 'href="/ads/lanjing"' in index)
 check("home 空状态有去处链接", "/places/new" in index and "/community/new" in index)
+
+# ---------- 8. 弹层不被底部五格导航遮挡（2026-11-17） ----------
+# 追加到 test_home_nav.py 末尾（print 汇总之前）。复用已有的 me / pwa_css / comm_css 变量。
+check("me.html 打开弹层时加 lh-overlay-open", "classList.add('lh-overlay-open')" in me)
+check("me.html 关闭弹层时移除 lh-overlay-open", "classList.remove('lh-overlay-open')" in me)
+check("me.html 弹层有 openSheet/closeSheet", "function openSheet(" in me and "function closeSheet(" in me)
+check("me.html 保存成功后关闭弹层", "closeSheet(); load();" in me)
+check("me.html 点遮罩只在 target===this 时关闭", "e.target === this" in me)
+_pbio = re.search(r'<input[^>]*id="pBio"[^>]*>', me)
+_pbio_s = _pbio.group(0) if _pbio else ""
+check("me.html 简介输入可编辑且限 40 字",
+      bool(_pbio) and "readonly" not in _pbio_s.lower() and 'maxlength="40"' in _pbio_s, _pbio_s)
+check("me.html 编辑资料有保存按钮 #pGo", 'id="pGo"' in me)
+
+_navz = re.search(r'body nav\.tabbar\{[^}]*z-index:(\d+)', pwa_css)
+check("pwa.css tabbar 仍为 z-index 60", bool(_navz) and _navz.group(1) == "60",
+      _navz.group(1) if _navz else "missing")
+check("pwa.css 弹层打开时隐藏 tabbar",
+      re.search(r'body\.lh-overlay-open nav\.tabbar\s*\{[^}]*visibility:hidden', pwa_css) is not None)
+check("pwa.css 用 :has 覆盖弹层/预览/大图/大字卡",
+      all(s in pwa_css for s in ("body:has(.sheet:not([hidden])) nav.tabbar",
+                                  "body:has(.preview-mask.show) nav.tabbar",
+                                  'body:has(.lightbox[style*="flex"]) nav.tabbar',
+                                  'body:has(#big[style*="flex"]) nav.tabbar')))
+
+_lb = re.search(r'\.lightbox\{[^}]*z-index:(\d+)', comm_css)
+_pm = re.search(r'\.preview-mask\{[^}]*z-index:(\d+)', comm_css)
+check("community.css .lightbox 高于 tabbar", bool(_lb) and int(_lb.group(1)) > 60,
+      _lb.group(1) if _lb else "missing")
+check("community.css .preview-mask 高于 tabbar", bool(_pm) and int(_pm.group(1)) > 60,
+      _pm.group(1) if _pm else "missing")
+
 
 print("%s passed, %s failed" % (ok, fail))
 if fail:

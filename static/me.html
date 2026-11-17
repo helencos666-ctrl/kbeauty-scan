@@ -9,11 +9,11 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="旅韩助手">
 <link rel="manifest" href="/manifest.webmanifest">
-<link rel="apple-touch-icon" href="/static/icons/apple-touch-icon.png?v=61">
-<link rel="icon" type="image/png" sizes="192x192" href="/static/icons/icon-192.png?v=61">
-<link rel="stylesheet" href="/static/pwa.css?v=61">
-<link rel="stylesheet" href="/static/community.css?v=61">
-<link rel="stylesheet" href="/static/me.css?v=61">
+<link rel="apple-touch-icon" href="/static/icons/apple-touch-icon.png?v=62">
+<link rel="icon" type="image/png" sizes="192x192" href="/static/icons/icon-192.png?v=62">
+<link rel="stylesheet" href="/static/pwa.css?v=62">
+<link rel="stylesheet" href="/static/community.css?v=62">
+<link rel="stylesheet" href="/static/me.css?v=62">
 </head>
 <body class="mepage">
 <div class="metop">我的<a class="bell" href="/community/notices" aria-label="通知">🔔<span class="dot" id="bellDot" hidden></span></a></div>
@@ -51,7 +51,7 @@
   <p class="tip" style="text-align:center">旅韩助手为个人运营的免费信息网站，内容仅供参考。<br><a href="/terms" style="color:#2c7be5">用户协议</a> · <a href="/privacy" style="color:#2c7be5">隐私政策</a></p>
 </main>
 
-<div class="sheet" id="sheet" hidden><div class="sheet-in"><div class="sheet-h"><b id="shT"></b><button type="button" class="x" id="shX" aria-label="关闭">✕</button></div><div id="shB"></div></div></div>
+<div class="sheet" id="sheet" role="dialog" aria-modal="true" aria-labelledby="shT" hidden><div class="sheet-in"><div class="sheet-h"><b id="shT"></b><button type="button" class="x" id="shX" aria-label="关闭">✕</button></div><div id="shB"></div></div></div>
 
 <nav class="tabbar" aria-label="底部导航">
   <a href="/" data-nav="home"><i>🏠</i>首页</a>
@@ -60,15 +60,25 @@
   <a href="/shops?tab=services" data-nav="services" class="svc"><i>💼</i>商业服务</a>
   <a href="/local" data-nav="local" class="loc"><i>🏘️</i>本地生活</a>
 </nav>
-<script src="/static/community.js?v=61"></script>
+<script src="/static/community.js?v=62"></script>
 <script src="/static/ref.js"></script>
 <script>
 (function(){
   var $ = function(id){ return document.getElementById(id); }, E = LH.esc, ME = null;
   function err(m){ LH.showErr($('err'), m); }
-  function sheet(title, html){ $('shT').textContent = title; $('shB').innerHTML = html; $('sheet').hidden = false; }
-  $('shX').onclick = function(){ $('sheet').hidden = true; };
-  $('sheet').onclick = function(e){ if (e.target === this) this.hidden = true; };
+  /* 弹层开关收成两个函数：打开时给 body 加 lh-overlay-open（pwa.css 里据此隐藏底部五格导航），
+     关闭时一定去掉，避免关闭按钮 / 点遮罩 / 保存成功后漏删 class 导致导航一直隐藏。 */
+  function openSheet(title, html){
+    $('shT').textContent = title; $('shB').innerHTML = html; $('sheet').hidden = false;
+    document.body.classList.add('lh-overlay-open');
+  }
+  function closeSheet(){
+    $('sheet').hidden = true; $('shB').innerHTML = '';
+    document.body.classList.remove('lh-overlay-open');
+  }
+  $('shX').onclick = closeSheet;
+  $('sheet').onclick = function(e){ if (e.target === this) closeSheet(); };
+  document.addEventListener('keydown', function(e){ if (e.key === 'Escape' && !$('sheet').hidden) closeSheet(); });
   function avHTML(u){
     var src = u && u.has_avatar ? '/api/community/avatar/' + u.id + '?t=' + Date.now() : '';
     return '<span class="av av-xl' + (src ? '' : ' fb') + '">' + (src ? '<img src="' + src + '" alt="" data-avfb="1">' : '') +
@@ -97,23 +107,23 @@
     $('avBtn').onclick = function(){ LH.pickAvatar(function(){ load(); }); };
     $('edBtn').onclick = editProfile;
     $('lvBtn').onclick = function(e){ e.preventDefault();
-      sheet('等级说明', '<p class="tip" style="font-size:14px">等级按<b>累计获得</b>的旅行豆计算（花掉不降级）。你已累计 ' + lv.earned + ' 豆' + (lv.next ? '，再得 ' + (lv.next - lv.earned) + ' 豆升到 LV.' + (lv.lv + 1) : '，已满级') + '。</p>' +
+      openSheet('等级说明', '<p class="tip" style="font-size:14px">等级按<b>累计获得</b>的旅行豆计算（花掉不降级）。你已累计 ' + lv.earned + ' 豆' + (lv.next ? '，再得 ' + (lv.next - lv.earned) + ' 豆升到 LV.' + (lv.lv + 1) : '，已满级') + '。</p>' +
         '<table class="lvt"><tr><th>等级</th><th>累计旅行豆</th></tr><tr><td>LV.1</td><td>0</td></tr><tr><td>LV.2</td><td>100</td></tr><tr><td>LV.3</td><td>300</td></tr><tr><td>LV.4</td><td>800</td></tr><tr><td>LV.5</td><td>2000</td></tr><tr><td>LV.6</td><td>5000</td></tr></table>' +
         '<a class="btn primary block" href="/points" style="margin-top:12px">去签到领豆</a>'); };
   }
   function editProfile(){
-    sheet('编辑资料', '<label class="f">昵称（2–16 字）</label><input class="f" id="pNick" maxlength="16" value="' + E(ME.nickname) + '">' +
-      '<label class="f">一句话简介（选填，不超过 40 字）</label><input class="f" id="pBio" maxlength="40" value="' + E(ME.bio || '') + '" placeholder="例如：12 月首尔自由行，爱逛药妆店">' +
+    openSheet('编辑资料', '<label class="f" for="pNick">昵称（2–16 字）</label><input class="f" type="text" id="pNick" maxlength="16" autocomplete="off" value="' + E(ME.nickname) + '">' +
+      '<label class="f" for="pBio">一句话简介（选填，不超过 40 字）</label><input class="f" type="text" id="pBio" maxlength="40" autocomplete="off" value="' + E(ME.bio || '') + '" placeholder="例如：12 月首尔自由行，爱逛药妆店">' +
       '<p class="tip">简介里不能留微信、电话等站外联系方式。</p><div class="err" id="pErr"></div><button class="btn primary block" id="pGo">保存</button>');
     $('pGo').onclick = async function(){
       this.disabled = true;
-      try { await LH.api('POST', '/api/me/profile', {nickname: $('pNick').value, bio: $('pBio').value}); $('sheet').hidden = true; load(); }
+      try { await LH.api('POST', '/api/me/profile', {nickname: $('pNick').value, bio: $('pBio').value}); closeSheet(); load(); }
       catch(e){ LH.showErr($('pErr'), e.message); }
       this.disabled = false;
     };
   }
   $('mFb').onclick = function(e){ e.preventDefault();
-    sheet('意见反馈', '<p class="tip" style="margin-top:0">哪里不好用、想要什么功能，都可以写。请不要填写手机号、微信等个人信息。</p><textarea class="f" id="fbT" rows="5" maxlength="500" placeholder="4–500 字"></textarea><div class="err" id="fbE"></div><button class="btn primary block" id="fbGo">提交</button>');
+    openSheet('意见反馈', '<p class="tip" style="margin-top:0">哪里不好用、想要什么功能，都可以写。请不要填写手机号、微信等个人信息。</p><textarea class="f" id="fbT" rows="5" maxlength="500" placeholder="4–500 字"></textarea><div class="err" id="fbE"></div><button class="btn primary block" id="fbGo">提交</button>');
     $('fbGo').onclick = async function(){
       this.disabled = true;
       try { await LH.api('POST', '/api/me/feedback', {body: $('fbT').value, page: '/me'}); $('shB').innerHTML = '<p style="font-size:15px">谢谢反馈，我们会认真看。</p>'; }
@@ -126,12 +136,12 @@
     h += '<a href="#" id="sClr"><span class="e">🧹</span>清除本机翻译记录与缓存<span class="ar">›</span></a>' +
       '<a href="/privacy"><span class="e">🔒</span>隐私政策<span class="ar">›</span></a><a href="/terms"><span class="e">📄</span>用户协议<span class="ar">›</span></a>';
     if (ME) h += '<a href="/member"><span class="e">🗑️</span>注销账号（在会员页底部）<span class="ar">›</span></a><a href="#" id="sOut"><span class="e">🚪</span>退出登录<span class="ar">›</span></a>';
-    sheet('设置', h + '</div>');
+    openSheet('设置', h + '</div>');
     $('sClr').onclick = function(ev){ ev.preventDefault(); try { ['lh_hist_v2', 'lh_tc_v2'].forEach(function(k){ localStorage.removeItem(k); }); } catch(x){} this.querySelector('.ar').textContent = '已清除'; };
     if (ME){
       $('sOut').onclick = async function(ev){ ev.preventDefault(); try { await LH.api('POST', '/api/community/logout', {}); } catch(x){} location.reload(); };
       $('sPw').onclick = function(ev){ ev.preventDefault();
-        sheet('修改密码', '<label class="f">原密码</label><input class="f" type="password" id="pwO" autocomplete="current-password"><label class="f">新密码（8 位以上）</label><input class="f" type="password" id="pwN" autocomplete="new-password"><div class="err" id="pwE"></div><button class="btn primary block" id="pwGo">保存</button>');
+        openSheet('修改密码', '<label class="f">原密码</label><input class="f" type="password" id="pwO" autocomplete="current-password"><label class="f">新密码（8 位以上）</label><input class="f" type="password" id="pwN" autocomplete="new-password"><div class="err" id="pwE"></div><button class="btn primary block" id="pwGo">保存</button>');
         $('pwGo').onclick = async function(){ try { await LH.api('POST', '/api/community/password', {old: $('pwO').value, new: $('pwN').value}); $('shB').innerHTML = '<p>密码已修改，其他设备已退出登录。</p>'; } catch(x){ LH.showErr($('pwE'), x.message); } };
       };
     }
