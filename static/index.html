@@ -1202,6 +1202,15 @@ async function makeCard(text,opts){
   }catch(e){if(e&&e.name==='AbortError')return;$('cardOut').innerHTML='';showErr(e.message||'网络错误，请重试')}
   finally{if(ctl===cardCtl){cardBusy=false;cardCtl=null;$('cardBtn').disabled=false}}
 }
+async function fillBack(it,key){
+  try{
+    const j=await postJSON('/api/back',{ko:it.ko});
+    it.back=j.zh||'';
+    if(curItem===it&&$('cBack')) $('cBack').textContent='中文回译：'+(it.back||'（暂无）');
+    if(key&&it.back){const c=tcGet(key);if(c){c.back=it.back;tcPut(key,c)}}
+    addHist(it);
+  }catch(e){if(curItem===it&&$('cBack')) $('cBack').textContent='中文回译：暂时无法核对'}
+}
 $('cardBtn').onclick=()=>makeCard();
 $('cardIn').addEventListener('input',()=>{if($('cardIn').value.trim())hideErr();syncClearBtn()});
 if($('cardClear')) $('cardClear').onclick=()=>clearCardInput();
