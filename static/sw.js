@@ -1,5 +1,5 @@
 /* 旅韩助手 service worker: cache app shell, never cache API or POST. */
-const CACHE = 'lvhan-shell-v49';
+const CACHE = 'lvhan-shell-v50';
 const SHELL = [
   '/',
   '/attractions',
@@ -95,20 +95,29 @@ function isHtml(request, url) {
 
 async function networkFirst(request) {
   const cache = await caches.open(CACHE);
-  try {
-    const fresh = await fetch(request);
+  const cachedP = cache.match(request, { ignoreSearch: true });
+  const freshP = fetch(request).then(fresh => {
     if (fresh && fresh.ok && fresh.type !== 'opaque') {
       cache.put(request, fresh.clone());
     }
     return fresh;
+  });
+  // iOS 返回时若只等网络，页面会长时间白屏；1.5 秒内没回来就先用缓存壳，再靠页面恢复路线
+  const timed = new Promise((_, reject) => setTimeout(() => reject(new Error('timeout')), 1500));
+  try {
+    return await Promise.race([freshP, timed]);
   } catch (err) {
-    const cached = await cache.match(request, { ignoreSearch: true });
+    const cached = await cachedP;
     if (cached) return cached;
-    if (request.mode === 'navigate') {
-      const fallback = await cache.match('/') || await cache.match('/static/index.html');
-      if (fallback) return fallback;
+    try {
+      return await freshP;
+    } catch (err2) {
+      if (request.mode === 'navigate') {
+        const fallback = await cache.match('/') || await cache.match('/static/index.html');
+        if (fallback) return fallback;
+      }
+      throw err2;
     }
-    throw err;
   }
 }
 

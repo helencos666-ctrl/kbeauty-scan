@@ -64,13 +64,24 @@ textarea{width:100%;min-height:90px;border:1px solid var(--line);border-radius:1
 .phrase{display:flex;align-items:center;gap:10px;background:#fff;border-radius:14px;padding:13px 14px;margin-bottom:9px;box-shadow:0 2px 8px rgba(0,0,0,.04);cursor:pointer}
 .phrase .t{flex:1}.phrase .zh{font-size:16px;font-weight:600}.phrase .k{font-size:14px;color:var(--sub);margin-top:2px}
 .phrase .sp{border:0;background:#ffe8ee;color:var(--pink);border-radius:50%;width:40px;height:40px;font-size:18px;flex:none}
-#big{display:none;position:fixed;inset:0;background:#fff;z-index:50;padding:24px 20px calc(24px + env(safe-area-inset-bottom));flex-direction:column}
-#big .bk{flex:1;display:flex;align-items:center;justify-content:center;text-align:center;font-size:44px;font-weight:800;line-height:1.35;word-break:keep-all}
-#big .bk.long{font-size:26px;line-height:1.5;overflow-y:auto;display:block;padding-top:8px}
-#big .bz{text-align:center;font-size:18px;color:var(--sub);margin:10px 0}
-#big .br{text-align:center;font-size:15px;color:#999;margin-bottom:16px}
-#big .bb{display:flex;gap:10px}
-#big .bb button{flex:1;border:0;border-radius:14px;padding:16px;font-size:18px;font-weight:700}
+#big{display:none;position:fixed;inset:0;background:#fff;z-index:50;padding:calc(14px + env(safe-area-inset-top)) 16px calc(14px + env(safe-area-inset-bottom));flex-direction:column;overflow:hidden}
+#big .bk{flex:1;min-height:0;overflow:auto;-webkit-overflow-scrolling:touch;display:flex;align-items:center;justify-content:center;text-align:center;font-size:44px;font-weight:800;line-height:1.35;word-break:keep-all}
+#big .bk.long{font-size:26px;line-height:1.5;display:block;padding-top:8px;align-items:stretch}
+#big .bz{text-align:center;font-size:16px;color:var(--sub);margin:8px 0;flex:none}
+#big .br{text-align:center;font-size:14px;color:#999;margin-bottom:10px;flex:none}
+#big .bb{display:flex;gap:10px;flex:none}
+#big .bb button{flex:1;border:0;border-radius:14px;padding:14px 8px;font-size:16px;font-weight:700}
+#big .btoggle{display:none;gap:8px;margin:0 0 10px;flex:none}
+#big.route-card .btoggle{display:flex}
+#big .btoggle button{flex:1;border:1.5px solid #e3e5ea;background:#fff;border-radius:12px;padding:10px 8px;font-size:15px;font-weight:700;color:#1f2330}
+#big .btoggle button.on{border-color:#ff4d6d;background:#fff5f7;color:#ff4f7b}
+#big.route-card .bk{display:block;text-align:left;padding:0}
+#big .bk .dest{font-size:1.05em;font-weight:800;line-height:1.3;text-align:center;word-break:keep-all}
+#big .bk .dest-addr{display:block;font-size:.42em;font-weight:600;color:#6b7080;margin-top:6px;word-break:break-all;line-height:1.35}
+#big .bk ol.steps{margin:10px 0 0;padding:0;list-style:none}
+#big .bk ol.steps li{display:flex;gap:10px;align-items:flex-start;padding:8px 0;border-top:1px dashed #ececec;font-size:.62em;font-weight:700;line-height:1.4;word-break:keep-all}
+#big .bk ol.steps li:first-child{border-top:0;padding-top:0}
+#big .bk ol.steps .n{flex:none;width:1.55em;height:1.55em;border-radius:50%;background:#1f2330;color:#fff;font-size:.75em;display:flex;align-items:center;justify-content:center;margin-top:.12em}
 .promo .prod{display:flex;gap:12px;align-items:center;padding:10px;border-radius:12px;margin-bottom:8px}
 .prod.red{background:#fff0f2}.prod.yellow{background:#fff9e6}
 .dot{width:44px;height:44px;border-radius:12px;flex:none}
@@ -428,6 +439,10 @@ body.is-home .disclaimer{display:none}
 <input type="file" id="fPick" accept="image/*" hidden>
 
 <div id="big">
+  <div class="btoggle" id="bigToggle">
+    <button type="button" data-m="dest" id="bigDestOnly">只显示目的地</button>
+    <button type="button" data-m="full" id="bigFullRoute" class="on">完整路线</button>
+  </div>
   <div class="bk" id="bigKo"></div>
   <div class="bz" id="bigZh"></div>
   <div class="br" id="bigRo"></div>
@@ -543,14 +558,24 @@ function speak(ko, btn){
 }
 function fitBig(){
   const el=$('bigKo');if(!el) return;
+  if($('big').classList.contains('route-card')){fitRouteCard($('big').dataset.mode==='dest');return}
   let fs=Math.min(64,Math.max(28,Math.floor(window.innerWidth/6)));
   el.style.fontSize=fs+'px';
   let guard=0;
-  while(guard++<30&&fs>18&&(el.scrollHeight>el.clientHeight+2||el.scrollWidth>el.clientWidth+2)){fs-=3;el.style.fontSize=fs+'px'}
+  while(guard++<40&&fs>18&&(el.scrollHeight>el.clientHeight+2||el.scrollWidth>el.clientWidth+2)){fs-=2;el.style.fontSize=fs+'px'}
+}
+function hideBig(){
+  $('big').style.display='none';
+  $('big').classList.remove('route-card');
+  $('big').dataset.mode='';
+  $('bigKo').innerHTML='';$('bigKo').textContent='';$('bigKo').style.fontSize='';
+  $('bigKo').classList.remove('long','flip');$('bigZh').classList.remove('flip');
+  stopAudio();
 }
 // main：大字内容；sub：下面小字；ro：发音；say：朗读的韩文（null 则不显示朗读）
 function showBig(main,sub,ro,say){
   if(say===undefined) say=main;
+  hideBig();
   $('bigKo').textContent=main;$('bigKo').classList.remove('long','flip');$('bigZh').classList.remove('flip');
   $('bigZh').textContent=sub||'';$('bigRo').textContent=ro?('发音：'+ro):'';
   $('big').style.display='flex';
@@ -558,9 +583,56 @@ function showBig(main,sub,ro,say){
   $('bigSpk').onclick=()=>say&&speak(say,$('bigSpk'));
   requestAnimationFrame(fitBig);
 }
-$('bigClose').onclick=()=>{$('big').style.display='none';stopAudio()};
+$('bigClose').onclick=hideBig;
 $('bigFlip').onclick=()=>{$('bigKo').classList.toggle('flip');$('bigZh').classList.toggle('flip')};
 window.addEventListener('resize',()=>{if($('big').style.display==='flex') fitBig()});
+
+let _routeCard=null;
+function fitRouteCard(destOnly){
+  const el=$('bigKo');if(!el) return;
+  let fs=destOnly?Math.min(64,Math.max(36,Math.floor(window.innerWidth/7))):Math.min(34,Math.max(18,Math.floor(window.innerWidth/11)));
+  const min=destOnly?26:16;
+  el.style.fontSize=fs+'px';
+  let guard=0;
+  while(guard++<50&&fs>min&&el.scrollHeight>el.clientHeight+2){fs-=1;el.style.fontSize=fs+'px'}
+}
+function routeCardSay(opt,only){
+  const parts=[opt.destKo];
+  if(opt.destAddr) parts[0]+=(' '+opt.destAddr);
+  if(!only&&opt.steps&&opt.steps.length) parts.push(opt.steps.map((s,i)=>(i+1)+'. '+s).join('\n'));
+  return parts.filter(Boolean).join('\n');
+}
+function paintRouteCard(){
+  const opt=_routeCard;if(!opt) return;
+  const box=$('big');
+  const only=box.dataset.mode==='dest';
+  box.querySelectorAll('.btoggle button').forEach(b=>b.classList.toggle('on',b.dataset.m===(only?'dest':'full')));
+  const el=$('bigKo');
+  el.classList.remove('flip');$('bigZh').classList.remove('flip');
+  el.classList.toggle('long',!only);
+  const addr=opt.destAddr?`<span class="dest-addr">${esc(opt.destAddr)}</span>`:'';
+  let html=`<div class="dest">${esc(opt.destKo)}${addr}</div>`;
+  if(!only&&opt.steps&&opt.steps.length){
+    html+=`<ol class="steps">${opt.steps.map((s,i)=>`<li><span class="n">${i+1}</span><span>${esc(s)}</span></li>`).join('')}</ol>`;
+  }
+  el.innerHTML=html;
+  const say=routeCardSay(opt,only);
+  $('bigSpk').style.display='';
+  $('bigSpk').onclick=()=>speak(say,$('bigSpk'));
+  requestAnimationFrame(()=>fitRouteCard(only));
+}
+function showRouteCard(opt){
+  _routeCard=opt;
+  const box=$('big');
+  box.classList.add('route-card');
+  box.dataset.mode=box.dataset.mode||'full';
+  $('bigZh').textContent=opt.destZh||'';
+  $('bigRo').textContent='';
+  box.style.display='flex';
+  paintRouteCard();
+}
+$('bigDestOnly').onclick=()=>{$('big').dataset.mode='dest';paintRouteCard()};
+$('bigFullRoute').onclick=()=>{$('big').dataset.mode='full';paintRouteCard()};
 
 // ---------- 拍照 ----------
 let mode='cos';
@@ -651,6 +723,94 @@ let myPos=null;
 function isPlace(o){return o&&o.kind==='place'}
 function ptOf(o){return isPlace(o)?{x:+o.x,y:+o.y,name:o.ko||o.name}:{x:o.p[0],y:o.p[1],name:o.ko+'역'}}
 function labelOf(o){return isPlace(o)?o.name:stName(o)}
+const RT_SAVE='lh_last_route_v1';
+function slimPt(o){
+  if(!o) return null;
+  if(isPlace(o)) return {kind:'place',name:o.name,ko:o.ko||o.name,x:+o.x,y:+o.y,addr:o.addr||'',cat:o.cat||''};
+  return {kind:'st',i:o.i,ko:o.ko,zh:o.zh,en:o.en,p:o.p};
+}
+function hydratePt(o){
+  if(!o) return null;
+  if(o.kind==='place'||(o.x!=null&&o.y!=null&&o.i==null)) return o;
+  try{
+    const D=LHSub.data();
+    if(D&&o.i!=null&&D.st[o.i]) return D.st[o.i];
+    if(o.ko){const s=LHSub.byKo(String(o.ko).replace(/역$/,''));if(s) return s}
+  }catch(e){}
+  return o;
+}
+function saveLastRoute(kind,data){
+  try{
+    const rest=Object.assign({},data||{});
+    delete rest.kind;delete rest.from;delete rest.to;delete rest.pick;delete rest.myPos;delete rest.scroll;delete rest.ts;
+    if(location.pathname==='/'&&!/[?&]tab=sub(?:&|$)/.test(location.search)){
+      try{history.replaceState({t:'sub'},'','/?tab=sub')}catch(e){}
+    }
+    const payload=Object.assign(rest,{kind,from:$('rtFrom')&&$('rtFrom').value||'',to:$('rtTo')&&$('rtTo').value||'',pick:{rtFrom:slimPt(rtPick.rtFrom),rtTo:slimPt(rtPick.rtTo)},myPos,scroll:window.scrollY,ts:Date.now()});
+    sessionStorage.setItem(RT_SAVE,JSON.stringify(payload));
+  }catch(e){}
+}
+function loadLastRoute(){
+  try{const s=JSON.parse(sessionStorage.getItem(RT_SAVE)||'');return s&&s.kind?s:null}catch(e){return null}
+}
+async function restoreLastRoute(){
+  const s=loadLastRoute();if(!s) return false;
+  try{
+    if($('rtFrom')&&s.from) $('rtFrom').value=s.from;
+    if($('rtTo')&&s.to) $('rtTo').value=s.to;
+    if(s.pick){rtPick.rtFrom=hydratePt(s.pick.rtFrom);rtPick.rtTo=hydratePt(s.pick.rtTo)}
+    if(s.myPos) myPos=s.myPos;
+    showTab('sub',false);
+    if(location.search.indexOf('tab=sub')<0) try{history.replaceState({t:'sub'},'','/?tab=sub')}catch(e){}
+    await LHSub.load();
+    if(s.kind==='transit') renderTransit(hydratePt(s.A),hydratePt(s.B),s.j,s.sel||0);
+    else if(s.kind==='subway') renderRoute(hydratePt(s.A),hydratePt(s.B),s.r,s.alts||[]);
+    else if(s.kind==='fallback') subwayFallback(hydratePt(s.A),hydratePt(s.B),s.why||'');
+    else if(s.kind==='html'&&s.html){$('rtOut').innerHTML=s.html}
+    else return false;
+    if(s.scroll) requestAnimationFrame(()=>window.scrollTo(0,s.scroll));
+    return true;
+  }catch(e){return false}
+}
+function openExternalMap(url,ev){
+  if(!url) return false;
+  let w=null;
+  try{w=window.open(url,'_blank','noopener')}catch(e){}
+  if(w){
+    if(ev){ev.preventDefault();ev.stopPropagation()}
+    try{w.opener=null}catch(e){}
+    return true;
+  }
+  // window.open 被拦时，不拦截默认的 target=_blank，避免既打不开地图又把当前页弄成白页
+  return false;
+}
+document.addEventListener('click',function(ev){
+  const a=ev.target.closest&&ev.target.closest('#rtMaps a, .route-links a');
+  if(!a||!a.href) return;
+  if(a.origin===location.origin) return;
+  if(ev.metaKey||ev.ctrlKey||ev.shiftKey||ev.altKey||ev.button) return;
+  const s=loadLastRoute();
+  if(s) saveLastRoute(s.kind,{A:s.A,B:s.B,j:s.j,sel:s.sel,r:s.r,alts:s.alts,why:s.why,html:s.html});
+  else if($('rtOut')&&$('rtOut').innerHTML) saveLastRoute('html',{html:$('rtOut').innerHTML});
+  openExternalMap(a.href,ev);
+},true);
+function destKoOf(B){const n=ptOf(B).name;return n+(/에 가려고 해요\.?$/.test(n)?'':'에 가려고 해요.')}
+function destZhOf(B){return '我想去'+labelOf(B)}
+function transitSteps(r){
+  return (r.steps||[]).filter(s=>s.t==='bus'||s.t==='subway').map(s=>{
+    const a=s.stops[0]||'', b=s.stops[s.stops.length-1]||'';
+    if(s.t==='bus') return a+'에서 '+(s.veh[0]||{}).n+'번 버스 타고 '+b+'에서 내리기';
+    const an=/역$/.test(a)?a:a+'역', bn=/역$/.test(b)?b:b+'역';
+    return an+'에서 '+(s.veh[0]||{}).n+' 타고 '+bn+'에서 내리기';
+  });
+}
+function subwaySteps(r){
+  const D=LHSub.data(), L=i=>D.lines[i], S=i=>D.st[i];
+  return (r.legs||[]).map(lg=>{
+    const a=S(lg.from), b=S(lg.to), l=L(lg.line);
+    return a.ko+'역에서 '+l.ko+' 타고 '+b.ko+'역에서 내리기';
+  });
+}
 function hav(a,b){const R=6371000,r=Math.PI/180,dla=(b[1]-a[1])*r,dlo=(b[0]-a[0])*r;const h=Math.sin(dla/2)**2+Math.cos(a[1]*r)*Math.cos(b[1]*r)*Math.sin(dlo/2)**2;return 2*R*Math.asin(Math.sqrt(h))}
 const placeCache={};
 async function placeSearch(q){
@@ -743,10 +903,11 @@ function renderTransit(A,B,j,sel){
   const bn=ptOf(B).name;
   const ko=`${bn}에 가려고 해요.\n`+ride.map(s=>s.t==='bus'?`${s.stops[0]}에서 ${(s.veh[0]||{}).n}번 버스 타고 ${s.stops[s.stops.length-1]}에서 내리기`:`${s.stops[0]}역에서 ${(s.veh[0]||{}).n} 타고 ${s.stops[s.stops.length-1]}역에서 내리기`).join(' → ')+'\n이렇게 가면 맞나요?';
   const zh=`我想去${labelOf(B)}，这样坐对吗？`;
-  $('rtStaff').onclick=()=>showBig(ko,zh,'',ko);
+  $('rtStaff').onclick=()=>showRouteCard({destKo:destKoOf(B),destZh:zh,destAddr:isPlace(B)&&(B.addr||'')||'',steps:transitSteps(r),say:ko});
   const pa=ptOf(A),pb=ptOf(B);
   const nv=LHMap.naverRoute({name:pa.name,lng:pa.x,lat:pa.y},{name:pb.name,lng:pb.x,lat:pb.y});
-  $('rtMaps').innerHTML=(j.link?`<a class="naver" href="${esc(j.link)}" target="_blank" rel="noopener">在 Kakao 地图看实景路线</a>`:'')+`<a class="amap" href="${esc(nv)}" target="_blank" rel="noopener">Naver 地图</a>`;
+  $('rtMaps').innerHTML=(j.link?`<a class="naver" href="${esc(j.link)}" target="_blank" rel="noopener noreferrer">在 Kakao 地图看实景路线</a>`:'')+`<a class="amap" href="${esc(nv)}" target="_blank" rel="noopener noreferrer">Naver 地图</a>`;
+  saveLastRoute('transit',{A:slimPt(A),B:slimPt(B),j,sel});
 }
 function kakaoLink(A,B){const a=ptOf(A),b=ptOf(B);return 'https://map.kakao.com/link/by/traffic/'+encodeURIComponent(a.name)+','+a.y+','+a.x+'/'+encodeURIComponent(b.name)+','+b.y+','+b.x}
 function nearestSt(o){const p=ptOf(o);let best=null,bd=1e12;LHSub.data().st.forEach(s=>{const d=hav([p.x,p.y],s.p);if(d<bd){bd=d;best=s}});return {s:best,d:bd}}
@@ -755,10 +916,10 @@ function subwayFallback(A,B,why){
   const links=`<div class="rt-acts"><div class="route-links"><a class="naver" href="${esc(kakaoLink(A,B))}" target="_blank" rel="noopener">在 Kakao 地图查公交+地铁</a><a class="amap" href="${esc(LHMap.naverRoute({name:ptOf(A).name,lng:ptOf(A).x,lat:ptOf(A).y},{name:ptOf(B).name,lng:ptOf(B).x,lat:ptOf(B).y}))}" target="_blank" rel="noopener">Naver 地图</a></div></div>`;
   if(!x.s||!y.s||x.d>2500||y.d>2500||x.s.i===y.s.i){
     const d=hav([ptOf(A).x,ptOf(A).y],[ptOf(B).x,ptOf(B).y]);
-    $('rtOut').innerHTML=`<div class="rt-note">${esc(why)}</div><div class="tstep walk"><i>🚶</i><div>两地直线距离约 ${(d/1000).toFixed(1)} 公里${d<1500?`，步行约 ${Math.round(d*1.25/70)} 分钟`:'，附近没有首都圈地铁站或两地离同一个站很近，请用地图查公交/打车'}</div></div>`+links;return;
+    $('rtOut').innerHTML=`<div class="rt-note">${esc(why)}</div><div class="tstep walk"><i>🚶</i><div>两地直线距离约 ${(d/1000).toFixed(1)} 公里${d<1500?`，步行约 ${Math.round(d*1.25/70)} 分钟`:'，附近没有首都圈地铁站或两地离同一个站很近，请用地图查公交/打车'}</div></div>`+links;saveLastRoute('fallback',{A:slimPt(A),B:slimPt(B),why});return;
   }
   const r=LHSub.route(x.s.i,y.s.i);
-  if(!r){$('rtOut').innerHTML=`<div class="rt-note">${esc(why)}</div>`+links;return}
+  if(!r){$('rtOut').innerHTML=`<div class="rt-note">${esc(why)}</div>`+links;saveLastRoute('fallback',{A:slimPt(A),B:slimPt(B),why});return}
   renderRoute(x.s,y.s,r,[]);
   const w=(o,d)=>`约 ${Math.round(d*1.25)} 米，步行约 ${Math.max(1,Math.round(d*1.25/70))} 分钟`;
   const pre=isPlace(A)?`<div class="tstep walk"><i>🚶</i><div>从 <b>${esc(labelOf(A))}</b> 步行到 <b>${esc(stName(x.s))}</b>（${w(A,x.d)}，直线估算）</div></div>`:'';
@@ -879,9 +1040,10 @@ function renderRoute(A,B,r,alts){
   const ro=w=>{const c=w.charCodeAt(w.length-1)-0xAC00;const j=(c>=0&&c<11172)?c%28:0;return w+((j===0||j===8)?'로':'으로')};
   ko+=r.legs.map((lg,k)=>k===0?`${S(lg.from).ko}역에서 ${L(lg.line).ko} 타고`:`${S(lg.from).ko}역에서 ${ro(L(lg.line).ko)} 갈아타고`).join(', ')+` ${B.ko}역에서 내리면 맞나요?`;
   const zh=`我想去${stName(B)}。这样坐对吗？（${r.legs.map(lg=>L(lg.line).zh).join(' → ')}）`;
-  $('rtStaff').onclick=()=>showBig(ko,zh,'',ko);
+  $('rtStaff').onclick=()=>showRouteCard({destKo:B.ko+'역에 가려고 해요.',destZh:zh,destAddr:'',steps:subwaySteps(r),say:ko});
   const m={naver:LHMap.naverRoute({name:A.ko+'역',lng:A.p[0],lat:A.p[1]},{name:B.ko+'역',lng:B.p[0],lat:B.p[1]}),amap:LHMap.amapRoute({name:stName(A),lng:A.p[0],lat:A.p[1]},{name:stName(B),lng:B.p[0],lat:B.p[1]})};
-  $('rtMaps').innerHTML=`<a class="naver" href="${esc(m.naver)}" target="_blank" rel="noopener">在 Naver 地图核对（推荐）</a><a class="amap" href="${esc(m.amap)}" target="_blank" rel="noopener">高德地图</a>`;
+  $('rtMaps').innerHTML=`<a class="naver" href="${esc(m.naver)}" target="_blank" rel="noopener noreferrer">在 Naver 地图核对（推荐）</a><a class="amap" href="${esc(m.amap)}" target="_blank" rel="noopener noreferrer">高德地图</a>`;
+  saveLastRoute('subway',{A:slimPt(A),B:slimPt(B),r,alts});
   $('rtOut').scrollIntoView({behavior:'smooth',block:'start'});
 }
 let rtBusy=false;
@@ -1321,7 +1483,7 @@ function drawScenes(){
 }
 drawScenes();
 
-// 从景点页带回的地铁终点，或其他 ?tab= 深链接
+// 从景点页带回的地铁终点，或其他 ?tab= 深链接；从地图返回时恢复上次路线，避免白页
 (function(){
   const q=new URLSearchParams(location.search);
   const tab=q.get('tab');
@@ -1331,6 +1493,20 @@ drawScenes();
   const fr=q.get('from'), to=q.get('to');
   if(fr && $('rtFrom')) $('rtFrom').value=fr;
   if(to && $('rtTo')) $('rtTo').value=to;
+  const needRestore=(!fr&&!to)&&(tab==='sub'||!!loadLastRoute());
+  if(needRestore && loadLastRoute() && (!$('rtOut')||!$('rtOut').innerHTML)) restoreLastRoute();
+  window.addEventListener('pageshow',function(e){
+    const t=new URLSearchParams(location.search).get('tab');
+    const subOn=$('p-sub')&&$('p-sub').classList.contains('on');
+    const empty=!$('rtOut')||!$('rtOut').innerHTML;
+    if(t&&TITLES[t]&&!document.getElementById('p-'+t).classList.contains('on')) showTab(t,false);
+    if(loadLastRoute()&&empty&&(t==='sub'||subOn||e.persisted)) restoreLastRoute();
+    if($('big').style.display==='flex') fitBig();
+  });
+  document.addEventListener('visibilitychange',function(){
+    if(document.visibilityState!=='visible') return;
+    if(loadLastRoute()&&$('rtOut')&&!$('rtOut').innerHTML) restoreLastRoute();
+  });
 })();
 </script>
 <script src="/static/maps.js"></script>
