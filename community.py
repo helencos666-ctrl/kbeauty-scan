@@ -414,6 +414,8 @@ def db():
                         cur.execute(MIGRATE_PROVIDERS)
                         from me import MIGRATE_ME
                         cur.execute(MIGRATE_ME)
+                        from chat import MIGRATE_CHAT
+                        cur.execute(MIGRATE_CHAT)
                     ensure_bot(conn)
                     from chicken import ensure_chicken_shops
                     ensure_chicken_shops(conn)
@@ -1719,7 +1721,7 @@ async def api_report(req: Request):
     csrf(req)
     d = await _json(req)
     tt = d.get("type")
-    if tt not in ("post", "comment", "profile", "message"):
+    if tt not in ("post", "comment", "profile", "message", "user"):
         raise HTTPException(400, "举报对象无效")
     try:
         tid = int(d.get("id"))
@@ -1727,13 +1729,23 @@ async def api_report(req: Request):
         raise HTTPException(400, "举报对象无效")
     reason = clean_text(d.get("reason"), 200, "举报理由")
     with db() as conn:
-        u = need_tier(conn, req, 1, "开通会员（¥{t1}）后才能举报；遇到严重违规也可直接联系管理员")
+        # 私信和用户举报：登录即可（方便处理骚扰）。帖子/评论/交友资料仍需会员。
+        if tt in ("message", "user"):
+            u = need_user(conn, req)
+        else:
+            u = need_tier(conn, req, 1, "开通会员（¥{t1}）后才能举报；遇到严重违规也可直接联系管理员")
         limit("rep:" + str(u["id"]), 10, 3600, "举报太频繁，请稍后再试")
         if tt == "message" and not q(conn, "SELECT 1 AS x FROM c_messages WHERE id=%s AND (sender_id=%s OR recipient_id=%s)",
                                      (tid, u["id"], u["id"]), one=True):
             raise HTTPException(404, "消息不存在")
         if tt == "profile" and not q(conn, "SELECT 1 AS x FROM c_dating_profiles WHERE user_id=%s", (tid,), one=True):
             raise HTTPException(404, "资料不存在")
+        if tt == "user":
+            if tid == u["id"]:
+                raise HTTPException(400, "不能举报自己")
+            peer = q(conn, "SELECT id, COALESCE(is_bot,FALSE) AS is_bot FROM c_users WHERE id=%s AND NOT is_banned", (tid,), one=True)
+            if not peer or peer["is_bot"]:
+                raise HTTPException(404, "用户不存在")
         q(conn, "INSERT INTO c_reports(target_type,target_id,user_id,reason) VALUES (%s,%s,%s,%s)", (tt, tid, u["id"], reason))
     return {"ok": True}
 
@@ -2011,12 +2023,14 @@ def api_admin_reports(req: Request):
             CASE WHEN r.target_type='post' THEN (SELECT title FROM c_posts WHERE id=r.target_id)
                  WHEN r.target_type='comment' THEN (SELECT body FROM c_comments WHERE id=r.target_id)
                  WHEN r.target_type='message' THEN (SELECT body FROM c_messages WHERE id=r.target_id)
+                 WHEN r.target_type='user' THEN (SELECT nickname FROM c_users WHERE id=r.target_id)
                  ELSE (SELECT nickname || '：' || intro FROM c_dating_profiles WHERE user_id=r.target_id) END AS target_text,
             CASE WHEN r.target_type='post' THEN r.target_id
                  WHEN r.target_type='comment' THEN (SELECT post_id FROM c_comments WHERE id=r.target_id) END AS post_id,
             CASE WHEN r.target_type='post' THEN (SELECT user_id FROM c_posts WHERE id=r.target_id)
                  WHEN r.target_type='comment' THEN (SELECT user_id FROM c_comments WHERE id=r.target_id)
                  WHEN r.target_type='message' THEN (SELECT sender_id FROM c_messages WHERE id=r.target_id)
+                 WHEN r.target_type='user' THEN r.target_id
                  ELSE r.target_id END AS target_user
             FROM c_reports r LEFT JOIN c_users u ON u.id=r.user_id
             WHERE NOT r.resolved ORDER BY r.id DESC LIMIT 100""")
@@ -2359,3 +2373,5 @@ from visits import router as _visits_router  # noqa: E402
 router.include_router(_visits_router)
 from me import router as _me_router  # noqa: E402
 router.include_router(_me_router)
+from chat import router as _chat_router  # noqa: E402
+router.include_router(_chat_router)

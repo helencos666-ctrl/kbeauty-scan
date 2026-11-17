@@ -109,20 +109,20 @@ def log_hit(conn, user_id, place, kind, snippet=""):
 MSG = "为保护双方权益，请勿留微信、QQ、电话、二维码等站外联系方式，所有咨询请通过站内「立即咨询」沟通。"
 
 
-def guard_text(conn, user_id, place, *texts):
+def guard_text(conn, user_id, place, *texts, msg=None):
     """任一文本含联系方式 → 记录后抛 400（调用方需在可提交的事务外记录，故这里单独开连接写日志）"""
     for t in texts:
         h = find_contacts(t or "")
         if h:
             _log_separately(user_id, place, "、".join(h), t)
-            raise HTTPException(400, "检测到站外联系方式（%s）。%s" % ("、".join(h), MSG))
+            raise HTTPException(400, "检测到站外联系方式（%s）。%s" % ("、".join(h), msg or MSG))
 
 
-def guard_images(conn, user_id, place, blobs):
+def guard_images(conn, user_id, place, blobs, msg=None):
     for b in blobs:
         if b and image_has_qr(b):
             _log_separately(user_id, place, "图片含二维码", "")
-            raise HTTPException(400, "图片中检测到二维码。" + MSG)
+            raise HTTPException(400, "图片中检测到二维码。" + (msg or MSG))
 
 
 def _log_separately(user_id, place, kind, snippet):

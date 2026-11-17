@@ -14,6 +14,7 @@
 <link rel="icon" type="image/png" sizes="192x192" href="/static/icons/icon-192.png">
 <link rel="stylesheet" href="/static/pwa.css">
 <link rel="stylesheet" href="/static/community.css">
+<link rel="stylesheet" href="/static/chat.css">
 </head>
 <body>
 <header>
@@ -81,7 +82,10 @@ async function load(){
   box.innerHTML = '<div class="meta" style="margin-top:0">' + LH.postFlags(p) + (p.merchant ? '<span class="tag biz">商家</span>' : '') + '<span class="tag">' + LH.esc(p.board_name) + '</span>' + (p.tag_name ? '<span class="tag">' + LH.esc(p.tag_name) + '</span>' : '') + '<span>' + LH.esc(p.time) + '</span>' + (p.merchant || p.views ? '<span>👁 ' + (p.views || 0) + '</span>' : '') + '</div>' +
     '<h2 style="color:var(--ink);font-size:19px;margin:10px 0 4px">' + (p.tag_name ? '<span style="color:#e8456f">[' + LH.esc(p.tag_name) + ']</span> ' : '') + LH.esc(p.title) + '</h2>' +
     '<div class="author-row"><span>' + LH.avatar(p.author_id, p.author, p.has_avatar, 'lg') + '</span><div class="who-txt"><div><a href="/community/u/' + p.author_id + '" style="color:inherit;text-decoration:none">' + LH.esc(p.author) + '</a>' + LH.badge(p.author_tier) + LH.vb(p.author_verified) + LH.ubadges(p.author_badges, p.author_official, 4) + '</div>' +
-    (p.mine ? '' : '<button class="jbtn' + (p.following ? ' on' : '') + '" id="fol" style="padding:2px 10px;font-size:12px;margin-top:4px">' + (p.following ? '已关注' : '＋ 关注') + '</button>') + '</div></div>' +
+    (p.mine ? '' : '<div class="pm-acts">' +
+      '<button class="jbtn' + (p.following ? ' on' : '') + '" id="fol" style="padding:2px 10px;font-size:12px">' + (p.following ? '已关注' : '＋ 关注') + '</button>' +
+      (p.consult ? '' : '<button class="btn sm primary" type="button" id="pmBtn">✉️ 私聊</button>') +
+    '</div>') + '</div></div>' +
     (p.offer || p.valid_until ? '<div class="offerbox">' + (p.offer ? '🎁 <b>' + LH.esc(p.offer) + '</b>' : '') + (p.valid_until ? '<div class="tip" style="margin:4px 0 0">有效期至 ' + LH.esc(p.valid_until) + '</div>' : '') + '</div>' : '') +
     '<div class="body">' + LH.esc(p.body) + '</div>' + g +
     (p.medical_note ? '<div class="mednote">⚠️ ' + LH.esc(p.medical_note) + '</div>' : '') +
@@ -101,6 +105,13 @@ async function load(){
   if (fol) fol.onclick = async function(){
     if (!me || !me.user){ location.href = '/login?next=' + encodeURIComponent(location.pathname); return; }
     try { var r = await LH.api('POST', '/api/community/follow/' + p.author_id, {}); fol.className = 'jbtn' + (r.following ? ' on' : ''); fol.textContent = r.following ? '已关注' : '＋ 关注'; } catch(e){ alert(e.message); }
+  };
+  var pm = document.getElementById('pmBtn');
+  if (pm) pm.onclick = async function(){
+    if (!me || !me.user){ location.href = '/login?next=' + encodeURIComponent(location.pathname); return; }
+    pm.disabled = true;
+    try { var r = await LH.api('POST', '/api/chat/start', {post_id: pid}); location.href = '/community/messages/' + r.thread_id; }
+    catch(e){ alert(e.message); pm.disabled = false; }
   };
   var dp = document.getElementById('delp');
   if (dp) dp.onclick = async function(){ if (!confirm('确定删除这篇帖子？')) return; try { await LH.api('DELETE', '/api/community/posts/' + pid); location.href = '/community'; } catch(e){ alert(e.message); } };

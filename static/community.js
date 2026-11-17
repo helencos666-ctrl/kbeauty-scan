@@ -78,7 +78,7 @@ var LH = (function(){
   async function report(type, id){
     var d = await me().catch(function(){ return {}; });
     if (!d.user){ location.href = '/login?next=' + encodeURIComponent(location.pathname); return; }
-    if (d.user.tier < 1){ if (confirm('开通会员后才能举报。去了解会员？')) location.href = '/member'; return; }
+    if (d.user.tier < 1 && type !== 'message' && type !== 'user'){ if (confirm('开通会员后才能举报。去了解会员？')) location.href = '/member'; return; }
     var reason = prompt('请简单说明举报理由（如：广告、诈骗、骚扰、违法违规）');
     if (!reason || !reason.trim()) return;
     try { await api('POST', '/api/community/report', {type: type, id: id, reason: reason.trim()}); alert('已收到举报，管理员会尽快处理'); }

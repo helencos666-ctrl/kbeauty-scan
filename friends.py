@@ -12,6 +12,7 @@ from PIL import Image, ImageFilter
 
 import community as C
 from community import db, q, csrf, limit, need_user, need_tier, current_user, clean_text, process_image, get_settings, _ts, ip_of, MAX_IMG_BYTES, _json
+from contact_guard import guard_text
 
 router = APIRouter()
 
@@ -354,6 +355,9 @@ def _warning(hits):
     return ("消息含“" + "、".join(hits[:3]) + "”等敏感词，已向对方显示防骗提醒并通知管理员。本站严禁借交友名义谈转账、投资、借钱。") if hits else None
 
 def _send(conn, tid, sender, recipient, body, kind):
+    if kind != "ref" and body:
+        from chat import CHAT_GUARD_MSG
+        guard_text(conn, sender, "私信", body, msg=CHAT_GUARD_MSG)
     hits = scam_hits(body)
     r = q(conn, """INSERT INTO c_messages(thread_id,sender_id,recipient_id,kind,body,flagged,flag_words)
                    VALUES (%s,%s,%s,%s,%s,%s,%s) RETURNING id""",
@@ -417,7 +421,7 @@ async def api_send(req: Request, tid: int):
     d = await _json(req)
     body = clean_text(d.get("body"), 500, "消息")
     with db() as conn:
-        u = need_tier(conn, req, FRIEND_MSG_TIER, "开通高级会员（¥{t2}）后才能发私信")
+        u = need_user(conn, req)
         th = _thread(conn, tid, u["id"])
         other = q(conn, "SELECT is_banned FROM c_users WHERE id=%s", (th["other"],), one=True)
         if not other or other["is_banned"]:
@@ -488,7 +492,7 @@ def api_thread(req: Request, tid: int):
             "has_avatar": bool(n.get("has_avatar")),
             "cover": n.get("cover") if n.get("has_profile") else None, "has_profile": bool(n.get("has_profile")),
             "blocked": i_blocked, "banned": bool(n.get("is_banned")),
-            "can_send": u["tier"] >= FRIEND_MSG_TIER and not i_blocked and not they_blocked and not n.get("is_banned"),
+            "can_send": not i_blocked and not they_blocked and not n.get("is_banned"),
             "my_tier": u["tier"],
             "messages": [{"id": m["id"], "mine": m["sender_id"] == u["id"], "kind": m["kind"], "body": m["body"],
                           "flagged": m["flagged"], "time": _ts(m["created_at"]), "read": m["read_at"] is not None} for m in msgs]}

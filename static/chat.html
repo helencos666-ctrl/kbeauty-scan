@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <title>私信 · 旅韩助手</title>
-<meta name="description" content="韩友圈私信。">
+<meta name="description" content="旅韩助手站内私信。">
 <meta name="theme-color" content="#ff6b8f">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
@@ -14,70 +14,169 @@
 <link rel="icon" type="image/png" sizes="192x192" href="/static/icons/icon-192.png">
 <link rel="stylesheet" href="/static/pwa.css">
 <link rel="stylesheet" href="/static/community.css">
+<link rel="stylesheet" href="/static/chat.css">
 <meta name="robots" content="noindex">
 </head>
-<header style="padding-bottom:24px">
-  <h1 id="h1">💬 私信</h1>
-  <p><a href="/community/messages">‹ 全部私信</a> <span id="hlinks"></span></p>
-</header>
-<main style="padding-bottom:70px">
-  <div class="antiscam" id="anti"></div>
-  <div class="err" id="err"></div>
-  <div class="msgs" id="msgs"><div class="loading">加载中…</div></div>
-</main>
-<div class="sendbar" id="sb" style="display:none"><textarea id="txt" maxlength="500" placeholder="友善聊天，不谈转账和投资"></textarea><button class="btn primary" id="send">发送</button></div>
-<nav>
-  <a href="/"><i>🏠</i>首页</a>
-  <a href="/?tab=sub"><i>🚇</i>地铁</a>
-  <a href="/?tab=card"><i>💬</i>翻译</a>
-  <a href="/community" class="on"><i>🧭</i>韩友圈</a>
-  <a href="/?tab=more"><i>☰</i>全部</a>
-  <a href="/me"><i>👤</i>我的</a>
-</nav>
+<body class="thread">
+<div class="chhd">
+  <a class="back" href="/community/messages" aria-label="返回">‹</a>
+  <span id="hav"></span>
+  <div class="who"><div class="nm" id="hnm">私信</div><div class="sub" id="hsub"></div></div>
+  <button class="more" type="button" id="more" aria-label="更多">⋯</button>
+</div>
+<div id="menu" class="menu-pop" hidden></div>
+<div id="ref" hidden></div>
+<div class="err" id="err"></div>
+<div class="msgs" id="msgs"><div class="loading">加载中…</div></div>
+<div class="sendbar" id="sb" hidden>
+  <label class="pic" title="发送图片">＋<input type="file" id="pic" accept="image/jpeg,image/png,image/webp" style="display:none"></label>
+  <textarea id="txt" maxlength="500" rows="1" placeholder="友善留言，请勿留站外联系方式"></textarea>
+  <button class="btn primary" id="send">发送</button>
+</div>
 <script src="/static/community.js"></script>
 <script>
-document.getElementById('anti').textContent = LH.ANTISCAM;
-var tid = parseInt(location.pathname.split('/').pop(), 10), E = LH.esc, T = null, SB = document.getElementById('sb').innerHTML;
-async function load(){
-  try { T = await LH.api('GET', '/api/friends/threads/' + tid); }
-  catch(e){
-    document.getElementById('msgs').innerHTML = '<div class="card empty">' + E(e.message) + (e.status === 401 ? '<br><br><a class="btn primary" href="/login?next=' + encodeURIComponent(location.pathname) + '">登录</a>' : '') + '</div>';
-    return;
-  }
-  document.getElementById('h1').innerHTML = '<span class="chat-hd">' + LH.avatar(T.other, T.nickname, T.has_avatar, 'lg', T.cover ? ('/api/friends/photo/' + T.cover + '?t=1') : '') + '<span>' + E(T.nickname) + LH.vb(T.verified) + '</span></span>';
-  document.getElementById('hlinks').innerHTML = (T.has_profile ? ' · <a href="/community/friends/' + T.other + '">查看资料</a>' : '') +
-    ' · <a href="#" id="blk">' + (T.blocked ? '解除拉黑' : '拉黑') + '</a>';
-  document.getElementById('blk').onclick = async function(ev){
-    ev.preventDefault();
-    if (!T.blocked && !confirm('拉黑后对方不能再给你发消息，确定？')) return;
-    try { await LH.api('POST', '/api/friends/block/' + T.other, {}); load(); } catch(e){ alert(e.message); }
-  };
+var tid = parseInt(location.pathname.split('/').pop(), 10), E = LH.esc, T = null, lastId = 0, sending = false;
+var DIRL = {zh2ko: '中文 → 韩文', ko2zh: '韩文 → 中文'};
+function loginNext(){ return '/login?next=' + encodeURIComponent(location.pathname); }
+
+function renderMsg(m){
+  if (m.kind === 'ref') return '<div class="msg ref">' + E(m.body) + '</div>';
+  var tr = m.translations || {};
+  var dirs = Object.keys(tr);
+  var trHtml = dirs.map(function(d){ return '<div class="trbox" data-tr="' + m.id + '-' + d + '"><em>' + E(DIRL[d] || d) + '</em>' + E(tr[d]) + '</div>'; }).join('');
+  var canTr = (m.body || '').trim() && m.kind !== 'ref';
+  return '<div class="rowm' + (m.mine ? ' me' : '') + '" data-mid="' + m.id + '">' +
+    (m.mine ? '' : LH.avatar(T.other, T.nickname, T.has_avatar, 'sm', T.cover ? ('/api/friends/photo/' + T.cover + '?t=1') : '')) +
+    '<div class="bub"><div class="msg' + (m.flagged ? ' flag' : '') + '">' +
+      (m.img ? '<img class="pic" src="' + E(m.img) + '" alt="">' : '') +
+      E(m.body) +
+      (m.flagged ? '<span class="fw">' + (m.mine ? '这条消息含转账/投资等敏感词，已提醒对方并通知管理员' : '这条消息含转账/投资等敏感词。交友不谈钱，对方要钱请勿转账，可点「举报」') + '</span>' : '') +
+    '</div>' + trHtml +
+    '<div class="mt">' + E(m.time) + (m.mine ? (m.read ? ' · 已读' : ' · 未读') : '') +
+      (canTr ? ' <button type="button" class="trbtn" data-tr="' + m.id + '">译</button>' : '') +
+      (m.mine ? '' : ' <a href="#" data-rp="' + m.id + '" style="color:var(--sub)">举报</a>') +
+    '</div></div></div>';
+}
+
+function bindMsgEvents(root){
+  root.querySelectorAll('[data-rp]').forEach(function(a){ a.onclick = function(ev){ ev.preventDefault(); LH.report('message', +a.dataset.rp); }; });
+  root.querySelectorAll('button.trbtn').forEach(function(b){ b.onclick = function(){ translateOne(+b.dataset.tr, b); }; });
+}
+
+function paint(full){
+  document.getElementById('hnm').textContent = T.nickname || '私信';
+  document.getElementById('hav').innerHTML = LH.avatar(T.other, T.nickname, T.has_avatar, 'md', T.cover ? ('/api/friends/photo/' + T.cover + '?t=1') : '');
+  document.getElementById('hsub').textContent = T.ref_title ? ('来自帖子') : '';
+  var ref = document.getElementById('ref');
+  if (T.ref_title && T.ref_href){
+    ref.hidden = false; ref.className = 'refchip';
+    ref.innerHTML = '<a class="refchip" href="' + E(T.ref_href) + '">来自帖子 <b>' + E(T.ref_title) + '</b></a>';
+  } else { ref.hidden = true; ref.innerHTML = ''; }
   var el = document.getElementById('msgs');
-  el.innerHTML = T.messages.map(function(m){
-    return '<div class="msg' + (m.mine ? ' me' : '') + (m.flagged ? ' flag' : '') + '">' + (m.kind === 'greet' ? '👋 ' : '') + E(m.body) +
-      (m.flagged ? '<span class="fw">⚠️ ' + (m.mine ? '这条消息含转账/投资等敏感词，已提醒对方并通知管理员' : '这条消息含转账/投资等敏感词。交友不谈钱，对方要钱一律是骗子，请勿转账并点“举报”') + '</span>' : '') +
-      '<span class="mt">' + E(m.time) + (m.mine ? (m.read ? ' · 已读' : ' · 未读') : ' · <a href="#" data-rp="' + m.id + '" style="color:var(--sub)">举报</a>') + '</span></div>';
-  }).join('') || '<div class="empty">还没有消息</div>';
-  el.querySelectorAll('[data-rp]').forEach(function(a){ a.onclick = function(ev){ ev.preventDefault(); LH.report('message', +a.dataset.rp); }; });
-  var sb = document.getElementById('sb');
-  sb.style.display = 'flex';
-  if (T.can_send && !document.getElementById('send')){ sb.innerHTML = SB; bindSend(); }
-  if (!T.can_send){
-    sb.innerHTML = T.my_tier < 2 ? '<a class="btn primary" style="flex:1" href="/member">开通高级会员后可回复私信</a>' :
-      '<button class="btn gray" style="flex:1" disabled>' + (T.blocked ? '你已拉黑对方' : (T.banned ? '对方账号已被封禁' : '对方暂不接收你的消息')) + '</button>';
+  if (full){
+    el.innerHTML = (T.messages || []).map(renderMsg).join('') || '<div class="empty">还没有消息</div>';
+    bindMsgEvents(el);
+    lastId = (T.messages || []).reduce(function(n,m){ return Math.max(n, m.id); }, 0);
+    window.scrollTo(0, document.body.scrollHeight);
+  } else if (T.messages && T.messages.length){
+    var wasBottom = (window.innerHeight + window.scrollY) >= document.body.scrollHeight - 80;
+    T.messages.forEach(function(m){
+      if (el.querySelector('[data-mid="' + m.id + '"]')) return;
+      el.insertAdjacentHTML('beforeend', renderMsg(m));
+      lastId = Math.max(lastId, m.id);
+    });
+    bindMsgEvents(el);
+    if (wasBottom) window.scrollTo(0, document.body.scrollHeight);
   }
-  window.scrollTo(0, document.body.scrollHeight);
+  var sb = document.getElementById('sb');
+  if (T.can_send){ sb.hidden = false; }
+  else {
+    sb.hidden = false;
+    sb.innerHTML = '<button class="btn gray" style="flex:1" disabled>' + (T.blocked ? '你已拉黑对方' : (T.banned ? '对方账号已被封禁' : '对方暂不接收你的消息')) + '</button>';
+  }
 }
-function bindSend(){ document.getElementById('send').onclick = sendMsg; }
-async function sendMsg(){
-  var t = document.getElementById('txt').value.trim(); if (!t) return;
-  this.disabled = true; LH.showErr(document.getElementById('err'), '');
-  try { var r = await LH.api('POST', '/api/friends/threads/' + tid + '/messages', {body: t}); document.getElementById('txt').value = ''; if (r.warning) alert(r.warning); await load(); }
-  catch(e){ LH.showErr(document.getElementById('err'), e.message); }
-  this.disabled = false;
+
+async function load(after){
+  try {
+    var url = '/api/chat/threads/' + tid + (after ? ('?after=' + after) : '');
+    var data = await LH.api('GET', url);
+    if (after){ T.messages = data.messages; T.can_send = data.can_send; T.blocked = data.blocked; T.banned = data.banned; paint(false); }
+    else { T = data; paint(true); }
+  } catch(e){
+    if (!after){
+      document.getElementById('msgs').innerHTML = '<div class="card empty">' + E(e.message) + (e.status === 401 ? '<br><br><a class="btn primary" href="' + loginNext() + '">登录</a>' : '') + '</div>';
+    }
+  }
 }
-bindSend();
+
+async function translateOne(mid, btn){
+  btn.disabled = true; btn.textContent = '…';
+  try {
+    var r = await LH.api('POST', '/api/chat/messages/' + mid + '/translate', {});
+    if (!r.ok){ alert(r.error || '翻译暂时不可用'); btn.disabled = false; btn.textContent = '译'; return; }
+    var box = btn.closest('.bub');
+    var id = mid + '-' + r.dir;
+    if (box && !box.querySelector('[data-tr="' + id + '"]')){
+      var div = document.createElement('div');
+      div.className = 'trbox'; div.setAttribute('data-tr', id);
+      div.innerHTML = '<em>' + E(DIRL[r.dir] || r.dir) + '</em>' + E(r.text);
+      btn.closest('.mt').insertAdjacentElement('beforebegin', div);
+    }
+  } catch(e){ alert(e.message); }
+  btn.disabled = false; btn.textContent = '译';
+}
+
+async function sendText(){
+  var t = document.getElementById('txt').value.trim(); if (!t || sending) return;
+  sending = true; document.getElementById('send').disabled = true; LH.showErr(document.getElementById('err'), '');
+  try {
+    var r = await LH.api('POST', '/api/chat/threads/' + tid + '/messages', {body: t});
+    document.getElementById('txt').value = '';
+    if (r.warning) alert(r.warning);
+    await load(lastId);
+  } catch(e){ LH.showErr(document.getElementById('err'), e.message); }
+  sending = false; document.getElementById('send').disabled = false;
+}
+
+document.getElementById('send').onclick = sendText;
+document.getElementById('pic').onchange = async function(){
+  var f = this.files[0]; this.value = ''; if (!f || sending) return;
+  sending = true; LH.showErr(document.getElementById('err'), '');
+  try {
+    var c = await LH.compress(f), fd = new FormData();
+    fd.append('body', document.getElementById('txt').value.trim());
+    fd.append('image', c, 'img.jpg');
+    var r = await LH.api('POST', '/api/chat/threads/' + tid + '/images', fd);
+    document.getElementById('txt').value = '';
+    if (r.warning) alert(r.warning);
+    await load(lastId);
+  } catch(e){ LH.showErr(document.getElementById('err'), e.message); }
+  sending = false;
+};
+
+document.getElementById('more').onclick = function(ev){
+  ev.stopPropagation();
+  var menu = document.getElementById('menu');
+  if (!T) return;
+  menu.hidden = !menu.hidden;
+  if (menu.hidden) return;
+  menu.innerHTML = '<button type="button" id="mBlk">' + (T.blocked ? '解除拉黑' : '拉黑对方') + '</button>' +
+    '<button type="button" id="mRep">举报用户</button>';
+  document.getElementById('mBlk').onclick = async function(){
+    menu.hidden = true;
+    if (!T.blocked && !confirm('拉黑后对方不能再给你发消息，确定？')) return;
+    try { await LH.api('POST', '/api/friends/block/' + T.other, {}); await load(); } catch(e){ alert(e.message); }
+  };
+  document.getElementById('mRep').onclick = function(){ menu.hidden = true; LH.report('user', T.other); };
+};
+document.addEventListener('click', function(){ document.getElementById('menu').hidden = true; });
+
 load();
+setInterval(function(){
+  if (!T) return;
+  if (document.hidden) return;
+  load(lastId);
+}, 3000);
 </script>
 <script src="/static/pwa.js" defer></script>
 </body>

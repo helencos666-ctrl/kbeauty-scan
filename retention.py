@@ -338,6 +338,7 @@ def api_user_profile(req: Request, uid: int):
         o = _post_out(r); o["cover"] = r["cover"]; o["img_n"] = r["img_n"]; posts.append(o)
     return {"id": u["id"], "nickname": u["nickname"], "member_no": u["member_no"] or u["id"], "tier": disp, "tier_name": TIER_NAMES.get(disp, ""),
             "official": bool(u["is_official"]), "verified": bool(u["verified"]), "has_avatar": bool(u["has_avatar"]),
+            "is_bot": bool(u["is_bot"]),
             "joined": _ts(u["created_at"]), "stats": st, "following": following, "mine": bool(me and me["id"] == uid),
             "badges": [dict(BADGES[b["badge"]], key=b["badge"], time=_ts(b["created_at"])) for b in bs if b["badge"] in BADGES],
             "posts": posts}

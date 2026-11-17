@@ -346,13 +346,14 @@ document.getElementById('usgo').onclick = users;
 async function reports(){
   var d = await call('GET', '/api/admin/reports');
   document.getElementById('rlist').innerHTML = d.reports.length ? d.reports.map(function(r){
-    var TN = {post: '帖子', comment: '评论', profile: '交友资料', message: '私信'};
-    return '<div class="cmt"><div class="who">' + TN[r.type] + ' #' + r.target_id + ' · 举报人 ' + E(r.reporter || '-') + ' · ' + E(r.time) + '</div>' +
+    var TN = {post: '帖子', comment: '评论', profile: '交友资料', message: '私信', user: '用户'};
+    return '<div class="cmt"><div class="who">' + (TN[r.type] || r.type) + ' #' + r.target_id + ' · 举报人 ' + E(r.reporter || '-') + ' · ' + E(r.time) + '</div>' +
       '<div class="ct">内容：' + E(r.text) + '<br>理由：' + E(r.reason) + '</div><div class="row" style="margin-top:6px">' +
       (r.post_id ? '<a class="btn sm ghost" target="_blank" href="/community/post/' + r.post_id + '">查看</a>' : '') +
+      (r.type === 'user' && r.target_user ? '<a class="btn sm ghost" target="_blank" href="/community/u/' + r.target_user + '">查看主页</a>' : '') +
       (r.type === 'profile' ? '<button class="btn sm primary" data-hidep="' + r.target_id + '">隐藏资料</button>' :
-       '<button class="btn sm primary" data-del="' + r.type + ':' + r.target_id + '">删除该内容</button>') +
-      (r.target_user ? '<button class="btn sm gray" data-ban="' + r.target_user + '">封禁作者</button>' : '') +
+       (r.type === 'user' ? '' : '<button class="btn sm primary" data-del="' + r.type + ':' + r.target_id + '">删除该内容</button>')) +
+      (r.target_user ? '<button class="btn sm gray" data-ban="' + r.target_user + '">封禁' + (r.type === 'user' ? '该用户' : '作者') + '</button>' : '') +
       '<button class="btn sm gray" data-res="' + r.id + '">忽略</button></div></div>';
   }).join('') : '<div class="empty">没有待处理的举报</div>';
   document.querySelectorAll('#rlist [data-del]').forEach(function(b){ b.onclick = async function(){
