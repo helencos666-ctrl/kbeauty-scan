@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <title>旅行豆 · 旅韩助手</title>
 <meta name="description" content="旅韩助手旅行豆：签到、分享和常用功能可累积，兑换权益即将上线。">
-<meta name="theme-color" content="#ff6b8f">
+<meta name="theme-color" content="#146E68">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="旅韩助手">
@@ -13,7 +13,7 @@
 <link rel="apple-touch-icon" href="/static/icons/apple-touch-icon.png">
 <link rel="icon" type="image/png" sizes="192x192" href="/static/icons/icon-192.png">
 <link rel="stylesheet" href="/static/pwa.css">
-<link rel="stylesheet" href="/static/community.css?v=53">
+<link rel="stylesheet" href="/static/community.css?v=58">
 </head>
 <body>
 <header>
@@ -52,7 +52,7 @@
   <a href="/?tab=more"><i>☰</i>全部</a>
   <a href="/me"><i>👤</i>我的</a>
 </nav>
-<script src="/static/community.js?v=53"></script>
+<script src="/static/community.js?v=58"></script>
 
 <script>
 (async function(){
@@ -78,7 +78,7 @@
   async function render(){
     var p;
     try { p = await LH.api('GET', '/api/points'); } catch(e){ document.getElementById('bal').innerHTML = '<p>' + LH.esc(e.message) + '</p>'; return p; }
-    document.getElementById('bal').innerHTML = '<h2>我的旅行豆</h2><p style="margin:0 0 12px;font-size:32px;font-weight:800;color:var(--pink)">' + p.balance +
+    document.getElementById('bal').innerHTML = '<h2>我的旅行豆</h2><p style="margin:0 0 12px;font-size:32px;font-weight:800;color:var(--primary)">' + p.balance +
       ' <span style="font-size:16px;font-weight:600">旅行豆</span></p>' +
       '<p class="tip" style="margin-top:0">连续签到 ' + (p.streak || 0) + ' 天</p>' +
       '<div class="row" style="gap:8px;flex-wrap:wrap">' +
@@ -110,7 +110,7 @@
     }; });
     document.getElementById('hist').innerHTML = (p.history&&p.history.length) ? p.history.map(function(h){
       var sign = h.points > 0 ? '+' : '';
-      return '<div class="cmt"><div class="who">' + LH.esc(h.label) + ' <b style="color:var(--pink)">' + sign + h.points + '</b></div><div class="meta"><span>' + LH.esc(h.time) + '</span></div></div>';
+      return '<div class="cmt"><div class="who">' + LH.esc(h.label) + ' <b style="color:var(--primary)">' + sign + h.points + '</b></div><div class="meta"><span>' + LH.esc(h.time) + '</span></div></div>';
     }).join('') : '<div class="empty">还没有明细</div>';
     return p;
   }

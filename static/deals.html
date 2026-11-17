@@ -5,12 +5,12 @@
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <title>购物优惠合集 · 旅韩助手</title>
 <meta name="description" content="汇总官方公开的韩国购物优惠：Korea Grand Sale、免税店会员活动、退税要点与大促提醒，每条注明来源。">
-<meta name="theme-color" content="#ff6b8f">
+<meta name="theme-color" content="#146E68">
 <link rel="manifest" href="/manifest.webmanifest">
 <link rel="apple-touch-icon" href="/static/icons/apple-touch-icon.png">
 <link rel="icon" type="image/png" sizes="192x192" href="/static/icons/icon-192.png">
 <link rel="stylesheet" href="/static/pwa.css">
-<link rel="stylesheet" href="/static/community.css?v=53">
+<link rel="stylesheet" href="/static/community.css?v=58">
 <link rel="stylesheet" href="/static/me.css">
 </head>
 <body class="mepage">
@@ -38,14 +38,14 @@
   <a href="/?tab=more"><i>☰</i>全部</a>
   <a href="/me"><i>👤</i>我的</a>
 </nav>
-<script src="/static/community.js?v=53"></script>
+<script src="/static/community.js?v=58"></script>
 <script src="/static/ref.js"></script>
 <script>
 (function(){
   var E = LH.esc;
   // verified: true = 官方页面；false = 第三方整理（待核实）。日期为 KST；checked = 核对日期
   var DEALS = [
-    {id:'kgs2026', cat:'官方活动', icon:'🎉', bg:'#ffe8ee', title:'Korea Grand Sale 冬季购物季', start:'2026-12-23', end:'2027-02-13',
+    {id:'kgs2026', cat:'官方活动', icon:'🎉', bg:'#E6F3F1', title:'Korea Grand Sale 冬季购物季', start:'2026-12-23', end:'2027-02-13',
      body:'韩国官方年度购物季，购物、餐饮、门票等多类商家参与；明洞 NOON SQUARE 1 楼设欢迎中心。具体优惠以活动页为准。',
      src:'VISITKOREA 活动页', url:'https://big5chinese.visitkorea.or.kr/svc/contents/contentsView.do?vcontsId=85435', verified:true, checked:'2026-11-17'},
     {id:'vkexclusive', cat:'官方活动', icon:'🎫', bg:'#e8f1ff', title:'VISITKOREA Exclusive 外国游客优惠', start:'', end:'',
@@ -54,7 +54,7 @@
     {id:'ktourpass', cat:'官方活动', icon:'🚌', bg:'#e8f6ee', title:'K-Tour Pass 游客优惠', start:'', end:'2026-12-31',
      body:'观光公社介绍的外国游客优惠通行证，优惠使用期至 2026-12-31，具体内容见官方页面。',
      src:'VISITKOREA 介绍页（2026-09-17）', url:'https://big5chinese.visitkorea.or.kr/svc/contents/contentsView.do?vcontsId=1593473', verified:true, checked:'2026-11-17'},
-    {id:'shilla', cat:'免税店', icon:'🏬', bg:'#ffe8ee', title:'新罗免税店 · 免费注册会员', start:'', end:'',
+    {id:'shilla', cat:'免税店', icon:'🏬', bg:'#E6F3F1', title:'新罗免税店 · 免费注册会员', start:'', end:'',
      body:'按官方中文购物指南免费注册会员，可领积分、优惠券和会员价。',
      src:'新罗免税店中文购物指南', url:'https://www.shilladutyfree.cn/comm/kr/zh/shoppingGuideStep1', verified:true, checked:'2026-11-17'},
     {id:'ssgca', cat:'免税店', icon:'✈️', bg:'#e8f1ff', title:'新世界免税店 · 国航旅客/凤凰知音会员', start:'', end:'2026-12-31',
@@ -111,7 +111,7 @@
   var g = DEALS[0], st = state(g), days = Math.ceil((new Date(g.start + 'T00:00:00+09:00') - Date.now()) / 864e5);
   if (st !== 'ended'){
     document.getElementById('gs').innerHTML = '<span class="tag w">' + (st === 'soon' ? '即将开始' : '进行中') + '</span><h2>Korea Grand Sale 冬季购物季</h2>' +
-      '<p>官方档期 2026-12-23 至 2027-02-13 · 明洞 NOON SQUARE 1 楼欢迎中心</p><div class="row2">' + (st === 'soon' ? '<span class="w" style="background:#fff;color:#ff4f7b;border-radius:9px;padding:6px 10px;font-size:12.5px;font-weight:800">还有 ' + days + ' 天</span>' : '') +
+      '<p>官方档期 2026-12-23 至 2027-02-13 · 明洞 NOON SQUARE 1 楼欢迎中心</p><div class="row2">' + (st === 'soon' ? '<span class="w" style="background:#fff;color:#146E68;border-radius:9px;padding:6px 10px;font-size:12.5px;font-weight:800">还有 ' + days + ' 天</span>' : '') +
       '<button type="button" id="ics">📅 加入手机日历提醒</button><a href="#howto">领券教程 ›</a></div>';
     document.getElementById('ics').onclick = function(){
       var ics = 'BEGIN:VCALENDAR\r\nVERSION:2.0\r\nPRODID:-//lvhanzhushou//deals//ZH\r\nBEGIN:VEVENT\r\nUID:kgs2026@lvhanzhushou.com\r\nDTSTAMP:20261117T000000Z\r\nDTSTART;VALUE=DATE:20261223\r\nDTEND;VALUE=DATE:20261224\r\nSUMMARY:Korea Grand Sale 开始（旅韩助手提醒）\r\nDESCRIPTION:领券教程 https://lvhanzhushou.com/deals\r\nBEGIN:VALARM\r\nTRIGGER:-PT12H\r\nACTION:DISPLAY\r\nDESCRIPTION:Korea Grand Sale 明天开始\r\nEND:VALARM\r\nEND:VEVENT\r\nEND:VCALENDAR\r\n';

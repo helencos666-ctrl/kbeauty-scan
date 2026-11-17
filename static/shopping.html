@@ -6,7 +6,7 @@
 <title>明洞店铺与退税 · 旅韩助手</title>
 <meta name="description" content="旅韩助手：明洞逛街店铺，以及韩国退税方式、金额条件与机场柜台。退税资料来自 VisitKorea。">
 
-<meta name="theme-color" content="#ff6b8f">
+<meta name="theme-color" content="#146E68">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="旅韩助手">
@@ -16,56 +16,56 @@
 <link rel="stylesheet" href="/static/pwa.css">
 <link rel="stylesheet" href="/static/guide.css">
 <style>
-:root{--pink:#ff4f7b;--ink:#1f2330;--sub:#6b7080;--bg:#fff6f8;--card:#fff;--line:#f0e3e7}
+:root{--primary:#146E68;--secondary:#3D8F88;--accent:#B85A12;--pink:var(--primary);--ink:#1A2330;--sub:#4A5560;--bg:#F3F7F6;--card:#fff;--line:#D5E4E1;--success:#1B7A45;--warning:#B45309}
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
 body{margin:0;font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Noto Sans SC","Microsoft YaHei",sans-serif;background:var(--bg);color:var(--ink);padding-bottom:132px}
-header{background:linear-gradient(135deg,#ff6b8f,#ff9a6b);color:#fff;padding:20px 18px 30px;border-radius:0 0 22px 22px}
+header{background:linear-gradient(135deg,#146E68,#3D8F88);color:#fff;padding:20px 18px 30px;border-radius:0 0 22px 22px}
 header h1{margin:0;font-size:21px}
 header p{margin:6px 0 0;font-size:14px;opacity:.95}
 main{max-width:560px;margin:-18px auto 0;padding:0 14px}
-.card{background:var(--card);border-radius:16px;padding:16px;box-shadow:0 4px 16px rgba(255,79,123,.08);margin-bottom:14px}
+.card{background:var(--card);border-radius:16px;padding:16px;box-shadow:0 4px 16px rgba(20,110,104,.08);margin-bottom:14px}
 .tip{font-size:12px;color:var(--sub);margin-top:10px;line-height:1.6}
 .disclaimer{font-size:12px;color:var(--sub);text-align:center;margin:6px 0 14px;line-height:1.6}
 nav{position:fixed;left:0;right:0;bottom:0;height:calc(60px + env(safe-area-inset-bottom));padding-bottom:env(safe-area-inset-bottom);background:#fff;border-top:1px solid var(--line);display:flex;z-index:10}
 nav a{flex:1;border:0;background:none;font-size:11px;color:var(--sub);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;text-decoration:none}
 nav a i{font-style:normal;font-size:20px}
-nav a.on{color:var(--pink);font-weight:700}
+nav a.on{color:var(--primary);font-weight:700}
 #q{width:100%;border:1px solid var(--line);border-radius:12px;padding:12px 14px;font-size:16px;font-family:inherit}
 .chips{display:flex;gap:8px;overflow-x:auto;padding:2px 0 4px;margin-top:10px;-webkit-overflow-scrolling:touch}
 .chips button{flex:none;border:0;border-radius:20px;padding:7px 13px;font-size:14px;background:#fff;color:var(--ink);box-shadow:0 2px 6px rgba(0,0,0,.05)}
-.chips button.on{background:var(--pink);color:#fff}
+.chips button.on{background:var(--primary);color:#fff}
 .lab{font-size:12px;color:var(--sub);margin:10px 0 0;font-weight:600}
 #count{font-size:13px;color:var(--sub);margin:4px 0 10px}
-.place{background:var(--card);border-radius:16px;padding:16px;box-shadow:0 4px 16px rgba(255,79,123,.08);margin-bottom:12px}
+.place{background:var(--card);border-radius:16px;padding:16px;box-shadow:0 4px 16px rgba(20,110,104,.08);margin-bottom:12px}
 .place .name-zh{font-size:18px;font-weight:700;margin:0}
 .place .name-ko{font-size:13px;color:var(--sub);margin:3px 0 0}
 .badges{display:flex;gap:6px;flex-wrap:wrap;margin-top:8px}
-.badge{font-size:12px;padding:3px 8px;border-radius:20px;background:#ffe8ee;color:var(--pink)}
+.badge{font-size:12px;padding:3px 8px;border-radius:20px;background:#E6F3F1;color:var(--primary)}
 .badge.gray{background:#eef0f4;color:#555}
 .place .desc{font-size:15px;line-height:1.65;margin:10px 0 0}
 .meta{border-top:1px solid var(--line);margin-top:12px;padding-top:10px}
-.meta h3{margin:8px 0 4px;font-size:13px;color:var(--pink)}
+.meta h3{margin:8px 0 4px;font-size:13px;color:var(--primary)}
 .meta p,.meta li{font-size:14px;line-height:1.65;margin:0}
 .meta ul{margin:0;padding-left:18px}
-.go{display:block;margin-top:12px;text-align:center;text-decoration:none;border-radius:12px;padding:12px 8px;font-size:15px;font-weight:700;background:#ffe8ee;color:var(--pink)}
-.spin{width:28px;height:28px;border:3px solid #ffd1dc;border-top-color:var(--pink);border-radius:50%;animation:s 1s linear infinite;margin:0 auto 8px}
+.go{display:block;margin-top:12px;text-align:center;text-decoration:none;border-radius:12px;padding:12px 8px;font-size:15px;font-weight:700;background:#E6F3F1;color:var(--primary)}
+.spin{width:28px;height:28px;border:3px solid #C5E0DC;border-top-color:var(--primary);border-radius:50%;animation:s 1s linear infinite;margin:0 auto 8px}
 @keyframes s{to{transform:rotate(360deg)}}
 .loading,.empty{text-align:center;padding:28px 10px;color:var(--sub)}
 .src a{color:#2c7be5;word-break:break-all}
 
-.place .cover{width:100%;border-radius:12px;margin:10px 0 0;max-height:240px;object-fit:cover;background:#f3e8eb;display:block}
+.place .cover{width:100%;border-radius:12px;margin:10px 0 0;max-height:240px;object-fit:cover;background:#E3EEEC;display:block}
 .gallery{display:flex;gap:8px;overflow-x:auto;margin-top:10px;padding-bottom:2px;-webkit-overflow-scrolling:touch}
 .gallery a{flex:none}
-.gallery img{height:100px;width:auto;max-width:180px;object-fit:cover;border-radius:10px;display:block;background:#f3e8eb}
+.gallery img{height:100px;width:auto;max-width:180px;object-fit:cover;border-radius:10px;display:block;background:#E3EEEC}
 .place{scroll-margin-top:12px}
-.place.hl{outline:2px solid var(--pink);outline-offset:2px}
+.place.hl{outline:2px solid var(--primary);outline-offset:2px}
 #stores{scroll-margin-top:12px}
 #areaWrap{display:none}
 #areaWrap.show{display:block}
 .toc{display:flex;flex-wrap:wrap;gap:8px}
-.toc a{font-size:13px;color:var(--pink);text-decoration:none;background:#ffe8ee;border-radius:16px;padding:6px 10px}
+.toc a{font-size:13px;color:var(--primary);text-decoration:none;background:#E6F3F1;border-radius:16px;padding:6px 10px}
 .fanplace-banner{display:block;background:#fff;border-radius:14px;padding:12px 14px;margin:0 0 12px;box-shadow:0 2px 10px rgba(0,0,0,.06);color:#333;text-decoration:none;font-size:14px;font-weight:600}
-.fanplace-banner span{display:block;font-weight:400;color:#6b7080;font-size:12px;margin-top:2px}
+.fanplace-banner span{display:block;font-weight:400;color:#4A5560;font-size:12px;margin-top:2px}
 </style>
 
 </head>
@@ -168,7 +168,7 @@ nav a.on{color:var(--pink);font-weight:700}
   </article>
 
   <div class="card src article">
-    <h2 style="color:#1f2330">资料来源（2026-11-15 查阅）</h2>
+    <h2 style="color:#1A2330">资料来源（2026-11-15 查阅）</h2>
     <ul>
       <li><a href="https://english.visitkorea.or.kr/svc/contents/contentsView.do?vcontsId=248765" target="_blank" rel="noopener">VisitKorea: Comprehensive Tax Refund Guide</a>（页面日期 2025-10-20）</li>
       <li><a href="https://chinese.visitkorea.or.kr" target="_blank" rel="noopener">VisitKorea 中文站</a></li>

@@ -8,8 +8,8 @@
     '.bns .bx{position:absolute;left:0;right:0;bottom:0;padding:22px 12px 10px;background:linear-gradient(transparent,rgba(0,0,0,.62))}' +
     '.bns b{display:block;font-size:16px;line-height:1.3}.bns small{display:block;font-size:12.5px;opacity:.92;margin-top:2px}' +
     '.bns .ad{position:absolute;top:8px;left:8px;font-size:10.5px;background:rgba(0,0,0,.38);padding:1px 6px;border-radius:6px}' +
-    '.bnc{position:absolute;right:10px;bottom:10px;z-index:2;background:#ff6b8f;color:#fff;font-size:12.5px;font-weight:600;padding:6px 10px;border-radius:999px;text-decoration:none}' +
-    '.bnd{display:flex;justify-content:center;gap:5px;margin-top:6px}.bnd i{width:6px;height:6px;border-radius:3px;background:#d1d5db}.bnd i.on{background:#ff6b8f;width:14px}';
+    '.bnc{position:absolute;right:10px;bottom:10px;z-index:2;background:#146E68;color:#fff;font-size:12.5px;font-weight:600;padding:6px 10px;border-radius:999px;text-decoration:none}' +
+    '.bnd{display:flex;justify-content:center;gap:5px;margin-top:6px}.bnd i{width:6px;height:6px;border-radius:3px;background:#d1d5db}.bnd i.on{background:#146E68;width:14px}';
   function esc(s){ return String(s == null ? '' : s).replace(/[&<>"']/g, function(c){ return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]; }); }
   function css(){ if (document.getElementById('bncss')) return; var s = document.createElement('style'); s.id = 'bncss'; s.textContent = CSS; document.head.appendChild(s); }
   async function mount(el, slot, area){

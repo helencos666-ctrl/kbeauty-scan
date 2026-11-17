@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <title>交友资料 · 旅韩助手</title>
 <meta name="description" content="韩友圈交友资料。">
-<meta name="theme-color" content="#ff6b8f">
+<meta name="theme-color" content="#146E68">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="旅韩助手">
@@ -13,7 +13,7 @@
 <link rel="apple-touch-icon" href="/static/icons/apple-touch-icon.png">
 <link rel="icon" type="image/png" sizes="192x192" href="/static/icons/icon-192.png">
 <link rel="stylesheet" href="/static/pwa.css">
-<link rel="stylesheet" href="/static/community.css?v=53">
+<link rel="stylesheet" href="/static/community.css?v=58">
 </head>
 <header>
   <h1 id="h1">💗 交友资料</h1>
@@ -35,7 +35,7 @@
   <a href="/?tab=more"><i>☰</i>全部</a>
   <a href="/me"><i>👤</i>我的</a>
 </nav>
-<script src="/static/community.js?v=53"></script>
+<script src="/static/community.js?v=58"></script>
 <script>
 document.getElementById('anti').textContent = LH.ANTISCAM;
 var uid = parseInt(location.pathname.split('/').pop(), 10), E = LH.esc, P = null;
@@ -64,7 +64,7 @@ async function load(){
     '<p style="margin:0;color:var(--sub);font-size:14px">会员编号 ' + P.member_no + '</p></div></div>' +
     '<div class="chips"><span class="chip ' + (P.gender === 'f' ? 'g-f">♀ 女' : 'g-m">♂ 男') + '</span><span class="chip">' + P.age + ' 岁</span>' +
     (P.height ? '<span class="chip">' + P.height + ' cm</span>' : '') + '<span class="chip">📍 ' + E(P.city + (P.area ? ' · ' + P.area : '')) + '</span>' +
-    (P.visa ? '<span class="chip">🪪 ' + E(P.visa) + '</span>' : '') + '<span class="chip" style="background:#ffe3eb;color:var(--pink)">🎯 ' + E(P.purpose_name) + '</span></div>' +
+    (P.visa ? '<span class="chip">🪪 ' + E(P.visa) + '</span>' : '') + '<span class="chip" style="background:#E6F3F1;color:var(--primary)">🎯 ' + E(P.purpose_name) + '</span></div>' +
     '<div class="body">' + E(P.intro) + '</div>' +
     '<div class="row" style="justify-content:flex-end;margin-top:12px">' + (P.mine ? '<a class="btn sm ghost" href="/community/friends/edit">编辑资料</a>' :
       '<button class="linkbtn" id="fo">' + (P.following ? '已关注' : '＋ 关注') + '</button><button class="linkbtn" id="bk">' + (P.blocked ? '解除拉黑' : '🚫 拉黑') + '</button><button class="linkbtn" id="rp">🚩 举报</button>') + '</div>' +

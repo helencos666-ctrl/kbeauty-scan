@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <title>管理后台 · 旅韩助手</title>
 <meta name="description" content="旅韩助手管理后台">
-<meta name="theme-color" content="#ff6b8f">
+<meta name="theme-color" content="#146E68">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="旅韩助手">
@@ -13,7 +13,7 @@
 <link rel="apple-touch-icon" href="/static/icons/apple-touch-icon.png">
 <link rel="icon" type="image/png" sizes="192x192" href="/static/icons/icon-192.png">
 <link rel="stylesheet" href="/static/pwa.css">
-<link rel="stylesheet" href="/static/community.css?v=53">
+<link rel="stylesheet" href="/static/community.css?v=58">
 <meta name="robots" content="noindex,nofollow">
 </head>
 <body>
@@ -239,7 +239,7 @@
     </div>
   </div>
 </main>
-<script src="/static/community.js?v=53"></script>
+<script src="/static/community.js?v=58"></script>
 <script src="/static/admin-ops.js"></script>
 <script>
 var E = LH.esc, err = document.getElementById('err'), okEl = document.getElementById('ok');
@@ -307,7 +307,7 @@ async function users(){
   document.getElementById('ulist').innerHTML = d.users.length ? '<table class="adm"><tr><th>编号</th><th>昵称/账号</th><th>状态</th><th>操作</th></tr>' + d.users.map(function(u){
     return '<tr><td>' + u.member_no + '</td><td>' + (u.has_avatar ? '<img src="/api/community/avatar/' + u.id + '" alt="" width="36" height="36" style="width:36px;height:36px;border-radius:50%;object-fit:cover;vertical-align:middle;margin-right:6px">' : '') +
       E(u.nickname) + '<br><small>' + E(u.account) + '</small><br><small>注册 ' + E(u.joined) + (u.promoter ? ' · 推广码 ' + E(u.promoter) : '') + '</small></td><td>' +
-      ['普通', '<b style="color:#1b7a3d">会员</b>', '<b style="color:#8e44ff">高级会员</b>'][u.tier] + (u.merchant_active ? '<br><b style="color:#1565c0">商家·' + (u.merchant_plan === 'year' ? '年付' : '月付') + '</b><br><small>到期 ' + E(u.merchant_until) + '<br>增发次数 ' + u.merchant_credits + '</small>' : (u.merchant_until ? '<br><small style="color:#c62828">商家已到期 ' + E(u.merchant_until) + '</small>' : '')) +
+      ['普通', '<b style="color:#1B7A45">会员</b>', '<b style="color:#8e44ff">高级会员</b>'][u.tier] + (u.merchant_active ? '<br><b style="color:#1565c0">商家·' + (u.merchant_plan === 'year' ? '年付' : '月付') + '</b><br><small>到期 ' + E(u.merchant_until) + '<br>增发次数 ' + u.merchant_credits + '</small>' : (u.merchant_until ? '<br><small style="color:#c62828">商家已到期 ' + E(u.merchant_until) + '</small>' : '')) +
       (u.is_banned ? '<br><b style="color:#c62828">已封禁</b>' : '') + (u.verified ? '<br><span class="vbadge">✔ 已认证</span>' : '') + '</td><td class="row">' +
       [0, 1, 2].filter(function(t){ return t !== u.tier; }).map(function(t){ return '<button class="btn sm ' + (t > u.tier ? 'primary' : 'gray') + '" data-u="' + u.id + '" data-a="set_tier" data-t="' + t + '">设为' + ['普通', '会员', '高级'][t] + '</button>'; }).join('') +
       '<button class="btn sm primary" data-u="' + u.id + '" data-a="merchant" data-plan="month">商家' + (u.merchant_active ? '续' : '开') + '月付</button>' +
@@ -405,7 +405,7 @@ async function posts(reset){
 async function comments(pid){
   var d = await call('GET', '/api/admin/posts/' + pid + '/comments'), box = document.querySelector('[data-cl="' + pid + '"]');
   box.innerHTML = d.comments.length ? d.comments.map(function(c){
-    return '<div style="font-size:13px;padding:6px 0 6px 10px;border-left:3px solid #ffd1dc;margin-top:6px">' + E(c.author) + '：' + E(c.body) +
+    return '<div style="font-size:13px;padding:6px 0 6px 10px;border-left:3px solid #C5E0DC;margin-top:6px">' + E(c.author) + '：' + E(c.body) +
       ' <button class="linkbtn" data-dc="' + c.id + '">删除</button></div>';
   }).join('') : '<div class="tip">没有评论</div>';
   box.querySelectorAll('[data-dc]').forEach(function(b){ b.onclick = async function(){ if (!confirm('删除评论？')) return; await call('DELETE', '/api/admin/comments/' + b.dataset.dc); comments(pid); }; });
@@ -531,7 +531,7 @@ async function loadFanplaces(){
     var photos = (x.photo_ids||[]).map(function(id){ return '<img src="/api/admin/fanplaces/photos/' + id + '?thumb=1" alt="" style="width:72px;height:72px;object-fit:cover;border-radius:8px;margin:0 6px 6px 0">'; }).join('');
     var map = x.map_url ? '<a class="btn sm ghost" target="_blank" rel="noopener noreferrer" href="' + E(x.map_url) + '">Kakao 地图</a>' : '';
     var flag = x.kakao_found ? ('地图已核对' + (x.kakao_id ? (' · ' + E(x.kakao_id)) : '')) : '地图未找到，请人工核对';
-    return '<div class="fp-admin" id="fp' + x.id + '" style="display:block;border-top:1px solid #f0e3e7;padding:10px 0"><div class="who">#' + E(String(x.member_no||'')) + ' ' + E(x.nickname) + ' · ' + E(x.name) + ' <span class="pill">' + E(SN[x.status]||x.status) + '</span></div>' +
+    return '<div class="fp-admin" id="fp' + x.id + '" style="display:block;border-top:1px solid #D5E4E1;padding:10px 0"><div class="who">#' + E(String(x.member_no||'')) + ' ' + E(x.nickname) + ' · ' + E(x.name) + ' <span class="pill">' + E(SN[x.status]||x.status) + '</span></div>' +
       '<div class="meta"><span class="tag">' + E(x.category_label) + '</span><span>' + E(x.address||x.address_user||'') + '</span><span>' + E(x.time) + '</span></div>' +
       (x.name_user && x.name_user !== x.name ? '<p class="tip" style="margin:6px 0">会员填写名称：' + E(x.name_user) + '</p>' : '') +
       '<p class="tip" style="margin:6px 0">' + flag + '</p>' +
@@ -587,7 +587,7 @@ function textToMenu(t){ return (t||'').split(/[;；\n]/).map(function(line,i){ v
 function merchantForm(x){
   x = x || {};
   var opt=function(arr,v){ return arr.map(function(a){ return '<option'+(a===v?' selected':'')+'>'+E(a)+'</option>'; }).join(''); };
-  return '<div class="card" style="background:#fff8fa;box-shadow:none;border:1px solid var(--line)">'+
+  return '<div class="card" style="background:#F7FBFA;box-shadow:none;border:1px solid var(--line)">'+
     '<b>'+(x.id?('编辑 #'+x.id+' '+E(x.name)):'新增商家')+'</b>'+
     '<input class="f" id="mf_name" maxlength="40" placeholder="商家名称" value="'+E(x.name||'')+'" style="margin-top:8px">'+
     '<div class="row" style="gap:8px;margin-top:8px"><select class="f" id="mf_area" style="flex:1">'+opt(M_AREAS,x.area||'明洞')+'</select><select class="f" id="mf_type" style="flex:1">'+opt(M_TYPES,x.shop_type||'美食')+'</select></div>'+
@@ -638,7 +638,7 @@ async function merchants(){
 async function photoPanel(sid){
   var host=document.getElementById('mx'+sid);
   var d=await call('GET','/api/admin/shop-photos?kind=rec&shop_id='+sid);
-  host.innerHTML='<div class="card" style="background:#fff8fa;box-shadow:none;border:1px solid var(--line);margin-top:8px"><b>照片 '+d.items.length+'/'+d.max+'</b>'+
+  host.innerHTML='<div class="card" style="background:#F7FBFA;box-shadow:none;border:1px solid var(--line);margin-top:8px"><b>照片 '+d.items.length+'/'+d.max+'</b>'+
     '<div class="ph-row">'+d.items.map(function(p,i){
       return '<div class="ph"><img alt="" src="/api/admin/shop-photos/'+p.id+'/img?t=1">'+(i===0?'<span class="pill approved" style="position:absolute;left:4px;top:4px">封面</span>':'<button class="btn sm ghost" data-pcov="'+p.id+'">设为封面</button>')+'<button class="btn sm gray" data-pdel="'+p.id+'">删除</button></div>';
     }).join('')+'</div>'+

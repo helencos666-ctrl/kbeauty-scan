@@ -170,7 +170,7 @@ var LH = (function(){
     return '<a class="post" href="/community/post/' + p.id + '">' + (rank ? '<span class="rank' + (rank <= 3 ? ' t' : '') + '">' + rank + '</span>' : '') +
       '<div class="author">' + avatar(p.author_id, p.author, p.has_avatar, 'xs') +
       '<div class="who">' + esc(p.author) + '<small>' + esc(relTime(p.time)) + '</small></div></div>' +
-      '<h3>' + (pin ? '<span style="color:var(--pink);font-weight:700;font-size:13px">' + pin + '</span>' : '') + esc(title) + '</h3>' +
+      '<h3>' + (pin ? '<span style="color:var(--primary);font-weight:700;font-size:13px">' + pin + '</span>' : '') + esc(title) + '</h3>' +
       (p.excerpt ? '<p class="ex">' + esc(p.excerpt) + '</p>' : '') +
       (p.offer ? '<div class="offer">🎁 ' + esc(p.offer) + '</div>' : '') +
       postPhotos(p) +

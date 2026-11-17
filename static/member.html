@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <title>会员 · 旅韩助手</title>
 <meta name="description" content="旅韩助手社区会员：会员可在日常和实用频道发帖、评论点赞、看交友资料；高级会员可在旅韩交友发帖和私信；商家会员可在住宿、包车用车、皮肤管理·医美、留学机构、代购、地陪、追星活动、中韩物流频道发布。">
-<meta name="theme-color" content="#ff6b8f">
+<meta name="theme-color" content="#146E68">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="旅韩助手">
@@ -13,7 +13,7 @@
 <link rel="apple-touch-icon" href="/static/icons/apple-touch-icon.png">
 <link rel="icon" type="image/png" sizes="192x192" href="/static/icons/icon-192.png">
 <link rel="stylesheet" href="/static/pwa.css">
-<link rel="stylesheet" href="/static/community.css?v=53">
+<link rel="stylesheet" href="/static/community.css?v=58">
 <style>
 .paybox{display:flex;gap:12px;margin-top:12px}
 .payq{flex:1;min-width:0;text-align:center;display:flex;flex-direction:column;gap:8px;align-items:stretch}
@@ -128,7 +128,7 @@ a.paylink{color:#2c7be5}
   <a href="/?tab=more"><i>☰</i>全部</a>
   <a href="/me"><i>👤</i>我的</a>
 </nav>
-<script src="/static/community.js?v=53"></script>
+<script src="/static/community.js?v=58"></script>
 <script>
 (async function(){
   LH.prices();
@@ -139,7 +139,7 @@ a.paylink{color:#2c7be5}
   var u = d.user, m = u.merchant_info, base = ['普通用户', '会员', '高级会员'][u.base_tier] || '普通用户';
   var html = '<h2>我的状态</h2><div class="me-av">' + LH.avatar(u.id, u.nickname, u.has_avatar, 'lg') +
     '<div><p style="margin:0;line-height:1.9">昵称：' + LH.esc(u.nickname) + LH.badge(u.display_tier) +
-    '<br>会员编号：<b style="font-size:18px;color:var(--pink)">' + u.member_no + '</b><br>登录账号：' + LH.esc(u.account) +
+    '<br>会员编号：<b style="font-size:18px;color:var(--primary)">' + u.member_no + '</b><br>登录账号：' + LH.esc(u.account) +
     '<br>会员档次：<b>' + base + '</b>';
   if (m){
     html += '<br>商家会员：<b style="color:#1565c0">有效（' + (m.plan === 'year' ? '年付' : '月付') + '）</b>，到期 ' + LH.esc(m.until) +

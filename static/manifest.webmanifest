@@ -9,8 +9,8 @@
   "orientation": "portrait-primary",
   "lang": "zh-CN",
   "dir": "ltr",
-  "theme_color": "#ff6b8f",
-  "background_color": "#fff6f8",
+  "theme_color": "#146E68",
+  "background_color": "#F3F7F6",
   "categories": ["travel", "lifestyle"],
   "icons": [
     {

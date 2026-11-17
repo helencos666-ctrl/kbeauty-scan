@@ -19,7 +19,7 @@
       drawForm(slots);
     }
     $('bnList').innerHTML = d.banners.length ? d.banners.map(function(b){
-      var st = !b.active ? '<b style="color:#999">已停用</b>' : (b.expired ? '<b style="color:#c62828">已过期</b>' : (b.live ? '<b style="color:#1b7a3d">展示中</b>' : '<b style="color:#e65100">未到开始日期/关联已下架</b>'));
+      var st = !b.active ? '<b style="color:#999">已停用</b>' : (b.expired ? '<b style="color:#c62828">已过期</b>' : (b.live ? '<b style="color:#1B7A45">展示中</b>' : '<b style="color:#e65100">未到开始日期/关联已下架</b>'));
       return '<div class="cmt" style="display:block"><div class="row" style="gap:10px;align-items:flex-start"><img src="' + b.img + '" alt="" style="width:150px;border-radius:8px">' +
         '<div style="flex:1;min-width:0"><div class="who">#' + b.id + ' ' + E(b.title) + ' · ' + st + '</div><div class="ct" style="color:var(--sub)">' + E(slotName(b.slot)) + ' · ' + E(BM.link_kinds[b.link_kind] || b.link_kind) + (b.link_id ? ' #' + b.link_id : '') +
         (b.subtitle ? ' · ' + E(b.subtitle) : '') + '<br>排序 ' + b.sort + ' · ' + (b.starts_on || '不限') + ' ~ ' + (b.ends_on || '不限') + ' · 报价 ¥' + b.price + (b.paid ? '（已付）' : '（未付）') + ' · 点击 ' + b.clicks + (b.merchant_no ? ' · 商家编号 ' + b.merchant_no : '') + '</div>' +
@@ -92,7 +92,7 @@
   async function viewThread(id){
     var d = await call('GET', '/api/admin/consult/threads/' + id), v = $('csView');
     v.innerHTML = '<h3>会话 #' + id + ' · ' + E(d.ref) + '</h3>' + d.messages.map(function(m){
-      return '<div style="font-size:13px;padding:6px 0 6px 10px;border-left:3px solid ' + (m.sender === 'user' ? '#ffd1dc' : '#cfe3ff') + ';margin-top:6px"><b>' + ({user: '用户', merchant: d.platform ? '客服' : '商家', system: '系统'}[m.sender] || m.sender) + '</b>：' + E(m.body) +
+      return '<div style="font-size:13px;padding:6px 0 6px 10px;border-left:3px solid ' + (m.sender === 'user' ? '#C5E0DC' : '#cfe3ff') + ';margin-top:6px"><b>' + ({user: '用户', merchant: d.platform ? '客服' : '商家', system: '系统'}[m.sender] || m.sender) + '</b>：' + E(m.body) +
         (m.img ? ' <a href="' + m.img + '" target="_blank" rel="noopener">[图片]</a>' : '') + ' <small style="color:#999">' + E(m.time) + '</small></div>';
     }).join('') + (d.platform ? '<textarea class="f" id="csTxt" maxlength="500" placeholder="以「旅韩助手客服」身份回复" style="margin-top:8px"></textarea><button class="btn primary" id="csSend" style="margin-top:6px">回复</button>' : '');
     if (d.platform) $('csSend').onclick = async function(){ try { await call('POST', '/api/admin/consult/threads/' + id + '/messages', {body: $('csTxt').value}); viewThread(id); } catch(e){} };
@@ -203,7 +203,7 @@
   window.splashAdmin = async function(){
     var d = await call('GET', '/api/admin/splash'), sp = d.splash || {}, box = $('t-splash');
     var fq = Object.keys(d.freqs).map(function(k){ return [k, d.freqs[k]]; });
-    box.innerHTML = '<div class="card"><h2>开屏广告 ' + (sp.live ? '<b style="color:#1b7a3d;font-size:14px">展示中</b>' : '<b style="color:#999;font-size:14px">未展示</b>') + '</h2>' +
+    box.innerHTML = '<div class="card"><h2>开屏广告 ' + (sp.live ? '<b style="color:#1B7A45;font-size:14px">展示中</b>' : '<b style="color:#999;font-size:14px">未展示</b>') + '</h2>' +
       '<p class="tip" style="margin-top:0">只在首页打开时出现，5 秒后自动关闭，用户可随时跳过。图片建议竖图 9:16（如 1080×1920），底部约 1/7 会被 Logo 白条挡住，重要文字放中上部。跳转只能是站内页面。不要放微信号、二维码或未经核实的优惠。</p>' +
       '<div class="row" style="gap:12px;align-items:flex-start">' + (sp.img ? '<img src="' + sp.img + '" alt="" style="width:110px;border-radius:10px">' : '<div style="width:110px;height:196px;border-radius:10px;background:#f0f1f4;display:flex;align-items:center;justify-content:center;color:#999;font-size:12px">未上传</div>') +
       '<div class="tip" style="flex:1">' + (sp.has_img ? '图片 ' + Math.round((sp.size || 0) / 1024) + 'KB · 更新于 ' + E(sp.updated_at || '') + '<br>' : '') + '展示 ' + (sp.shows || 0) + ' · 点击 ' + (sp.clicks || 0) + ' · 跳过 ' + (sp.skips || 0) + '</div></div>' +
@@ -231,9 +231,9 @@
   window.referralAdmin = async function(){
     var d = await call('GET', '/api/admin/referral'), c = d.config, s = d.stats, cp = d.coupons, box = $('t-referral');
     var pct = Math.min(100, Math.round(cp.amount / Math.max(1, c.total_cap) * 100));
-    box.innerHTML = '<div class="card"><h2>邀请奖励 ' + (c.active ? '<b style="color:#1b7a3d;font-size:14px">试运行中</b>' : '<b style="color:#999;font-size:14px">未开放</b>') + '</h2>' +
+    box.innerHTML = '<div class="card"><h2>邀请奖励 ' + (c.active ? '<b style="color:#1B7A45;font-size:14px">试运行中</b>' : '<b style="color:#999;font-size:14px">未开放</b>') + '</h2>' +
       '<div class="tip" style="margin-top:0">' + E(c.starts) + ' 至 ' + E(c.ends) + ' · 券有效 60 天 · 单人上限 ¥' + c.person_cap + ' · 只计一级 · 分享动作本身不奖励</div>' +
-      '<div style="height:8px;background:#f0e3e7;border-radius:4px;overflow:hidden;margin:10px 0 4px"><i style="display:block;height:100%;width:' + pct + '%;background:#ff4f7b"></i></div>' +
+      '<div style="height:8px;background:#D5E4E1;border-radius:4px;overflow:hidden;margin:10px 0 4px"><i style="display:block;height:100%;width:' + pct + '%;background:#146E68"></i></div>' +
       '<div class="tip">已发券面值 ¥' + cp.amount + ' / 总额度 ¥' + c.total_cap + '（达到后自动停发）</div>' +
       '<div class="row" style="gap:8px;margin-top:10px;flex-wrap:wrap"><button class="btn sm ' + (c.enabled ? 'gray' : 'primary') + '" id="rfTg">' + (c.enabled ? '暂停活动' : '开启活动') + '</button>' +
       '<input class="f" type="date" id="rfEnd" value="' + E(c.ends) + '" style="width:auto;margin:0"><button class="btn sm gray" id="rfEndGo">改结束日期</button></div></div>' +
@@ -258,7 +258,7 @@
   window.feedbackAdmin = async function(){
     var d = await call('GET', '/api/admin/feedback'), box = $('t-feedback');
     box.innerHTML = '<div class="card"><h2>意见反馈</h2>' + (d.items.length ? d.items.map(function(f){
-      return '<div class="cmt" style="display:block"><div class="who">' + E(f.who) + ' · ' + E(f.time) + (f.status === 'done' ? ' · <span style="color:#1b7a3d">已处理</span>' : '') + '</div><div class="ct" style="white-space:pre-wrap">' + E(f.body) + '</div>' +
+      return '<div class="cmt" style="display:block"><div class="who">' + E(f.who) + ' · ' + E(f.time) + (f.status === 'done' ? ' · <span style="color:#1B7A45">已处理</span>' : '') + '</div><div class="ct" style="white-space:pre-wrap">' + E(f.body) + '</div>' +
         (f.status === 'done' ? '' : '<button class="btn sm gray" style="margin-top:6px" data-fb="' + f.id + '">标为已处理</button>') + '</div>';
     }).join('') : '<div class="empty">还没有反馈</div>') + '</div>';
     box.querySelectorAll('[data-fb]').forEach(function(b){ b.onclick = async function(){ await call('POST', '/api/admin/feedback/' + b.dataset.fb, {}); feedbackAdmin(); }; });

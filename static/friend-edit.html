@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <title>我的交友资料 · 旅韩助手</title>
 <meta name="description" content="编辑韩友圈交友资料。">
-<meta name="theme-color" content="#ff6b8f">
+<meta name="theme-color" content="#146E68">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="旅韩助手">
@@ -13,7 +13,7 @@
 <link rel="apple-touch-icon" href="/static/icons/apple-touch-icon.png">
 <link rel="icon" type="image/png" sizes="192x192" href="/static/icons/icon-192.png">
 <link rel="stylesheet" href="/static/pwa.css">
-<link rel="stylesheet" href="/static/community.css?v=53">
+<link rel="stylesheet" href="/static/community.css?v=58">
 <meta name="robots" content="noindex">
 </head>
 <header>
@@ -58,13 +58,13 @@
   <a href="/?tab=more"><i>☰</i>全部</a>
   <a href="/me"><i>👤</i>我的</a>
 </nav>
-<script src="/static/community.js?v=53"></script>
+<script src="/static/community.js?v=58"></script>
 <script>
 document.getElementById('anti').textContent = LH.ANTISCAM;
 var $ = function(id){ return document.getElementById(id); }, err = $('err'), okEl = $('ok'), D = null;
 function fill(sel, obj){ Object.keys(obj).forEach(function(k){ sel.insertAdjacentHTML('beforeend', '<option value="' + LH.esc(Array.isArray(obj) ? obj[k] : k) + '">' + LH.esc(obj[k]) + '</option>'); }); }
 function photos(list){
-  $('thumbs').innerHTML = list.map(function(id, i){ return '<div><img src="/api/friends/photo/' + id + '?t=1" data-cv="' + id + '" alt="" style="' + (i === 0 ? 'outline:3px solid var(--pink)' : '') + '"><button data-dp="' + id + '">×</button></div>'; }).join('');
+  $('thumbs').innerHTML = list.map(function(id, i){ return '<div><img src="/api/friends/photo/' + id + '?t=1" data-cv="' + id + '" alt="" style="' + (i === 0 ? 'outline:3px solid var(--primary)' : '') + '"><button data-dp="' + id + '">×</button></div>'; }).join('');
   $('thumbs').querySelectorAll('[data-dp]').forEach(function(b){ b.onclick = async function(){ if (!confirm('删除这张照片？')) return; try { await LH.api('DELETE', '/api/friends/me/photos/' + b.dataset.dp); reload(); } catch(e){ LH.showErr(err, e.message); } }; });
   $('thumbs').querySelectorAll('[data-cv]').forEach(function(im){ im.onclick = async function(){ try { await LH.api('POST', '/api/friends/me/photos/' + im.dataset.cv + '/cover', {}); reload(); } catch(e){ LH.showErr(err, e.message); } }; });
   $('file').style.display = list.length >= D.options.max_photos ? 'none' : 'block';
