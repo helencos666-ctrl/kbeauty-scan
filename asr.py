@@ -13,12 +13,12 @@ from starlette.concurrency import run_in_threadpool
 log = logging.getLogger("asr")
 router = APIRouter()
 
-MAX_AUDIO = 2 * 1024 * 1024          # 上传最大 2MB（15 秒 aac/opus 通常 < 300KB）
+MAX_AUDIO = 2 * 1024 * 1024          # 上传最大 2MB（30 秒 aac/opus 通常 < 300KB）
 MAX_SEC = 30.0
 SR = 16000
 
-CF_ACCOUNT = os.getenv("CF_ACCOUNT_ID", "").strip()
-CF_TOKEN = os.getenv("CF_AI_TOKEN", "").strip()
+CF_ACCOUNT = os.getenv("CF_ACCOUNT_ID", "").replace("\ufeff", "").strip()
+CF_TOKEN = os.getenv("CF_AI_TOKEN", "").replace("\ufeff", "").strip()
 CF_MODEL = os.getenv("CF_ASR_MODEL", "@cf/openai/whisper-large-v3-turbo")
 
 MODEL_NAME = "sherpa-onnx-paraformer-zh-small-2024-03-09"
@@ -198,7 +198,7 @@ async def asr(request: Request, lang: str = "zh"):
     async for chunk in request.stream():
         raw += chunk
         if len(raw) > MAX_AUDIO:
-            raise HTTPException(413, "录音太长，请分段说（每次 15 秒内）")
+            raise HTTPException(413, "录音太长，请分段说（每次 30 秒内）")
     if len(raw) < 200:
         raise HTTPException(400, "没有录到声音，请按住说话")
     t0 = time.time()

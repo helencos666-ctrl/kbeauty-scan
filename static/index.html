@@ -103,6 +103,18 @@ nav button.on,nav a.on{color:var(--pink);font-weight:700}
 .mic-btn span.ico{font-size:26px;line-height:1;pointer-events:none}
 .mic-btn span.lb{pointer-events:none;text-align:center;line-height:1.2}
 .mic-btn.on{background:var(--pink);color:#fff}
+.mic-btn.on span.lb{font-size:22px;font-weight:800;font-variant-numeric:tabular-nums;letter-spacing:.5px}
+.mic-btn.near{background:#e8590c}
+#micState .rtxt{display:block}
+#splash{position:fixed;inset:0;z-index:1000;background:#000;transition:opacity .3s}#splash.out{opacity:0}
+html.sp-on,html.sp-on body{overflow:hidden}
+#splash .sp-ad{position:absolute;left:0;right:0;top:0;bottom:calc(110px + env(safe-area-inset-bottom));background:#222 center/cover no-repeat;cursor:pointer}
+#splash .sp-lbl{position:absolute;left:14px;top:calc(14px + env(safe-area-inset-top));font-size:11px;color:#fff;background:rgba(0,0,0,.4);padding:2px 7px;border-radius:5px}
+#splash .sp-skip{position:absolute;right:16px;bottom:calc(128px + env(safe-area-inset-bottom));background:rgba(0,0,0,.5);color:#fff;font-size:14px;padding:7px 14px;border-radius:999px;border:1px solid rgba(255,255,255,.45)}
+#splash .sp-skip b{font-weight:600}
+#splash .sp-strip{position:absolute;left:0;right:0;bottom:0;height:calc(110px + env(safe-area-inset-bottom));padding-bottom:env(safe-area-inset-bottom);background:#fff;display:flex;align-items:center;justify-content:center;gap:10px}
+#splash .sp-strip img{width:44px;height:44px;border-radius:12px}#splash .sp-strip b{font-size:22px;letter-spacing:2px;color:#1f2330}#splash .sp-strip b span{display:block;font-size:12px;color:#6b7080;font-weight:400;letter-spacing:0}
+
 .mic-btn:disabled{opacity:.5}
 #micState{display:none;margin-top:8px;font-size:13px;color:var(--pink);font-weight:600}
 #micState .lvl{display:block;height:8px;margin-top:6px;border-radius:4px;background:#ffe8ee;overflow:hidden}
@@ -257,7 +269,7 @@ body.is-home .disclaimer{display:none}
       <a href="/?tab=more" data-go="more"><i>☰</i>全部功能</a>
     </div>
     <div class="chips"><span>出发前</span><a href="/visa">签证须知</a><a href="/tax-refund">退税</a><a href="/pay">支付</a><a href="/itineraries">路线卡</a><a href="/tips">攻略</a></div>
-    <div class="chips"><span>服务</span><a href="/services">服务商家</a><a href="/partner">商家入驻</a></div>
+    <div class="chips"><span>服务</span><a href="/deals">购物优惠</a><a href="/invite">邀请有奖</a><a href="/services">服务商家</a><a href="/partner">商家入驻</a></div>
     <a class="promo-bar" id="openPromo" href="/points" hidden></a>
     <section class="blk" id="shopBlk" hidden><div class="bh"><h2>热门商家</h2><a href="/shops">全部 ›</a></div><div class="hs" id="shopList"></div></section>
     <section class="blk" id="postBlk" hidden><div class="bh"><h2>韩友圈 · 最新</h2><a href="/community">进入 ›</a></div><div id="postList"></div></section>
@@ -395,6 +407,7 @@ body.is-home .disclaimer{display:none}
   <button data-tab="card"><i>💬</i>翻译</button>
   <a href="/community"><i>🧭</i>韩友圈</a>
   <button data-tab="more"><i>☰</i>全部</button>
+  <a href="/me"><i>👤</i>我的</a>
 </nav>
 <input type="file" id="fCam" accept="image/*" capture="environment" hidden>
 <input type="file" id="fPick" accept="image/*" hidden>
@@ -406,6 +419,8 @@ body.is-home .disclaimer{display:none}
   <div class="bb"><button style="background:#ffe8ee;color:#ff4f7b" id="bigSpk">🔊 朗读</button><button style="background:#f2f3f5;color:#1f2330" id="bigFlip" title="把文字倒过来，方便对面的人看">⇅ 倒转</button><button style="background:#1f2330;color:#fff" id="bigClose">关闭</button></div>
 </div>
 
+<script src="/static/ref.js"></script>
+<script src="/static/splash.js"></script>
 <script src="/static/phrases.js"></script>
 <script src="/static/subway.js"></script>
 <script>
@@ -715,6 +730,7 @@ async function findRoute(){
     [x,y].forEach(o=>{if(o.alt) alts.push(`「${stName(o.s)}」也可能是「${stName(o.alt)}」，如不对请在下拉列表里选`)});
     if(/인천공항/.test(x.s.ko+y.s.ko)) alts.push('仁川机场有 1、2 号航站楼两个站，请按航班的航站楼选择；机场铁路分普通车和直达车，这里按普通车计算');
     renderRoute(x.s,y.s,r,alts);
+    if(window.LHRef) LHRef.use('subway').then(j=>{if(j&&j.status==='valid'&&j.reward) setTimeout(()=>alert('邀请奖励已到账：'+j.reward+'，可在「我的 → 我的卡券」查看'),300)});
   }catch(err){showErr(err.message||'查询失败，请稍后重试')}
   finally{rtBusy=false;$('ld-rt').style.display='none';$('rtBtn').disabled=false}
 }
@@ -861,7 +877,7 @@ drawModeUI();drawScenesT();drawHist();
   function joinTxt(a,b){a=a.trim();b=b.trim();if(!a)return b;if(!b)return a;if(b.startsWith(a))return b;if(tMode==='ko2zh')return a+' '+b;return /[。！？!?，,；;]$/.test(a)?a+b:a+'，'+b}
 
   // ================= 录音 + 服务器识别 =================
-  const REC_MAX=15000, REC_MIN=500;
+  const REC_MAX=30000, REC_MIN=500; // 每次最长录 30 秒，到时自动停止并识别
   let mr=null, stream=null, chunks=[], recT0=0, recTimer=null, meterRAF=0, analyser=null, srcNode=null, recBusy=false, recWant=false, recCancel=false, warmed=false;
   let peak=0;
   function warm(){if(warmed) return;warmed=true;fetch('/api/asr/warm',{method:'POST'}).catch(()=>{})}
@@ -877,7 +893,16 @@ drawModeUI();drawScenesT();drawHist();
   }
   function meterHTML(sec,lv){
     const w=Math.max(4,Math.min(100,Math.round(lv*100)));
-    return '<span>🔴 正在录音 '+sec+' 秒，松手后识别</span><span class="lvl"><i style="width:'+w+'%"></i></span>';
+    return '<span class="rtxt">'+recText(sec)+'</span><span class="lvl"><i style="width:'+w+'%"></i></span>';
+  }
+  function recText(sec){
+    const left=Math.ceil((REC_MAX-(Date.now()-recT0))/1000);
+    return left<=10?('⏳ 还剩 '+Math.max(0,left)+' 秒，到时自动识别'):'🔴 正在录音，松手后识别（最长 '+(REC_MAX/1000)+' 秒）';
+  }
+  function bigTimer(sec){ // 按钮里显示大号秒数，每秒递增
+    const lb=btn.querySelector('.lb');const t=sec+'秒';
+    if(lb.textContent!==t){lb.textContent=t}
+    btn.classList.toggle('near',REC_MAX-(Date.now()-recT0)<=10000);
   }
   function meterLoop(){
     let lv=0;
@@ -888,7 +913,8 @@ drawModeUI();drawScenesT();drawHist();
     }
     const sec=Math.floor((Date.now()-recT0)/1000);
     const bar=st.querySelector('.lvl i');
-    if(bar){bar.style.width=Math.max(4,Math.round(lv*100))+'%';st.querySelector('span').textContent='🔴 正在录音 '+sec+' 秒，松手后识别'}
+    if(bar){bar.style.width=Math.max(4,Math.round(lv*100))+'%';const rt=st.querySelector('.rtxt');const t=recText(sec);if(rt&&rt.textContent!==t)rt.textContent=t}
+    if(mr) bigTimer(sec);
     meterRAF=requestAnimationFrame(meterLoop);
   }
   async function recStart(){
@@ -924,8 +950,8 @@ drawModeUI();drawScenesT();drawHist();
     mr.onstop=onRecStop;
     if(ctx){try{srcNode=ctx.createMediaStreamSource(stream);analyser=ctx.createAnalyser();analyser.fftSize=1024;srcNode.connect(analyser)}catch(e){analyser=null}}
     try{mr.start()}catch(e){mr=null;releaseMic();ui(false);setState('');showErr('录音启动失败，请重试');return}
-    recT0=Date.now();markOldCard(true);box.value='';
-    setStateHTML(meterHTML(0,0));meterLoop();
+    recT0=Date.now();markOldCard(true);box.value='';btn.classList.add('rec');
+    setStateHTML(meterHTML(0,0));bigTimer(0);meterLoop();
     clearTimeout(recTimer);recTimer=setTimeout(()=>recStop(),REC_MAX);
   }
   function recStop(){
@@ -936,7 +962,7 @@ drawModeUI();drawScenesT();drawHist();
   }
   async function onRecStop(){
     const type=(mr&&mr.mimeType)||(chunks[0]&&chunks[0].type)||'audio/mp4';
-    mr=null;releaseMic();ui(false);
+    mr=null;releaseMic();ui(false);btn.classList.remove('rec','near');
     if(recCancel){setState('');markOldCard(false);showErr('按住时间太短：请按住按钮说完整句话再松手');return}
     const blob=new Blob(chunks,{type});chunks=[];
     if(blob.size<200){setState('');markOldCard(false);showErr('没有录到声音，请再试一次');return}
@@ -986,7 +1012,8 @@ drawModeUI();drawScenesT();drawHist();
     if(!want) return;
     const el=Date.now()-t0;
     if(!gotText&&el>NO_TEXT_MS) setState('正在听… '+secs()+'秒，还没识别到文字');
-    else setState('正在听… '+secs()+'秒（边说边出字，松手后自动翻译）');
+    else setState('正在听…（边说边出字，松手后自动翻译）');
+    btn.querySelector('.lb').textContent=secs()+'秒';
     if(el>=MAX_MS) stopRec();
   }
   function render(){const v=full();if(box.value!==v){box.value=v;box.scrollTop=box.scrollHeight}}

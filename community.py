@@ -412,6 +412,8 @@ def db():
                         cur.execute(MIGRATE_VISITS)
                         from providers import MIGRATE_PROVIDERS
                         cur.execute(MIGRATE_PROVIDERS)
+                        from me import MIGRATE_ME
+                        cur.execute(MIGRATE_ME)
                     ensure_bot(conn)
                     from chicken import ensure_chicken_shops
                     ensure_chicken_shops(conn)
@@ -2355,3 +2357,5 @@ from retention import router as _retention_router  # noqa: E402
 router.include_router(_retention_router)
 from visits import router as _visits_router  # noqa: E402
 router.include_router(_visits_router)
+from me import router as _me_router  # noqa: E402
+router.include_router(_me_router)

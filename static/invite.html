@@ -1,0 +1,72 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>邀请有奖 · 旅韩助手</title>
+<meta name="description" content="邀请同行一起用旅韩助手，好友完成首次使用后双方都可获得站内抵用券。">
+<meta name="theme-color" content="#ff6b8f">
+<link rel="manifest" href="/manifest.webmanifest">
+<link rel="apple-touch-icon" href="/static/icons/apple-touch-icon.png">
+<link rel="icon" type="image/png" sizes="192x192" href="/static/icons/icon-192.png">
+<link rel="stylesheet" href="/static/pwa.css">
+<link rel="stylesheet" href="/static/community.css">
+<link rel="stylesheet" href="/static/me.css">
+</head>
+<body class="mepage invpage">
+<div class="metop"><a class="back" href="/me" aria-label="返回">‹</a>邀请有奖</div>
+<div class="ihd"><h1>邀请同行一起用旅韩助手</h1><p>好友完成首次使用后，双方都可获得站内代订/接送机抵用券</p>
+  <div class="gift"><div><b>¥10</b><span>好友得 · 满 50 可用</span></div><div><b>累计 ¥135</b><span>你得 · 邀满 5 人</span></div></div></div>
+<main class="mewrap">
+  <div class="err" id="err"></div>
+  <div id="box"><div class="card mecard">加载中…</div></div>
+  <div class="card mecard"><b>活动规则</b><ol class="rules" id="rules">
+    <li>有效邀请：好友是新用户，经你的邀请链接注册，并完成首次使用（查一次地铁路线，或在「购物优惠合集」收藏一条优惠）。</li>
+    <li>好友得「新客代订抵用券」10 元（满 50 元可用）；你在第 1、3、5 位有效好友时分别得 15 元（代订满 50 / 接送机满 200 可用）、40 元（满 150 可用）、80 元（免费代订 1 家非医疗门店，抵扣上限 80 元）抵用券，确定面额，不是抽奖。</li>
+    <li>只计一级：好友再邀请的人与你无关。单人奖励上限 150 元（不含你作为新用户得到的 10 元券）。</li>
+    <li>同一设备之间互相邀请不计入；1 小时内出现 3 个及以上邀请、同一网络批量注册等异常情况，先冻结、人工复核后再发券；判定虚假的不发券并收回未使用的券。</li>
+    <li>券仅限旅韩助手站内服务（门店代订、接送机等，陆续上线）使用，有效期 60 天，不可折现、不可转让、不找零，每单限 1 张。</li>
+    <li>试运行 <span id="rDate">90 天</span>；活动总额度 3,000 元，发完即止并在本页公告。分享这个动作本身没有奖励，也不需要转发朋友圈；翻译、地铁等功能不邀请也能正常使用。</li>
+  </ol></div>
+</main>
+<nav>
+  <a href="/"><i>🏠</i>首页</a>
+  <a href="/?tab=sub"><i>🚇</i>地铁</a>
+  <a href="/?tab=card"><i>💬</i>翻译</a>
+  <a href="/community"><i>🧭</i>韩友圈</a>
+  <a href="/?tab=more"><i>☰</i>全部</a>
+  <a href="/me" class="on"><i>👤</i>我的</a>
+</nav>
+<script src="/static/community.js"></script>
+<script src="/static/ref.js"></script>
+<script>
+(async function(){
+  var $ = function(id){ return document.getElementById(id); }, E = LH.esc, box = $('box');
+  var d; try { d = await fetch('/api/ref/me', {credentials: 'same-origin', headers: {'X-LH-Dev': LHRef.dev()}}).then(function(r){ return r.json(); }); } catch(e){ box.innerHTML = '<div class="card mecard">网络不太好，请稍后再试</div>'; return; }
+  var p = d.program || {};
+  $('rDate').textContent = (p.starts || '') + ' 至 ' + (p.ends || '') + '（90 天）';
+  var off = !p.active ? '<div class="card mecard" style="background:#fff7e6">活动当前未开放' + (p.ends ? '（试运行至 ' + E(p.ends) + '）' : '') + '，已获得的券仍可在有效期内使用。</div>' :
+            (!p.budget_left ? '<div class="card mecard" style="background:#fff7e6">活动总额度已发完，暂停发放新券。感谢参与！</div>' : '');
+  var invited = LHRef.code();
+  if (!d.user){
+    box.innerHTML = off + '<div class="card mecard"><b>' + (invited ? '你的朋友邀请你一起用旅韩助手' : '登录后获取你的邀请链接') + '</b>' +
+      '<p class="tip">' + (invited ? '注册后查一次地铁路线（或收藏一条购物优惠），即可获得 10 元新客代订抵用券（满 50 可用）。' : '可用邮箱或手机号注册，手机号不是必填。') + '</p>' +
+      '<a class="btn primary block" href="/login?mode=reg&next=' + encodeURIComponent(invited ? '/?tab=sub' : '/invite') + '">' + (invited ? '注册并去查地铁' : '注册 / 登录') + '</a></div>';
+    return;
+  }
+  if (invited) await LHRef.bind();
+  var link = location.origin + d.link, v = d.valid, tiers = [[1, 15, '¥15'], [3, 40, '+¥40'], [5, 80, '+¥80']];
+  var fill = v >= 5 ? 100 : v >= 3 ? 50 + (v - 3) * 25 : v >= 1 ? (v - 1) * 25 : 0;
+  var cpn = (d.coupons || []).map(function(c){ return '<div class="irow"><span>' + E(c.title) + '</span><span class="tag ' + (c.status === 'available' ? 'g' : 'gr') + '">' + (c.status === 'available' ? '可用 · 至 ' + c.expires : c.status === 'used' ? '已使用' : c.status === 'revoked' ? '已收回' : '已过期') + '</span></div>'; }).join('');
+  var mine = d.invited_status ? '<div class="tip" style="margin-top:6px">你是被邀请的新用户：' + ({pending: '查一次地铁路线即可领取 10 元新客券', valid: '已完成首次使用，新客券已发到「我的卡券」', frozen: '邀请复核中', excluded: '与邀请人同设备，不计入', invalid: '复核未通过'}[d.invited_status] || '') + '</div>' : '';
+  box.innerHTML = off + '<div class="card mecard"><b>我的邀请码</b><div class="code"><b>' + E(d.code) + '</b><button class="btn sm ghost" type="button" id="cp">复制链接</button></div>' +
+    '<div class="tip">把链接发给同行的朋友即可。分享这个动作本身没有奖励，也不需要转发朋友圈。</div>' + mine + '</div>' +
+    '<div class="card mecard"><div style="display:flex;justify-content:space-between;align-items:baseline"><b>累计有效邀请 ' + v + ' 人</b><span class="tip">试运行至 ' + E(p.ends || '') + '</span></div>' +
+    '<div class="ladder"><span class="fill" style="width:calc((100% - 60px) * ' + (fill / 100) + ')"></span>' + tiers.map(function(t){ return '<div class="st' + (v >= t[0] ? ' on' : '') + '"><i>' + t[0] + '</i><b>' + t[2] + '</b><span>' + (v >= t[0] ? '已达成' : '再邀 ' + (t[0] - v) + ' 人') + '</span></div>'; }).join('') + '</div></div>' +
+    '<div class="card mecard"><b>邀请记录</b>' + ((d.invites || []).length ? d.invites.map(function(i){ return '<div class="irow"><span>' + E(i.name) + '（' + E(i.joined.slice(5)) + ' 加入）</span><span class="tag ' + ({valid: 'g', pending: 'gr', frozen: 'o'}[i.status] || 'gr') + '">' + E(i.label) + '</span></div>'; }).join('') : '<p class="tip">还没有邀请记录</p>') + '</div>' +
+    (cpn ? '<div class="card mecard"><b>我获得的邀请券</b>' + cpn + '<a class="btn ghost block" style="margin-top:8px" href="/coupons">查看全部卡券</a></div>' : '');
+  $('cp').onclick = async function(){ var ok = await LH.copyText(link); this.textContent = ok === false ? '请长按复制' : '已复制'; };
+})();
+</script>
+</body>
+</html>

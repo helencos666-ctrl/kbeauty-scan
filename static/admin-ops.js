@@ -199,4 +199,68 @@
       try { await call('POST', '/api/admin/providers/' + b.dataset.pv, body); msg('已处理', false); providersAdmin(); } catch(e){}
     }; });
   };
+  // ---------- 开屏广告 ----------
+  window.splashAdmin = async function(){
+    var d = await call('GET', '/api/admin/splash'), sp = d.splash || {}, box = $('t-splash');
+    var fq = Object.keys(d.freqs).map(function(k){ return [k, d.freqs[k]]; });
+    box.innerHTML = '<div class="card"><h2>开屏广告 ' + (sp.live ? '<b style="color:#1b7a3d;font-size:14px">展示中</b>' : '<b style="color:#999;font-size:14px">未展示</b>') + '</h2>' +
+      '<p class="tip" style="margin-top:0">只在首页打开时出现，5 秒后自动关闭，用户可随时跳过。图片建议竖图 9:16（如 1080×1920），底部约 1/7 会被 Logo 白条挡住，重要文字放中上部。跳转只能是站内页面。不要放微信号、二维码或未经核实的优惠。</p>' +
+      '<div class="row" style="gap:12px;align-items:flex-start">' + (sp.img ? '<img src="' + sp.img + '" alt="" style="width:110px;border-radius:10px">' : '<div style="width:110px;height:196px;border-radius:10px;background:#f0f1f4;display:flex;align-items:center;justify-content:center;color:#999;font-size:12px">未上传</div>') +
+      '<div class="tip" style="flex:1">' + (sp.has_img ? '图片 ' + Math.round((sp.size || 0) / 1024) + 'KB · 更新于 ' + E(sp.updated_at || '') + '<br>' : '') + '展示 ' + (sp.shows || 0) + ' · 点击 ' + (sp.clicks || 0) + ' · 跳过 ' + (sp.skips || 0) + '</div></div>' +
+      '<label class="f">更换图片（JPG/PNG/WebP，8MB 内）</label><input type="file" id="spImg" accept="image/jpeg,image/png,image/webp">' +
+      '<label class="f">标题（后台备注，选填）</label><input class="f" id="spTitle" maxlength="40" value="' + E(sp.title || '') + '">' +
+      '<label class="f">点击跳转（站内路径，如 /deals；留空则点击不跳转）</label><input class="f" id="spLink" value="' + E(sp.link || '') + '" placeholder="/deals">' +
+      '<label class="f">展示频率</label><select class="f" id="spFreq">' + opt(fq, sp.freq || 'daily') + '</select>' +
+      '<div class="row" style="gap:8px"><div style="flex:1"><label class="f">开始日期</label><input class="f" type="date" id="spS" value="' + E(sp.starts_on || '') + '"></div><div style="flex:1"><label class="f">结束日期</label><input class="f" type="date" id="spE" value="' + E(sp.ends_on || '') + '"></div></div>' +
+      '<label style="display:block;font-size:13px;margin-top:8px"><input type="checkbox" id="spLbl"' + (sp.show_label !== false ? ' checked' : '') + '> 左上角显示「广告」标识</label>' +
+      '<label style="display:block;font-size:13px;margin-top:6px"><input type="checkbox" id="spOn"' + (sp.enabled ? ' checked' : '') + '> 启用开屏广告</label>' +
+      '<button class="btn primary block" id="spGo" style="margin-top:10px">保存</button></div>';
+    $('spGo').onclick = async function(){
+      var fd = new FormData(), f = $('spImg').files[0];
+      if (f) fd.append('image', f, 'splash.jpg');
+      fd.append('title', $('spTitle').value); fd.append('link', $('spLink').value.trim()); fd.append('freq', $('spFreq').value);
+      fd.append('starts_on', $('spS').value); fd.append('ends_on', $('spE').value);
+      fd.append('show_label', $('spLbl').checked ? '1' : ''); fd.append('enabled', $('spOn').checked ? '1' : '');
+      this.disabled = true;
+      try { await call('POST', '/api/admin/splash', fd); msg('已保存', false); splashAdmin(); } catch(e){}
+      this.disabled = false;
+    };
+  };
+
+  // ---------- 邀请奖励 ----------
+  window.referralAdmin = async function(){
+    var d = await call('GET', '/api/admin/referral'), c = d.config, s = d.stats, cp = d.coupons, box = $('t-referral');
+    var pct = Math.min(100, Math.round(cp.amount / Math.max(1, c.total_cap) * 100));
+    box.innerHTML = '<div class="card"><h2>邀请奖励 ' + (c.active ? '<b style="color:#1b7a3d;font-size:14px">试运行中</b>' : '<b style="color:#999;font-size:14px">未开放</b>') + '</h2>' +
+      '<div class="tip" style="margin-top:0">' + E(c.starts) + ' 至 ' + E(c.ends) + ' · 券有效 60 天 · 单人上限 ¥' + c.person_cap + ' · 只计一级 · 分享动作本身不奖励</div>' +
+      '<div style="height:8px;background:#f0e3e7;border-radius:4px;overflow:hidden;margin:10px 0 4px"><i style="display:block;height:100%;width:' + pct + '%;background:#ff4f7b"></i></div>' +
+      '<div class="tip">已发券面值 ¥' + cp.amount + ' / 总额度 ¥' + c.total_cap + '（达到后自动停发）</div>' +
+      '<div class="row" style="gap:8px;margin-top:10px;flex-wrap:wrap"><button class="btn sm ' + (c.enabled ? 'gray' : 'primary') + '" id="rfTg">' + (c.enabled ? '暂停活动' : '开启活动') + '</button>' +
+      '<input class="f" type="date" id="rfEnd" value="' + E(c.ends) + '" style="width:auto;margin:0"><button class="btn sm gray" id="rfEndGo">改结束日期</button></div></div>' +
+      '<div class="card"><div class="row" style="gap:8px;flex-wrap:wrap;text-align:center">' +
+      [[s.total, '邀请注册'], [s.valid, '有效邀请'], [s.frozen, '冻结待复核'], [s.excluded, '同设备不计入'], [cp.used + ' / ' + cp.issued, '已核销 / 已发券']].map(function(x){ return '<div style="flex:1;min-width:90px;background:#f7f8fa;border-radius:10px;padding:8px"><b style="font-size:18px;display:block">' + x[0] + '</b><span class="tip">' + x[1] + '</span></div>'; }).join('') + '</div></div>' +
+      '<div class="card"><h2>待复核 / 有标记</h2>' + (d.review.length ? d.review.map(function(r){
+        return '<div class="cmt" style="display:block"><div class="who">#' + r.id + ' ' + E(r.inviter) + ' → ' + E(r.invitee) + ' · <b style="color:' + (r.status === 'frozen' ? '#e65100' : '#999') + '">' + E({frozen: '冻结', excluded: '不计入', pending: '待首次使用', valid: '有效', invalid: '无效'}[r.status] || r.status) + '</b></div>' +
+          '<div class="ct" style="color:var(--sub)">' + E(r.reason) + (r.flags ? ' · 标记：' + E(r.flags) : '') + ' · ' + E(r.time) + (r.used ? ' · 已完成首次使用' : '') + '</div>' +
+          '<div class="row" style="margin-top:6px;gap:6px"><button class="btn sm gray" data-rf="' + r.id + '" data-a="valid">判为有效</button><button class="btn sm gray" style="color:#c62828" data-rf="' + r.id + '" data-a="invalid">判为无效并收回</button></div></div>';
+      }).join('') : '<div class="empty">暂无</div>') + '</div>' +
+      '<div class="card"><h2>邀请人（仅后台可见，不对外排名）</h2>' + (d.top.length ? d.top.map(function(t){ return '<div class="cmt"><div class="who">' + E(t.who) + '</div><div class="ct">有效 ' + t.valid + ' / 共 ' + t.total + ' · 已得 ¥' + t.amount + '</div></div>'; }).join('') : '<div class="empty">暂无</div>') +
+      '<p class="tip">被邀请人联系方式不在此显示；设备与 IP 只存加盐哈希，用于判断同设备与批量注册。</p></div>';
+    $('rfTg').onclick = async function(){ await call('POST', '/api/admin/referral/config', {enabled: !c.enabled}); referralAdmin(); };
+    $('rfEndGo').onclick = async function(){ try { await call('POST', '/api/admin/referral/config', {ends: $('rfEnd').value}); msg('已保存', false); referralAdmin(); } catch(e){} };
+    box.querySelectorAll('[data-rf]').forEach(function(b){ b.onclick = async function(){
+      if (b.dataset.a === 'invalid' && !confirm('判为无效并收回未使用的券？')) return;
+      try { await call('POST', '/api/admin/referral/invite/' + b.dataset.rf, {action: b.dataset.a}); msg('已处理', false); referralAdmin(); } catch(e){}
+    }; });
+  };
+
+  // ---------- 意见反馈 ----------
+  window.feedbackAdmin = async function(){
+    var d = await call('GET', '/api/admin/feedback'), box = $('t-feedback');
+    box.innerHTML = '<div class="card"><h2>意见反馈</h2>' + (d.items.length ? d.items.map(function(f){
+      return '<div class="cmt" style="display:block"><div class="who">' + E(f.who) + ' · ' + E(f.time) + (f.status === 'done' ? ' · <span style="color:#1b7a3d">已处理</span>' : '') + '</div><div class="ct" style="white-space:pre-wrap">' + E(f.body) + '</div>' +
+        (f.status === 'done' ? '' : '<button class="btn sm gray" style="margin-top:6px" data-fb="' + f.id + '">标为已处理</button>') + '</div>';
+    }).join('') : '<div class="empty">还没有反馈</div>') + '</div>';
+    box.querySelectorAll('[data-fb]').forEach(function(b){ b.onclick = async function(){ await call('POST', '/api/admin/feedback/' + b.dataset.fb, {}); feedbackAdmin(); }; });
+  };
 })();

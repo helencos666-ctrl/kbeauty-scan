@@ -165,6 +165,14 @@ PAGES = {
         "商家入驻,服务商入驻,입점 신청,旅韩助手",
         True,
     ),
+    "/deals": (
+        "购物优惠合集｜免税店、药妆、退税与韩国购物季 · 旅韩助手",
+        "汇总官方公开的韩国购物优惠：Korea Grand Sale、免税店会员活动、退税要点与大促提醒，每条注明来源。",
+        "韩国购物优惠,免税店优惠,Korea Grand Sale,韩国退税,旅韩助手",
+        True,
+    ),
+    "/me": ("我的 · 旅韩助手", "我的旅行豆、卡券、帖子与常用工具。", "旅韩助手", False),
+    "/invite": ("邀请有奖 · 旅韩助手", "邀请同行一起用旅韩助手，好友完成首次使用后双方都可获得站内抵用券。", "旅韩助手", False),
     "/services": (
         "服务商家 · 旅韩助手",
         "经平台审核的门店代订、接送机、中文应急协助服务商，仅供参考。",
@@ -257,6 +265,9 @@ FILE_PATHS = {
     "chicken.html": "/chicken",
     "chicken-join.html": "/chicken/join",
     "partner.html": "/partner",
+    "me.html": "/me",
+    "deals.html": "/deals",
+    "invite.html": "/invite",
     "services.html": "/services",
     "consult.html": "/consult",
     "notices.html": "/community/notices",
@@ -290,6 +301,7 @@ NOINDEX_PREFIXES = (
     "/chicken/join",
     "/consult",
     "/community/notices",
+    "/invite",
     "/community/u/",
 )
 
@@ -297,7 +309,7 @@ SITEMAP_PATHS = [
     "/", "/attractions", "/food", "/shopping", "/tips", "/beauty", "/faq",
     "/community", "/community/boards", "/community/rate", "/community/friends",
     "/rules", "/member", "/shops", "/pay", "/tax-refund", "/visa", "/itineraries", "/privacy", "/terms", "/promo/rules",
-    "/services", "/partner",
+    "/services", "/partner", "/deals",
 ]
 
 router = APIRouter()

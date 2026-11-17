@@ -1,0 +1,141 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>我的 · 旅韩助手</title>
+<meta name="description" content="我的旅行豆、卡券、帖子与常用工具。">
+<meta name="theme-color" content="#ff6b8f">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="旅韩助手">
+<link rel="manifest" href="/manifest.webmanifest">
+<link rel="apple-touch-icon" href="/static/icons/apple-touch-icon.png">
+<link rel="icon" type="image/png" sizes="192x192" href="/static/icons/icon-192.png">
+<link rel="stylesheet" href="/static/pwa.css">
+<link rel="stylesheet" href="/static/community.css">
+<link rel="stylesheet" href="/static/me.css">
+</head>
+<body class="mepage">
+<div class="metop">我的<a class="bell" href="/community/notices" aria-label="通知">🔔<span class="dot" id="bellDot" hidden></span></a></div>
+<div id="prof" class="prof"><div class="avbox"><span class="av av-xl fb"><span class="av-letter">·</span></span></div><div><div class="nm">加载中…</div></div></div>
+<div class="stats" id="stats" hidden></div>
+<main class="mewrap">
+  <div class="err" id="err"></div>
+  <div class="card mecard" id="guest" hidden>
+    <b style="font-size:16px">免费注册 / 登录</b>
+    <p class="tip" style="margin:4px 0 12px">可用邮箱或手机号注册，手机号不是必填。登录后可保存卡券、旅行豆和帖子。</p>
+    <a class="btn primary block" href="/login?mode=reg&next=/me">注册新账号</a>
+    <a class="btn ghost block" style="margin-top:8px" href="/login?next=/me">已有账号，去登录</a>
+    <p class="tip" style="margin:10px 0 0">翻译、地铁、常用句不登录也能用；翻译记录先保存在本机。</p>
+  </div>
+  <div class="card mecard"><h3>我的工具</h3><div class="tgrid">
+    <a href="/?tab=card"><span class="ic" style="background:#ffe8ee">💬</span>翻译记录</a>
+    <a href="/?tab=ph"><span class="ic" style="background:#e8f1ff">🗣️</span>常用句</a>
+    <a href="/?tab=sub"><span class="ic" style="background:#e8f6ee">🚇</span>地铁路线</a>
+    <a href="/coupons"><span class="ic" style="background:#fff1e0">🎫</span>我的卡券</a>
+    <a href="/member#mine"><span class="ic" style="background:#f3ecff">📝</span>我的帖子</a>
+    <a href="/points"><span class="ic" style="background:#fff7d6">🫘</span>签到领豆</a>
+    <a href="/community/messages"><span class="ic" style="background:#e6f7f7">✉️</span>私信<span class="new" id="msgDot" hidden></span></a>
+    <a href="/deals"><span class="ic" style="background:#ffeef6">🛍️</span>购物优惠</a>
+  </div></div>
+  <div class="card mecard menu">
+    <a href="/invite"><span class="e">🎁</span>邀请有奖<span class="hint">双方得抵用券</span><span class="ar">›</span></a>
+    <a href="/partner"><span class="e">🏪</span>商家入驻<span class="ar">›</span></a>
+    <a href="#" id="mFb"><span class="e">📮</span>意见反馈<span class="ar">›</span></a>
+    <a href="#" id="mSet"><span class="e">⚙️</span>设置<span class="ar">›</span></a>
+    <a href="/faq"><span class="e">ℹ️</span>关于旅韩助手<span class="ar">›</span></a>
+  </div>
+  <p class="tip" style="text-align:center">旅韩助手为个人运营的免费信息网站，内容仅供参考。<br><a href="/terms" style="color:#2c7be5">用户协议</a> · <a href="/privacy" style="color:#2c7be5">隐私政策</a></p>
+</main>
+
+<div class="sheet" id="sheet" hidden><div class="sheet-in"><div class="sheet-h"><b id="shT"></b><button type="button" class="x" id="shX" aria-label="关闭">✕</button></div><div id="shB"></div></div></div>
+
+<nav>
+  <a href="/"><i>🏠</i>首页</a>
+  <a href="/?tab=sub"><i>🚇</i>地铁</a>
+  <a href="/?tab=card"><i>💬</i>翻译</a>
+  <a href="/community"><i>🧭</i>韩友圈</a>
+  <a href="/?tab=more"><i>☰</i>全部</a>
+  <a href="/me" class="on"><i>👤</i>我的</a>
+</nav>
+<script src="/static/community.js"></script>
+<script src="/static/ref.js"></script>
+<script>
+(function(){
+  var $ = function(id){ return document.getElementById(id); }, E = LH.esc, ME = null;
+  function err(m){ LH.showErr($('err'), m); }
+  function sheet(title, html){ $('shT').textContent = title; $('shB').innerHTML = html; $('sheet').hidden = false; }
+  $('shX').onclick = function(){ $('sheet').hidden = true; };
+  $('sheet').onclick = function(e){ if (e.target === this) this.hidden = true; };
+  function avHTML(u){
+    var src = u && u.has_avatar ? '/api/community/avatar/' + u.id + '?t=' + Date.now() : '';
+    return '<span class="av av-xl' + (src ? '' : ' fb') + '">' + (src ? '<img src="' + src + '" alt="" data-avfb="1">' : '') +
+      '<span class="av-letter">' + E(u ? (u.nickname || '·').slice(0, 1) : '👤') + '</span></span>';
+  }
+  async function load(){
+    var d; try { d = await fetch('/api/me/summary', {credentials: 'same-origin', headers: {'X-LH-Dev': LHRef.dev()}}).then(function(r){ return r.json(); }); } catch(e){ err('网络不太好，请稍后再试'); return; }
+    var u = ME = d.user;
+    if (!u){
+      $('prof').innerHTML = '<div class="avbox"><span class="av av-xl guest"><span class="av-letter">👤</span></span></div><div><div class="nm">游客</div><div class="bio">登录后可保存卡券、旅行豆和帖子</div></div>';
+      $('guest').hidden = false; $('stats').hidden = true; return;
+    }
+    LHRef.bind();
+    var lv = u.level;
+    $('prof').innerHTML = '<button class="avbox" type="button" id="avBtn" aria-label="更换头像">' + avHTML(u) + '<span class="cam">📷</span></button>' +
+      '<div style="min-width:0;flex:1"><div class="nm"><span class="nmt">' + E(u.nickname) + '</span><span class="lv" title="按累计获得的旅行豆计算">LV.' + lv.lv + '</span></div>' +
+      '<div class="bio">' + (u.bio ? E(u.bio) : '<span style="opacity:.7">还没有简介，点「编辑资料」写一句</span>') + '</div></div>' +
+      '<button class="edit" type="button" id="edBtn">编辑资料</button>';
+    $('stats').innerHTML = '<a href="/points"><b>' + u.points + '</b><span>' + E(u.points_name || '旅行豆') + '</span></a>' +
+      '<a href="#" id="lvBtn"><b>LV.' + lv.lv + '</b><span>等级</span></a>' +
+      '<a href="/coupons"><b>' + u.coupons + '</b><span>卡券</span></a>' +
+      '<a href="/member#mine"><b>' + u.posts + '</b><span>帖子</span></a>';
+    $('stats').hidden = false;
+    $('bellDot').hidden = !u.notif_unread;
+    if (u.msg_unread){ $('msgDot').hidden = false; $('msgDot').textContent = u.msg_unread > 99 ? '99+' : u.msg_unread; }
+    $('avBtn').onclick = function(){ LH.pickAvatar(function(){ load(); }); };
+    $('edBtn').onclick = editProfile;
+    $('lvBtn').onclick = function(e){ e.preventDefault();
+      sheet('等级说明', '<p class="tip" style="font-size:14px">等级按<b>累计获得</b>的旅行豆计算（花掉不降级）。你已累计 ' + lv.earned + ' 豆' + (lv.next ? '，再得 ' + (lv.next - lv.earned) + ' 豆升到 LV.' + (lv.lv + 1) : '，已满级') + '。</p>' +
+        '<table class="lvt"><tr><th>等级</th><th>累计旅行豆</th></tr><tr><td>LV.1</td><td>0</td></tr><tr><td>LV.2</td><td>100</td></tr><tr><td>LV.3</td><td>300</td></tr><tr><td>LV.4</td><td>800</td></tr><tr><td>LV.5</td><td>2000</td></tr><tr><td>LV.6</td><td>5000</td></tr></table>' +
+        '<a class="btn primary block" href="/points" style="margin-top:12px">去签到领豆</a>'); };
+  }
+  function editProfile(){
+    sheet('编辑资料', '<label class="f">昵称（2–16 字）</label><input class="f" id="pNick" maxlength="16" value="' + E(ME.nickname) + '">' +
+      '<label class="f">一句话简介（选填，最多 40 字）</label><input class="f" id="pBio" maxlength="40" value="' + E(ME.bio || '') + '" placeholder="例如：12 月首尔自由行，爱逛药妆店">' +
+      '<p class="tip">简介里不能留微信、电话等站外联系方式。</p><div class="err" id="pErr"></div><button class="btn primary block" id="pGo">保存</button>');
+    $('pGo').onclick = async function(){
+      this.disabled = true;
+      try { await LH.api('POST', '/api/me/profile', {nickname: $('pNick').value, bio: $('pBio').value}); $('sheet').hidden = true; load(); }
+      catch(e){ LH.showErr($('pErr'), e.message); }
+      this.disabled = false;
+    };
+  }
+  $('mFb').onclick = function(e){ e.preventDefault();
+    sheet('意见反馈', '<p class="tip" style="margin-top:0">哪里不好用、想要什么功能，都可以写。请不要填写手机号、微信等个人信息。</p><textarea class="f" id="fbT" rows="5" maxlength="500" placeholder="4–500 字"></textarea><div class="err" id="fbE"></div><button class="btn primary block" id="fbGo">提交</button>');
+    $('fbGo').onclick = async function(){
+      this.disabled = true;
+      try { await LH.api('POST', '/api/me/feedback', {body: $('fbT').value, page: '/me'}); $('shB').innerHTML = '<p style="font-size:15px">谢谢反馈，我们会认真看。</p>'; }
+      catch(e){ LH.showErr($('fbE'), e.message); this.disabled = false; }
+    };
+  };
+  $('mSet').onclick = function(e){ e.preventDefault();
+    var h = '<div class="menu">';
+    if (ME) h += '<a href="#" id="sPw"><span class="e">🔑</span>修改密码<span class="ar">›</span></a>';
+    h += '<a href="#" id="sClr"><span class="e">🧹</span>清除本机翻译记录与缓存<span class="ar">›</span></a>' +
+      '<a href="/privacy"><span class="e">🔒</span>隐私政策<span class="ar">›</span></a><a href="/terms"><span class="e">📄</span>用户协议<span class="ar">›</span></a>';
+    if (ME) h += '<a href="/member"><span class="e">🗑️</span>注销账号（在会员页底部）<span class="ar">›</span></a><a href="#" id="sOut"><span class="e">🚪</span>退出登录<span class="ar">›</span></a>';
+    sheet('设置', h + '</div>');
+    $('sClr').onclick = function(ev){ ev.preventDefault(); try { ['lh_hist_v2', 'lh_tc_v2'].forEach(function(k){ localStorage.removeItem(k); }); } catch(x){} this.querySelector('.ar').textContent = '已清除'; };
+    if (ME){
+      $('sOut').onclick = async function(ev){ ev.preventDefault(); try { await LH.api('POST', '/api/community/logout', {}); } catch(x){} location.reload(); };
+      $('sPw').onclick = function(ev){ ev.preventDefault();
+        sheet('修改密码', '<label class="f">原密码</label><input class="f" type="password" id="pwO" autocomplete="current-password"><label class="f">新密码（8 位以上）</label><input class="f" type="password" id="pwN" autocomplete="new-password"><div class="err" id="pwE"></div><button class="btn primary block" id="pwGo">保存</button>');
+        $('pwGo').onclick = async function(){ try { await LH.api('POST', '/api/community/password', {old: $('pwO').value, new: $('pwN').value}); $('shB').innerHTML = '<p>密码已修改，其他设备已退出登录。</p>'; } catch(x){ LH.showErr($('pwE'), x.message); } };
+      };
+    }
+  };
+  load();
+})();
+</script>
+</body>
+</html>

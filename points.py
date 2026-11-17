@@ -222,6 +222,10 @@ def _coupon_out(r):
         "used_at": _ts(r["used_at"]),
         "flag": "若用于会员档（¥9.9），抵扣后该档相当于免费，需人工确认。",
     }
+    if r["kind"].startswith("ref_"):
+        o["flag"] = "邀请活动站内抵用券：仅限旅韩助手站内服务使用，不可折现、不可转让，每单限 1 张。"
+        if status == "revoked":
+            o["flag"] = "该券因邀请复核未通过已收回。"
     if r["kind"] == "subway_guide_card":
         o["href"] = "/?tab=sub"
         o["flag"] = "打开即可查看首尔地铁攻略，指南内容对所有人免费。"

@@ -1,0 +1,125 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>购物优惠合集 · 旅韩助手</title>
+<meta name="description" content="汇总官方公开的韩国购物优惠：Korea Grand Sale、免税店会员活动、退税要点与大促提醒，每条注明来源。">
+<meta name="theme-color" content="#ff6b8f">
+<link rel="manifest" href="/manifest.webmanifest">
+<link rel="apple-touch-icon" href="/static/icons/apple-touch-icon.png">
+<link rel="icon" type="image/png" sizes="192x192" href="/static/icons/icon-192.png">
+<link rel="stylesheet" href="/static/pwa.css">
+<link rel="stylesheet" href="/static/community.css">
+<link rel="stylesheet" href="/static/me.css">
+</head>
+<body class="mepage">
+<div class="metop"><a class="back" href="/me" aria-label="返回">‹</a>购物优惠合集</div>
+<main class="mewrap">
+  <div class="dhero" id="gs"></div>
+  <div class="dtabs" id="tabs"></div>
+  <div id="list"></div>
+  <div class="card mecard" id="howto">
+    <h3>Korea Grand Sale 领券教程</h3>
+    <ol class="steps-ol">
+      <li>活动期间（2026-12-23 至 2027-02-13，以官方公布为准）先在 <a href="https://big5chinese.visitkorea.or.kr/svc/contents/contentsView.do?vcontsId=85435" target="_blank" rel="noopener" style="color:#2c7be5">VISITKOREA 活动页</a> 查看参与商家与优惠内容。</li>
+      <li>到明洞 NOON SQUARE 1 楼欢迎中心，可咨询活动介绍与优惠券相关服务（官方页面说明）。</li>
+      <li>部分优惠可能需要出示护照，结账前先问店员能否使用，以现场为准。</li>
+      <li>买完记得看能否退税：参与门店单次满 15,000 韩元可办，详见 <a href="/tax-refund" style="color:#2c7be5">退税页</a>。</li>
+    </ol>
+  </div>
+  <p class="tip">本页只汇总官方或公开渠道已公布的信息，每条注明来源；标「待核实」的来自第三方整理，尚未经官方确认，请以商家当时规则为准。旅韩助手不发放、不代领这些优惠，过期即下架。目前没有任何联盟或推广合作链接，以后若有会单独标注。</p>
+</main>
+<nav>
+  <a href="/"><i>🏠</i>首页</a>
+  <a href="/?tab=sub"><i>🚇</i>地铁</a>
+  <a href="/?tab=card"><i>💬</i>翻译</a>
+  <a href="/community"><i>🧭</i>韩友圈</a>
+  <a href="/?tab=more"><i>☰</i>全部</a>
+  <a href="/me"><i>👤</i>我的</a>
+</nav>
+<script src="/static/community.js"></script>
+<script src="/static/ref.js"></script>
+<script>
+(function(){
+  var E = LH.esc;
+  // verified: true = 官方页面；false = 第三方整理（待核实）。日期为 KST；checked = 核对日期
+  var DEALS = [
+    {id:'kgs2026', cat:'官方活动', icon:'🎉', bg:'#ffe8ee', title:'Korea Grand Sale 冬季购物季', start:'2026-12-23', end:'2027-02-13',
+     body:'韩国官方年度购物季，购物、餐饮、门票等多类商家参与；明洞 NOON SQUARE 1 楼设欢迎中心。具体优惠以活动页为准。',
+     src:'VISITKOREA 活动页', url:'https://big5chinese.visitkorea.or.kr/svc/contents/contentsView.do?vcontsId=85435', verified:true, checked:'2026-11-17'},
+    {id:'vkexclusive', cat:'官方活动', icon:'🎫', bg:'#e8f1ff', title:'VISITKOREA Exclusive 外国游客优惠', start:'', end:'',
+     body:'韩国观光公社联合 20 多家合作伙伴的优惠：百货/免税店购物、主题公园、餐厅预订积分、演出与住宿等。部分须出示护照，折扣以各合作方当时规则为准。',
+     src:'VISITKOREA 介绍页（2026-06-04）', url:'https://chinese.visitkorea.or.kr/svc/contents/contentsView.do?vcontsId=1590193', verified:true, checked:'2026-11-17'},
+    {id:'ktourpass', cat:'官方活动', icon:'🚌', bg:'#e8f6ee', title:'K-Tour Pass 游客优惠', start:'', end:'2026-12-31',
+     body:'观光公社介绍的外国游客优惠通行证，优惠使用期至 2026-12-31，具体内容见官方页面。',
+     src:'VISITKOREA 介绍页（2026-09-17）', url:'https://big5chinese.visitkorea.or.kr/svc/contents/contentsView.do?vcontsId=1593473', verified:true, checked:'2026-11-17'},
+    {id:'shilla', cat:'免税店', icon:'🏬', bg:'#ffe8ee', title:'新罗免税店 · 免费注册会员', start:'', end:'',
+     body:'按官方中文购物指南免费注册会员，可领积分、优惠券和会员价。',
+     src:'新罗免税店中文购物指南', url:'https://www.shilladutyfree.cn/comm/kr/zh/shoppingGuideStep1', verified:true, checked:'2026-11-17'},
+    {id:'ssgca', cat:'免税店', icon:'✈️', bg:'#e8f1ff', title:'新世界免税店 · 国航旅客/凤凰知音会员', start:'', end:'2026-12-31',
+     body:'例如明洞店满 100/300/500 美元减 1.5/4/6 万韩元等，须出示登机牌或会员卡，细则以官方为准。',
+     src:'国航活动页', url:'https://wav.ca.amadeus.com/CN/GB/promotion/XINS2026', verified:true, checked:'2026-11-17'},
+    {id:'oy-klocal', cat:'药妆', icon:'💄', bg:'#e8f6ee', title:'Olive Young · K-Local 10% 券', start:'', end:'2026-12-31',
+     body:'第三方博客整理：满 10 万韩元可用、上限 2 万韩元，须凭 2026-12-31 前出发的机票；领取渠道与条件尚未经观光公社确认。',
+     src:'旅游博客整理（2026-10-27）', url:'https://ginatw.com/oliveyoung-coupon/', verified:false, checked:'2026-11-17'},
+    {id:'oy-incheon', cat:'药妆', icon:'🎁', bg:'#fff1e0', title:'Olive Young · 仁川松岛门店赠礼通行证', start:'', end:'2026-12-31',
+     body:'第三方页面整理：松岛指定 3 家门店满 7 万韩元赠礼。门店与条件请到店确认。',
+     src:'Trippose 页面', url:'https://cn.trippose.com/shopping/olive-young-incheon-coupon-pass/coupon', verified:false, checked:'2026-11-17'},
+    {id:'taxrefund', cat:'退税', icon:'🧾', bg:'#fff1e0', title:'退税要点：单次满 15,000 韩元可办', start:'', end:'',
+     body:'在参与退税的门店单次消费满 15,000 韩元可办理；即时退税不是退回全部 10%，部分门店约为购买金额的 5–8%，以店员系统为准。',
+     src:'本站退税页', url:'/tax-refund', verified:true, checked:'2026-11-17'},
+    {id:'oysale', cat:'大促提醒', icon:'⏰', bg:'#f3ecff', title:'올영세일（Olive Young 大促）', start:'', end:'',
+     body:'公开整理显示通常每年 3、6、9、12 月各一轮，确切日期往往开始前 1–2 天才公布。日期以官方为准。',
+     src:'公开整理（资料截至 2026-09）', url:'https://lacha.co.kr/korea-guide/zh-cn/olive-young-foreigner-shopping-tips/', verified:false, checked:'2026-11-17'}
+  ];
+  var today = new Date(Date.now() + 9 * 3600e3).toISOString().slice(0, 10);
+  function state(d){
+    if (d.end && today > d.end) return 'ended';
+    if (d.start && today < d.start) return 'soon';
+    return d.end || d.start ? 'on' : 'long';
+  }
+  var saved = {}; try { saved = JSON.parse(localStorage.getItem('lh_saved_deals') || '{}'); } catch(e){}
+  function tags(d){
+    var s = state(d), t = '';
+    t += s === 'soon' ? '<span class="tag">即将开始</span>' : s === 'on' ? '<span class="tag g">进行中</span>' : '<span class="tag gr">长期</span>';
+    t += d.verified ? '<span class="tag g">官方来源</span>' : '<span class="tag o">待核实</span>';
+    if (d.start || d.end) t += '<span>' + (d.start ? d.start.slice(5) + ' 起' : '') + (d.end ? ' 至 ' + d.end : '') + '</span>';
+    return t;
+  }
+  var CATS = ['全部', '官方活动', '免税店', '药妆', '退税', '大促提醒'], cur = '全部';
+  function draw(){
+    document.getElementById('tabs').innerHTML = CATS.map(function(c){ return '<button type="button" class="' + (c === cur ? 'on' : '') + '" data-c="' + c + '">' + c + '</button>'; }).join('');
+    var list = DEALS.filter(function(d){ return state(d) !== 'ended' && (cur === '全部' || d.cat === cur); });
+    document.getElementById('list').innerHTML = list.map(function(d){
+      var ext = /^https?:/.test(d.url);
+      return '<div class="card mecard it"><span class="lg" style="background:' + d.bg + '">' + d.icon + '</span><div style="flex:1;min-width:0"><h4>' + E(d.title) + '</h4><p>' + E(d.body) + '</p>' +
+        '<div class="meta">' + tags(d) + '</div><div class="meta">来源：<a href="' + E(d.url) + '"' + (ext ? ' target="_blank" rel="noopener nofollow"' : '') + '>' + E(d.src) + '</a><span>核对 ' + d.checked.slice(5) + '</span>' +
+        '<button type="button" class="save' + (saved[d.id] ? ' on' : '') + '" data-s="' + d.id + '">' + (saved[d.id] ? '已收藏' : '☆ 收藏') + '</button></div></div></div>';
+    }).join('') || '<div class="card empty">这个分类暂时没有进行中的优惠</div>';
+  }
+  document.addEventListener('click', function(e){
+    var t = e.target.closest('[data-c]'); if (t){ cur = t.dataset.c; draw(); return; }
+    var s = e.target.closest('[data-s]');
+    if (s){
+      var id = s.dataset.s; if (saved[id]) delete saved[id]; else { saved[id] = Date.now(); LHRef.use('deal'); }
+      try { localStorage.setItem('lh_saved_deals', JSON.stringify(saved)); } catch(x){}
+      draw();
+    }
+  });
+  // 顶部：Korea Grand Sale 倒计时 + 加入日历
+  var g = DEALS[0], st = state(g), days = Math.ceil((new Date(g.start + 'T00:00:00+09:00') - Date.now()) / 864e5);
+  if (st !== 'ended'){
+    document.getElementById('gs').innerHTML = '<span class="tag w">' + (st === 'soon' ? '即将开始' : '进行中') + '</span><h2>Korea Grand Sale 冬季购物季</h2>' +
+      '<p>官方档期 2026-12-23 至 2027-02-13 · 明洞 NOON SQUARE 1 楼欢迎中心</p><div class="row2">' + (st === 'soon' ? '<span class="w" style="background:#fff;color:#ff4f7b;border-radius:9px;padding:6px 10px;font-size:12.5px;font-weight:800">还有 ' + days + ' 天</span>' : '') +
+      '<button type="button" id="ics">📅 加入手机日历提醒</button><a href="#howto">领券教程 ›</a></div>';
+    document.getElementById('ics').onclick = function(){
+      var ics = 'BEGIN:VCALENDAR\r\nVERSION:2.0\r\nPRODID:-//lvhanzhushou//deals//ZH\r\nBEGIN:VEVENT\r\nUID:kgs2026@lvhanzhushou.com\r\nDTSTAMP:20261117T000000Z\r\nDTSTART;VALUE=DATE:20261223\r\nDTEND;VALUE=DATE:20261224\r\nSUMMARY:Korea Grand Sale 开始（旅韩助手提醒）\r\nDESCRIPTION:领券教程 https://lvhanzhushou.com/deals\r\nBEGIN:VALARM\r\nTRIGGER:-PT12H\r\nACTION:DISPLAY\r\nDESCRIPTION:Korea Grand Sale 明天开始\r\nEND:VALARM\r\nEND:VEVENT\r\nEND:VCALENDAR\r\n';
+      var a = document.createElement('a'); a.href = URL.createObjectURL(new Blob([ics], {type: 'text/calendar'})); a.download = 'korea-grand-sale.ics'; document.body.appendChild(a); a.click(); a.remove();
+    };
+  } else document.getElementById('gs').hidden = true;
+  draw();
+})();
+</script>
+</body>
+</html>
