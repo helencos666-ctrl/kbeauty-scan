@@ -151,8 +151,6 @@ def _wav_bytes(pcm):
 
 async def _cf(pcm, lang):
     body = {"audio": base64.b64encode(_wav_bytes(pcm)).decode(), "task": "transcribe", "language": lang, "vad_filter": True}
-    if lang == "zh":
-        body["initial_prompt"] = "以下是普通话的句子，使用简体中文。"
     url = f"https://api.cloudflare.com/client/v4/accounts/{CF_ACCOUNT}/ai/run/{CF_MODEL}"
     async with httpx.AsyncClient(timeout=20) as c:
         r = await c.post(url, json=body, headers={"Authorization": "Bearer " + CF_TOKEN})
@@ -173,6 +171,19 @@ def _local(pcm):
         s.accept_waveform(SR, pcm)
         rec.decode_stream(s)
         return s.result.text.strip()
+
+
+_HALLU = ("字幕", "订阅", "点赞", "打赏", "转发", "栏目", "感谢观看", "請不吝", "明镜")
+
+
+def _looks_hallucinated(t: str, dur: float, lang: str) -> bool:
+    """Whisper 在尾部静音处偶尔会“编”出与语音无关的文字（字幕志愿者、请订阅……）。"""
+    if not t:
+        return False
+    if any(h in t for h in _HALLU):
+        return True
+    n = len(t.replace(" ", ""))
+    return n > max(12, dur * (9 if lang == "zh" else 12))
 
 
 def _fix(t: str) -> str:
@@ -213,11 +224,14 @@ async def asr(request: Request, lang: str = "zh"):
     if CF_ACCOUNT and CF_TOKEN:
         try:
             text, engine = await _cf(pcm, lang), "cf"
+            if _looks_hallucinated(text, dur, lang):
+                log.warning("asr cf output looks hallucinated (%s, %.1fs, %d chars)", lang, dur, len(text))
+                text, engine = "", ("" if lang == "zh" else "cf")
         except Exception as e:  # noqa: BLE001
             log.warning("asr cf failed: %s", e)
     if not engine:
         if lang == "ko":
-            raise HTTPException(503, "韩语语音识别暂未开通，请点输入框用键盘上的话筒说韩语")
+            raise HTTPException(503, ("韩语语音识别暂时不可用" if CF_ACCOUNT and CF_TOKEN else "韩语语音识别暂未开通") + "，请点输入框用键盘上的话筒说韩语")
         text, engine = await run_in_threadpool(_local, pcm), "local"
     if lang == "zh":
         text = _fix(text)
