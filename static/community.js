@@ -89,7 +89,7 @@ var LH = (function(){
   function avColor(s){
     var h = 0, t = String(s || '');
     for (var i = 0; i < t.length; i++) h = (h * 31 + t.charCodeAt(i)) >>> 0;
-    return ['#e86b8a','#5b7fd6','#2f9e7a','#d4a017','#8e6bb8','#e07a5f','#4a9aa3','#c06c84'][h % 8];
+    return ['#146E68','#5b7fd6','#2f9e7a','#d4a017','#8e6bb8','#e07a5f','#4a9aa3','#B85A12'][h % 8];
   }
   // size: sm 42px（帖子/评论） / md 48px（私信列表） / lg 56px（资料/顶栏）
   // has 为真时用社区头像；否则用 fallbackUrl（如交友封面）或彩色首字

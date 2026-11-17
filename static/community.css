@@ -18,7 +18,7 @@ nav a i{font-style:normal;font-size:20px}
 nav a.on{color:var(--primary);font-weight:700}
 .userbar{display:flex;align-items:center;justify-content:space-between;gap:8px;font-size:14px}
 .userbar .who{font-weight:600;display:flex;align-items:center;gap:8px;min-width:0}
-.av{position:relative;display:inline-flex;align-items:center;justify-content:center;border-radius:50%;overflow:hidden;flex:none;color:#fff;font-weight:700;line-height:1;user-select:none;background:#e86b8a}
+.av{position:relative;display:inline-flex;align-items:center;justify-content:center;border-radius:50%;overflow:hidden;flex:none;color:#fff;font-weight:700;line-height:1;user-select:none;background:#3D8F88}
 .av-xs{width:36px;height:36px;font-size:14px}
 .av-sm{width:42px;height:42px;font-size:16px}
 .av-md{width:48px;height:48px;font-size:18px}
@@ -60,7 +60,7 @@ nav a.on{color:var(--primary);font-weight:700}
 .post .photos img{width:100%;height:100%;object-fit:cover;display:block}
 .post .photos .more{position:absolute;inset:0;background:rgba(31,35,48,.45);color:#fff;font-size:16px;font-weight:700;display:flex;align-items:center;justify-content:center}
 .post .cover{display:none} /* old thumb, kept so leftover markup does not break */
-.post .offer{margin:10px 0 0;background:#EAF6F4;border-radius:12px;padding:8px 12px;font-size:13px;line-height:1.5;color:#c43b63}
+.post .offer{margin:10px 0 0;background:#EAF6F4;border-radius:12px;padding:8px 12px;font-size:13px;line-height:1.5;color:#B85A12}
 .post .meta{margin-top:12px;align-items:center;justify-content:space-between}
 .post .acts{display:flex;gap:14px;color:var(--sub)}
 .meta{font-size:12px;color:var(--sub);margin-top:8px;display:flex;flex-wrap:wrap;gap:8px}
@@ -295,8 +295,8 @@ a.all-boards{flex:none;font-size:12px;color:var(--sub);text-decoration:none;whit
 /* 商家活动 / 小分类 / 站内咨询 */
 .subcats{display:flex;gap:8px;overflow-x:auto;padding:2px 0 10px;scrollbar-width:none}.subcats::-webkit-scrollbar{display:none}
 .subcats button{flex:0 0 auto;border:1px solid var(--line,#eee);background:#fff;border-radius:14px;padding:8px 10px;min-width:64px;font-size:12.5px;color:inherit;display:flex;flex-direction:column;align-items:center;gap:3px;cursor:pointer}
-.subcats button i{font-style:normal;font-size:20px}.subcats button.on{border-color:#146E68;background:#EAF6F4;color:#e8456f;font-weight:600}
-.biz-item .btag{color:#e8456f;margin-right:4px}.biz-item .offer{margin:4px 0 0;font-size:13px;color:#e8456f}
+.subcats button i{font-style:normal;font-size:20px}.subcats button.on{border-color:#146E68;background:#EAF6F4;color:#146E68;font-weight:600}
+.biz-item .btag{color:#B85A12;margin-right:4px}.biz-item .offer{margin:4px 0 0;font-size:13px;color:#B85A12}
 .biz-item .bzph{display:flex;align-items:center;justify-content:center;font-size:26px;background:#EAF6F4}
 .consult-btn{margin-top:10px}
 .mednote{background:#fff7ed;border:1px solid #fed7aa;color:#9a3412;border-radius:12px;padding:10px 12px;font-size:13px;line-height:1.6;margin:10px 0}
