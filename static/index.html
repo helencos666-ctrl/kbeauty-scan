@@ -107,6 +107,48 @@ nav button.on,nav a.on{color:var(--pink);font-weight:700}
 #micState{display:none;margin-top:8px;font-size:13px;color:var(--pink);font-weight:600}
 #micTip{display:none}
 .kocard.stale{opacity:.35;filter:grayscale(1);transition:opacity .15s}
+.kocard.pending .ko{color:#c9ccd3}
+.kocard .src{font-size:14px;color:var(--sub);margin-bottom:6px}
+.kocard .acts button.copy{background:#f2f3f5;color:var(--ink)}
+.tmode{display:flex;background:#f2f3f5;border-radius:12px;padding:3px;margin-bottom:10px}
+.tmode button{flex:1;border:0;background:transparent;border-radius:10px;padding:10px 4px;font-size:15px;font-weight:700;color:var(--sub)}
+.tmode button.on{background:#fff;color:var(--pink);box-shadow:0 1px 4px rgba(0,0,0,.08)}
+.tscene{display:flex;gap:6px;overflow-x:auto;padding-bottom:8px;margin-bottom:4px;-webkit-overflow-scrolling:touch}
+.tscene button{flex:none;border:1px solid var(--line);background:#fff;border-radius:16px;padding:6px 12px;font-size:14px;color:var(--ink)}
+.tscene button.on{background:var(--pink);border-color:var(--pink);color:#fff}
+.qph{margin-top:14px}.qph h3,.hist h3{font-size:14px;margin:0 0 8px;color:var(--sub);display:flex;justify-content:space-between;align-items:center}
+.qph .chips{display:flex;flex-wrap:wrap;gap:8px}
+.qph .chips button{border:0;background:#fff4f7;color:var(--ink);border-radius:12px;padding:9px 12px;font-size:14px;text-align:left}
+.hist{margin-top:14px}.hist .it{display:flex;gap:8px;align-items:center;padding:10px 0;border-top:1px solid #f0f1f3;cursor:pointer}
+.hist .it .t{flex:1;min-width:0}.hist .it .a{font-size:14px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.hist .it .b{font-size:13px;color:var(--sub);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.hist .it button{border:0;background:#ffe8ee;color:var(--pink);border-radius:50%;width:36px;height:36px;flex:none}
+.hist h3 button{border:0;background:none;color:var(--sub);font-size:13px}
+.sug-wrap{position:relative}
+.sug{display:none;position:absolute;left:0;right:0;top:100%;z-index:20;background:#fff;border:1px solid var(--line);border-radius:12px;margin-top:4px;box-shadow:0 8px 24px rgba(0,0,0,.12);max-height:300px;overflow-y:auto}
+.sug button{display:flex;width:100%;border:0;background:#fff;text-align:left;padding:11px 12px;font-size:15px;gap:8px;align-items:center;border-bottom:1px solid #f4f4f6}
+.sug button .n{flex:1;min-width:0}.sug button .n small{color:var(--sub);font-weight:400;margin-left:6px}
+.ldots{display:flex;gap:3px;flex-wrap:wrap;justify-content:flex-end}
+.ldot{display:inline-block;border-radius:8px;color:#fff;font-size:11px;font-weight:700;padding:2px 6px;line-height:1.3;white-space:nowrap}
+.hot-st{display:flex;flex-wrap:wrap;gap:6px;margin-top:10px}
+.hot-st button{border:1px solid var(--line);background:#fff;border-radius:14px;padding:5px 10px;font-size:13px}
+.rsum{display:flex;flex-wrap:wrap;gap:6px 14px;font-size:15px;font-weight:700;margin:4px 0 12px}
+.rsum .big{font-size:24px;color:var(--pink)}
+.rsum span{display:inline-flex;align-items:baseline;gap:3px}
+.leg{position:relative;padding:0 0 4px 22px;margin-left:8px;border-left:5px solid var(--lc,#888)}
+.leg .lb{position:relative;margin-left:-22px;padding-left:22px;margin-bottom:6px}
+.leg .stn{font-size:16px;font-weight:700;position:relative}
+.leg .stn::before{content:'';position:absolute;left:-33px;top:3px;width:13px;height:13px;border-radius:50%;background:#fff;border:4px solid var(--lc,#888)}
+.leg .stn small{font-weight:400;color:var(--sub);margin-left:4px}
+.leg .dir{font-size:14px;margin:6px 0;background:#f7f8fa;border-radius:10px;padding:8px 10px}
+.leg .meta{font-size:13px;color:var(--sub);margin:4px 0 8px}
+.leg details{font-size:13px;color:var(--sub);margin-bottom:8px}.leg details summary{cursor:pointer}
+.xfer{margin:6px 0 10px 0;padding:10px 12px;background:#fff8e6;border-radius:12px;font-size:14px}
+.arrive{font-size:14px;margin:8px 0 4px;padding:10px 12px;background:#effaf3;border-radius:12px}
+.rt-acts{display:flex;flex-direction:column;gap:8px;margin-top:12px}
+.rt-acts button.staff{border:0;border-radius:12px;padding:13px;font-size:16px;font-weight:700;background:#1f2330;color:#fff}
+.rt-note{font-size:13px;color:#b26a00;margin-top:8px}
+#big .bk.flip,#big .bz.flip{transform:rotate(180deg)}
 
 .phrase .sp.spk-on{background:var(--pink);color:#fff}
 #cSpk.spk-on{background:var(--pink);color:#fff}
@@ -233,24 +275,25 @@ body.is-home .disclaimer{display:none}
   <!-- 地铁 -->
   <section class="page" id="p-sub">
     <div class="card">
-      <h2>🚇 地铁看图</h2>
+      <h2>🚇 地铁路线（起点 → 终点）</h2>
+      <div class="route-grid">
+        <div class="route-fields">
+          <label>起点<div class="sug-wrap"><input id="rtFrom" maxlength="40" autocomplete="off" enterkeyhint="next" placeholder="中文/韩文/英文/拼音，如：明洞"><div class="sug" id="rtFromSug"></div></div></label>
+          <label>终点<div class="sug-wrap"><input id="rtTo" maxlength="40" autocomplete="off" enterkeyhint="search" placeholder="如：弘大、仁川机场、乐天世界"><div class="sug" id="rtToSug"></div></div></label>
+        </div>
+        <button type="button" id="rtSwap" aria-label="交换起点和终点" title="交换">⇅</button>
+      </div>
+      <div class="hot-st" id="hotSt"></div>
+      <div class="btns" style="margin-top:10px"><button type="button" class="btn primary" id="rtBtn">查路线</button></div>
+      <div class="loading" id="ld-rt"><div class="spin"></div>正在计算路线…</div>
+      <div class="route-out" id="rtOut"></div>
+      <div class="tip">路线按首都圈地铁线路数据在手机上计算（站数、换乘站、方向），时间和票价是估算，仅供参考，请以车站标识、列车终点站显示和现场工作人员为准。线路数据 © OpenStreetMap 贡献者（ODbL）。</div>
+    </div>
+    <div class="card">
+      <h2>📷 地铁看图</h2>
       <div class="btns"><button class="btn primary" data-pick="sub" data-cam="1">拍站牌/线路图</button><button class="btn ghost" data-pick="sub">从相册选</button></div>
       <img class="preview" id="pv-sub" alt="预览">
       <div class="tip">可以拍站名牌、换乘指示、出口指示或线路图。只根据图里能看到的内容说明，拿不准会直接告诉你。</div>
-      <div class="route-box">
-        <div class="rh">输入起点和终点查路线</div>
-        <div class="route-grid">
-          <div class="route-fields">
-            <label>起点<input id="rtFrom" maxlength="40" autocomplete="off" placeholder="如：明洞"></label>
-            <label>终点<input id="rtTo" maxlength="40" autocomplete="off" placeholder="如：弘大入口"></label>
-          </div>
-          <button type="button" id="rtSwap" aria-label="交换起点和终点" title="交换">⇅</button>
-        </div>
-        <div class="btns" style="margin-top:10px"><button type="button" class="btn primary" id="rtBtn">查路线</button></div>
-        <div class="loading" id="ld-rt"><div class="spin"></div>正在查找车站…</div>
-        <div class="route-out" id="rtOut"></div>
-        <div class="tip">可用中文、韩文或英文站名。路线仅供参考，请以车站标识和现场工作人员为准。</div>
-      </div>
     </div>
     <div class="card loading" id="ld-sub"><div class="spin"></div>正在看图，大约 5–15 秒…</div>
     <div class="card" id="rs-sub" style="display:none"></div>
@@ -259,7 +302,8 @@ body.is-home .disclaimer{display:none}
   <!-- 沟通卡 -->
   <section class="page" id="p-card">
     <div class="card">
-      <h2>💬 中文 → 韩文沟通卡</h2>
+      <div class="tmode" id="tMode"><button data-m="zh2ko" class="on">中文 → 韩文</button><button data-m="ko2zh">韩文 → 中文</button></div>
+      <div class="tscene" id="tScene"></div>
       <div class="card-inrow">
         <textarea id="cardIn" maxlength="600" placeholder="输入想说的话，例如：请帮我拿一个大一点的袋子"></textarea>
         <button type="button" class="mic-btn" id="micBtn" aria-label="按住说话"><span class="ico">🎤</span><span class="lb">按住说话</span></button>
@@ -269,7 +313,9 @@ body.is-home .disclaimer{display:none}
       <div class="btns" style="margin-top:10px"><button class="btn primary" id="cardBtn">生成韩文卡片</button></div>
       <div class="card loading" id="ld-card" style="box-shadow:none"><div class="spin"></div>正在翻译…</div>
       <div id="cardOut"></div>
-      <div class="tip">卡片下方的“中文回译”是把韩文再翻回中文，用来核对意思有没有跑偏。</div>
+      <div class="qph" id="quickPh"></div>
+      <div class="hist" id="tHist"></div>
+      <div class="tip">中→韩卡片下方的“中文回译”是把韩文再翻回中文，用来核对意思有没有跑偏。机器翻译仅供参考，涉及金额、药品、时间等重要信息请当面再确认。</div>
     </div>
   </section>
 
@@ -350,13 +396,15 @@ body.is-home .disclaimer{display:none}
   <div class="bk" id="bigKo"></div>
   <div class="bz" id="bigZh"></div>
   <div class="br" id="bigRo"></div>
-  <div class="bb"><button style="background:#ffe8ee;color:#ff4f7b" id="bigSpk">🔊 朗读</button><button style="background:#1f2330;color:#fff" id="bigClose">关闭</button></div>
+  <div class="bb"><button style="background:#ffe8ee;color:#ff4f7b" id="bigSpk">🔊 朗读</button><button style="background:#f2f3f5;color:#1f2330" id="bigFlip" title="把文字倒过来，方便对面的人看">⇅ 倒转</button><button style="background:#1f2330;color:#fff" id="bigClose">关闭</button></div>
 </div>
 
+<script src="/static/phrases.js"></script>
+<script src="/static/subway.js"></script>
 <script>
 const $=id=>document.getElementById(id);
 const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
-const SUBS={home:'',cos:'拍一下韩国化妆品包装，马上看中文名称、用法和规格',sub:'拍地铁站牌或线路图，也可输入起点终点查路线',card:'输入中文，生成大字韩文卡片，直接给店员或司机看',ph:'明洞常用韩语，一键大字展示并朗读',more:'所有功能都在这里'};
+const SUBS={home:'',cos:'拍一下韩国化妆品包装，马上看中文名称、用法和规格',sub:'输入起点终点，查换乘站、乘车方向和站数；也可拍站牌',card:'中韩互译，大字卡片给对方看，网站自带韩语朗读',ph:'常用韩语，一键大字展示并朗读，可离线',more:'所有功能都在这里'};
 const TITLES={home:'旅韩助手',cos:'拍照识妆',sub:'地铁路线',card:'中韩翻译',ph:'常用韩语',more:'全部功能'};
 function showTab(t,push){
   if(!TITLES[t]) t='home';
@@ -374,9 +422,19 @@ window.addEventListener('popstate',()=>showTab(new URLSearchParams(location.sear
 function showErr(m){$('err').textContent=m;$('err').style.display='block';window.scrollTo(0,0)}
 
 // ---------- 朗读 ----------
-// 预录韩语音频（edge-tts ko-KR-SunHiNeural），用 Audio 播放可绕过 iPhone 静音拨片。
-const TTS_MANIFEST={"택스 리펀드 되나요?":"13371362db2cb7c540a18eaf790c6a440f61e1de.mp3","즉시 환급 되나요?":"1c56f475e79d7d75fae4b3f75176296ea2daad5c.mp3","여권 여기 있어요.":"e414645d24fa7f280f43954efebdc0d0ff4edbaf.mp3","택스 리펀드 영수증 주세요.":"c61d2d9f0b5eb4de64961e61df7eb5b28fa745fa.mp3","이거 얼마예요?":"27122a203445d022783d2920302467aee70f9a87.mp3","좀 깎아 주세요.":"2b7beade8d6bc890779e7b8c33da88f352bee035.mp3","카드 결제 되나요?":"93dd24e8b04bfdfaebd2d236801a468c823894d5.mp3","알리페이 돼요?":"eacf66b739fdf2c8fc8fa01e720086db8b16d5d2.mp3","위챗페이 돼요?":"c208c4737ba04962eaad8de31aaf695667bb04ac.mp3","그냥 구경하는 거예요.":"0d4fafb37a6805478f277a1c2d8bbb28a0b47dd9.mp3","화장실 어디예요?":"65377d03321d187e4f67177d6c8c09931b342264.mp3","화장실 써도 돼요?":"88a4be141b61f0196e87d9b0036d08f693065031.mp3","여기로 가 주세요.":"8aa0c93aed6d7f99c05a64fbdb45f943583ce1d8.mp3","명동역으로 가 주세요.":"3b8d9816b156ff7baa45ce9a31a795226ea3e384.mp3","여기서 세워 주세요.":"d0e8d6e8070f8dce49098d9adb19956a84453cb9.mp3","트렁크 열어 주세요.":"edd5b14f61aee73702ba0233f71c801f2528a60b.mp3","영수증 주세요.":"e4b4938ed9d883bcd4425e2324fc53bd7716d507.mp3","명동역 어떻게 가요?":"932a984ec4b2d486b6ebead3067457806c74b425.mp3","여기가 어디예요?":"998f212f2e7210deac4ae19d41ea5cfd91f206e6.mp3","가까운 지하철역이 어디예요?":"918c89f6e4cfacfbc38931a220f42ab8be9459dd.mp3","지도로 보여 주세요.":"5eb88b34c8579ad7671aa1978452adabcfcb2b7f.mp3","약국 어디 있어요?":"3b059cdc48ff3c0c597056f7cc052bd615dff82b.mp3","두통약 있어요?":"79827696d51bd554f046e6cc0b93171fad395ce4.mp3","감기약 있어요?":"3e80b4bf66a369a1c66be6846238c9510dbe7c06.mp3","소화제 주세요.":"35f43d65ac979405f16da802a8aebb956d367aa7.mp3","반창고 있어요?":"e63bac76532975f849de066106d21cbbd24f4598.mp3","하루에 몇 번 먹어요?":"0fb2c9a396dbee2670a96ca320ed935cc0c72a3c.mp3","도와주세요!":"fc8ac898cd4af82c2c749e7191f86d0b79f366ed.mp3","중국어 하는 분 있어요?":"73ca81ea0bb041fb60379cceecd0dcd47af2d0e8.mp3","경찰 불러 주세요.":"b667c26ac981fc4f744d2362d5565eabd387a586.mp3"};
-let audio;
+// 网站自带的韩语朗读：服务器用 edge-tts（ko-KR-SunHiNeural）生成 mp3，所有手机（含微信）声音一致。
+// 常用句已预生成（/static/audio/<sha1>.mp3，可离线缓存）；其他句子走 /api/tts（服务器与浏览器都会缓存）。
+// 只有服务器音频失败时才用手机自带的系统朗读兜底。
+const TTS_MANIFEST=window.LH_TTS||{};
+const player=new Audio();
+player.setAttribute('playsinline','');player.setAttribute('webkit-playsinline','');player.preload='auto';
+let spkBtn=null, spkTimer=null, spkToken=0;
+function ttsUrl(ko){const f=TTS_MANIFEST[ko];return f?'/static/audio/'+f:'/api/tts?text='+encodeURIComponent(ko)}
+const _warm=new Set();
+function prefetchTTS(ko){ // 卡片出来后提前生成音频，点朗读时几乎立即出声
+  if(!ko||TTS_MANIFEST[ko]||_warm.has(ko)) return;_warm.add(ko);
+  setTimeout(()=>{fetch(ttsUrl(ko)).catch(()=>{_warm.delete(ko)})},300);
+}
 function clearSpeakUI(){
   document.querySelectorAll('.spk-on').forEach(el=>{
     el.classList.remove('spk-on');
@@ -386,66 +444,55 @@ function clearSpeakUI(){
 }
 function speakFallback(ko, done){
   if('speechSynthesis' in window){
-    const u=new SpeechSynthesisUtterance(ko);
-    u.lang='ko-KR';u.rate=.9;
-    u.onend=done;u.onerror=done;
-    try{speechSynthesis.speak(u)}catch(e){if(done) done()}
+    try{
+      const u=new SpeechSynthesisUtterance(ko);u.lang='ko-KR';u.rate=.9;
+      const v=(speechSynthesis.getVoices()||[]).find(v=>/^ko/i.test(v.lang));if(v)u.voice=v;
+      u.onend=done;u.onerror=done;speechSynthesis.speak(u);
+    }catch(e){if(done) done()}
   }else if(done) done();
 }
 function speak(ko, btn){
-  if(audio){try{audio.pause();audio.onended=null;audio.onerror=null}catch(e){}}
-  clearSpeakUI();
+  const tok=++spkToken;
+  try{player.pause()}catch(e){}
+  clearTimeout(spkTimer);clearSpeakUI();
   let finished=false;
   const done=()=>{
-    if(finished) return;
-    finished=true;
-    if(btn){
-      btn.classList.remove('spk-on');
-      if(btn.dataset.spkLabel!=null) btn.textContent=btn.dataset.spkLabel;
-    }
+    if(finished||tok!==spkToken) return;finished=true;clearTimeout(spkTimer);
+    if(btn){btn.classList.remove('spk-on');if(btn.dataset.spkLabel!=null) btn.textContent=btn.dataset.spkLabel}
   };
+  const fallback=()=>{if(finished||tok!==spkToken) return;try{player.pause()}catch(e){};speakFallback(ko,done)};
   if(btn){
     if(btn.dataset.spkLabel==null) btn.dataset.spkLabel=btn.textContent;
     btn.classList.add('spk-on');
     btn.textContent=(btn.id==='cSpk'||btn.id==='bigSpk')?'🔈 播放中':'🔈';
   }
-  const file=TTS_MANIFEST[ko];
-  function bindAndPlay(a){
-    audio=a;
-    audio.setAttribute('playsinline','');
-    audio.setAttribute('webkit-playsinline','');
-    audio.preload='auto';
-    audio.onended=done;
-    audio.onerror=()=>{done(); if(!file) return; speakFallback(ko,()=>{})};
-    const p=audio.play(); // 必须在点击回调里同步调用，iPhone 静音拨片下才能出声
-    if(p&&p.catch) p.catch(()=>{if(file){done();speakFallback(ko,()=>{})}else speakFallback(ko,done)});
-  }
-  if(file){
-    bindAndPlay(new Audio('/static/audio/'+file));
-    return;
-  }
-  // 沟通卡等没有预录音频的句子：先用静音文件解锁，再播 /api/tts，最后才用系统朗读
-  const unlock=new Audio('/static/audio/silence.mp3');
-  unlock.setAttribute('playsinline','');
-  unlock.setAttribute('webkit-playsinline','');
-  const afterUnlock=()=>{
-    try{unlock.pause()}catch(e){}
-    const a=new Audio('/api/tts?text='+encodeURIComponent(ko));
-    a.setAttribute('playsinline','');
-    a.setAttribute('webkit-playsinline','');
-    a.preload='auto';
-    a.onended=done;
-    a.onerror=()=>speakFallback(ko,done);
-    audio=a;
-    const p=a.play();
-    if(p&&p.catch) p.catch(()=>speakFallback(ko,done));
-  };
-  const up=unlock.play();
-  if(up&&up.then) up.then(afterUnlock).catch(afterUnlock);
-  else afterUnlock();
+  player.onended=done;
+  player.onerror=fallback;
+  player.src=ttsUrl(ko);
+  const p=player.play(); // 必须在点击回调里同步调用（iPhone/微信），静音拨片下也能出声
+  if(p&&p.catch) p.catch(err=>{if(err&&err.name==='AbortError') return;fallback()});
+  spkTimer=setTimeout(()=>{if(player.paused&&!finished) fallback()},9000); // 网络太慢时兜底
 }
-function showBig(ko,zh,ro){$('bigKo').textContent=ko;$('bigKo').classList.toggle('long',ko.length>40);$('bigZh').textContent=zh||'';$('bigRo').textContent=ro||'';$('big').style.display='flex';$('bigSpk').onclick=()=>speak(ko,$('bigSpk'))}
-$('bigClose').onclick=()=>{$('big').style.display='none'};
+function fitBig(){
+  const el=$('bigKo');if(!el) return;
+  let fs=Math.min(64,Math.max(28,Math.floor(window.innerWidth/6)));
+  el.style.fontSize=fs+'px';
+  let guard=0;
+  while(guard++<30&&fs>18&&(el.scrollHeight>el.clientHeight+2||el.scrollWidth>el.clientWidth+2)){fs-=3;el.style.fontSize=fs+'px'}
+}
+// main：大字内容；sub：下面小字；ro：发音；say：朗读的韩文（null 则不显示朗读）
+function showBig(main,sub,ro,say){
+  if(say===undefined) say=main;
+  $('bigKo').textContent=main;$('bigKo').classList.remove('long','flip');$('bigZh').classList.remove('flip');
+  $('bigZh').textContent=sub||'';$('bigRo').textContent=ro?('发音：'+ro):'';
+  $('big').style.display='flex';
+  $('bigSpk').style.display=say?'':'none';
+  $('bigSpk').onclick=()=>say&&speak(say,$('bigSpk'));
+  requestAnimationFrame(fitBig);
+}
+$('bigClose').onclick=()=>{$('big').style.display='none';try{player.pause()}catch(e){}};
+$('bigFlip').onclick=()=>{$('bigKo').classList.toggle('flip');$('bigZh').classList.toggle('flip')};
+window.addEventListener('resize',()=>{if($('big').style.display==='flex') fitBig()});
 
 // ---------- 拍照 ----------
 let mode='cos';
@@ -525,191 +572,227 @@ function renderSub(d){
   el.style.display='block';el.scrollIntoView({behavior:'smooth',block:'start'});
 }
 
-// ---------- 地铁查路线 ----------
-const STATION_RAW=[
-  ['명동역',['明洞','明洞站','myeongdong','myeong-dong']],
-  ['홍대입구역',['弘大入口','弘大','弘益大学','hongdae','hongik','hongikuniversity']],
-  ['서울역',['首尔站','首尔车站','seoulstation','seoul']],
-  ['강남역',['江南','江南站','gangnam']],
-  ['이태원역',['梨泰院','itaewon']],
-  ['동대문역',['东大门','dongdaemun']],
-  ['동대문역사문화공원역',['东大门历史文化公园','ddp','dongdaemunhistoryandculturepark','dongdaemunhistory']],
-  ['광화문역',['光化门','光化门站','gwanghwamun']],
-  ['경복궁역',['景福宫','景福宫站','gyeongbokgung','gyeongbokpalace','gyeongbok']],
-  ['안국역',['安国','仁寺洞','北村','anguk','insadong','bukchon']],
-  ['종로3가역',['钟路3街','钟路三街','jongno3ga','jongno3-ga','jongno']],
-  ['종각역',['钟阁','jonggak']],
-  ['시청역',['市厅','首尔市厅','cityhall','seoulcityhall']],
-  ['을지로입구역',['乙支路入口','乙支路','euljiro1ga','euljiro']],
-  ['을지로3가역',['乙支路3街','euljiro3ga']],
-  ['충무로역',['忠武路','chungmuro']],
-  ['회현역',['会贤','南大门','南大门市场','hoehyeon','namdaemun']],
-  ['서울대입구역',['首尔大学','首尔大入口','seoulnationaluniversity','snu']],
-  ['신촌역',['新村','sinchon']],
-  ['이대역',['梨大','梨花女子大学','ewha','ewhawomansuniversity']],
-  ['합정역',['合井','hapjeong','hapjung']],
-  ['상수역',['上水','sangsu']],
-  ['망원역',['望远','mangwon']],
-  ['여의도역',['汝矣岛','yeouido','yoido']],
-  ['여의나루역',['汝矣渡口','yeouinaru']],
-  ['잠실역',['蚕室','乐天世界','jamsil','lotteworld']],
-  ['잠실새내역',['蚕室新川','jamsilsaenae']],
-  ['삼성역',['三成','科克斯','星空图书馆','samsung','coex']],
-  ['봉은사역',['奉恩寺','bongeunsa']],
-  ['선릉역',['宣陵','seolleung','seonreung']],
-  ['역삼역',['驿三','yeoksam']],
-  ['신논현역',['新论岘','sinnonhyeon','sinnonhyun']],
-  ['논현역',['论岘','nonhyeon']],
-  ['신사역',['新沙','林荫道','佳拉苏吉','sinsa','garosugil']],
-  ['압구정역',['狎鸥亭','apgujeong']],
-  ['압구정로데오역',['狎鸥亭罗德奥','apgujeongrodeo']],
-  ['청담역',['清潭','cheongdam']],
-  ['성수역',['圣水','seongsu','sungsoo']],
-  ['뚝섬역',['纛岛','ttukseom','dukseom']],
-  ['서울숲역',['首尔林','seoulforest']],
-  ['건대입구역',['建大入口','建大','建国大学','konkuk','konkukuniversity']],
-  ['어린이대공원역',['儿童大公园','childrensgrandpark']],
-  ['왕십리역',['往十里','wangsimni']],
-  ['용산역',['龙山','yongsan']],
-  ['숙대입구역',['淑大入口','淑大','sookmyung','sookmyungwomenuniversity']],
-  ['한강진역',['汉江镇','hangangjin']],
-  ['녹사평역',['绿莎坪','noksapyeong']],
-  ['삼각지역',['三角地','samgakji']],
-  ['이촌역',['二村','国立中央博物馆','ichon','nationalmuseum']],
-  ['사당역',['舍堂','sadang']],
-  ['교대역',['教大','gyodae','seoulnationalunivofeducation']],
-  ['고속터미널역',['高速巴士客运站','高速客运站','expressbusterminal']],
-  ['공덕역',['孔德','gongdeok','kongdok']],
-  ['김포공항역',['金浦机场','金浦','gimpoairport','gimpo']],
-  ['인천공항1터미널역',['仁川机场1号航站楼','仁川机场一号','仁川机场','incheonairportt1','incheonairport','icnt1','icn']],
-  ['인천공항2터미널역',['仁川机场2号航站楼','仁川机场二号','incheonairportt2','icnt2']],
-  ['청량리역',['清凉里','cheongnyangni']],
-  ['혜화역',['惠化','大学路','hyehwa','daehangno','daehakro']],
-  ['성신여대입구역',['诚信女大','sungshin']],
-  ['신림역',['新林','sillim','shillim']],
-  ['노량진역',['鹭梁津','水产市场','noryangjin']],
-  ['영등포역',['永登浦','yeongdeungpo']],
-  ['신도림역',['新道林','sindorim']],
-  ['구로디지털단지역',['九老数码园区','gurodigitalcomplex','guro']],
-  ['가산디지털단지역',['加山数码园区','gasandigitalcomplex','gasan']],
-  ['디지털미디어시티역',['数码媒体城','dmc','digitalmediacity']],
-  ['월드컵경기장역',['世界杯体育场','上岩','worldcupstadium','sangam']],
-  ['마곡나루역',['麻谷渡口','首尔植物园','magongnaru','magoknaru']],
-  ['마곡역',['麻谷','magok']],
-  ['발산역',['钵山','balsan']],
-  ['국회의사당역',['国会','国会议事堂','nationalassembly']],
-  ['종합운동장역',['综合运动场','sportscomplex']],
-  ['문정역',['文井','munjeong']],
-  ['약수역',['药水','yaksu']],
-  ['옥수역',['玉水','oksu']],
-  ['한남역',['汉南','hannam']],
-  ['동작역',['铜雀','dongjak']],
-  ['서대문역',['西大门','seodaemun']],
-  ['독립문역',['独立门','dongnimmun']],
-  ['충정로역',['忠正路','chungjeongno','chungjeongro']],
-  ['연신내역',['延新川','yeonsinnae']],
-  ['불광역',['佛光','bulgwang']],
-  ['노원역',['芦原','nowon']],
-  ['수유역',['水逾','suyu']],
-  ['창동역',['仓洞','changdong']],
-  ['고려대역',['高丽大学','koreauniversity']],
-  ['한양대역',['汉阳大学','hanyanguniversity','hanyang']],
-  ['군자역',['君子','gunja']],
-  ['대흥역',['大兴','daeheung']],
-  ['공릉역',['孔陵','gongneung']],
-  ['석촌역',['石村','石村湖','seokchon']],
-  ['송파역',['松坡','songpa']],
-  ['남영역',['南营','namyeong']],
-  ['신용산역',['新龙山','sinyongsan']]
-];
-function normSt(s){
-  return String(s||'').trim().toLowerCase()
-    .replace(/[.\s_\-'’]/g,'')
-    .replace(/(车站|地铁站|地铁)$/,'')
-    .replace(/站$/,'')
-    .replace(/역$/,'')
-    .replace(/station$/,'')
-    .replace(/stn$/,'');
+// ---------- 地铁查路线（站内计算，数据见 /static/subway.js 注释）----------
+const HOT_ST=['明洞','弘大入口','首尔站','仁川机场1号航站楼','东大门历史文化公园','江南','蚕室','景福宫','圣水','金浦机场','梨泰院','汝矣岛'];
+const rtPick={rtFrom:null,rtTo:null};
+let rtFocus='rtFrom';
+function ldot(lid){const D=LHSub.data();const l=D.lines[D.lineIdx[lid]];return l?`<span class="ldot" style="background:${esc(l.color)}">${esc(l.zh)}</span>`:''}
+function stName(s){return LHSub.label(s)}
+function sugHtml(list){
+  return list.map(s=>`<button type="button" data-i="${s.i}"><span class="n">${esc(stName(s))}<small>${esc(s.ko)}역${s.en?' · '+esc(s.en):''}</small></span><span class="ldots">${s.lines.map(ldot).join('')}</span></button>`).join('');
 }
-const STATIONS={};
-STATION_RAW.forEach(([off,als])=>{
-  if(!off.endsWith('역') && off!=='여의도') return;
-  const official = off.endsWith('역')?off:null;
-  if(!official) return;
-  STATIONS[normSt(official)]=official;
-  (als||[]).forEach(a=>{const k=normSt(a); if(k) STATIONS[k]=official});
+function bindSug(id){
+  const inp=$(id), box=$(id+'Sug');
+  let t=null;
+  const hide=()=>{box.style.display='none'};
+  const draw=()=>{
+    LHSub.load().then(()=>{
+      const q=inp.value.trim();
+      if(!q){hide();return}
+      const list=LHSub.search(q,8);
+      if(!list.length){box.innerHTML='<button type="button" disabled><span class="n">没找到这个站，可换个写法（韩文/英文/拼音）</span></button>';box.style.display='block';return}
+      box.innerHTML=sugHtml(list);box.style.display='block';
+      box.querySelectorAll('button[data-i]').forEach(b=>b.addEventListener('pointerdown',e=>{
+        e.preventDefault();
+        const s=LHSub.data().st[+b.dataset.i];rtPick[id]=s;inp.value=stName(s);hide();
+        if(id==='rtFrom'&&!$('rtTo').value.trim()) $('rtTo').focus(); else inp.blur();
+      }));
+    }).catch(()=>{});
+  };
+  inp.addEventListener('input',()=>{rtPick[id]=null;clearTimeout(t);t=setTimeout(draw,80)});
+  inp.addEventListener('focus',()=>{rtFocus=id;LHSub.load().catch(()=>{});if(inp.value.trim()&&!rtPick[id]) draw()});
+  inp.addEventListener('blur',()=>setTimeout(hide,150));
+  inp.addEventListener('keydown',e=>{if(e.key==='Enter'){e.preventDefault();hide();if(id==='rtFrom'&&!$('rtTo').value.trim()) $('rtTo').focus(); else findRoute()}});
+}
+bindSug('rtFrom');bindSug('rtTo');
+$('hotSt').innerHTML=HOT_ST.map(n=>`<button type="button">${esc(n)}</button>`).join('');
+$('hotSt').querySelectorAll('button').forEach(b=>b.onclick=()=>{
+  const id=(!$('rtFrom').value.trim())?'rtFrom':(!$('rtTo').value.trim()?'rtTo':rtFocus);
+  LHSub.load().then(()=>{const s=LHSub.search(b.textContent,1)[0];if(!s) return;rtPick[id]=s;$(id).value=stName(s);rtFocus=id==='rtFrom'?'rtTo':'rtFrom'});
 });
-// 汝矣岛 already added via 여의도역; drop the accidental placeholder row
-function lookupStation(s){
-  const k=normSt(s);
-  return (k && STATIONS[k]) || '';
-}
-// 有两站坐标时打开 Naver / 高德的公交路线规划；缺坐标时退回搜索终点站
-async function mapLinks(s,e){
-  const st=await LHMap.stations(), a=st[s], b=st[e];
-  if(a&&b){
-    const A={name:s,lng:a[0],lat:a[1]}, B={name:e,lng:b[0],lat:b[1]};
-    return {naver:LHMap.naverRoute(A,B), amap:LHMap.amapRoute(A,B), exact:true};
-  }
-  return {naver:LHMap.naverSearch(e), amap:LHMap.amapSearch(e, b||null), exact:false};
-}
-async function resolveStation(raw){
-  const hit=lookupStation(raw);
-  if(hit) return hit;
+async function resolveSt(id){
+  if(rtPick[id]) return {s:rtPick[id],alt:null};
+  const raw=$(id).value.trim();
+  const list=LHSub.search(raw,3);
+  if(list.length) return {s:list[0],alt:(list[1]&&LHSub.norm(raw).length<=4&&/机场|공항|airport/i.test(raw))?list[1]:null};
+  // 本地找不到时，再请服务器把写法转成官方韩文站名
   const r=await fetch('/api/station',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({name:raw})});
   const j=await r.json().catch(()=>({}));
-  if(!r.ok) throw new Error(j.detail||'站名转换失败');
-  if(!j.station_ko) throw new Error('没能确认这个站名，请换个写法再试');
-  return j.station_ko;
+  const s=j.station_ko&&LHSub.byKo(j.station_ko);
+  if(!s) throw new Error('没找到「'+raw+'」这个站，请换个写法或从下拉列表里选');
+  return {s:s,alt:null};
 }
+function fmtMin(m){return m>=60?Math.floor(m/60)+'小时'+(m%60?m%60+'分':''):m+'分钟'}
+function renderRoute(A,B,r,alts){
+  const D=LHSub.data(), L=i=>D.lines[i], S=i=>D.st[i];
+  const fare=LHSub.fare(r);
+  const xf=r.legs.length-1;
+  let h=`<div class="rsum"><span>约<b class="big">${esc(fmtMin(r.min))}</b></span><span>换乘 ${xf} 次</span><span>共 ${r.stops} 站</span></div>`;
+  h+=`<div class="tip" style="margin:-6px 0 12px">${fare?`票价约 ${fare.toLocaleString()} 韩元（交通卡，按距离估算；一次性车票另加 100 韩元）`:'含机场铁路/新盆唐线等另计票价线路，票价以刷卡为准'}。出站必须刷卡。</div>`;
+  r.legs.forEach((lg,k)=>{
+    const l=L(lg.line), a=S(lg.from), b=S(lg.to), nx=S(lg.next);
+    const via=lg.stops.slice(0,-1).map(i=>stName(S(i))).join(' → ');
+    let dir;
+    if(lg.term>=0&&lg.term===lg.to) dir=`坐开往 <b>${esc(stName(b))}</b>（${esc(b.ko)}）方向的车（就是终点站），下一站是 ${esc(stName(nx))}（${esc(nx.ko)}）`;
+    else if(lg.term>=0) dir=`坐开往 <b>${esc(stName(S(lg.term)))}</b>（${esc(S(lg.term).ko)}）方向的车，下一站是 ${esc(stName(nx))}（${esc(nx.ko)}）`;
+    else if(lg.loop) dir=`坐 <b>${esc(l.zh)}${esc(lg.loop)}</b>（${lg.loop==='内环'?'내선순환':'외선순환'}），下一站是 ${esc(stName(nx))}（${esc(nx.ko)}）`;
+    else dir=`站台上找“下一站 ${esc(nx.ko)}（${esc(stName(nx))}）”一侧上车，并看列车终点是否经过 ${esc(b.ko)}`;
+    h+=`<div class="leg" style="--lc:${esc(l.color)}">
+      <div class="stn">${k===0?'🚩 ':''}${esc(stName(a))}<small>${esc(a.ko)}역</small> ${ldot(l.id)}</div>
+      <div class="dir">${dir}</div>
+      <div class="meta">坐 ${lg.stops.length} 站 · 约 ${Math.round(lg.min)} 分钟</div>
+      ${lg.stops.length>1?`<details><summary>途经 ${lg.stops.length-1} 站</summary>${esc(via)}</details>`:''}
+      <div class="stn">${esc(stName(b))}<small>${esc(b.ko)}역</small> 下车</div>
+    </div>`;
+    if(k<r.legs.length-1){const n=L(r.legs[k+1].line);h+=`<div class="xfer">🔁 在 <b>${esc(stName(b))}</b> 换乘 ${ldot(n.id)}：跟着「${esc(n.ko)}」和该线颜色的换乘标识走，站内步行一般需要几分钟，部分大站会更久。</div>`}
+  });
+  h+=`<div class="arrive">🏁 到达 <b>${esc(stName(B))}</b>（${esc(B.ko)}역）。出口：请看站内黄色出口指示牌，或用下面的地图确认目的地在几号出口。</div>`;
+  if(alts.length) h+=`<div class="rt-note">提示：${alts.map(esc).join('；')}</div>`;
+  h+=`<div class="rt-acts"><button type="button" class="staff" id="rtStaff">🪪 给工作人员看（韩文）</button><div class="route-links" id="rtMaps"></div></div>`;
+  $('rtOut').innerHTML=h;
+  // 韩文卡片
+  let ko=`${B.ko}역에 가려고 해요.\n`;
+  const ro=w=>{const c=w.charCodeAt(w.length-1)-0xAC00;const j=(c>=0&&c<11172)?c%28:0;return w+((j===0||j===8)?'로':'으로')};
+  ko+=r.legs.map((lg,k)=>k===0?`${S(lg.from).ko}역에서 ${L(lg.line).ko} 타고`:`${S(lg.from).ko}역에서 ${ro(L(lg.line).ko)} 갈아타고`).join(', ')+` ${B.ko}역에서 내리면 맞나요?`;
+  const zh=`我想去${stName(B)}。这样坐对吗？（${r.legs.map(lg=>L(lg.line).zh).join(' → ')}）`;
+  $('rtStaff').onclick=()=>showBig(ko,zh,'',ko);
+  const m={naver:LHMap.naverRoute({name:A.ko+'역',lng:A.p[0],lat:A.p[1]},{name:B.ko+'역',lng:B.p[0],lat:B.p[1]}),amap:LHMap.amapRoute({name:stName(A),lng:A.p[0],lat:A.p[1]},{name:stName(B),lng:B.p[0],lat:B.p[1]})};
+  $('rtMaps').innerHTML=`<a class="naver" href="${esc(m.naver)}" target="_blank" rel="noopener">在 Naver 地图核对（推荐）</a><a class="amap" href="${esc(m.amap)}" target="_blank" rel="noopener">高德地图</a>`;
+  $('rtOut').scrollIntoView({behavior:'smooth',block:'start'});
+}
+let rtBusy=false;
 async function findRoute(){
+  if(rtBusy) return;
   const a=$('rtFrom').value.trim(), b=$('rtTo').value.trim();
   if(!a||!b){showErr('请先填写起点和终点');return}
   if(a.length>40||b.length>40){showErr('站名太长，请只输入车站名称');return}
-  $('err').style.display='none';$('ld-rt').style.display='block';$('rtBtn').disabled=true;$('rtOut').innerHTML='';
+  rtBusy=true;$('err').style.display='none';$('ld-rt').style.display='block';$('rtBtn').disabled=true;$('rtOut').innerHTML='';
   try{
-    const [s,e]=await Promise.all([resolveStation(a),resolveStation(b)]);
-    const m=await mapLinks(s,e);
-    $('rtOut').innerHTML=`<div class="name-zh">${esc(s)} → ${esc(e)}</div>
-      <div class="tip">${m.exact?'仅供参考。将打开地图查看换乘和走法，请再核对站名。':'暂时没有这两站的坐标，将打开地图搜索终点站，再点“길찾기/路线”规划。'}</div>
-      <div class="route-links">
-        <a class="naver" href="${esc(m.naver)}" target="_blank" rel="noopener">Naver 地图（推荐）</a>
-        <a class="amap" href="${esc(m.amap)}" target="_blank" rel="noopener">高德地图</a>
-      </div>`;
-    window.open(m.naver,'_blank','noopener');
+    await LHSub.load();
+    const [x,y]=await Promise.all([resolveSt('rtFrom'),resolveSt('rtTo')]);
+    if(x.s.i===y.s.i) throw new Error('起点和终点是同一个站');
+    const r=LHSub.route(x.s.i,y.s.i);
+    if(!r) throw new Error('这两站之间没算出地铁路线，可能需要换乘火车或巴士，请用地图查询');
+    const alts=[];
+    [x,y].forEach(o=>{if(o.alt) alts.push(`「${stName(o.s)}」也可能是「${stName(o.alt)}」，如不对请在下拉列表里选`)});
+    if(/인천공항/.test(x.s.ko+y.s.ko)) alts.push('仁川机场有 1、2 号航站楼两个站，请按航班的航站楼选择；机场铁路分普通车和直达车，这里按普通车计算');
+    renderRoute(x.s,y.s,r,alts);
   }catch(err){showErr(err.message||'查询失败，请稍后重试')}
-  finally{$('ld-rt').style.display='none';$('rtBtn').disabled=false}
+  finally{rtBusy=false;$('ld-rt').style.display='none';$('rtBtn').disabled=false}
 }
 $('rtBtn').onclick=findRoute;
-$('rtSwap').onclick=()=>{const a=$('rtFrom'),b=$('rtTo'),x=a.value;a.value=b.value;b.value=x};
-['rtFrom','rtTo'].forEach(id=>$(id).addEventListener('keydown',e=>{if(e.key==='Enter'){e.preventDefault();findRoute()}}));
+$('rtSwap').onclick=()=>{const a=$('rtFrom'),b=$('rtTo'),x=a.value;a.value=b.value;b.value=x;const p=rtPick.rtFrom;rtPick.rtFrom=rtPick.rtTo;rtPick.rtTo=p};
 
-// ---------- 沟通卡 ----------
-let cardBusy=false, cardLast='', cardCtl=null;
+// ---------- 中韩翻译 ----------
+const T_SCENES=[['general','通用',['求助','厕所']],['shop','购物',['问价','退税']],['food','餐厅',['餐厅']],['taxi','打车',['打车']],['subway','地铁',['地铁']],['pharmacy','药店',['买药']],['hotel','酒店',['酒店']],['road','问路',['问路']]];
+let tMode='zh2ko', tScene='general';
+let cardBusy=false, cardLast='', cardCtl=null, curItem=null;
+const LS={get(k,d){try{return JSON.parse(localStorage.getItem(k))??d}catch(e){return d}},set(k,v){try{localStorage.setItem(k,JSON.stringify(v))}catch(e){}}};
+const TC_KEY='lh_tc_v2', HIST_KEY='lh_hist_v2';
+function tcGet(k){const c=LS.get(TC_KEY,{});return c[k]||null}
+function tcPut(k,v){const c=LS.get(TC_KEY,{});c[k]=Object.assign({},v,{_t:Date.now()});const ks=Object.keys(c);if(ks.length>200){ks.sort((a,b)=>c[a]._t-c[b]._t).slice(0,ks.length-200).forEach(x=>delete c[x])}LS.set(TC_KEY,c)}
 function hideErr(){const e=$('err');if(e.style.display!=='none'){e.style.display='none';e.textContent=''}}
 function markOldCard(on){const k=$('cardOut').querySelector('.kocard');if(k)k.classList.toggle('stale',!!on)}
+function drawModeUI(){
+  document.querySelectorAll('#tMode button').forEach(b=>b.classList.toggle('on',b.dataset.m===tMode));
+  const z=tMode==='zh2ko';
+  $('cardIn').placeholder=z?'输入想说的话，例如：请帮我拿一个大一点的袋子':'请对方输入或按住话筒说韩语，例如：몇 분이세요?';
+  $('cardBtn').textContent=z?'生成韩文卡片':'翻译成中文';
+  $('tScene').style.display=z?'flex':'none';$('quickPh').style.display=z?'block':'none';
+  $('cardIn').lang=z?'zh-CN':'ko';
+}
+document.querySelectorAll('#tMode button').forEach(b=>b.onclick=()=>{if(tMode===b.dataset.m) return;tMode=b.dataset.m;$('cardIn').value='';hideErr();drawModeUI()});
+function drawScenesT(){
+  $('tScene').innerHTML=T_SCENES.map(s=>`<button type="button" data-s="${s[0]}" class="${s[0]===tScene?'on':''}">${s[1]}</button>`).join('');
+  $('tScene').querySelectorAll('button').forEach(b=>b.onclick=()=>{tScene=b.dataset.s;drawScenesT()});
+  const SC=window.LH_SCENES||{};const sc=T_SCENES.find(s=>s[0]===tScene);
+  const list=[];sc[2].forEach(k=>(SC[k]||[]).forEach(p=>list.push(p)));
+  $('quickPh').innerHTML=list.length?`<h3>常用句 · ${esc(sc[1])}（点一下直接出卡片，可离线）</h3><div class="chips">${list.map((p,i)=>`<button type="button" data-i="${i}">${esc(p[0])}</button>`).join('')}</div>`:'';
+  $('quickPh').querySelectorAll('button').forEach(b=>b.onclick=()=>{const p=list[+b.dataset.i];const it={mode:'zh2ko',src:p[0],ko:p[1],roman:p[2],back:p[0],t:Date.now()};$('cardIn').value=p[0];renderCard(it);addHist(it)});
+}
+function renderCard(it,pending){
+  curItem=it;
+  let h;
+  if(pending){
+    h=`<div class="kocard pending"><div class="src">${esc(it.src)}</div><div class="ko">翻译中…</div></div>`;
+  }else if(it.mode==='zh2ko'){
+    h=`<div class="kocard"><div class="ko${it.ko.length>60?' long':''}">${esc(it.ko)}</div>${it.roman?`<div class="roman">发音：${esc(it.roman)}</div>`:''}
+      <div class="back" id="cBack">中文回译：${it.back?esc(it.back):'<span style="color:#aaa">核对中…</span>'}</div>
+      <div class="acts"><button id="cSpk">🔊 朗读</button><button id="cBig">⛶ 全屏给对方看</button></div></div>`;
+  }else{
+    h=`<div class="kocard"><div class="src">对方说（韩文）：${esc(it.src)}</div><div class="ko${it.zh.length>40?' long':''}">${esc(it.zh)}</div>
+      <div class="acts"><button id="cSpk">🔊 朗读韩文原句</button><button id="cBig">⛶ 全屏</button></div></div>`;
+  }
+  $('cardOut').innerHTML=h;
+  if(pending) return;
+  if(it.mode==='zh2ko'){
+    $('cSpk').onclick=()=>speak(it.ko,$('cSpk'));$('cBig').onclick=()=>showBig(it.ko,it.src,it.roman,it.ko);prefetchTTS(it.ko);
+  }else{
+    $('cSpk').onclick=()=>speak(it.src,$('cSpk'));$('cBig').onclick=()=>showBig(it.zh,it.src,'',it.src);
+  }
+}
+function addHist(it){
+  let h=LS.get(HIST_KEY,[]).filter(x=>!(x.mode===it.mode&&x.src===it.src));
+  h.unshift({mode:it.mode,src:it.src,ko:it.ko||'',roman:it.roman||'',zh:it.zh||'',back:it.back||'',t:Date.now()});
+  LS.set(HIST_KEY,h.slice(0,20));drawHist();
+}
+function drawHist(){
+  const h=LS.get(HIST_KEY,[]);
+  if(!h.length){$('tHist').innerHTML='';return}
+  $('tHist').innerHTML=`<h3>最近翻译（保存在本机）<button type="button" id="hClr">清空</button></h3>`+h.map((x,i)=>`<div class="it" data-i="${i}"><div class="t"><div class="a">${esc(x.mode==='zh2ko'?x.ko:x.zh)}</div><div class="b">${x.mode==='zh2ko'?'中→韩':'韩→中'} · ${esc(x.src)}</div></div>${x.mode==='zh2ko'?`<button type="button" class="sp" data-i="${i}" aria-label="朗读">🔊</button>`:''}</div>`).join('');
+  $('hClr').onclick=e=>{e.stopPropagation();LS.set(HIST_KEY,[]);drawHist()};
+  $('tHist').querySelectorAll('.it').forEach(el=>el.onclick=e=>{
+    const x=h[+el.dataset.i];
+    if(e.target.closest('.sp')){speak(x.ko,e.target.closest('.sp'));return}
+    if(x.mode!==tMode){tMode=x.mode;drawModeUI()}$('cardIn').value=x.src;renderCard(x);window.scrollTo({top:$('cardOut').getBoundingClientRect().top+window.scrollY-80,behavior:'smooth'});
+  });
+}
+async function postJSON(url,body,signal){
+  const r=await fetch(url,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body),signal});
+  const j=await r.json().catch(()=>({}));if(!r.ok) throw new Error(j.detail||'翻译失败，请重试');return j;
+}
 async function makeCard(text,opts){
   opts=opts||{};
+  const mode=tMode, scene=mode==='zh2ko'?tScene:'';
   const t=(text??$('cardIn').value).trim();
-  if(!t){showErr(opts.voice?'没听清，请再说一次':'请先输入中文');return}
-  if(cardBusy&&t===cardLast) return; // 同一句正在翻译，忽略重复点击
+  if(!t){showErr(opts.voice?'没听清，请再说一次':(mode==='zh2ko'?'请先输入中文':'请先输入韩语'));return}
+  if(mode==='ko2zh'&&!/[\uac00-\ud7a3]/.test(t)){showErr('请输入韩语（韩→中模式）');return}
+  const key=mode+'|'+scene+'|'+t;
+  if(cardBusy&&key===cardLast) return; // 同一句正在翻译，忽略重复点击
   if(cardCtl){try{cardCtl.abort()}catch(e){}}
-  const ctl=new AbortController();cardCtl=ctl;cardBusy=true;cardLast=t;
-  $('cardIn').value=t;
-  hideErr();$('ld-card').style.display='block';$('cardBtn').disabled=true;markOldCard(true);
+  $('cardIn').value=t;hideErr();
+  const hit=tcGet(key);
+  if(hit){const it=Object.assign({mode,src:t},hit);renderCard(it);addHist(it);if(mode==='zh2ko'&&!it.back) fillBack(it);return}
+  const ctl=new AbortController();cardCtl=ctl;cardBusy=true;cardLast=key;
+  $('cardBtn').disabled=true;renderCard({mode,src:t},true);
   try{
-    const r=await fetch('/api/card',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({text:t}),signal:ctl.signal});
-    const j=await r.json().catch(()=>({}));if(!r.ok)throw new Error(j.detail||'翻译失败');
+    const j=await postJSON('/api/translate',{text:t,dir:mode,scene:scene||'general'},ctl.signal);
     if(ctl!==cardCtl) return;
-    $('cardOut').innerHTML=`<div class="kocard"><div class="ko${j.ko.length>60?' long':''}">${esc(j.ko)}</div><div class="roman">发音：${esc(j.roman)}</div>
-      <div class="back">中文回译：${esc(j.back)}</div>
-      <div class="acts"><button id="cSpk">🔊 朗读</button><button id="cBig">⛶ 全屏给对方看</button></div></div>`;
-    $('cSpk').onclick=()=>speak(j.ko,$('cSpk'));$('cBig').onclick=()=>showBig(j.ko,t,j.roman);
-  }catch(e){if(e&&e.name==='AbortError')return;markOldCard(false);showErr(e.message||'网络错误')}
-  finally{if(ctl===cardCtl){cardBusy=false;cardCtl=null;$('ld-card').style.display='none';$('cardBtn').disabled=false}}
+    const it=mode==='zh2ko'?{mode,src:t,ko:j.ko,roman:j.roman||'',back:''}:{mode,src:t,zh:j.zh};
+    renderCard(it);tcPut(key,mode==='zh2ko'?{ko:it.ko,roman:it.roman}:{zh:it.zh});addHist(it);
+    if(mode==='zh2ko') fillBack(it,key);
+  }catch(e){if(e&&e.name==='AbortError')return;$('cardOut').innerHTML='';showErr(e.message||'网络错误，请重试')}
+  finally{if(ctl===cardCtl){cardBusy=false;cardCtl=null;$('cardBtn').disabled=false}}
+}
+async function fillBack(it,key){
+  try{
+    const j=await postJSON('/api/back',{ko:it.ko});
+    it.back=j.zh||'';
+    if(curItem===it&&$('cBack')) $('cBack').textContent='中文回译：'+(it.back||'（暂无）');
+    if(key&&it.back){const c=tcGet(key);if(c){c.back=it.back;tcPut(key,c)}}
+    addHist(it);
+  }catch(e){if(curItem===it&&$('cBack')) $('cBack').textContent='中文回译：暂时无法核对'}
 }
 $('cardBtn').onclick=()=>makeCard();
 $('cardIn').addEventListener('input',()=>{if($('cardIn').value.trim())hideErr()});
+drawModeUI();drawScenesT();drawHist();
+// 空闲时把常用句音频预先存到本机（service worker 缓存），离线也能朗读
+(function(){
+  if(LS.get('lh_aud_v2',0)||!('serviceWorker' in navigator)) return;
+  const files=Array.from(new Set(Object.values(TTS_MANIFEST)));let i=0;
+  const next=()=>{if(i>=files.length){LS.set('lh_aud_v2',1);return}fetch('/static/audio/'+files[i++]).catch(()=>{}).finally(()=>setTimeout(next,150))};
+  setTimeout(()=>{(window.requestIdleCallback||setTimeout)(next)},8000);
+})();
 
 // 沟通卡语音输入（浏览器自带识别，边说边出字；不上传录音）：可连续说多句，松手后自动翻译
 (function(){
@@ -738,7 +821,7 @@ $('cardIn').addEventListener('input',()=>{if($('cardIn').value.trim())hideErr()}
     'audio-capture':'找不到麦克风，请检查设备后重试',
     'network':'语音识别网络错误，请稍后再试'
   };
-  function joinTxt(a,b){a=a.trim();b=b.trim();if(!a)return b;if(!b)return a;if(b.startsWith(a))return b;return /[。！？!?，,；;]$/.test(a)?a+b:a+'，'+b}
+  function joinTxt(a,b){a=a.trim();b=b.trim();if(!a)return b;if(!b)return a;if(b.startsWith(a))return b;if(tMode==='ko2zh')return a+' '+b;return /[。！？!?，,；;]$/.test(a)?a+b:a+'，'+b}
   function full(){return joinTxt(committed,cur).slice(0,MAXLEN)}
   function secs(){return Math.floor((Date.now()-t0)/1000)}
   function ui(on){btn.classList.toggle('on',on);btn.querySelector('.lb').textContent=on?'正在听…':'按住说话'}
@@ -756,7 +839,7 @@ $('cardIn').addEventListener('input',()=>{if($('cardIn').value.trim())hideErr()}
     if(box.value!==v){box.value=v;box.scrollTop=box.scrollHeight}
   }
   function newRec(myGen){
-    const r=new SR();r.lang='zh-CN';r.interimResults=true;r.continuous=true;r.maxAlternatives=1;
+    const r=new SR();r.lang=(tMode==='ko2zh'?'ko-KR':'zh-CN');r.interimResults=true;r.continuous=true;r.maxAlternatives=1;
     r.onresult=e=>{
       if(myGen!==gen) return;
       // iOS Safari 连续模式下后面的结果可能包含前面全部文字，按前缀去重
@@ -835,16 +918,8 @@ $('cardIn').addEventListener('input',()=>{if($('cardIn').value.trim())hideErr()}
 })();
 
 // ---------- 常用句 ----------
-const SCENES={
- '退税':[['可以退税吗？','택스 리펀드 되나요?','taekseu ripeondeu doenayo?'],['可以当场退税吗？','즉시 환급 되나요?','jeuksi hwangeup doenayo?'],['这是我的护照。','여권 여기 있어요.','yeogwon yeogi isseoyo.'],['退税单请给我。','택스 리펀드 영수증 주세요.','taekseu ripeondeu yeongsujeung juseyo.']],
- '问价':[['这个多少钱？','이거 얼마예요?','igeo eolmayeyo?'],['可以便宜一点吗？','좀 깎아 주세요.','jom kkakka juseyo.'],['可以刷卡吗？','카드 결제 되나요?','kadeu gyeolje doenayo?'],['可以用支付宝吗？','알리페이 돼요?','allipei dwaeyo?'],['可以用微信支付吗？','위챗페이 돼요?','wichaetpei dwaeyo?'],['我只是看看。','그냥 구경하는 거예요.','geunyang gugyeonghaneun geoyeyo.']],
- '厕所':[['厕所在哪里？','화장실 어디예요?','hwajangsil eodiyeyo?'],['可以借用一下厕所吗？','화장실 써도 돼요?','hwajangsil sseodo dwaeyo?']],
- '打车':[['请去这里。（配合地址给司机看）','여기로 가 주세요.','yeogiro ga juseyo.'],['请去明洞站。','명동역으로 가 주세요.','myeongdongyeogeuro ga juseyo.'],['请在这里停车。','여기서 세워 주세요.','yeogiseo sewo juseyo.'],['请打开后备箱。','트렁크 열어 주세요.','teureongkeu yeoreo juseyo.'],['请给我收据。','영수증 주세요.','yeongsujeung juseyo.']],
- '问路':[['明洞站怎么走？','명동역 어떻게 가요?','myeongdongyeok eotteoke gayo?'],['这里是哪里？','여기가 어디예요?','yeogiga eodiyeyo?'],['最近的地铁站在哪里？','가까운 지하철역이 어디예요?','gakkaun jihacheollyeogi eodiyeyo?'],['请在地图上指给我看。','지도로 보여 주세요.','jidoro boyeo juseyo.']],
- '买药':[['药店在哪里？','약국 어디 있어요?','yakguk eodi isseoyo?'],['有头痛药吗？','두통약 있어요?','dutongyak isseoyo?'],['有感冒药吗？','감기약 있어요?','gamgiyak isseoyo?'],['请给我消化药。','소화제 주세요.','sohwaje juseyo.'],['有创可贴吗？','반창고 있어요?','banchanggo isseoyo?'],['一天吃几次？','하루에 몇 번 먹어요?','harue myeot beon meogeoyo?']],
- '求助':[['请帮帮我！','도와주세요!','dowajuseyo!'],['有会说中文的人吗？','중국어 하는 분 있어요?','junggugeo haneun bun isseoyo?'],['请帮我叫警察。','경찰 불러 주세요.','gyeongchal bulleo juseyo.']]
-};
-let scene='退税';
+const SCENES=window.LH_SCENES||{};
+let scene=Object.keys(SCENES)[0]||'问价';
 function drawScenes(){
   $('sceneTabs').innerHTML=Object.keys(SCENES).map(k=>`<button class="${k===scene?'on':''}" data-s="${k}">${k}</button>`).join('');
   $('sceneTabs').querySelectorAll('button').forEach(b=>b.onclick=()=>{scene=b.dataset.s;drawScenes()});

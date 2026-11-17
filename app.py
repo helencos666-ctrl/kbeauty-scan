@@ -27,7 +27,7 @@ _day = {"date": None, "count": defaultdict(int), "global": 0}
 
 from security import client_ip, SecurityMiddleware  # noqa: E402
 
-GLOBAL_KIND_DAY = {"scan": GLOBAL_DAY, "price": 300, "card": 600, "station": 600, "tts": 1500}
+GLOBAL_KIND_DAY = {"scan": GLOBAL_DAY, "price": 300, "card": 600, "back": 600, "station": 600, "tts": 1500}
 
 def rate_limit(req: Request, kind: str, per_min=PER_MIN, per_day=PER_DAY):
     """按 IP 每分钟/每天限次 + 每种接口全站每日上限（防止换 IP 刷 AI 接口产生费用）。"""
@@ -269,6 +269,7 @@ async def subway(request: Request, image: UploadFile = File(...)):
     return {"result": res}
 
 # ================= 沟通卡 =================
+HANGUL = re.compile(r"[\uac00-\ud7a3]")
 CARD_PROMPT = """把下面这句中文翻译成自然、礼貌的韩语（用 해요体/敬语，适合对店员、司机、路人说），只输出 JSON：
 {"ko":"韩语句子","roman":"韩语罗马字发音（Revised Romanization，全小写）"}
 不要添加原文没有的内容。中文：
@@ -276,9 +277,47 @@ CARD_PROMPT = """把下面这句中文翻译成自然、礼貌的韩语（用 �
 BACK_PROMPT = """把下面这句韩语忠实地直译成简体中文，不要润色、不要补充，只输出 JSON：{"zh":"中文"}
 韩语：
 """
+SCENES_ZH = {"general": "日常", "shop": "购物、免税店、退税", "food": "餐厅点餐、结账", "taxi": "出租车", "pharmacy": "药店买药、说明症状",
+             "hotel": "酒店入住、退房", "road": "问路", "subway": "地铁、换乘、交通卡"}
+ZH2KO_PROMPT = """你是在韩国陪中国游客的专业翻译。把【中文】翻译成韩国人日常真的会这么说的自然韩语。
+对象是店员、司机、服务员、药剂师、路人：用礼貌的해요体（请求用 "-아/어 주세요"，询问用 "-나요?/-아요?/-ㄹ 수 있어요?"），不要用过于生硬的书面语，也不要用半语。
+场景：{scene}
+规则：
+1. 忠实原意，不添加、不省略信息；原文是问句就保持问句。
+2. 数字、数量、价格、时间、日期、房间号、航班号、电话号码、地址、品牌名、人名一律准确保留；阿拉伯数字照抄。韩元写成 "10,000원"，人民币写 "위안"。
+3. 韩国地名、站名用韩国通行写法（明洞→명동，弘大→홍대，东大门→동대문，仁川机场→인천공항）。
+4. 句子简短清楚，让对方一眼能看懂；多句时按原顺序分句。
+5. roman 用 Revised Romanization 标注实际发音（按连音规则），全小写，词之间空格。
+只输出 JSON：{{"ko":"韩语","roman":"发音"}}
+【中文】
+"""
+KO2ZH_PROMPT = """你是在韩国陪中国游客的专业翻译。【韩语】是韩国店员、司机或路人对中国游客说的话（可能来自语音识别，略有错字时按最合理的意思理解）。
+把它翻译成自然、口语化的简体中文。数字、价格（韩元写"韩元"）、时间、地址、站名、出口号准确保留；地名可在中文后括注韩文。不要添加原文没有的内容。
+只输出 JSON：{"zh":"中文"}
+【韩语】
+"""
+from collections import OrderedDict
+_tcache = OrderedDict()
+_tcache_lock = threading.Lock()
+TCACHE_MAX = 3000
+
+def _tc_get(k):
+    with _tcache_lock:
+        v = _tcache.get(k)
+        if v is not None: _tcache.move_to_end(k)
+        return v
+
+def _tc_put(k, v):
+    with _tcache_lock:
+        _tcache[k] = v; _tcache.move_to_end(k)
+        while len(_tcache) > TCACHE_MAX: _tcache.popitem(last=False)
+
+def _norm_text(t, n=600):
+    return re.sub(r"\s+", " ", str(t or "")).strip()[:n]
 
 @app.post("/api/card")
 async def card(request: Request):
+    """旧接口（老版本页面缓存仍可能调用）：一次返回韩文和回译。"""
     rate_limit(request, "card", per_min=10, per_day=80)
     body = await json_body(request)
     zh = str(body.get("text", "")).strip()[:600]
@@ -289,10 +328,49 @@ async def card(request: Request):
     back, _ = await chat([{"role": "user", "content": BACK_PROMPT + ko}], max_tokens=1200)
     return {"zh": zh, "ko": ko, "roman": str(res.get("roman", "")), "back": str(back.get("zh", ""))}
 
+@app.post("/api/translate")
+async def translate(request: Request):
+    """新版翻译：dir=zh2ko 返回 ko/roman；dir=ko2zh 返回 zh。回译另走 /api/back，先出结果更快。相同句子走缓存。"""
+    body = await json_body(request)
+    d = "ko2zh" if body.get("dir") == "ko2zh" else "zh2ko"
+    scene = body.get("scene") if body.get("scene") in SCENES_ZH else "general"
+    text = _norm_text(body.get("text"))
+    if not text: raise HTTPException(400, "请先输入韩语" if d == "ko2zh" else "请先输入中文")
+    if d == "ko2zh" and not HANGUL.search(text): raise HTTPException(400, "请输入韩语")
+    key = (d, scene if d == "zh2ko" else "", text)
+    hit = _tc_get(key)
+    if hit: return {**hit, "cached": True}
+    rate_limit(request, "card", per_min=12, per_day=120)
+    if d == "zh2ko":
+        res, _ = await chat([{"role": "user", "content": ZH2KO_PROMPT.format(scene=SCENES_ZH[scene]) + text}], max_tokens=1600)
+        ko = str(res.get("ko", "")).strip()
+        if not ko: raise HTTPException(502, "翻译失败，请重试")
+        out = {"ko": ko, "roman": str(res.get("roman", "")).strip()}
+    else:
+        res, _ = await chat([{"role": "user", "content": KO2ZH_PROMPT + text}], max_tokens=1600)
+        zh = str(res.get("zh", "")).strip()
+        if not zh: raise HTTPException(502, "翻译失败，请重试")
+        out = {"zh": zh}
+    _tc_put(key, out)
+    return out
+
+@app.post("/api/back")
+async def back_translate(request: Request):
+    body = await json_body(request)
+    ko = _norm_text(body.get("ko"), 700)
+    if not ko or not HANGUL.search(ko): raise HTTPException(400, "只能回译韩文")
+    key = ("back", "", ko)
+    hit = _tc_get(key)
+    if hit: return hit
+    rate_limit(request, "back", per_min=12, per_day=120)
+    res, _ = await chat([{"role": "user", "content": BACK_PROMPT + ko}], max_tokens=1200)
+    out = {"zh": str(res.get("zh", "")).strip()}
+    if out["zh"]: _tc_put(key, out)
+    return out
+
 # ================= 韩语朗读（edge-tts）=================
 import hashlib
 TTS_DIR = os.path.join(BASE, "tts_cache"); os.makedirs(TTS_DIR, exist_ok=True)
-HANGUL = re.compile(r"[\uac00-\ud7a3]")
 
 TTS_MAX_FILES = 3000
 
@@ -314,6 +392,9 @@ async def tts(request: Request, text: str = ""):
     text = text.strip()[:700]
     if not text or not HANGUL.search(text): raise HTTPException(400, "只能朗读韩文")
     h = hashlib.sha1(text.encode()).hexdigest()
+    pre = os.path.join(BASE, "static", "audio", h + ".mp3")   # 常用句预生成音频
+    if os.path.exists(pre):
+        return FileResponse(pre, media_type="audio/mpeg", headers={"Cache-Control": "public, max-age=2592000"})
     path = os.path.join(TTS_DIR, h + ".mp3")
     if not os.path.exists(path):
         rate_limit(request, "tts", per_min=15, per_day=150)
@@ -324,7 +405,7 @@ async def tts(request: Request, text: str = ""):
             os.replace(path + ".tmp", path)
         except Exception:
             raise HTTPException(502, "朗读服务暂不可用")
-    return FileResponse(path, media_type="audio/mpeg", headers={"Cache-Control": "public, max-age=86400"})
+    return FileResponse(path, media_type="audio/mpeg", headers={"Cache-Control": "public, max-age=2592000"})
 
 # ================= 站名转换（中/英/韩 -> 官方韩文站名）=================
 STATION_MAX = 40

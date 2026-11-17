@@ -1,0 +1,272 @@
+{
+ "问价": [
+  [
+   "这个有吗？（配合图片给对方看）",
+   "이거 있어요?",
+   "igeo isseoyo?"
+  ],
+  [
+   "这个多少钱？",
+   "이거 얼마예요?",
+   "igeo eolmayeyo?"
+  ],
+  [
+   "可以便宜一点吗？",
+   "좀 깎아 주세요.",
+   "jom kkakka juseyo."
+  ],
+  [
+   "可以刷卡吗？",
+   "카드 결제 되나요?",
+   "kadeu gyeolje doenayo?"
+  ],
+  [
+   "可以用支付宝吗？",
+   "알리페이 돼요?",
+   "allipei dwaeyo?"
+  ],
+  [
+   "可以用微信支付吗？",
+   "위챗페이 돼요?",
+   "wichaetpei dwaeyo?"
+  ],
+  [
+   "我只是看看。",
+   "그냥 구경하는 거예요.",
+   "geunyang gugyeonghaneun geoyeyo."
+  ]
+ ],
+ "退税": [
+  [
+   "可以退税吗？",
+   "택스 리펀드 되나요?",
+   "taekseu ripeondeu doenayo?"
+  ],
+  [
+   "可以当场退税吗？",
+   "즉시 환급 되나요?",
+   "jeuksi hwangeup doenayo?"
+  ],
+  [
+   "这是我的护照。",
+   "여권 여기 있어요.",
+   "yeogwon yeogi isseoyo."
+  ],
+  [
+   "退税单请给我。",
+   "택스 리펀드 영수증 주세요.",
+   "taekseu ripeondeu yeongsujeung juseyo."
+  ]
+ ],
+ "餐厅": [
+  [
+   "两位。",
+   "두 명이에요.",
+   "du myeongieyo."
+  ],
+  [
+   "有中文菜单吗？",
+   "중국어 메뉴 있어요?",
+   "junggugeo menyu isseoyo?"
+  ],
+  [
+   "请给我这个。",
+   "이거 주세요.",
+   "igeo juseyo."
+  ],
+  [
+   "请做得不辣。",
+   "안 맵게 해 주세요.",
+   "an maepge hae juseyo."
+  ],
+  [
+   "请再给一点小菜。",
+   "반찬 좀 더 주세요.",
+   "banchan jom deo juseyo."
+  ],
+  [
+   "请给我水。",
+   "물 좀 주세요.",
+   "mul jom juseyo."
+  ],
+  [
+   "可以打包吗？",
+   "포장돼요?",
+   "pojang dwaeyo?"
+  ],
+  [
+   "请结账。",
+   "계산해 주세요.",
+   "gyesanhae juseyo."
+  ]
+ ],
+ "打车": [
+  [
+   "请去这里。（配合地址给司机看）",
+   "여기로 가 주세요.",
+   "yeogiro ga juseyo."
+  ],
+  [
+   "请去明洞站。",
+   "명동역으로 가 주세요.",
+   "myeongdongyeogeuro ga juseyo."
+  ],
+  [
+   "请在这里停车。",
+   "여기서 세워 주세요.",
+   "yeogiseo sewo juseyo."
+  ],
+  [
+   "请打开后备箱。",
+   "트렁크 열어 주세요.",
+   "teureongkeu yeoreo juseyo."
+  ],
+  [
+   "请给我收据。",
+   "영수증 주세요.",
+   "yeongsujeung juseyo."
+  ]
+ ],
+ "地铁": [
+  [
+   "这趟车去明洞吗？",
+   "이 열차 명동 가요?",
+   "i yeolcha myeongdong gayo?"
+  ],
+  [
+   "在哪里换乘？",
+   "어디서 갈아타요?",
+   "eodiseo garatayo?"
+  ],
+  [
+   "交通卡在哪里充值？",
+   "교통카드 어디서 충전해요?",
+   "gyotongkadeu eodiseo chungjeonhaeyo?"
+  ],
+  [
+   "几号出口？",
+   "몇 번 출구예요?",
+   "myeot beon chulguyeyo?"
+  ],
+  [
+   "这个出口对吗？",
+   "이 출구 맞아요?",
+   "i chulgu majayo?"
+  ]
+ ],
+ "问路": [
+  [
+   "明洞站怎么走？",
+   "명동역 어떻게 가요?",
+   "myeongdongyeok eotteoke gayo?"
+  ],
+  [
+   "这里是哪里？",
+   "여기가 어디예요?",
+   "yeogiga eodiyeyo?"
+  ],
+  [
+   "最近的地铁站在哪里？",
+   "가까운 지하철역이 어디예요?",
+   "gakkaun jihacheollyeogi eodiyeyo?"
+  ],
+  [
+   "请在地图上指给我看。",
+   "지도로 보여 주세요.",
+   "jidoro boyeo juseyo."
+  ]
+ ],
+ "买药": [
+  [
+   "药店在哪里？",
+   "약국 어디 있어요?",
+   "yakguk eodi isseoyo?"
+  ],
+  [
+   "有头痛药吗？",
+   "두통약 있어요?",
+   "dutongyak isseoyo?"
+  ],
+  [
+   "有感冒药吗？",
+   "감기약 있어요?",
+   "gamgiyak isseoyo?"
+  ],
+  [
+   "请给我消化药。",
+   "소화제 주세요.",
+   "sohwaje juseyo."
+  ],
+  [
+   "有创可贴吗？",
+   "반창고 있어요?",
+   "banchanggo isseoyo?"
+  ],
+  [
+   "一天吃几次？",
+   "하루에 몇 번 먹어요?",
+   "harue myeot beon meogeoyo?"
+  ]
+ ],
+ "酒店": [
+  [
+   "我要办理入住。",
+   "체크인하려고요.",
+   "chekeuinharyeogoyo."
+  ],
+  [
+   "我要退房。",
+   "체크아웃할게요.",
+   "chekeuauthalgeyo."
+  ],
+  [
+   "可以寄存行李吗？",
+   "짐 맡길 수 있어요?",
+   "jim matgil su isseoyo?"
+  ],
+  [
+   "Wi-Fi 密码是多少？",
+   "와이파이 비밀번호가 뭐예요?",
+   "waipai bimilbeonhoga mwoyeyo?"
+  ],
+  [
+   "早餐几点开始？",
+   "조식은 몇 시부터예요?",
+   "josigeun myeot sibuteoyeyo?"
+  ],
+  [
+   "房间没有热水。",
+   "방에 뜨거운 물이 안 나와요.",
+   "bange tteugeoun muri an nawayo."
+  ]
+ ],
+ "厕所": [
+  [
+   "厕所在哪里？",
+   "화장실 어디예요?",
+   "hwajangsil eodiyeyo?"
+  ],
+  [
+   "可以借用一下厕所吗？",
+   "화장실 써도 돼요?",
+   "hwajangsil sseodo dwaeyo?"
+  ]
+ ],
+ "求助": [
+  [
+   "请帮帮我！",
+   "도와주세요!",
+   "dowajuseyo!"
+  ],
+  [
+   "有会说中文的人吗？",
+   "중국어 하는 분 있어요?",
+   "junggugeo haneun bun isseoyo?"
+  ],
+  [
+   "请帮我叫警察。",
+   "경찰 불러 주세요.",
+   "gyeongchal bulleo juseyo."
+  ]
+ ]
+}
