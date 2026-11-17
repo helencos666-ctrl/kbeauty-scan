@@ -10,10 +10,10 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="旅韩助手">
 <link rel="manifest" href="/manifest.webmanifest">
-<link rel="apple-touch-icon" href="/static/icons/apple-touch-icon.png?v=62">
-<link rel="icon" type="image/png" sizes="192x192" href="/static/icons/icon-192.png?v=62">
-<link rel="stylesheet" href="/static/pwa.css?v=62">
-<link rel="stylesheet" href="/static/community.css?v=62">
+<link rel="apple-touch-icon" href="/static/icons/apple-touch-icon.png?v=63">
+<link rel="icon" type="image/png" sizes="192x192" href="/static/icons/icon-192.png?v=63">
+<link rel="stylesheet" href="/static/pwa.css?v=63">
+<link rel="stylesheet" href="/static/community.css?v=63">
 <meta name="robots" content="noindex,nofollow">
 <style>
 /* 标签栏待处理数量角标：只在本页生效，不改 community.css / sw.js */
@@ -96,7 +96,7 @@
     <div class="card" id="t-reports" style="display:none"><div id="rlist"></div></div>
     <div class="card" id="t-posts" style="display:none"><div id="plist"></div><button class="btn ghost block" id="pmore" style="margin-top:10px">加载更多</button></div>
     <div id="t-review" style="display:none">
-      <div class="card"><p class="tip" style="margin-top:0">普通频道中非商家用户发布的、含商业关键词的帖子在这里审核。通过后公开，拒绝后仅作者可见“未通过”。</p><div id="rvlist"></div></div>
+      <div class="card"><p class="tip" style="margin-top:0">这里审核两类帖子：普通频道里含商业关键词、需要先审后发的帖子，以及商家会员发布的待审帖（列表里会标「商家帖」）。通过后公开，拒绝后仅作者可见“未通过”。</p><div id="rvlist"></div></div>
       <div class="card">
         <h2>推荐店铺审核</h2>
         <p class="tip" style="margin-top:0">用户提交的店铺推荐和避雷经验。通过后公开，并向提交人发放 10 旅行豆；拒绝后仅提交人可见理由。简介不得含网址、电话或联系方式。</p>
@@ -107,6 +107,7 @@
         <p class="tip" style="margin-top:0">吃喝玩里会员提交的店铺、酒店、咖啡馆和景点。服务器会用 Kakao 地图核对；找不到的会标「待核对」。通过后公开，并向提交人发放 10 旅行豆。拒绝时请填写理由（提交人可见）。</p>
         <div class="row" style="gap:8px;margin-bottom:8px;flex-wrap:wrap">
           <select class="f" id="fpstatus" style="flex:1;min-width:110px">
+            <option value="queue" selected>待审核和待核对</option>
             <option value="pending">待审核</option>
             <option value="flagged">待核对（地图未找到）</option>
             <option value="approved">已通过</option>
@@ -270,7 +271,7 @@
     </div>
   </div>
 </main>
-<script src="/static/community.js?v=62"></script>
+<script src="/static/community.js?v=63"></script>
 <script src="/static/admin-ops.js"></script>
 <script>
 var E = LH.esc, err = document.getElementById('err'), okEl = document.getElementById('ok');
@@ -529,7 +530,7 @@ document.getElementById('pholdgo').onclick = async function(){ await call('POST'
 async function review(){
   var d = await call('GET', '/api/admin/pending');
   document.getElementById('rvlist').innerHTML = d.posts.length ? d.posts.map(function(p){
-    return '<div class="cmt" id="rv' + p.id + '"><div class="who">#' + p.id + ' [' + E(p.board_name) + '] ' + E(p.title) + '</div>' +
+    return '<div class="cmt" id="rv' + p.id + '"><div class="who">#' + p.id + ' [' + E(p.board_name) + '] ' + (p.merchant ? '<span style="display:inline-block;padding:1px 6px;border-radius:999px;background:#E8F3F1;color:#146E68;font-size:11px;margin-right:4px">商家帖</span> ' : '') + E(p.title) + '</div>' +
       '<div class="ct" style="color:var(--sub)">' + E(p.author) + '（编号 ' + p.member_no + '）· ' + E(p.time) + ' · ' + E(p.note || '') + '</div>' +
       '<div class="ct">' + E(p.body) + '</div>' +
       (p.images.length ? '<div class="thumbs">' + p.images.map(function(i){ return '<div><img src="/api/admin/img/' + i + '" alt=""></div>'; }).join('') + '</div>' : '') +
@@ -574,7 +575,7 @@ async function review(){
   await loadFanplaces();
 }
 async function loadFanplaces(){
-  var st = (document.getElementById('fpstatus') || {}).value || 'pending';
+  var st = (document.getElementById('fpstatus') || {}).value || 'queue';
   var fp = await call('GET', '/api/admin/fanplaces?status=' + encodeURIComponent(st));
   var pe = document.getElementById('fppend');
   if (pe){ pe.textContent = fp.pending + ' 条待审'; pe.style.display = fp.pending ? 'inline-block' : 'none'; }

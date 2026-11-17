@@ -96,6 +96,12 @@ SESSION_DAYS = 30
 ADMIN_SESSION_HOURS = 12
 COOKIE, ADMIN_COOKIE = "lh_sess", "lh_admin"
 
+# 「内容审核」角标与列表共用的 WHERE 条件（含商家待审帖，不含已删帖）
+PENDING_POSTS_COND = "p.status='pending' AND NOT p.deleted"
+REVIEW_POSTS_COND = "status='pending' AND NOT deleted"
+REVIEW_SHOP_RECS_COND = "status='pending'"
+REVIEW_FANPLACES_COND = "status IN ('pending','flagged')"
+
 router = APIRouter()
 
 # ---------------- 数据库 ----------------
@@ -1870,12 +1876,12 @@ def api_admin_tab_counts(req: Request):
             "friends", "idv", "consult", "providers", "referral", "feedback")
     with db() as conn:
         need_admin(conn, req)
-        row = q(conn, """SELECT
+        row = q(conn, f"""SELECT
             (SELECT count(*) FROM c_pay_proofs WHERE status='pending') AS payproofs,
             (SELECT count(*) FROM c_reports WHERE NOT resolved) AS reports,
-            (SELECT count(*) FROM c_posts WHERE status='pending' AND NOT deleted)
-          + (SELECT count(*) FROM c_shop_recs WHERE status='pending')
-          + (SELECT count(*) FROM c_fan_place_subs WHERE status IN ('pending','flagged')) AS review,
+            (SELECT count(*) FROM c_posts WHERE {REVIEW_POSTS_COND})
+          + (SELECT count(*) FROM c_shop_recs WHERE {REVIEW_SHOP_RECS_COND})
+          + (SELECT count(*) FROM c_fan_place_subs WHERE {REVIEW_FANPLACES_COND}) AS review,
             (SELECT count(*) FROM c_shop_reviews WHERE status='pending') AS merchants,
             (SELECT count(*) FROM c_chicken_orders WHERE status='pending_review')
           + (SELECT count(*) FROM c_chicken_merchants WHERE status='pending') AS chicken,
@@ -2319,20 +2325,31 @@ def merchant_activate(conn, uid, plan):
 
 @router.get("/api/admin/pending")
 def api_admin_pending(req: Request):
+    """待审核帖子列表：含商家待审帖。"""
     with db() as conn:
         need_admin(conn, req)
-        rows = q(conn, """SELECT p.*, au.nickname, au.member_no, (CASE WHEN au.merchant_until>now() THEN 3 ELSE au.tier END) AS tier
-                          FROM c_posts p JOIN c_users au ON au.id=p.user_id
-                          WHERE p.status='pending' AND NOT p.deleted ORDER BY p.id LIMIT 100""")
+        rows = q(conn, f"""SELECT p.*, au.nickname, au.member_no,
+                                  (CASE WHEN au.merchant_until>now() THEN 3 ELSE au.tier END) AS tier
+                           FROM c_posts p JOIN c_users au ON au.id=p.user_id
+                           WHERE {PENDING_POSTS_COND}
+                           ORDER BY p.id LIMIT 100""")
         imgs = {}
         if rows:
-            for i in q(conn, "SELECT id,post_id FROM c_images WHERE post_id = ANY(%s) ORDER BY pos", ([r["id"] for r in rows],)):
+            for i in q(conn, "SELECT id,post_id FROM c_images WHERE post_id = ANY(%s) ORDER BY pos",
+                       ([r["id"] for r in rows],)):
                 imgs.setdefault(i["post_id"], []).append(i["id"])
     out = []
     for r in rows:
-        o = _post_out(r, full=True); o["user_id"] = r["user_id"]; o["member_no"] = r.get("member_no") or r["user_id"]; o["note"] = r["review_note"]; o["images"] = imgs.get(r["id"], [])
+        o = _post_out(r, full=True)
+        # 后台审核卡片需要的字段（_post_out 已带 title/author/board/board_name/time/status/merchant）
+        o["user_id"] = r["user_id"]
+        o["member_no"] = r.get("member_no") or r["user_id"]
+        o["note"] = r["review_note"]
+        o["images"] = imgs.get(r["id"], [])
+        o["merchant"] = bool(r.get("is_merchant"))   # 前端据此显示「商家帖」标记
         out.append(o)
     return {"posts": out}
+
 
 @router.get("/api/admin/img/{iid}")
 def api_admin_img(req: Request, iid: int):

@@ -401,7 +401,7 @@ def json_ld(origin, title, desc, path, extra=None):
         "@id": origin + "/#org",
         "name": "旅韩助手",
         "url": origin + "/",
-        "logo": origin + "/static/icons/icon-512.png?v=62",
+        "logo": origin + "/static/icons/icon-512.png?v=63",
     }
     website = {
         "@type": "WebSite",

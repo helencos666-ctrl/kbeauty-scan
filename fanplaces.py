@@ -42,6 +42,25 @@ ABS_MSG = "请避免用「最」「第一」「唯一」这类说法，改得更
 CONTACT_MSG = "请不要填写微信、电话、二维码或站外联系方式。"
 KAKAO_MISS_MSG = "没有在地图上找到这家店，已提交给管理员核对。请再确认名称和地址是否写对。"
 
+FANPLACE_QUEUE_COND = "status IN ('pending','flagged')"   # 不带别名，用于计数 SQL
+FANPLACE_QUEUE_COND_S = "s.status IN ('pending','flagged')"  # 带别名 s，用于列表 SQL
+
+# 合法筛选值：queue（默认，= 上面那条条件）/ 单个状态 / all
+FANPLACE_STATUS_VALUES = ("queue", "pending", "flagged", "approved", "rejected", "all")
+
+
+def _fanplace_status_where(status):
+    """筛选值 → (WHERE 条件, 参数列表)。非法值返回 (None, [])，由调用方报 400。"""
+    st = (status or "queue").strip()
+    if st not in FANPLACE_STATUS_VALUES:
+        return None, []
+    if st == "all":
+        return "TRUE", []
+    if st == "queue":
+        return FANPLACE_QUEUE_COND_S, []
+    return "s.status=%s", [st]
+
+
 # 绝对化用语：拦住广告式的「最好 / 第一 / 唯一」，放过「第一次」「第一天」等叙述。
 ABS_RE = re.compile(
     r"最(?:好|棒|强|佳|优|顶|美味|值得|便宜|好吃|受欢迎|火爆|火|赞)|"
@@ -555,14 +574,13 @@ async def api_report_review(req: Request, rid: int):
 
 # ---------- admin ----------
 @router.get("/api/admin/fanplaces")
-def api_admin_list(req: Request, status: str = "pending"):
-    st = (status or "pending").strip()
-    if st not in ("pending", "flagged", "approved", "rejected", "all"):
+def api_admin_list(req: Request, status: str = "queue"):
+    """会员推荐地点审核列表。默认 status=queue，与角标/「N 条待审」同一口径。"""
+    cond, args = _fanplace_status_where(status)
+    if cond is None:
         raise HTTPException(400, "状态不正确")
     with db() as conn:
         need_admin(conn, req)
-        cond = "TRUE" if st == "all" else "s.status=%s"
-        args = [] if st == "all" else [st]
         rows = q(conn, f"""SELECT s.*, p.name, p.name_user, p.category, p.address, p.address_user,
                                   p.kakao_id, p.kakao_url, p.kakao_found, p.x, p.y, p.status AS place_status,
                                   u.nickname, u.member_no
@@ -587,7 +605,8 @@ def api_admin_list(req: Request, status: str = "pending"):
                 "user_id": r["user_id"], "time": _ts(r["created_at"]),
                 "photo_ids": [p["id"] for p in photos],
             })
-        pending = q(conn, "SELECT count(*) AS n FROM c_fan_place_subs WHERE status IN ('pending','flagged')",
+        # 与 tab-counts 的会员地点一段同一条条件：pending + flagged
+        pending = q(conn, "SELECT count(*) AS n FROM c_fan_place_subs WHERE " + FANPLACE_QUEUE_COND,
                     one=True)["n"]
     return {"items": items, "pending": int(pending)}
 

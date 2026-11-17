@@ -1,3 +1,25 @@
+## 2026-11-17 管理后台「内容审核」：角标与列表口径对齐，帖子审核含商家帖
+
+- 会员推荐地点新增筛选值 `queue`（= `pending` + `flagged`，待审核和待核对），
+  `GET /api/admin/fanplaces` 默认 `status=queue`；admin.html 下拉首项改为
+  「待审核和待核对」并默认选中，`loadFanplaces()` 兜底值同步改为 `queue`。
+  返回的 `pending` 字段仍是 `c_fan_place_subs.status IN ('pending','flagged')`。
+  修复「1 条待审但列表为空、看不到通过/拒绝按钮」：待核对（Kakao 地图未找到）的投稿
+  现在会出现在默认列表里。已通过的不再显示「通过」，已拒绝的不再显示「拒绝」。
+- 帖子审核 `GET /api/admin/pending` 明确包含商家待审帖：条件固定为
+  `c_posts.status='pending' AND NOT deleted`，不按 `is_merchant`/板块过滤；
+  每条返回 id、title、author、member_no、user_id、body、note、images、merchant、
+  board、board_name、time、status。admin.html 列表给 `merchant` 为真的帖子加
+  「商家帖」标记，标题、作者、时间、说明、正文、图片和通过/拒绝/封禁均可见。
+  顶部说明改为同时覆盖普通频道商业关键词帖与商家待审帖。
+- 角标 `review` 仍为三段相加，三段条件与对应列表默认查询完全一致：
+  帖子 `status='pending' AND NOT deleted`（含商家帖）、店铺推荐 `status='pending'`、
+  会员地点 `status IN ('pending','flagged')`。
+- 静态资源缓存改为 `?v=63`，Service Worker `lvhan-shell-v63`。未改动付款审核等其他队列的默认筛选。
+- 新增测试 `test/test_admin_review_queue.py`：静态检查下拉默认值与列表模板；
+  独立测试库内插入待审商家帖与 flagged 地点投稿，验证默认列表、计数等式、
+  审核通过后队列与角标同步减少，以及未登录 401、非法状态 400。
+
 ## 2026-11-17 修复「我的 · 编辑资料」弹层被底部五格导航遮挡
 
 - `static/me.css`：`.sheet` 的 z-index 60 → 80（高于 `body nav.tabbar` 的 60）；`.sheet-in` 增加 `-webkit-overflow-scrolling:touch`、`overscroll-behavior:contain`，`max-height` 扣掉顶部安全区避免被裁切；`padding-bottom` 只保留 `env(safe-area-inset-bottom)`，不再叠加 58px 导航高度（打开弹层时导航已隐藏，否则保存按钮会悬空）；弹层内输入与按钮显式 `pointer-events:auto`。
