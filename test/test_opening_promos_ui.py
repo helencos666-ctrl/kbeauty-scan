@@ -30,8 +30,8 @@ items = cfg.get("items") or []
 by_id = {i["id"]: i for i in items}
 
 check("配置默认开启且有起止日期", cfg.get("enabled") is True and "starts" in cfg and "ends" in cfg)
-check("配置至少 7 条活动", len(items) >= 7, len(items))
-for key in ("invite", "lanjing-sim", "hamcho-10", "daega-10", "seoul-film", "merchant-free", "promoter"):
+check("配置至少 8 条活动", len(items) >= 8, len(items))
+for key in ("invite", "lanjing-sim", "hamcho-10", "daega-10", "seoul-film", "merchant-free", "promoter", "blogger"):
     check("含活动 %s" % key, key in by_id)
     it = by_id.get(key) or {}
     check("%s 为进行中且可关闭" % key, it.get("enabled") is True and it.get("status") == "active")
@@ -59,6 +59,17 @@ for key in ("hamcho-10", "daega-10", "seoul-film", "lanjing-sim"):
     check("%s 不是筹备中/即将开放" % key, "筹备中" not in blob and "即将开放" not in blob)
     check("%s 有现场规则说明" % key, "现场" in (it.get("note") or it.get("body") or ""))
 
+
+bl = by_id.get("blogger") or {}
+bl_text = (bl.get("title") or "") + (bl.get("summary") or "") + (bl.get("body") or "") + (bl.get("note") or "")
+check("博主标题为招募第一批博主", "招募第一批博主" in (bl.get("title") or ""))
+check("博主优质帖每篇 2 元且分红 5%", "2 元" in bl_text and "5%" in bl_text)
+check("博主含重点培养、探店佣金与演出活动", "重点培养" in bl_text and "探店" in bl_text and "演出" in bl_text and "颁奖典礼" in bl_text)
+check("博主只计一级且不设下级奖励", "只计一级" in bl_text and "下级" in bl_text)
+check("博主应聘走站内咨询", (bl.get("href") or "").startswith("/consult/new") and "kind=platform" in (bl.get("href") or ""))
+check("博主按钮为应聘/咨询", "应聘" in (bl.get("cta") or "") and "咨询" in (bl.get("cta") or ""))
+check("博主注明标准结算与名额规则", "优质标准与结算规则以平台公布为准" in bl_text and "活动名额以平台邀请为准" in bl_text)
+
 check("酱蟹链到美食页", (by_id["hamcho-10"].get("href") or "").startswith("/food#hamcho"))
 check("烤肉链到美食页", (by_id["daega-10"].get("href") or "").startswith("/food#daega"))
 check("电话卡链到蓝憬活动", by_id["lanjing-sim"].get("href") == "/ads/lanjing")
@@ -73,14 +84,14 @@ for name, txt in (("开业配置和活动页", blob), ("pwa.css", pwa_css), ("pw
 check("活动页读取配置并渲染列表", "opening-promos.json" in js and "renderList" in js and "LHOpening" in page)
 check("弹层每日一次写入 localStorage", "lh_opening_popup_day" in json.dumps(cfg) and "localStorage.setItem" in js)
 check("弹层只在首页出现", "onHome" in js and "openPromoSheet" in js)
-check("pwa.js 会加载开业脚本", "opening-promos.js?v=74" in pwa_js)
+check("pwa.js 会加载开业脚本", "opening-promos.js?v=75" in pwa_js)
 check("pwa.css 开业期间我的为红色", "body.lh-opening nav.tabbar a.me" in pwa_css and "#C62828" in pwa_css)
 check("pwa.css 有「开」角标", "tab-hot" in pwa_css)
 check("我的页有开业活动入口且保留邀请有奖", 'id="openPromoRow"' in me and 'href="/opening"' in me and 'href="/invite"' in me)
 check("邀请有奖仍在开业活动下方", me.index('id="openPromoRow"') < me.index('href="/invite"'))
 check("存在 /opening 路由与 SEO", 'p_opening' in read("me.py") and '"/opening"' in seo)
-check("sw.js 含活动页与配置", "'/opening'" in sw and "opening-promos.json?v=74" in sw)
-check("sw.js CACHE 为 v74", "lvhan-shell-v74" in sw)
+check("sw.js 含活动页与配置", "'/opening'" in sw and "opening-promos.json?v=75" in sw)
+check("sw.js CACHE 为 v75", "lvhan-shell-v75" in sw)
 
 print("%s passed, %s failed" % (ok, fail))
 if fail:
