@@ -10,10 +10,10 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="旅韩助手">
 <link rel="manifest" href="/manifest.webmanifest">
-<link rel="apple-touch-icon" href="/static/icons/apple-touch-icon.png?v=85">
-<link rel="icon" type="image/png" sizes="192x192" href="/static/icons/icon-192.png?v=85">
-<link rel="stylesheet" href="/static/pwa.css?v=85">
-<link rel="stylesheet" href="/static/community.css?v=85">
+<link rel="apple-touch-icon" href="/static/icons/apple-touch-icon.png?v=86">
+<link rel="icon" type="image/png" sizes="192x192" href="/static/icons/icon-192.png?v=86">
+<link rel="stylesheet" href="/static/pwa.css?v=86">
+<link rel="stylesheet" href="/static/community.css?v=86">
 </head>
 <body class="compose">
 <header>
@@ -33,9 +33,8 @@
   <div class="card" id="form" style="display:none">
     <div class="draftnote" id="draftnote"></div>
     <div class="err" id="err"></div>
-    <input type="hidden" id="board" value="">
-    <div id="chanbox">
-    <label class="f">发到哪个频道</label>
+    <input type="hidden" id="board" value="daily">
+    <div id="chanbox" style="display:none">
     <div class="chips" id="chips"></div>
     </div>
     <div id="mcatbox" style="display:none;margin-top:10px">
@@ -75,8 +74,9 @@
     <label class="f" id="blab">正文（10–3000 字）</label>
     <textarea class="f" id="body" maxlength="3000" placeholder="时间、地点、经过、建议……写得越具体越有用" style="min-height:200px;line-height:1.7"></textarea>
     <div class="count" id="bcount">0 / 3000</div>
-    <label class="f" for="topics">话题（选填）</label>
-    <input class="f" id="topics" maxlength="40" placeholder="例如 明洞 换季，用空格分开，会显示成 #话题">
+    <div id="topicbox" style="display:none">
+    <input class="f" id="topics" maxlength="40" value="" autocomplete="off">
+    </div>
     <label class="f" for="place">地点（选填）</label>
     <input class="f" id="place" maxlength="40" placeholder="城市或更具体的地点，例如 首尔 明洞">
     <label class="f">图片（最多 6 张，会自动压缩）</label>
@@ -106,7 +106,7 @@
   <a href="/?tab=more"><i>☰</i>全部</a>
   <a href="/me"><i>👤</i>我的</a>
 </nav>
-<script src="/static/community.js?v=85"></script>
+<script src="/static/community.js?v=86"></script>
 <script>
 var WARN = {visa: '签证问答仅限个人经验分享，禁止发布代办广告。', study: '留学打听仅限经验交流，禁止发布中介广告。',
   friends: '请勿在帖子里公开手机号、微信号、住址等隐私。想认识新朋友，也可以去“旅韩交友”发布交友资料。',
@@ -498,18 +498,21 @@ window.addEventListener('lh-compose-files', function(ev){
   var isMerchant = !!(d.user && (d.user.merchant || d.user.merchant_info));
   if (LISTING){
     if (!isMerchant){ gate.innerHTML = '<div class="empty">开通商家会员后才能发布商家信息<br><br><a class="btn primary" href="/member#merchant">了解商家会员</a>　<a class="btn ghost" href="/partner">商家入驻</a></div>'; return; }
-  } else if (d.user.tier < 1){ gate.innerHTML = '<div class="empty">开通会员（¥' + d.prices.price_t1 + '）后即可在在韩日常、踩坑避雷、签证问答等频道发帖；旅韩交友发帖需高级会员。商家信息请到「我的」页的「商家发布信息」发布。<br><br><a class="btn primary" href="/member">了解会员</a></div>'; return; }
+  } else if (d.user.tier < 1){ gate.innerHTML = '<div class="empty">开通会员（¥' + d.prices.price_t1 + '）后即可发帖。商家信息请到「我的」页的「商家发布信息」发布。<br><br><a class="btn primary" href="/member">了解会员</a></div>'; return; }
   gate.style.display = 'none'; document.getElementById('form').style.display = 'block';
   fillPlace();
   document.getElementById('send').disabled = false; document.getElementById('preview').disabled = false;
-  renderChips();
-  if (!LISTING) document.getElementById('mcatbox').style.display = 'none';
+  if (!LISTING){
+    document.getElementById('chanbox').style.display = 'none';
+    document.getElementById('mcatbox').style.display = 'none';
+    var tb = document.getElementById('topicbox'); if (tb) tb.style.display = 'none';
+  } else {
+    renderChips();
+  }
   try { var mm = await LH.api('GET', '/api/merch/meta'); SUBC = mm.subcats || {}; MEDNOTE = mm.medical_note || ''; (mm.medical_boards || []).forEach(function(k){ MED[k] = 1; }); } catch(e){}
   setupListingUI();
   var draft = loadDraft();
-  var qBoard = LISTING ? '' : LH.qs('board');
-  if (qBoard && MB[qBoard]) qBoard = '';
-  if (draft && draft.board && MB[draft.board] && !LISTING) draft.board = '';
+  var qBoard = '';
   if (draft){
     if (LISTING){
       if (draft.mcat) document.getElementById('mcat').value = draft.mcat;
@@ -530,7 +533,7 @@ window.addEventListener('lh-compose-files', function(ev){
       await loadPendingImages();
       return;
     }
-    applyBoard(qBoard || draft.board || '', true);
+    applyBoard('daily', true);
     if (draft.title) document.getElementById('title').value = draft.title;
     if (draft.body){ document.getElementById('body').value = draft.body; if (TPL[draft.board] && draft.body === TPL[draft.board]) lastTpl = draft.body; }
     if (draft.topics) document.getElementById('topics').value = draft.topics;
@@ -545,7 +548,7 @@ window.addEventListener('lh-compose-files', function(ev){
     syncMedNote();
     var n = document.getElementById('draftnote'); n.style.display = 'block'; n.textContent = '草稿已自动保存 · 刚刚';
   } else {
-    applyBoard(qBoard || '', false);
+    applyBoard('daily', false);
   }
   updateCounts();
   await loadPendingImages();
@@ -581,8 +584,7 @@ function setSending(on){
 document.getElementById('preview').onclick = function(){
   var title = document.getElementById('title').value.trim();
   var body = document.getElementById('body').value.trim();
-  var ch = CHANNELS.filter(function(c){ return c.key === currentBoard(); })[0];
-  document.getElementById('pvBoard').innerHTML = ch ? '<span class="tag">' + LH.esc(ch.label) + '</span>' : '';
+  document.getElementById('pvBoard').innerHTML = '';
   document.getElementById('pvTitle').textContent = title || '（还没有标题）';
   document.getElementById('pvBody').textContent = body || '（还没有正文）';
   var box = document.getElementById('pvPhotos');
@@ -605,14 +607,17 @@ document.getElementById('send').onclick = async function(){
     var mc = (document.getElementById('mcat') || {}).value || '';
     if (!mc){ LH.showErr(err, '请选择商家分类'); window.scrollTo(0, 0); return; }
     document.getElementById('board').value = CAT_TO_BOARD[mc] || 'daigou';
+  } else {
+    document.getElementById('board').value = 'daily';
   }
-  if (!currentBoard()){ LH.showErr(err, LISTING ? '请选择商家分类' : '请选择频道'); window.scrollTo(0, 0); return; }
+  if (!currentBoard()){ LH.showErr(err, '请选择商家分类'); window.scrollTo(0, 0); return; }
   var fd = new FormData();
   fd.append('board', currentBoard());
   fd.append('merchant_cat', (document.getElementById('mcat') || {}).value || '');
   fd.append('title', document.getElementById('title').value);
   fd.append('body', document.getElementById('body').value);
-  fd.append('topics', document.getElementById('topics').value);
+  var topicsEl = document.getElementById('topics');
+  fd.append('topics', topicsEl && !LISTING ? '' : ((topicsEl && topicsEl.value) || ''));
   fd.append('place', document.getElementById('place').value);
   if (MB[currentBoard()]){
     fd.append('tag', document.getElementById('tag').value); fd.append('offer', document.getElementById('offer').value); fd.append('valid_until', document.getElementById('valid').value);
@@ -623,11 +628,11 @@ document.getElementById('send').onclick = async function(){
     var r = await LH.api('POST', '/api/community/posts', fd);
     clearDraft();
     if (r.pending){ LH.toast(r.message || '已提交，等待审核', 'ok', 4000); }
-    else { LH.toast('发布成功', 'ok'); }
-    setTimeout(function(){ location.href = '/community/post/' + r.id; }, r.pending ? 900 : 500);
+    else { LH.toast('发布成功', 'ok', 2000); }
+    setTimeout(function(){ location.href = '/community/post/' + r.id; }, r.pending ? 900 : 800);
   } catch(e){ LH.showErr(err, e.message); LH.toast(e.message); setSending(false); window.scrollTo(0, 0); }
 };
 </script>
-<script src="/static/pwa.js?v=85" defer></script>
+<script src="/static/pwa.js?v=86" defer></script>
 </body>
 </html>

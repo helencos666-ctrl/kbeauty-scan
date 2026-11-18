@@ -1,4 +1,4 @@
-"""纯静态检查：首页七格底部导航、?v=85 缓存版本、新页面（trips）与禁词。
+"""纯静态检查：首页七格底部导航、?v=86 缓存版本、新页面（trips）与禁词。
 不需要启服务，直接 python test/test_home_nav.py 即可。"""
 import os, re
 
@@ -38,13 +38,13 @@ PAGES = {
 }
 
 # ---------- 1. 缓存版本 v63 ----------
-check("sw.js CACHE is lvhan-shell-v85", "'lvhan-shell-v85'" in sw or '"lvhan-shell-v85"' in sw)
-check("sw.js uses ?v=85", "?v=85" in sw)
+check("sw.js CACHE is lvhan-shell-v86", "'lvhan-shell-v86'" in sw or '"lvhan-shell-v86"' in sw)
+check("sw.js uses ?v=86", "?v=86" in sw)
 check("sw.js has no ?v=60", "?v=60" not in sw)
 for name, txt in PAGES.items():
-    check("%s uses ?v=85 (or tabbar)" % name, ("?v=85" in txt) or ("tabbar" in txt))
+    check("%s uses ?v=86 (or tabbar)" % name, ("?v=86" in txt) or ("tabbar" in txt))
     check("%s has no ?v=60" % name, "?v=60" not in txt)
-check("sw.js SHELL has four home ads", all("/static/home-ads/ad-%d.jpg?v=85" % i in sw for i in (1, 2, 3, 4)))
+check("sw.js SHELL has four home ads", all("/static/home-ads/ad-%d.jpg?v=86" % i in sw for i in (1, 2, 3, 4)))
 check("sw.js SHELL has /trips", "'/trips'" in sw and "'/local'" not in sw)
 check("sw.js SHELL has trips.html", "/static/trips.html" in sw and "/static/local.html" not in sw)
 
@@ -122,7 +122,7 @@ check("trips can add/edit/delete/reorder", all(w in trips for w in ("添加地�
 check("trips links subway planner", "/?tab=sub" in trips)
 check("trips links /itineraries", "/itineraries" in trips)
 check("trips has back and me", 'href="/"' in trips and 'href="/me"' in trips)
-check("trips loads pwa.js?v=85", "/static/pwa.js?v=85" in trips)
+check("trips loads pwa.js?v=86", "/static/pwa.js?v=86" in trips)
 
 
 # ---------- 5b. festival.html 韩国购物节 ----------
@@ -167,10 +167,15 @@ for name, txt in ALL.items():
 home = index.split('id="p-home"')[1].split('id="p-cos"')[0] if 'id="p-home"' in index else ""
 check("home 无示例标签", "示例" not in index)
 check("home 无示例店名", not any(w in home for w in ["广藏市场", "星巴克", "明洞乐天免税"]))
-check("home 推荐卡片走 /api/places", "/api/places?limit_n=40" in index and "nearBlk" not in index)
-check("home 吃喝玩乐推荐走 /api/places", "/api/places?limit_n=40" in index and "playBlk" in index and "韩友圈分享" not in index)
+check("home 横幅下改为韩友圈带图帖瀑布流",
+      "playBlk" in index and "playGrid" in index and "nearBlk" not in index
+      and "/api/community/feed?tab=latest&has_image=1" in index
+      and "/api/places?limit_n=40" not in index
+      and "韩友圈分享" not in index
+      and "会员推荐" in index and "play-lab" in index
+      and "community.js" in index and "showFeed" in index and "LH.appendWater" in index)
 check("lanjing ad links /ads/lanjing", 'data-ad="lanjing"' in index and "ad-4.jpg" in index and 'href="/ads/lanjing"' in index)
-check("home 空状态有去处链接", "/places/new" in index and "/community/new" in index)
+check("发帖入口仍在底栏", "/community/new" in index)
 
 # ---------- 8. 弹层不被底部七格导航遮挡（2026-11-17） ----------
 # 追加到 test_home_nav.py 末尾（print 汇总之前）。复用已有的 me / pwa_css / comm_css 变量。

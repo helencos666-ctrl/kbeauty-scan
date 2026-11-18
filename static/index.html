@@ -10,10 +10,10 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="旅韩助手">
 <link rel="manifest" href="/manifest.webmanifest">
-<link rel="apple-touch-icon" href="/static/icons/apple-touch-icon.png?v=85">
-<link rel="icon" type="image/png" sizes="192x192" href="/static/icons/icon-192.png?v=85">
-<link rel="stylesheet" href="/static/pwa.css?v=85">
-<link rel="preload" href="/static/subway.json?v=85" as="fetch" crossorigin>
+<link rel="apple-touch-icon" href="/static/icons/apple-touch-icon.png?v=86">
+<link rel="icon" type="image/png" sizes="192x192" href="/static/icons/icon-192.png?v=86">
+<link rel="stylesheet" href="/static/pwa.css?v=86">
+<link rel="preload" href="/static/subway.json?v=86" as="fetch" crossorigin>
 <style>
 :root{--primary:#146E68;--secondary:#3D8F88;--accent:#B85A12;--pink:var(--primary);--ink:#1A2330;--sub:#4A5560;--bg:#F3F7F6;--card:#fff;--line:#D5E4E1;--success:#1B7A45;--warning:#B45309}
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
@@ -265,23 +265,29 @@ body.is-home .disclaimer{display:none}
 .ads .dots{display:flex;align-items:center;justify-content:center;gap:5px;margin-top:6px}
 .ads .dots i{width:6px;height:6px;border-radius:50%;background:#C5E0DC;display:block;transition:width .2s,background .2s}
 .ads .dots i.on{width:14px;border-radius:4px;background:var(--primary)}
-/* E. 吃喝玩乐推荐卡片（已审核会员地点，紧跟广告轮播） */
+/* E. 首页「会员推荐」韩友圈带图帖瀑布流（紧跟广告轮播） */
 .play{background:var(--bg);padding:4px 0 16px}
-.play-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;padding:0 16px}
-.pcard{display:block;border-radius:14px;background:#fff;overflow:hidden;box-shadow:0 2px 10px rgba(20,110,104,.05);color:var(--ink);text-decoration:none}
-.pcard .pic,.pcard .ph{width:100%;aspect-ratio:4/3;display:block;background:#EAF6F4}
-.pcard .pic{object-fit:cover;font-size:0}
-.pcard .ph{display:flex;align-items:center;justify-content:center;font-size:32px}
-.pcard .cap{padding:8px 9px 10px}
-.pcard b{display:block;font-size:13.5px;font-weight:700;line-height:1.35;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.pcard p{margin:4px 0 0;font-size:11.5px;color:var(--sub);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.pcard .rec{margin-top:3px;font-size:11px;font-weight:600;color:var(--primary)}
-
-/* 空状态（吃喝玩乐推荐） */
-.empty-box{margin:0 16px;padding:16px 14px;border-radius:14px;background:#fff;box-shadow:0 2px 10px rgba(20,110,104,.05);font-size:13px;line-height:1.7;color:var(--sub)}
-.empty-box p{margin:0}
-.empty-box .lnks{display:flex;flex-wrap:wrap;gap:8px;margin-top:10px}
-.empty-box .lnks a{padding:6px 10px;border-radius:12px;background:#E6F3F1;color:var(--primary);font-size:12.5px;font-weight:700;text-decoration:none}
+.play-lab{padding:0 16px 8px;font-size:12px;font-weight:700;color:var(--sub)}
+#playGrid.waterfall{padding:0 16px}
+#playGrid.waterfall .wcols{display:flex;align-items:flex-start;gap:8px}
+#playGrid.waterfall .wcol{flex:1 1 0;min-width:0;display:flex;flex-direction:column;gap:8px}
+.play .wcard{display:block;background:#fff;border-radius:12px;overflow:hidden;text-decoration:none;color:inherit;box-shadow:0 1px 4px rgba(26,35,48,.06)}
+.play .wcover{position:relative;width:100%;overflow:hidden;background:#f3eef0}
+.play .wcover img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;display:block}
+.play .wcover.wtext{display:flex;align-items:center;justify-content:center;padding:18px 14px;background:linear-gradient(165deg,#f7f2eb 0%,#efe6dc 100%)}
+.play .wtext-t{font-size:18px;font-weight:700;line-height:1.35;color:#222;display:-webkit-box;-webkit-line-clamp:6;-webkit-box-orient:vertical;overflow:hidden;text-align:left;width:100%;word-break:break-word}
+.play .wtitle{margin:8px 8px 0;font-size:14px;font-weight:650;line-height:1.35;color:#111;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;word-break:break-word}
+.play .wmeta{display:flex;align-items:center;justify-content:space-between;gap:6px;padding:6px 8px 8px}
+.play .wuser{display:flex;align-items:center;gap:4px;min-width:0;flex:1}
+.play .av{position:relative;display:inline-flex;align-items:center;justify-content:center;border-radius:50%;overflow:hidden;flex:none;color:#fff;font-weight:700;line-height:1;user-select:none;background:#3D8F88}
+.play .av-xs{width:18px;height:18px;font-size:10px}
+.play .av img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;z-index:1;background:#f3eef0}
+.play .av-letter{position:relative;z-index:0}
+.play .av.fb img{display:none}
+.play .wnick{font-size:11px;color:#666;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.play .wlike{flex:none;font-size:12px;color:#666;line-height:1}
+.play-hint{margin:8px 16px 0;padding:0;font-size:13px;color:var(--sub);line-height:1.5}
+#playMore.btn{display:inline-block;flex:none;padding:10px 16px;font-size:14px}
 
 /* F. 开业活动条（默认 hidden，接口开启后由 JS 显示） */
 .promo-bar{display:flex;align-items:center;gap:10px;margin:4px 16px 16px;padding:14px;border-radius:16px;background:#FFF4E8;color:var(--ink);text-decoration:none;box-shadow:0 2px 10px rgba(184,90,18,.08)}
@@ -328,7 +334,7 @@ body.is-home .disclaimer{display:none}
 <body class="is-home">
 <header></header>
 <div class="hero" id="hero">
-  <a class="brand" href="/"><img src="/static/icons/icon-192.png?v=85" alt="">旅韩助手</a>
+  <a class="brand" href="/"><img src="/static/icons/icon-192.png?v=86" alt="">旅韩助手</a>
 </div>
 <p class="hero-sub">地铁 · 翻译 · 吃喝玩，中文一站搞定</p>
 <div class="bar"><a href="/" id="back" aria-label="返回首页">‹</a><b id="htitle">旅韩助手</b></div>
@@ -364,19 +370,21 @@ body.is-home .disclaimer{display:none}
     <div class="ads" id="homeAds">
       <div class="ads-viewport">
         <div class="ads-track" id="adsTrack">
-          <a class="slide" href="/food#hamcho-myeongdong"><img src="/static/home-ads/ad-1.jpg?v=85" alt="咸草酱蟹：明洞酱蟹，点击查看" width="640" height="320" draggable="false" onerror="this.style.display=&#39;none&#39;;"></a>
-          <a class="slide" href="/food#daega-myeongdong"><img src="/static/home-ads/ad-2.jpg?v=85" alt="大家烤肉：明洞烤肉，点击查看" width="640" height="320" draggable="false" onerror="this.style.display=&#39;none&#39;;"></a>
-          <a class="slide" href="/shops"><img src="/static/home-ads/ad-3.jpg?v=85" alt="DAYONE：商业服务，点击查看" width="640" height="320" draggable="false" onerror="this.style.display=&#39;none&#39;;"></a>
-          <a class="slide" data-ad="lanjing" href="/ads/lanjing"><img src="/static/home-ads/ad-4.jpg?v=85" alt="蓝憬通讯：推荐2位好友注册 免费领韩国手机卡" width="640" height="320" draggable="false" onerror="this.style.display=&#39;none&#39;;"></a>
+          <a class="slide" href="/food#hamcho-myeongdong"><img src="/static/home-ads/ad-1.jpg?v=86" alt="咸草酱蟹：明洞酱蟹，点击查看" width="640" height="320" draggable="false" onerror="this.style.display=&#39;none&#39;;"></a>
+          <a class="slide" href="/food#daega-myeongdong"><img src="/static/home-ads/ad-2.jpg?v=86" alt="大家烤肉：明洞烤肉，点击查看" width="640" height="320" draggable="false" onerror="this.style.display=&#39;none&#39;;"></a>
+          <a class="slide" href="/shops"><img src="/static/home-ads/ad-3.jpg?v=86" alt="DAYONE：商业服务，点击查看" width="640" height="320" draggable="false" onerror="this.style.display=&#39;none&#39;;"></a>
+          <a class="slide" data-ad="lanjing" href="/ads/lanjing"><img src="/static/home-ads/ad-4.jpg?v=86" alt="蓝憬通讯：推荐2位好友注册 免费领韩国手机卡" width="640" height="320" draggable="false" onerror="this.style.display=&#39;none&#39;;"></a>
         </div>
       </div>
       <div class="ads-cap" id="adsCap"><b>咸草酱蟹</b><span>点击查看</span></div>
       <div class="dots" id="adsDots" aria-hidden="true"><i class="on"></i><i></i><i></i><i></i></div>
     </div>
-    <!-- E. 吃喝玩乐推荐卡片（只显示已审核会员地点，不编造） -->
+    <!-- E. 会员推荐：韩友圈带图帖瀑布流（不编造） -->
     <section class="play" id="playBlk">
-      <div class="play-grid" id="playGrid"></div>
-      <div id="playEmpty" hidden></div>
+      <div class="play-lab">会员推荐</div>
+      <div id="playGrid"></div>
+      <div id="playEmpty" class="play-hint" hidden></div>
+      <div style="text-align:center;margin:8px 0 0"><button type="button" class="btn ghost" id="playMore" style="display:none">加载更多</button></div>
     </section>
 
     <!-- F. 开业活动条（默认 hidden，/api/opening-promo 开启后显示） -->
@@ -533,9 +541,10 @@ body.is-home .disclaimer{display:none}
 </div>
 
 <script src="/static/ref.js"></script>
-<script src="/static/splash.js?v=85"></script>
+<script src="/static/splash.js?v=86"></script>
 <script src="/static/phrases.js"></script>
 <script src="/static/subway.js"></script>
+<script src="/static/community.js?v=86"></script>
 <script>
 const $=id=>document.getElementById(id);
 const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
@@ -1629,7 +1638,7 @@ drawScenes();
 })();
 </script>
 <script src="/static/maps.js"></script>
-<script src="/static/pwa.js?v=85" defer></script>
+<script src="/static/pwa.js?v=86" defer></script>
 
 <script>
 (function(){
@@ -1902,78 +1911,79 @@ drawScenes();
     paint(false);
     start();
   })();
-  /* ---------- E. 吃喝玩乐推荐：只读 /api/places（已审核地点） ---------- */
+  /* ---------- E. 首页瀑布流：韩友圈带图帖（无分类则收录全部带图帖，不编造） ---------- */
   (function(){
-    var grid=byId('playGrid'), empty=byId('playEmpty');
-    if(!grid||!empty) return;
-    var ICON={food:'🍜',coffee:'☕',shop:'🛍️',spot:'🏯',hotel:'🏨',beauty:'💄',other:'📍'};
-    var CATS={food:'美食',coffee:'咖啡',shop:'购物',spot:'景点',hotel:'酒店',beauty:'医美',other:'其他'};
-    var items=[], filter='all', state='loading';
-    function arr(d){
-      if(!d) return [];
-      if(Array.isArray(d)) return d;
-      if(Array.isArray(d.items)) return d.items;
-      if(Array.isArray(d.places)) return d.places;
-      return [];
+    var grid=byId('playGrid'), empty=byId('playEmpty'), more=byId('playMore');
+    if(!grid) return;
+    if (typeof LH === 'undefined') LH = {};
+    if (typeof LH.appendWater !== 'function'){
+      LH.appendWater = function(listEl, posts, reset, leadHtml){
+        if (reset){
+          listEl.className = 'waterfall';
+          listEl.innerHTML = (leadHtml || '') + '<div class="wcols"><div class="wcol"></div><div class="wcol"></div></div>';
+        }
+        var cols = listEl.querySelectorAll('.wcol');
+        if (!cols.length){
+          listEl.className = '';
+          listEl.innerHTML = (leadHtml || '') + (posts || []).map(function(p){
+            return LH.postItem ? LH.postItem(p) : ('<a class="wcard" href="/community/post/' + p.id + '">' + (LH.esc ? LH.esc(p.title || '') : (p.title || '')) + '</a>');
+          }).join('');
+          return;
+        }
+        function card(p){
+          if (typeof LH.waterItem === 'function') return LH.waterItem(p);
+          var title = LH.esc ? LH.esc(p.title || '') : String(p.title || '');
+          return '<a class="wcard" href="/community/post/' + p.id + '"><div class="wcover wtext" style="aspect-ratio:3/4"><div class="wtext-t">' + title + '</div></div><div class="wtitle">' + title + '</div></a>';
+        }
+        (posts || []).forEach(function(p){
+          var col = cols[0];
+          if (cols[1] && cols[1].offsetHeight < cols[0].offsetHeight) col = cols[1];
+          col.insertAdjacentHTML('beforeend', card(p));
+        });
+        if (typeof LH.bindWaterLazy === 'function') LH.bindWaterLazy(listEl);
+      };
     }
-    function areaOf(p){
-      var a=String(p.address||'').replace(/\s+/g,' ').trim();
-      if(!a) return '';
-      var keys=['首尔','济州','釜山','仁川','大邱','光州','大田','京畿','江原','明洞','弘大','江南','梨泰院','东大门','新村','蚕室','仁寺洞','合井','新沙','圣水','延南','市厅','龙山','汝矣岛'];
-      for(var i=0;i<keys.length;i++) if(a.indexOf(keys[i])>=0) return keys[i];
-      return a.length>14 ? a.slice(0,14) : a;
+    function showFeed(listEl, items, reset, lead){
+      try {
+        if (typeof LH.appendWater === 'function'){
+          LH.appendWater(listEl, items, reset, lead);
+          return;
+        }
+      } catch (err) {}
+      listEl.className = '';
+      listEl.innerHTML = (lead || '') + (items || []).map(function(p){
+        return '<a class="wcard" href="/community/post/' + p.id + '">' + (LH.esc ? LH.esc(p.title || '') : (p.title || '')) + '</a>';
+      }).join('');
     }
-    function recLine(p){
-      var n=+p.rec_count||0;
-      if(n>1) return n+' 人推荐';
-      if(n===1 || p.recommended_by) return '由会员推荐';
-      return '';
+    var next = 0, loading = false;
+    function feedUrl(){ return '/api/community/feed?tab=latest&has_image=1&limit_n=20&offset=' + next; }
+    function load(reset){
+      if (loading) return;
+      loading = true;
+      if (reset){ next = 0; if (empty){ empty.hidden = true; empty.textContent = ''; } }
+      var req = (LH.api ? LH.api('GET', feedUrl()) : fetch(feedUrl()).then(function(r){ return r.json(); }));
+      Promise.resolve(req).then(function(d){
+        var posts = (d && d.posts) || [];
+        if (reset && !posts.length){
+          grid.className = ''; grid.innerHTML = '';
+          if (empty){ empty.hidden = false; empty.textContent = '暂时还没有带图的帖子'; }
+          if (more) more.style.display = 'none';
+          return;
+        }
+        if (empty) empty.hidden = true;
+        showFeed(grid, posts, reset, '');
+        next = (d && d.next != null) ? d.next : (next + posts.length);
+        if (more) more.style.display = d && d.more ? 'inline-block' : 'none';
+      }).catch(function(){
+        if (reset){
+          grid.className = ''; grid.innerHTML = '';
+          if (empty){ empty.hidden = false; empty.textContent = '加载失败，请稍后再试'; }
+        }
+        if (more) more.style.display = 'none';
+      }).then(function(){ loading = false; });
     }
-    function card(p){
-      var cat=CATS[p.category]||p.category_label||'';
-      var area=areaOf(p);
-      var sub=[cat,area].filter(Boolean).join(' · ');
-      var rec=recLine(p);
-      var im=p.cover_id
-        ? '<img class="pic" src="/api/places/photos/'+encodeURIComponent(p.cover_id)+'?thumb=1" alt="" width="320" height="240" loading="lazy" decoding="async" onerror="this.style.display=&#39;none&#39;;">'
-        : '<div class="ph">'+E(ICON[p.category]||'📍')+'</div>';
-      return '<a class="pcard" href="/places/'+encodeURIComponent(p.id)+'">'+im
-        + '<div class="cap"><b>'+E(p.name||'')+'</b>'
-        + (sub?'<p>'+E(sub)+'</p>':'')
-        + (rec?'<div class="rec">'+E(rec)+'</div>':'')
-        + '</div></a>';
-    }
-    function emptyBox(cat){
-      var href='/places/new'+(cat&&cat!=='all' ? '?category='+encodeURIComponent(cat) : '');
-      return '<div class="empty-box"><p>暂无推荐，去推荐</p><div class="lnks"><a href="'+href+'">去推荐</a></div></div>';
-    }
-    function rowsOf(){
-      var rows=items.slice();
-      if(filter!=='all') rows=rows.filter(function(p){ return p.category===filter; });
-      rows.sort(function(a,b){
-        var ra=(+a.rec_count||0)-(+b.rec_count||0);
-        if(ra) return -ra;
-        return (b.id||0)-(a.id||0);
-      });
-      return rows;
-    }
-    function render(){
-      if(state==='loading'){
-        grid.innerHTML=''; grid.style.display='none';
-        empty.innerHTML='<div class="empty-box"><p>正在加载推荐…</p></div>'; empty.hidden=false; return;
-      }
-      var rows=rowsOf();
-      if(!rows.length){
-        grid.innerHTML=''; grid.style.display='none';
-        empty.innerHTML=emptyBox(filter); empty.hidden=false; return;
-      }
-      empty.hidden=true; empty.innerHTML=''; grid.style.display='grid';
-      grid.innerHTML=rows.slice(0,12).map(card).join('');
-    }
-    render();
-    fetch('/api/places?limit_n=40').then(function(r){ return r.json(); }).then(function(d){
-      items=arr(d); state='ready'; render();
-    }).catch(function(){ items=[]; state='ready'; render(); });
+    if (more) more.onclick = function(){ load(false); };
+    load(true);
   })();
 
   /* ---------- #p-more 顶部搜索：从「全部功能」里找 ---------- */

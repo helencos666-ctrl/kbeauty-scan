@@ -1535,6 +1535,7 @@ def api_feed(req: Request, tab: str = "recommend", boards: str = "", offset: int
     cat = (req.query_params.get("cat") or "").strip()
     if cat and cat not in FEED_CATS:
         raise HTTPException(400, "分类不存在")
+    has_image = (req.query_params.get("has_image") or "").strip().lower() in ("1", "true", "yes")
     try:
         km = int(float(req.query_params.get("km") or 0))
     except (TypeError, ValueError):
@@ -1570,6 +1571,8 @@ def api_feed(req: Request, tab: str = "recommend", boards: str = "", offset: int
             cond.append("""(p.user_id IN (SELECT followee_id FROM c_follows WHERE follower_id=%s)
                            OR p.board IN (SELECT board FROM c_board_follows WHERE user_id=%s))""")
             args += [u["id"], u["id"]]
+        if has_image:
+            cond.append("EXISTS (SELECT 1 FROM c_images i WHERE i.post_id=p.id)")
         if area:
             aliases = FEED_AREA_ALIASES[area]
             likes = ["%" + a + "%" for a in aliases]
@@ -1823,14 +1826,15 @@ def api_merchant_feed(req: Request, cat: str = "", before: int = 0, limit_n: int
 
 
 @router.post("/api/community/posts")
-async def api_new_post(req: Request, board: str = Form(...), title: str = Form(...), body: str = Form(...),
+async def api_new_post(req: Request, board: str = Form(""), title: str = Form(...), body: str = Form(...),
                        tag: str = Form(""), offer: str = Form(""), valid_until: str = Form(""),
                        merchant_cat: str = Form(""), topics: str = Form(""), area: str = Form(""),
                        place: str = Form(""),
                        images: list[UploadFile] = File(default=[])):
     csrf(req)
+    board = (board or "").strip()
     if board not in BOARDS:
-        raise HTTPException(400, "请选择频道")
+        board = DAILY_BOARD
     daily = board == DAILY_BOARD
     title = clean_text(title, 40, "标题", 2 if daily else 4)
     body = clean_text(body, 3000, "正文", 5 if daily else 10)
