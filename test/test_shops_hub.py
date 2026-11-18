@@ -91,9 +91,10 @@ for key in ("guide", "clinic", "daigou", "logistics", "sim", "food", "hotel",
 for label in ("地陪向导", "医美", "代购", "物流快递", "通讯电话卡", "美食", "住宿",
               "接送机", "翻译", "留学签证", "租车", "追星活动", "其它"):
     check("shops 分类文案：%s" % label, label in shops)
-check("shops 分类不再截断横滑，改为换行全部可见",
-      "flex-wrap:wrap" in shops and ".cat-chips{display:flex;flex-wrap:wrap" in shops
-      and "overflow-x:auto" not in shops.split(".cat-chips")[1].split("}")[0])
+check("shops 分类与韩国生活同为三列图标网格",
+      ".icon-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr))" in shops
+      and shops.count('class="icon-tile"') == 19
+      and "overflow-x:auto" not in shops.split(".icon-grid")[1].split("}")[0])
 check("shops 精选商家广告条仍可左右滑动", "ad-strip" in shops and "scroll-snap-type" in shops and "overflow-x:auto" in shops)
 check("shops 无截断旧文案 餐饮美食（炸鸡等）", "餐饮美食（炸鸡等）" not in shops)
 check("shops 页面本身不再拉商家信息流", "/api/community/merchant-feed" not in shops and 'id="feed"' not in shops)

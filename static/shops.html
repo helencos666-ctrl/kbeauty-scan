@@ -26,18 +26,17 @@
 .ad-cap{position:absolute;left:0;right:0;bottom:0;display:flex;align-items:center;justify-content:space-between;gap:10px;padding:22px 14px 12px;background:linear-gradient(transparent,rgba(0,0,0,.72));font-size:14px}
 .ad-cap b{font-size:15px}
 .ad-cap span{font-size:12px;opacity:.9;text-align:right}
-.cat-chips{display:flex;flex-wrap:wrap;gap:8px;padding:2px 0 12px}
-.cat-chips button{flex:0 0 auto;border:1px solid #eceef2;background:#fff;color:#4A5560;border-radius:999px;padding:7px 11px;font-size:13px;font-family:inherit;line-height:1.2;cursor:pointer;white-space:nowrap}
-.cat-chips button.on{background:#146E68;border-color:#146E68;color:#fff;font-weight:700}
-.loc-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:0 0 14px}
-.loc-card{display:flex;flex-direction:column;gap:6px;padding:14px;border-radius:16px;background:#fff;border:1px solid #F0F6F5;box-shadow:0 4px 16px rgba(20,110,104,.06);text-decoration:none;color:#1A2330;min-height:104px}
-.loc-card .ico{width:38px;height:38px;border-radius:12px;background:#EAF6F4;display:flex;align-items:center;justify-content:center;font-size:20px}
-.loc-card b{font-size:15px;font-weight:800}
-.loc-card span{font-size:12px;line-height:1.55;color:#4A5560}
+.icon-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;margin:0 0 14px;padding:0}
+.icon-tile{display:flex;flex-direction:column;align-items:center;justify-content:flex-start;gap:8px;padding:14px 6px 12px;border-radius:16px;background:#fff;border:1px solid #F0F6F5;box-shadow:0 4px 16px rgba(20,110,104,.06);text-decoration:none;color:#1A2330;min-height:104px;box-sizing:border-box;font-family:inherit;font-size:inherit;cursor:pointer;-webkit-appearance:none;appearance:none}
+button.icon-tile{width:100%}
+.icon-tile .ico{width:38px;height:38px;border-radius:12px;background:#EAF6F4;display:flex;align-items:center;justify-content:center;font-size:20px;flex:none}
+.icon-tile b{font-size:13px;font-weight:800;line-height:1.35;text-align:center}
+.icon-tile.on{background:#EAF6F4;border-color:#146E68}
+.icon-tile.on b{color:#0F5B56}
+@media (max-width:339px){.icon-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
 .loc-note{margin:0;padding:12px 14px;border-radius:14px;background:#F7FBFA;border:1px solid #DDEDEA;font-size:12.5px;line-height:1.75;color:#4A5560}
 .loc-note b{color:#1A2330}
 .sec-head a.sec-sub{color:#146E68;text-decoration:none;font-weight:700}
-@media (max-width:339px){.loc-grid{grid-template-columns:1fr}}
 .feed{display:flex;flex-direction:column;gap:12px}
 .mpost{background:#fff;border-radius:16px;overflow:hidden;box-shadow:0 4px 16px rgba(20,110,104,.08)}
 .mcover{display:block;background:#f4f5f7}
@@ -89,33 +88,33 @@
 
   <section class="sec" aria-labelledby="feedTitle">
     <div class="sec-head"><h2 id="feedTitle">商家服务</h2><span class="sec-sub">站内咨询，沟通留痕</span></div>
-    <div class="cat-chips" id="catChips" role="tablist" aria-label="商家分类">
-      <button type="button" role="tab" data-cat="guide" aria-selected="false">地陪向导</button>
-      <button type="button" role="tab" data-cat="clinic" aria-selected="false">医美</button>
-      <button type="button" role="tab" data-cat="daigou" aria-selected="false">代购</button>
-      <button type="button" role="tab" data-cat="logistics" aria-selected="false">物流快递</button>
-      <button type="button" role="tab" data-cat="sim" aria-selected="false">通讯电话卡</button>
-      <button type="button" role="tab" data-cat="food" aria-selected="false">美食</button>
-      <button type="button" role="tab" data-cat="hotel" aria-selected="false">住宿</button>
-      <button type="button" role="tab" data-cat="airport" aria-selected="false">接送机</button>
-      <button type="button" role="tab" data-cat="interp" aria-selected="false">翻译</button>
-      <button type="button" role="tab" data-cat="agency" aria-selected="false">留学签证</button>
-      <button type="button" role="tab" data-cat="car" aria-selected="false">租车</button>
-      <button type="button" role="tab" data-cat="kpop" aria-selected="false">追星活动</button>
-      <button type="button" role="tab" data-cat="other" aria-selected="false">其它</button>
+    <div class="icon-grid" id="catChips" role="tablist" aria-label="商家分类">
+      <button type="button" class="icon-tile" role="tab" data-cat="guide" aria-selected="false"><span class="ico">🗺️</span><b>地陪向导</b></button>
+      <button type="button" class="icon-tile" role="tab" data-cat="clinic" aria-selected="false"><span class="ico">✨</span><b>医美</b></button>
+      <button type="button" class="icon-tile" role="tab" data-cat="daigou" aria-selected="false"><span class="ico">🛍️</span><b>代购</b></button>
+      <button type="button" class="icon-tile" role="tab" data-cat="logistics" aria-selected="false"><span class="ico">📦</span><b>物流快递</b></button>
+      <button type="button" class="icon-tile" role="tab" data-cat="sim" aria-selected="false"><span class="ico">📱</span><b>通讯电话卡</b></button>
+      <button type="button" class="icon-tile" role="tab" data-cat="food" aria-selected="false"><span class="ico">🍜</span><b>美食</b></button>
+      <button type="button" class="icon-tile" role="tab" data-cat="hotel" aria-selected="false"><span class="ico">🏨</span><b>住宿</b></button>
+      <button type="button" class="icon-tile" role="tab" data-cat="airport" aria-selected="false"><span class="ico">✈️</span><b>接送机</b></button>
+      <button type="button" class="icon-tile" role="tab" data-cat="interp" aria-selected="false"><span class="ico">💬</span><b>翻译</b></button>
+      <button type="button" class="icon-tile" role="tab" data-cat="agency" aria-selected="false"><span class="ico">📋</span><b>留学签证</b></button>
+      <button type="button" class="icon-tile" role="tab" data-cat="car" aria-selected="false"><span class="ico">🚗</span><b>租车</b></button>
+      <button type="button" class="icon-tile" role="tab" data-cat="kpop" aria-selected="false"><span class="ico">⭐</span><b>追星活动</b></button>
+      <button type="button" class="icon-tile" role="tab" data-cat="other" aria-selected="false"><span class="ico">📌</span><b>其它</b></button>
     </div>
 
   </section>
 
   <section class="sec" aria-labelledby="localTitle">
     <div class="sec-head"><h2 id="localTitle">韩国生活</h2><a class="sec-sub" href="/community">查看韩友圈 ›</a></div>
-    <div class="loc-grid">
-      <a class="loc-card" href="/community"><span class="ico">🧭</span><b>韩友圈</b><span>去韩国前问问走过的人，也可看看在韩国的生活分享</span></a>
-      <a class="loc-card" href="/community?board=rent"><span class="ico">🏠</span><b>租房</b><span>考试院、单间、合租与转租信息</span></a>
-      <a class="loc-card" href="/community?board=jobs"><span class="ico">💼</span><b>招聘 · 工作</b><span>兼职、全职与打工经验交流</span></a>
-      <a class="loc-card" href="/community?board=used"><span class="ico">🛋️</span><b>二手 · 闲置</b><span>家具、家电、生活用品的转让</span></a>
-      <a class="loc-card" href="/community?board=visa"><span class="ico">🛂</span><b>签证</b><span>居留、延期与材料准备的经验</span></a>
-      <a class="loc-card" href="/community?board=study"><span class="ico">🎓</span><b>留学</b><span>语学院、大学与入学后的生活</span></a>
+    <div class="icon-grid" aria-label="韩国生活频道">
+      <a class="icon-tile" href="/community"><span class="ico">🧭</span><b>韩友圈</b></a>
+      <a class="icon-tile" href="/community?board=rent"><span class="ico">🏠</span><b>租房</b></a>
+      <a class="icon-tile" href="/community?board=jobs"><span class="ico">💼</span><b>招聘 · 工作</b></a>
+      <a class="icon-tile" href="/community?board=used"><span class="ico">🛋️</span><b>二手 · 闲置</b></a>
+      <a class="icon-tile" href="/community?board=visa"><span class="ico">🛂</span><b>签证</b></a>
+      <a class="icon-tile" href="/community?board=study"><span class="ico">🎓</span><b>留学</b></a>
     </div>
     <p class="loc-note"><b>说明：</b>这里只做频道入口，帖子都由用户自己发布，仅供参考。涉及签约、汇款、押金和证件的事情，请当面核实对方身份与合同条款，不要提前转账。</p>
   </section>
