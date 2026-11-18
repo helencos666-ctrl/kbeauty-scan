@@ -10,10 +10,10 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="旅韩助手">
 <link rel="manifest" href="/manifest.webmanifest">
-<link rel="apple-touch-icon" href="/static/icons/apple-touch-icon.png?v=77">
-<link rel="icon" type="image/png" sizes="192x192" href="/static/icons/icon-192.png?v=77">
-<link rel="stylesheet" href="/static/pwa.css?v=77">
-<link rel="stylesheet" href="/static/community.css?v=77">
+<link rel="apple-touch-icon" href="/static/icons/apple-touch-icon.png?v=78">
+<link rel="icon" type="image/png" sizes="192x192" href="/static/icons/icon-192.png?v=78">
+<link rel="stylesheet" href="/static/pwa.css?v=78">
+<link rel="stylesheet" href="/static/community.css?v=78">
 <style>
 .sec{margin:0 0 18px}
 .sec-head{display:flex;align-items:baseline;justify-content:space-between;gap:10px;margin:4px 2px 10px}
@@ -29,8 +29,6 @@
 .cat-chips{display:flex;flex-wrap:wrap;gap:8px;padding:2px 0 12px}
 .cat-chips button{flex:0 0 auto;border:1px solid #eceef2;background:#fff;color:#4A5560;border-radius:999px;padding:7px 11px;font-size:13px;font-family:inherit;line-height:1.2;cursor:pointer;white-space:nowrap}
 .cat-chips button.on{background:#146E68;border-color:#146E68;color:#fff;font-weight:700}
-.loc-hero{margin:0 0 12px;padding:14px;border-radius:18px;background:linear-gradient(150deg,#EAF6F4 0%,#FFFFFF 72%);border:1px solid #E2EFEC}
-.loc-hero p{margin:0;font-size:13.5px;line-height:1.7;color:#4A5560}
 .loc-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:0 0 14px}
 .loc-card{display:flex;flex-direction:column;gap:6px;padding:14px;border-radius:16px;background:#fff;border:1px solid #F0F6F5;box-shadow:0 4px 16px rgba(20,110,104,.06);text-decoration:none;color:#1A2330;min-height:104px}
 .loc-card .ico{width:38px;height:38px;border-radius:12px;background:#EAF6F4;display:flex;align-items:center;justify-content:center;font-size:20px}
@@ -71,19 +69,19 @@
     <div class="sec-head"><h2 id="featTitle">精选商家</h2><span class="sec-sub">左右滑动查看</span></div>
     <div class="ad-strip" id="adStrip">
       <a class="ad-card" href="/food#hamcho-myeongdong">
-        <img src="/static/home-ads/ad-1.jpg?v=77" alt="咸草酱蟹：明洞酱蟹，点击查看" width="640" height="320" loading="lazy" draggable="false" onerror="this.style.display='none';">
+        <img src="/static/home-ads/ad-1.jpg?v=78" alt="咸草酱蟹：明洞酱蟹，点击查看" width="640" height="320" loading="lazy" draggable="false" onerror="this.style.display='none';">
         <span class="ad-cap"><b>咸草酱蟹</b><span>点击查看</span></span>
       </a>
       <a class="ad-card" href="/food#daega-myeongdong">
-        <img src="/static/home-ads/ad-2.jpg?v=77" alt="大家烤肉：明洞烤肉，点击查看" width="640" height="320" loading="lazy" draggable="false" onerror="this.style.display='none';">
+        <img src="/static/home-ads/ad-2.jpg?v=78" alt="大家烤肉：明洞烤肉，点击查看" width="640" height="320" loading="lazy" draggable="false" onerror="this.style.display='none';">
         <span class="ad-cap"><b>大家烤肉</b><span>点击查看</span></span>
       </a>
       <a class="ad-card" href="/shops">
-        <img src="/static/home-ads/ad-3.jpg?v=77" alt="DAYONE：商业服务，点击查看" width="640" height="320" loading="lazy" draggable="false" onerror="this.style.display='none';">
+        <img src="/static/home-ads/ad-3.jpg?v=78" alt="DAYONE：商业服务，点击查看" width="640" height="320" loading="lazy" draggable="false" onerror="this.style.display='none';">
         <span class="ad-cap"><b>DAYONE</b><span>点击查看</span></span>
       </a>
       <a class="ad-card" data-ad="lanjing" href="/ads/lanjing">
-        <img src="/static/home-ads/ad-4.jpg?v=77" alt="蓝憬通讯：推荐2位好友注册 免费领韩国手机卡" width="640" height="320" loading="lazy" draggable="false" onerror="this.style.display='none';">
+        <img src="/static/home-ads/ad-4.jpg?v=78" alt="蓝憬通讯：推荐2位好友注册 免费领韩国手机卡" width="640" height="320" loading="lazy" draggable="false" onerror="this.style.display='none';">
         <span class="ad-cap"><b>蓝憬通讯</b><span>推荐2位好友注册 免费领韩国手机卡</span></span>
       </a>
     </div>
@@ -92,7 +90,6 @@
   <section class="sec" aria-labelledby="feedTitle">
     <div class="sec-head"><h2 id="feedTitle">商家服务</h2><span class="sec-sub">站内咨询，沟通留痕</span></div>
     <div class="cat-chips" id="catChips" role="tablist" aria-label="商家分类">
-      <button type="button" role="tab" data-cat="all" class="on" aria-selected="true">全部</button>
       <button type="button" role="tab" data-cat="guide" aria-selected="false">地陪向导</button>
       <button type="button" role="tab" data-cat="clinic" aria-selected="false">医美</button>
       <button type="button" role="tab" data-cat="daigou" aria-selected="false">代购</button>
@@ -108,14 +105,10 @@
       <button type="button" role="tab" data-cat="other" aria-selected="false">其它</button>
     </div>
 
-    <a class="btn primary block partner-btn" href="/partner">我是商家，申请入驻/发布</a>
   </section>
 
   <section class="sec" aria-labelledby="localTitle">
     <div class="sec-head"><h2 id="localTitle">韩国生活</h2><a class="sec-sub" href="/community">查看韩友圈 ›</a></div>
-    <div class="loc-hero">
-      <p>韩友圈是在韩国生活的交流入口。租房、工作、二手、签证和留学也在韩友圈的对应频道里，内容由用户发布。</p>
-    </div>
     <div class="loc-grid">
       <a class="loc-card" href="/community"><span class="ico">🧭</span><b>韩友圈</b><span>去韩国前问问走过的人，也可看看在韩国的生活分享</span></a>
       <a class="loc-card" href="/community?board=rent"><span class="ico">🏠</span><b>租房</b><span>考试院、单间、合租与转租信息</span></a>
@@ -139,8 +132,23 @@
   <a href="/trips" data-nav="trips" class="loc"><i>🗓️</i>行程安排</a>
   <a href="/me" data-nav="me" class="me"><i>👤</i>我的</a>
 </nav>
-<script src="/static/community.js?v=77"></script>
+<script src="/static/community.js?v=78"></script>
 <script src="/static/banners.js"></script>
-<script src="/static/pwa.js?v=77" defer></script>
+<script>
+(function(){
+  var box=document.getElementById('catChips');
+  if(!box) return;
+  box.addEventListener('click',function(e){
+    var b=e.target.closest('button[data-cat]');
+    if(!b||!box.contains(b)) return;
+    box.querySelectorAll('button[data-cat]').forEach(function(x){
+      var on=x===b;
+      x.classList.toggle('on',on);
+      x.setAttribute('aria-selected',on?'true':'false');
+    });
+  });
+})();
+</script>
+<script src="/static/pwa.js?v=78" defer></script>
 </body>
 </html>

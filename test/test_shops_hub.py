@@ -71,7 +71,7 @@ check("shops 没有 LH.userbar(带参数) 的个人卡调用",
 # ---------- 2. 精选商家广告位：只用已有 4 张 ----------
 check("shops 有「精选商家」", "精选商家" in shops)
 for i in (1, 2, 3, 4):
-    check("shops 使用已有首页广告 ad-%d" % i, ("/static/home-ads/ad-%d.jpg?v=77" % i) in shops)
+    check("shops 使用已有首页广告 ad-%d" % i, ("/static/home-ads/ad-%d.jpg?v=78" % i) in shops)
 check("shops 恰好 4 张广告卡（没有第五家）", shops.count('class="ad-card"') == 4, shops.count('class="ad-card"'))
 for name in ("咸草酱蟹", "大家烤肉", "DAYONE", "蓝憬通讯"):
     check("shops 广告店名：%s" % name, name in shops)
@@ -85,10 +85,10 @@ for fake in ("星巴克", "广藏市场", "明洞乐天", "第五家", "示例�
 
 # ---------- 3. 商家服务（无信息流） ----------
 check("shops 有「商家服务」", "商家服务" in shops and "feedTitle" in shops)
-for key in ("all", "guide", "clinic", "daigou", "logistics", "sim", "food", "hotel",
+for key in ("guide", "clinic", "daigou", "logistics", "sim", "food", "hotel",
             "airport", "interp", "agency", "car", "kpop", "other"):
     check("shops 分类 key：%s" % key, ('data-cat="%s"' % key) in shops)
-for label in ("全部", "地陪向导", "医美", "代购", "物流快递", "通讯电话卡", "美食", "住宿",
+for label in ("地陪向导", "医美", "代购", "物流快递", "通讯电话卡", "美食", "住宿",
               "接送机", "翻译", "留学签证", "租车", "追星活动", "其它"):
     check("shops 分类文案：%s" % label, label in shops)
 check("shops 分类不再截断横滑，改为换行全部可见",
@@ -97,7 +97,8 @@ check("shops 分类不再截断横滑，改为换行全部可见",
 check("shops 精选商家广告条仍可左右滑动", "ad-strip" in shops and "scroll-snap-type" in shops and "overflow-x:auto" in shops)
 check("shops 无截断旧文案 餐饮美食（炸鸡等）", "餐饮美食（炸鸡等）" not in shops)
 check("shops 页面本身不再拉商家信息流", "/api/community/merchant-feed" not in shops and 'id="feed"' not in shops)
-check("shops 入驻按钮文案", "我是商家，申请入驻/发布" in shops)
+check("shops 无「全部」分类钮", 'data-cat="all"' not in shops and ">全部<" not in shops)
+check("shops 无入驻按钮", "我是商家，申请入驻/发布" not in shops)
 check("shops 商家服务下方是韩国生活", 'id="localTitle"' in shops and "韩国生活" in shops and shops.index('id="localTitle"') > shops.index('id="feedTitle"'))
 check("shops 韩国生活复用六个频道卡片",
       all(w in shops for w in ("韩友圈", "租房", "招聘 · 工作", "二手 · 闲置", "签证", "留学"))
@@ -107,9 +108,11 @@ check("shops 正文不再出现行程安排区块",
       'id="tripTitle"' not in shops and "按天安排" not in shops and "查看独立页面" not in shops
       and 'href="/trips"' not in shops.split("<nav")[0])
 
-check("shops 入驻按钮链到 /partner", re.search(r'href="/partner"[^>]*>我是商家，申请入驻/发布', shops) is not None)
-check("shops 入驻按钮在分类条下方",
-      shops.count("我是商家，申请入驻/发布") == 1 and shops.index("我是商家，申请入驻/发布") > shops.index('id="catChips"'))
+check("shops 分类钮默认可点选且默认不选中",
+      "getElementById('catChips')" in shops and 'class="on"' not in shops.split('id="catChips"')[1].split('</div>')[0])
+check("shops 韩国生活无导语框",
+      "loc-hero" not in shops and "韩友圈是在韩国生活的交流入口" not in shops
+      and "查看韩友圈" in shops and 'id="localTitle"' in shops)
 check("shops 没有旧推荐/服务商 JS 残留",
       all(x not in shops for x in ("setTab", "svcTabs", "/api/providers", "/api/shops", "typechips")))
 check("shops 忽略旧 tab/type 参数，不做重定向",
@@ -120,9 +123,9 @@ check("shops 忽略旧 tab/type 参数，不做重定向",
 check("shops 有 banner 位", '<div data-banner-slot="shops"></div>' in shops)
 check("shops 用汉江青 theme-color", 'name="theme-color" content="#146E68"' in shops)
 check("shops 加载 pwa.css / community.css / community.js / banners.js",
-      all(x in shops for x in ("/static/pwa.css?v=77", "/static/community.css?v=77",
-                               "/static/community.js?v=77", "/static/banners.js")))
-check("shops 加载 pwa.js?v=77 defer", '<script src="/static/pwa.js?v=77" defer></script>' in shops)
+      all(x in shops for x in ("/static/pwa.css?v=78", "/static/community.css?v=78",
+                               "/static/community.js?v=78", "/static/banners.js")))
+check("shops 加载 pwa.js?v=78 defer", '<script src="/static/pwa.js?v=78" defer></script>' in shops)
 check("shops 保留底部导航", "<nav" in shops and "底部导航" in shops)
 check("shops 免责声明完整",
       all(w in shops for w in ("免费信息网站", "仅供参考", "不是旅行社", "不代办签证")))
@@ -202,7 +205,7 @@ for name, txt in (("shops.html", shops), ("community-new.html", newpost)):
           [w for w in wx_solicit if w in txt])
 for name, txt in (("shops.html", shops), ("community-new.html", newpost)):
     vers = re.findall(r"\?v=(\d+)", txt)
-    check("%s 仍使用 ?v=77" % name, bool(vers) and set(vers) == {"77"}, set(vers))
+    check("%s 仍使用 ?v=78" % name, bool(vers) and set(vers) == {"78"}, set(vers))
 
 print("%s passed, %s failed, %s skipped" % (ok, fail, skip))
 if fail:

@@ -89,7 +89,7 @@ def static_checks():
     check("帖子图片走 /api/admin/img/", "/api/admin/img/" in rv)
     check("保留封禁作者按钮", "封禁作者" in rv)
 
-    check("admin.html 使用 ?v=77", "?v=77" in html)
+    check("admin.html 使用 ?v=78", "?v=78" in html)
 
 
 # ---------------------------------------------------------- 测试库小工具
