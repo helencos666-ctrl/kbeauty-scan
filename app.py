@@ -507,12 +507,14 @@ def static_html(name: str):
 from lanjing_seed import router as lanjing_router, seed_once as seed_lanjing  # noqa: E402
 from guides_seed import seed_once as seed_guides  # noqa: E402
 from hide_shop_posts_v76 import hide_once as hide_shop_posts_v76  # noqa: E402
+from hide_shop_posts_v77 import hide_once as hide_shop_posts_v77  # noqa: E402
 app.include_router(lanjing_router)
 
 @app.on_event("startup")
 def _startup_seeds():
     seed_lanjing()
     hide_shop_posts_v76()
+    hide_shop_posts_v77()
     seed_guides()
 
 app.mount("/static", StaticFiles(directory=os.path.join(BASE, "static")), name="static")

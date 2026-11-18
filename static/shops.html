@@ -10,10 +10,10 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="旅韩助手">
 <link rel="manifest" href="/manifest.webmanifest">
-<link rel="apple-touch-icon" href="/static/icons/apple-touch-icon.png?v=76">
-<link rel="icon" type="image/png" sizes="192x192" href="/static/icons/icon-192.png?v=76">
-<link rel="stylesheet" href="/static/pwa.css?v=76">
-<link rel="stylesheet" href="/static/community.css?v=76">
+<link rel="apple-touch-icon" href="/static/icons/apple-touch-icon.png?v=77">
+<link rel="icon" type="image/png" sizes="192x192" href="/static/icons/icon-192.png?v=77">
+<link rel="stylesheet" href="/static/pwa.css?v=77">
+<link rel="stylesheet" href="/static/community.css?v=77">
 <style>
 .sec{margin:0 0 18px}
 .sec-head{display:flex;align-items:baseline;justify-content:space-between;gap:10px;margin:4px 2px 10px}
@@ -62,7 +62,7 @@
 <body>
 <header>
   <h1>商家</h1>
-  <p>精选推荐和已审核的商家发布</p>
+  <p>精选推荐和商家服务</p>
 </header>
 <main>
   <div data-banner-slot="shops"></div>
@@ -71,26 +71,26 @@
     <div class="sec-head"><h2 id="featTitle">精选商家</h2><span class="sec-sub">左右滑动查看</span></div>
     <div class="ad-strip" id="adStrip">
       <a class="ad-card" href="/food#hamcho-myeongdong">
-        <img src="/static/home-ads/ad-1.jpg?v=76" alt="咸草酱蟹：明洞酱蟹，点击查看" width="640" height="320" loading="lazy" draggable="false" onerror="this.style.display='none';">
+        <img src="/static/home-ads/ad-1.jpg?v=77" alt="咸草酱蟹：明洞酱蟹，点击查看" width="640" height="320" loading="lazy" draggable="false" onerror="this.style.display='none';">
         <span class="ad-cap"><b>咸草酱蟹</b><span>点击查看</span></span>
       </a>
       <a class="ad-card" href="/food#daega-myeongdong">
-        <img src="/static/home-ads/ad-2.jpg?v=76" alt="大家烤肉：明洞烤肉，点击查看" width="640" height="320" loading="lazy" draggable="false" onerror="this.style.display='none';">
+        <img src="/static/home-ads/ad-2.jpg?v=77" alt="大家烤肉：明洞烤肉，点击查看" width="640" height="320" loading="lazy" draggable="false" onerror="this.style.display='none';">
         <span class="ad-cap"><b>大家烤肉</b><span>点击查看</span></span>
       </a>
       <a class="ad-card" href="/shops">
-        <img src="/static/home-ads/ad-3.jpg?v=76" alt="DAYONE：商业服务，点击查看" width="640" height="320" loading="lazy" draggable="false" onerror="this.style.display='none';">
+        <img src="/static/home-ads/ad-3.jpg?v=77" alt="DAYONE：商业服务，点击查看" width="640" height="320" loading="lazy" draggable="false" onerror="this.style.display='none';">
         <span class="ad-cap"><b>DAYONE</b><span>点击查看</span></span>
       </a>
       <a class="ad-card" data-ad="lanjing" href="/ads/lanjing">
-        <img src="/static/home-ads/ad-4.jpg?v=76" alt="蓝憬通讯：推荐2位好友注册 免费领韩国手机卡" width="640" height="320" loading="lazy" draggable="false" onerror="this.style.display='none';">
+        <img src="/static/home-ads/ad-4.jpg?v=77" alt="蓝憬通讯：推荐2位好友注册 免费领韩国手机卡" width="640" height="320" loading="lazy" draggable="false" onerror="this.style.display='none';">
         <span class="ad-cap"><b>蓝憬通讯</b><span>推荐2位好友注册 免费领韩国手机卡</span></span>
       </a>
     </div>
   </section>
 
   <section class="sec" aria-labelledby="feedTitle">
-    <div class="sec-head"><h2 id="feedTitle">商家发布</h2><span class="sec-sub">站内咨询，沟通留痕</span></div>
+    <div class="sec-head"><h2 id="feedTitle">商家服务</h2><span class="sec-sub">站内咨询，沟通留痕</span></div>
     <div class="cat-chips" id="catChips" role="tablist" aria-label="商家分类">
       <button type="button" role="tab" data-cat="all" class="on" aria-selected="true">全部</button>
       <button type="button" role="tab" data-cat="guide" aria-selected="false">地陪向导</button>
@@ -108,26 +108,23 @@
       <button type="button" role="tab" data-cat="other" aria-selected="false">其它</button>
     </div>
 
-    <div class="feed" id="feed" aria-live="polite"><div class="loading">加载中…</div></div>
-    <div class="empty-state" id="feedEmpty" hidden>
-      <p>暂无商家发布</p>
-    </div>
     <a class="btn primary block partner-btn" href="/partner">我是商家，申请入驻/发布</a>
-    <div style="text-align:center;margin-top:10px"><button class="btn ghost" id="moreBtn" type="button" hidden>加载更多</button></div>
   </section>
 
-  <section class="sec" aria-labelledby="tripTitle">
-    <div class="sec-head"><h2 id="tripTitle">行程安排</h2><a class="sec-sub" href="/trips">查看独立页面 ›</a></div>
+  <section class="sec" aria-labelledby="localTitle">
+    <div class="sec-head"><h2 id="localTitle">韩国生活</h2><a class="sec-sub" href="/community">查看韩友圈 ›</a></div>
     <div class="loc-hero">
-      <p>按游玩天数和想去的地点，生成一份按天排好的首尔行程，并可以跳到站内地铁路线查询。</p>
+      <p>韩友圈是在韩国生活的交流入口。租房、工作、二手、签证和留学也在韩友圈的对应频道里，内容由用户发布。</p>
     </div>
     <div class="loc-grid">
-      <a class="loc-card" href="/trips"><span class="ico">🗓️</span><b>按天安排</b><span>选择 1 到 6 天，把想去的地点排进每天的行程</span></a>
-      <a class="loc-card" href="/trips"><span class="ico">📍</span><b>热门地点</b><span>明洞、景福宫、弘大、东大门、江南等常用点可勾选</span></a>
-      <a class="loc-card" href="/?tab=sub"><span class="ico">🚇</span><b>查地铁路线</b><span>用站内路线工具查看换乘</span></a>
-      <a class="loc-card" href="/itineraries"><span class="ico">🗺️</span><b>路线卡片</b><span>也可先看已整理的购物、美食路线</span></a>
+      <a class="loc-card" href="/community"><span class="ico">🧭</span><b>韩友圈</b><span>去韩国前问问走过的人，也可看看在韩国的生活分享</span></a>
+      <a class="loc-card" href="/community?board=rent"><span class="ico">🏠</span><b>租房</b><span>考试院、单间、合租与转租信息</span></a>
+      <a class="loc-card" href="/community?board=jobs"><span class="ico">💼</span><b>招聘 · 工作</b><span>兼职、全职与打工经验交流</span></a>
+      <a class="loc-card" href="/community?board=used"><span class="ico">🛋️</span><b>二手 · 闲置</b><span>家具、家电、生活用品的转让</span></a>
+      <a class="loc-card" href="/community?board=visa"><span class="ico">🛂</span><b>签证</b><span>居留、延期与材料准备的经验</span></a>
+      <a class="loc-card" href="/community?board=study"><span class="ico">🎓</span><b>留学</b><span>语学院、大学与入学后的生活</span></a>
     </div>
-    <p class="loc-note"><b>说明：</b>行程只作参考，交通、营业时间和门票请以现场标识与官方信息为准。</p>
+    <p class="loc-note"><b>说明：</b>这里只做频道入口，帖子都由用户自己发布，仅供参考。涉及签约、汇款、押金和证件的事情，请当面核实对方身份与合同条款，不要提前转账。</p>
   </section>
 
   <div class="footlinks"><a href="/points">旅行豆</a>·<a href="/coupons">卡券</a>·<a href="/shops">商家</a>·<a href="/member">会员</a>·<a href="/community">社区</a></div>
@@ -142,91 +139,8 @@
   <a href="/trips" data-nav="trips" class="loc"><i>🗓️</i>行程安排</a>
   <a href="/me" data-nav="me" class="me"><i>👤</i>我的</a>
 </nav>
-<script src="/static/community.js?v=76"></script>
+<script src="/static/community.js?v=77"></script>
 <script src="/static/banners.js"></script>
-<script>
-(function(){
-  var LIMIT = 20;
-  var feed = document.getElementById('feed');
-  var empty = document.getElementById('feedEmpty');
-  var moreBtn = document.getElementById('moreBtn');
-  var chips = Array.prototype.slice.call(document.querySelectorAll('#catChips button'));
-  var cat = 'all', before = 0, loading = false, hasMore = false;
-
-  function card(p){
-    var id = p.id;
-    var cover = p.cover ? '<a class="mcover" href="/community/post/' + id + '"><img loading="lazy" alt="" src="/api/community/img/' + p.cover + '?t=1"></a>' : '';
-    var catName = p.merchant_cat_name || p.board_name || '';
-    var consult = (p.consult !== false && !p.mine)
-      ? '<a class="btn primary consult-btn" href="' + LH.consultHref('post', id) + '">立即咨询</a>' : '';
-    return '<article class="mpost">' + cover + '<div class="mbody">' +
-      (catName ? '<span class="tag">' + LH.esc(catName) + '</span>' : '') +
-      '<h3><a href="/community/post/' + id + '">' + LH.esc(p.title || '') + '</a></h3>' +
-      (p.excerpt ? '<p class="ex">' + LH.esc(p.excerpt) + '</p>' : '') +
-      '<div class="mfoot"><span class="mmeta">' + LH.esc(p.author || '') + (p.time ? ' · ' + LH.esc(LH.relTime(p.time)) : '') + '</span>' + consult + '</div>' +
-      '</div></article>';
-  }
-
-  function setMore(){
-    moreBtn.hidden = !hasMore;
-  }
-
-  function showEmpty(){
-    empty.hidden = feed.querySelector('.mpost') !== null;
-  }
-
-  async function load(reset){
-    if (loading) return;
-    loading = true;
-    if (reset){
-      before = 0;
-      hasMore = false;
-      setMore();
-      feed.innerHTML = '<div class="loading">加载中…</div>';
-    }
-    var url = '/api/community/merchant-feed?before=' + (reset ? 0 : (before || 0)) + '&limit_n=' + LIMIT;
-    if (cat !== 'all') url += '&cat=' + encodeURIComponent(cat);
-    try {
-      var r = await LH.api('GET', url);
-      var posts = r.posts || [];
-      if (reset) feed.innerHTML = '';
-      posts.forEach(function(p){ feed.insertAdjacentHTML('beforeend', card(p)); });
-      if (posts.length) before = posts[posts.length - 1].id;
-      hasMore = !!r.has_more;
-      setMore();
-      showEmpty();
-    } catch(e){
-      if (reset) feed.innerHTML = '<div class="load-err">加载失败：' + LH.esc(e.message || '请稍后再试') +
-        '<br><button class="btn ghost" type="button" id="retryBtn">重试</button></div>';
-      var retry = document.getElementById('retryBtn');
-      if (retry) retry.onclick = function(){ load(true); };
-      showEmpty();
-    }
-    loading = false;
-  }
-
-  chips.forEach(function(b){
-    b.onclick = function(){
-      if (loading || cat === b.getAttribute('data-cat')) return;
-      cat = b.getAttribute('data-cat');
-      chips.forEach(function(x){
-        var on = x === b;
-        x.classList.toggle('on', on);
-        x.setAttribute('aria-selected', on ? 'true' : 'false');
-      });
-      load(true);
-    };
-  });
-
-  moreBtn.onclick = function(){ load(false); };
-
-  (async function(){
-    try { await LH.userbar(); } catch(e){}
-    load(true);
-  })();
-})();
-</script>
-
-<script src="/static/pwa.js?v=76" defer></script>
+<script src="/static/pwa.js?v=77" defer></script>
 </body>
 </html>

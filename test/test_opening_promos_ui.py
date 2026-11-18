@@ -84,14 +84,14 @@ for name, txt in (("开业配置和活动页", blob), ("pwa.css", pwa_css), ("pw
 check("活动页读取配置并渲染列表", "opening-promos.json" in js and "renderList" in js and "LHOpening" in page)
 check("弹层每日一次写入 localStorage", "lh_opening_popup_day" in json.dumps(cfg) and "localStorage.setItem" in js)
 check("弹层只在首页出现", "onHome" in js and "openPromoSheet" in js)
-check("pwa.js 会加载开业脚本", "opening-promos.js?v=76" in pwa_js)
+check("pwa.js 会加载开业脚本", "opening-promos.js?v=77" in pwa_js)
 check("pwa.css 开业期间我的为红色", "body.lh-opening nav.tabbar a.me" in pwa_css and "#C62828" in pwa_css)
 check("pwa.css 有「开」角标", "tab-hot" in pwa_css)
 check("我的页有开业活动入口且保留邀请有奖", 'id="openPromoRow"' in me and 'href="/opening"' in me and 'href="/invite"' in me)
 check("邀请有奖仍在开业活动下方", me.index('id="openPromoRow"') < me.index('href="/invite"'))
 check("存在 /opening 路由与 SEO", 'p_opening' in read("me.py") and '"/opening"' in seo)
-check("sw.js 含活动页与配置", "'/opening'" in sw and "opening-promos.json?v=76" in sw)
-check("sw.js CACHE 为 v76", "lvhan-shell-v76" in sw)
+check("sw.js 含活动页与配置", "'/opening'" in sw and "opening-promos.json?v=77" in sw)
+check("sw.js CACHE 为 v76", "lvhan-shell-v77" in sw)
 
 print("%s passed, %s failed" % (ok, fail))
 if fail:
