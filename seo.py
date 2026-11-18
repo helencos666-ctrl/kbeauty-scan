@@ -191,6 +191,12 @@ PAGES = {
     ),
     "/me": ("我的 · 旅韩助手", "我的旅行豆、卡券、帖子与常用工具。", "旅韩助手", False),
     "/invite": ("邀请有奖 · 旅韩助手", "邀请同行一起用旅韩助手，好友完成首次使用后双方都可获得站内抵用券。", "旅韩助手", False),
+    "/opening": (
+        "开业活动 · 旅韩助手",
+        "旅韩助手开业活动：邀请有奖、电话卡、到店优惠、电影节门票和商家入驻免费。规则以本页和店家现场说明为准。",
+        "开业活动,邀请有奖,旅韩助手",
+        True,
+    ),
     "/services": (
         "服务商家 · 旅韩助手",
         "经平台审核的门店代订、接送机、中文应急协助服务商，仅供参考。",
@@ -301,6 +307,7 @@ FILE_PATHS = {
     "deals.html": "/deals",
     "festival.html": "/festival",
     "invite.html": "/invite",
+    "opening.html": "/opening",
     "services.html": "/services",
     "consult.html": "/consult",
     "notices.html": "/community/notices",
@@ -345,7 +352,7 @@ SITEMAP_PATHS = [
     "/", "/attractions", "/food", "/shopping", "/tips", "/beauty", "/faq",
     "/community", "/community/boards", "/community/rate", "/community/friends",
     "/rules", "/member", "/shops", "/pay", "/tax-refund", "/visa", "/itineraries", "/privacy", "/terms", "/promo/rules",
-    "/services", "/partner", "/deals", "/festival", "/places", "/trips", "/local",
+    "/services", "/partner", "/deals", "/festival", "/opening", "/places", "/trips", "/local",
 ]
 
 router = APIRouter()
@@ -408,7 +415,7 @@ def json_ld(origin, title, desc, path, extra=None):
         "@id": origin + "/#org",
         "name": "旅韩助手",
         "url": origin + "/",
-        "logo": origin + "/static/icons/icon-512.png?v=73",
+        "logo": origin + "/static/icons/icon-512.png?v=74",
     }
     website = {
         "@type": "WebSite",

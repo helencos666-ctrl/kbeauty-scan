@@ -142,6 +142,11 @@ def p_invite():
     return _page("invite.html", "/invite", extra={"title": "邀请有奖 · 旅韩助手",
                                                    "description": "邀请同行一起用旅韩助手，好友完成首次使用后双方都可获得站内抵用券。"})
 
+@router.get("/opening")
+def p_opening():
+    return _page("opening.html", "/opening", extra={"title": "开业活动 · 旅韩助手",
+                                                     "description": "旅韩助手开业活动：邀请有奖、电话卡、到店优惠、电影节门票和商家入驻免费。规则以本页和店家现场说明为准。"})
+
 # ---------------- 我的 ----------------
 @router.get("/api/me/summary")
 def api_me_summary(req: Request):

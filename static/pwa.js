@@ -1,5 +1,15 @@
 /* 旅韩助手：全站底部七格导航 + 注册 Service Worker + 可关闭的安装提示 */
 (function(){
+
+  /* 开业活动脚本：红标「我的」+ 首页每日弹层 */
+  if (!document.querySelector('script[data-lh-opening]')) {
+    var s = document.createElement('script');
+    s.src = '/static/opening-promos.js?v=74';
+    s.async = true;
+    s.setAttribute('data-lh-opening', '1');
+    document.head.appendChild(s);
+  }
+
   /* ===================== 底部七格导航（必须在安装提示的 return 之前执行） ===================== */
   var TABS = [
     {k:'home',     href:'/',                    icon:'🏠', label:'首页'},
@@ -130,8 +140,12 @@
   }
 
   function refreshNav(){
-    document.body.classList.remove('lh-overlay-open');
+    var sh = document.getElementById('openPromoSheet');
+    if (!sh || sh.hidden) document.body.classList.remove('lh-overlay-open');
     normalizeTabbar();
+    if (window.LHOpening && LHOpening.paintMeTab) {
+      LHOpening.load().then(function(cfg){ if (cfg) LHOpening.paintMeTab(cfg); });
+    }
   }
   if (document.readyState === 'loading') {
     document.addEventListener('DOMContentLoaded', refreshNav);

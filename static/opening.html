@@ -1,0 +1,69 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>开业活动 · 旅韩助手</title>
+<meta name="description" content="旅韩助手开业活动：邀请有奖、电话卡、到店优惠、电影节门票和商家入驻免费。规则以本页和店家现场说明为准。">
+<meta name="theme-color" content="#146E68">
+<link rel="manifest" href="/manifest.webmanifest">
+<link rel="apple-touch-icon" href="/static/icons/apple-touch-icon.png?v=74">
+<link rel="icon" type="image/png" sizes="192x192" href="/static/icons/icon-192.png?v=74">
+<link rel="stylesheet" href="/static/pwa.css?v=74">
+<link rel="stylesheet" href="/static/community.css?v=74">
+<link rel="stylesheet" href="/static/me.css?v=74">
+<style>
+.opage .metop{background:linear-gradient(90deg,#8B1E1E,#C45C26);color:#fff}
+.opage .metop .back{color:#fff}
+.ophero{border-radius:18px;padding:18px 16px;color:#fff;margin:0 0 16px;
+  background:linear-gradient(145deg,#8B1E1E 0%,#C45C26 58%,#C9A227 100%)}
+.ophero h1{margin:0 0 6px;font-size:22px}
+.ophero p{margin:0;font-size:13.5px;line-height:1.65;opacity:.96}
+.ophero .odates{margin-top:8px;font-size:13px;font-weight:700;color:#F5D76E}
+.op-card{display:flex;gap:12px;background:#fff;border-radius:16px;padding:14px;margin:0 0 12px;box-shadow:0 4px 16px rgba(20,110,104,.08)}
+.op-ico{flex:none;width:44px;height:44px;border-radius:12px;background:#FFF4E8;display:flex;align-items:center;justify-content:center;font-size:22px}
+.op-bd{flex:1;min-width:0}
+.op-bd h3{margin:0 0 4px;font-size:16px}
+.op-bd p{margin:0;font-size:13.5px;line-height:1.65;color:#444}
+.op-note{margin-top:6px!important;font-size:12px!important;color:#8B1E1E!important}
+.op-cta{display:inline-block;margin-top:8px;background:linear-gradient(90deg,#C45C26,#C9A227);color:#fff;border-radius:9px;padding:7px 12px;font-size:13px;font-weight:700;text-decoration:none}
+.op-tip{font-size:12.5px;line-height:1.7;color:#4A5560;margin:8px 2px 24px}
+</style>
+</head>
+<body class="mepage opage">
+<div class="metop"><a class="back" href="/" aria-label="返回首页">‹</a>开业活动</div>
+<main class="mewrap">
+  <div class="ophero" id="hero"></div>
+  <div id="list"></div>
+  <p class="op-tip" id="foot"></p>
+</main>
+<nav class="tabbar" aria-label="底部导航">
+  <a href="/" data-nav="home"><i>🏠</i>首页</a>
+  <a href="/community?tab=follow" data-nav="follow"><i>👥</i>关注</a>
+  <a href="/community/new" data-nav="post" class="pub"><span class="plus">＋</span>发布</a>
+  <a href="/festival" data-nav="festival" class="fest"><span class="fest-ico">🎁<em>冬季</em></span>购物节</a>
+  <a href="/shops" data-nav="services" class="svc"><i>💼</i>商业服务</a>
+  <a href="/local" data-nav="local" class="loc"><i>🏘️</i>生活在韩国</a>
+  <a href="/me" data-nav="me" class="me"><i>👤</i>我的</a>
+</nav>
+<script src="/static/opening-promos.js?v=74"></script>
+<script src="/static/pwa.js?v=74" defer></script>
+<script>
+(function(){
+  function paint(cfg){
+    var hero = document.getElementById('hero');
+    var on = LHOpening.isActive(cfg);
+    var dates = (cfg.starts || '') + (cfg.ends ? (' 至 ' + cfg.ends) : '');
+    hero.innerHTML = '<h1>' + LHOpening.esc(cfg.title || '开业活动') + '</h1>' +
+      '<p>' + LHOpening.esc(cfg.intro || '') + '</p>' +
+      (dates ? '<p class="odates">' + (on ? '进行中 · ' : '不在活动期 · ') + LHOpening.esc(dates) + '</p>' : '');
+    LHOpening.renderList(document.getElementById('list'), cfg, false);
+    document.getElementById('foot').textContent = '活动内容以本页最新说明和店家现场规则为准。关闭某一项或调整日期，只需更新活动配置。';
+  }
+  if (window.LHOpening){
+    LHOpening.load().then(function(cfg){ if (cfg) paint(cfg); });
+  }
+})();
+</script>
+</body>
+</html>
