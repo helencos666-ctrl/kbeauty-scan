@@ -408,6 +408,11 @@ MIGRATE10 = """
 ALTER TABLE c_posts ADD COLUMN IF NOT EXISTS show_cat TEXT;
 CREATE INDEX IF NOT EXISTS c_posts_show_cat_idx ON c_posts(show_cat, id DESC) WHERE NOT deleted AND show_cat IS NOT NULL;
 """
+MIGRATE11 = """
+ALTER TABLE c_posts ADD COLUMN IF NOT EXISTS spot_name TEXT;
+ALTER TABLE c_posts ADD COLUMN IF NOT EXISTS spot_area TEXT;
+ALTER TABLE c_posts ADD COLUMN IF NOT EXISTS avg_price INT;
+"""
 
 FEED_AREA_ALIASES = {
     "首尔": ["首尔", "서울", "Seoul", "seoul", "江南", "明洞", "弘大", "东大门", "梨泰院", "新村", "蚕室"],
@@ -533,6 +538,7 @@ def db():
                         cur.execute(MIGRATE8)
                         cur.execute(MIGRATE9)
                         cur.execute(MIGRATE10)
+                        cur.execute(MIGRATE11)
                         from points import MIGRATE_POINTS
                         cur.execute(MIGRATE_POINTS)
                         from chicken import MIGRATE_CHICKEN
@@ -1477,6 +1483,12 @@ def _post_out(r, full=False):
     if sc in SHOW_CATS:
         o["show_cat"] = sc
         o["show_cat_name"] = SHOW_CATS[sc]
+    if r.get("spot_name"):
+        o["spot_name"] = r["spot_name"]
+    if r.get("spot_area"):
+        o["spot_area"] = r["spot_area"]
+    if r.get("avg_price") is not None:
+        o["avg_price"] = int(r["avg_price"])
     o["favs"] = int(r.get("fav_count") or 0)
     if r.get("lat") is not None and r.get("lng") is not None:
         try:
@@ -1864,6 +1876,8 @@ async def api_new_post(req: Request, board: str = Form(""), title: str = Form(""
                        tag: str = Form(""), offer: str = Form(""), valid_until: str = Form(""),
                        merchant_cat: str = Form(""), topics: str = Form(""), area: str = Form(""),
                        place: str = Form(""), show_cat: str = Form(""),
+                       spot_name: str = Form(""), spot_area: str = Form(""),
+                       avg_price: str = Form(""),
                        images: list[UploadFile] = File(default=[])):
     csrf(req)
     board = (board or "").strip()
@@ -1884,6 +1898,25 @@ async def api_new_post(req: Request, board: str = Form(""), title: str = Form(""
         raise HTTPException(400, "分类不存在")
     if listing:
         show_cat = ""
+    need_spot = (not listing) and show_cat in HOME_SHOW_CATS
+    if need_spot:
+        spot_name = clean_text(spot_name, 40, "店名/地名", 1)
+        spot_area = clean_text(spot_area, 40, "地址或区域", 0)
+        price_raw = (avg_price or "").strip().replace(",", "").replace("₩", "").replace("원", "").replace(" ", "")
+        if not price_raw:
+            avg_price_n = None
+        elif not re.fullmatch(r"\d+", price_raw):
+            raise HTTPException(400, "人均请填写数字")
+        else:
+            avg_price_n = int(price_raw)
+            if avg_price_n <= 0:
+                avg_price_n = None
+            elif avg_price_n > 10000000:
+                raise HTTPException(400, "人均金额过大")
+    else:
+        spot_name = ""
+        spot_area = ""
+        avg_price_n = None
     if cat:
         if cat not in MERCHANT_CAT_KEYS:
             raise HTTPException(400, "分类不存在")
@@ -1949,9 +1982,9 @@ async def api_new_post(req: Request, board: str = Form(""), title: str = Form(""
               (u["id"],), one=True)["n"]
         if n >= 20:
             raise HTTPException(429, "今天发帖已达上限（20 篇）")
-        row = q(conn, """INSERT INTO c_posts(user_id,board,title,body,status,is_merchant,quota_kind,review_note,tag,offer,valid_until,merchant_cat,topics,area,place,show_cat)
-                         VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s) RETURNING id""",
-                (u["id"], board, title, body, status, bool(u["merchant"]), quota_kind, note, *act, cat, topics or None, area or None, place or None, show_cat or None), one=True)
+        row = q(conn, """INSERT INTO c_posts(user_id,board,title,body,status,is_merchant,quota_kind,review_note,tag,offer,valid_until,merchant_cat,topics,area,place,show_cat,spot_name,spot_area,avg_price)
+                         VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s) RETURNING id""",
+                (u["id"], board, title, body, status, bool(u["merchant"]), quota_kind, note, *act, cat, topics or None, area or None, place or None, show_cat or None, spot_name or None, spot_area or None, avg_price_n), one=True)
         for i, (big, th, w, h) in enumerate(processed):
             q(conn, "INSERT INTO c_images(post_id,pos,data,thumb,width,height) VALUES (%s,%s,%s,%s,%s,%s)",
               (row["id"], i, big, th, w, h))

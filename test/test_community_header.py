@@ -135,7 +135,7 @@ check("顶栏安全区只作用于 header.xbar",
       "env(safe-area-inset-top)" in xbar_css, xbar_css)
 check("main.home 单独微调上边距", bool(rule(css, "main.home")))
 
-check("community.html 使用 ?v=87", html.count("?v=87") >= 4 and "?v=81" not in html)
+check("community.html 使用 ?v=88", html.count("?v=88") >= 4 and "?v=81" not in html)
 check("未新增外链 http(s) 资源",
       "http://" not in html and "https://" not in html.replace("https://schema.org", ""))
 
@@ -170,10 +170,20 @@ check("普通写帖子标题和正文之间有可选分类标签",
       and "function applyShowCat" in newpost and "fd.append('show_cat'" in newpost
       and newpost.find('id="tcount"') < newpost.find('id="showCats"')
       and newpost.find('id="showCats"') < newpost.find('id="blab"'))
+check("选美食等分类时出现店名、区域和人均字段，自拍或不选则隐藏",
+      'id="spotBox"' in newpost and "店名/地名" in newpost
+      and "地址或区域（选填）" in newpost and "人均（选填）" in newpost
+      and 'id="spotName"' in newpost and 'id="spotArea"' in newpost and 'id="avgPrice"' in newpost
+      and "SPOT_CATS" in newpost and "请填写店名/地名" in newpost
+      and 'id="spotBox" hidden' in newpost
+      and newpost.find('id="showCats"') < newpost.find('id="spotBox"')
+      and newpost.find('id="spotBox"') < newpost.find('id="blab"'))
 js_w = read("community.js")
 post_h = read("community-post.html")
 check("无标题帖在瀑布流不渲染空标题节点", "(title ? '<div class=" + chr(34) + "wtitle" + chr(34) + ">'" in js_w)
 check("详情页无标题时不渲染空 h1", "(p.title ? '<h1 class=" + chr(34) + "ptitle" + chr(34) + ">'" in post_h)
+check("瀑布流卡片可展示店名和区域", "wspot" in js_w and "spot_name" in js_w and "spot_area" in js_w)
+check("帖子详情可展示店名、区域和人均", "pspot" in post_h and "人均 ₩" in post_h and "spot_name" in post_h)
 check("商家发布走 listing 模式", "isListingMode" in newpost and "listing=1" in newpost and "CAT_TO_BOARD" in newpost and "MCAT_TPL" in newpost)
 me = read("me.html")
 check("我的页有商家发布信息入口", "商家发布信息" in me and "/community/new?listing=1" in me)

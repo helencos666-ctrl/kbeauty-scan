@@ -191,8 +191,12 @@ var LH = (function(){
     if (!id && !title){
       cover = '<div class="wcover" style="aspect-ratio:3/4"></div>';
     }
+    var spot = esc(p.spot_name || '');
+    var sarea = esc(p.spot_area || '');
+    var spotLine = spot ? ('<div class="wspot">' + spot + (sarea ? '<span class="warea"> · ' + sarea + '</span>' : '') + '</div>') : '';
     return '<a class="wcard" href="/community/post/' + p.id + '">' + cover +
       (title ? '<div class="wtitle">' + title + '</div>' : '') +
+      spotLine +
       '<div class="wmeta"><span class="wuser">' + avatar(p.author_id, p.author, p.has_avatar, 'xs') +
       '<span class="wnick">' + esc(p.author) + '</span></span>' +
       '<span class="wlike">♡ ' + likes + '</span></div></a>';
@@ -265,7 +269,7 @@ var LH = (function(){
       var r = await api('GET', '/api/consult/unread'), n = r.n || 0;
       document.querySelectorAll('[data-consult-dot]').forEach(function(el){ el.textContent = n > 99 ? '99+' : n; el.style.display = n ? '' : 'none'; });
       if (_cn >= 0 && n > _cn && document.hidden && window.Notification && Notification.permission === 'granted' && !/^\/consult\/\d/.test(location.pathname)){
-        var opt = {body: '你有 ' + n + ' 条未读咨询消息', icon: '/static/icons/icon-192.png?v=87', tag: 'lh-consult', data: {url: '/consult'}};
+        var opt = {body: '你有 ' + n + ' 条未读咨询消息', icon: '/static/icons/icon-192.png?v=88', tag: 'lh-consult', data: {url: '/consult'}};
         try { var reg = navigator.serviceWorker && await navigator.serviceWorker.getRegistration(); if (reg) reg.showNotification('旅韩助手 · 站内咨询', opt); else new Notification('旅韩助手 · 站内咨询', opt); } catch(e){}
       }
       _cn = n;

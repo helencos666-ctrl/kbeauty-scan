@@ -10,10 +10,10 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="旅韩助手">
 <link rel="manifest" href="/manifest.webmanifest">
-<link rel="apple-touch-icon" href="/static/icons/apple-touch-icon.png?v=87">
-<link rel="icon" type="image/png" sizes="192x192" href="/static/icons/icon-192.png?v=87">
-<link rel="stylesheet" href="/static/pwa.css?v=87">
-<link rel="preload" href="/static/subway.json?v=87" as="fetch" crossorigin>
+<link rel="apple-touch-icon" href="/static/icons/apple-touch-icon.png?v=88">
+<link rel="icon" type="image/png" sizes="192x192" href="/static/icons/icon-192.png?v=88">
+<link rel="stylesheet" href="/static/pwa.css?v=88">
+<link rel="preload" href="/static/subway.json?v=88" as="fetch" crossorigin>
 <style>
 :root{--primary:#146E68;--secondary:#3D8F88;--accent:#B85A12;--pink:var(--primary);--ink:#1A2330;--sub:#4A5560;--bg:#F3F7F6;--card:#fff;--line:#D5E4E1;--success:#1B7A45;--warning:#B45309}
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
@@ -278,6 +278,8 @@ body.is-home .disclaimer{display:none}
 .play .wtext-t{font-size:18px;font-weight:700;line-height:1.35;color:#222;display:-webkit-box;-webkit-line-clamp:6;-webkit-box-orient:vertical;overflow:hidden;text-align:left;width:100%;word-break:break-word}
 .play .wtitle:empty{display:none}
 .play .wtitle{margin:8px 8px 0;font-size:14px;font-weight:650;line-height:1.35;color:#111;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;word-break:break-word}
+.play .wspot{margin:4px 8px 0;font-size:12px;font-weight:650;line-height:1.35;color:#111;display:-webkit-box;-webkit-line-clamp:1;-webkit-box-orient:vertical;overflow:hidden;word-break:break-word}
+.play .wspot .warea{font-weight:400;color:var(--sub)}
 .play .wmeta{display:flex;align-items:center;justify-content:space-between;gap:6px;padding:6px 8px 8px}
 .play .wuser{display:flex;align-items:center;gap:4px;min-width:0;flex:1}
 .play .av{position:relative;display:inline-flex;align-items:center;justify-content:center;border-radius:50%;overflow:hidden;flex:none;color:#fff;font-weight:700;line-height:1;user-select:none;background:#3D8F88}
@@ -335,7 +337,7 @@ body.is-home .disclaimer{display:none}
 <body class="is-home">
 <header></header>
 <div class="hero" id="hero">
-  <a class="brand" href="/"><img src="/static/icons/icon-192.png?v=87" alt="">旅韩助手</a>
+  <a class="brand" href="/"><img src="/static/icons/icon-192.png?v=88" alt="">旅韩助手</a>
 </div>
 <p class="hero-sub">地铁 · 翻译 · 吃喝玩，中文一站搞定</p>
 <div class="bar"><a href="/" id="back" aria-label="返回首页">‹</a><b id="htitle">旅韩助手</b></div>
@@ -371,10 +373,10 @@ body.is-home .disclaimer{display:none}
     <div class="ads" id="homeAds">
       <div class="ads-viewport">
         <div class="ads-track" id="adsTrack">
-          <a class="slide" href="/food#hamcho-myeongdong"><img src="/static/home-ads/ad-1.jpg?v=87" alt="咸草酱蟹：明洞酱蟹，点击查看" width="640" height="320" draggable="false" onerror="this.style.display=&#39;none&#39;;"></a>
-          <a class="slide" href="/food#daega-myeongdong"><img src="/static/home-ads/ad-2.jpg?v=87" alt="大家烤肉：明洞烤肉，点击查看" width="640" height="320" draggable="false" onerror="this.style.display=&#39;none&#39;;"></a>
-          <a class="slide" href="/shops"><img src="/static/home-ads/ad-3.jpg?v=87" alt="DAYONE：商业服务，点击查看" width="640" height="320" draggable="false" onerror="this.style.display=&#39;none&#39;;"></a>
-          <a class="slide" data-ad="lanjing" href="/ads/lanjing"><img src="/static/home-ads/ad-4.jpg?v=87" alt="蓝憬通讯：推荐2位好友注册 免费领韩国手机卡" width="640" height="320" draggable="false" onerror="this.style.display=&#39;none&#39;;"></a>
+          <a class="slide" href="/food#hamcho-myeongdong"><img src="/static/home-ads/ad-1.jpg?v=88" alt="咸草酱蟹：明洞酱蟹，点击查看" width="640" height="320" draggable="false" onerror="this.style.display=&#39;none&#39;;"></a>
+          <a class="slide" href="/food#daega-myeongdong"><img src="/static/home-ads/ad-2.jpg?v=88" alt="大家烤肉：明洞烤肉，点击查看" width="640" height="320" draggable="false" onerror="this.style.display=&#39;none&#39;;"></a>
+          <a class="slide" href="/shops"><img src="/static/home-ads/ad-3.jpg?v=88" alt="DAYONE：商业服务，点击查看" width="640" height="320" draggable="false" onerror="this.style.display=&#39;none&#39;;"></a>
+          <a class="slide" data-ad="lanjing" href="/ads/lanjing"><img src="/static/home-ads/ad-4.jpg?v=88" alt="蓝憬通讯：推荐2位好友注册 免费领韩国手机卡" width="640" height="320" draggable="false" onerror="this.style.display=&#39;none&#39;;"></a>
         </div>
       </div>
       <div class="ads-cap" id="adsCap"><b>咸草酱蟹</b><span>点击查看</span></div>
@@ -542,10 +544,10 @@ body.is-home .disclaimer{display:none}
 </div>
 
 <script src="/static/ref.js"></script>
-<script src="/static/splash.js?v=87"></script>
+<script src="/static/splash.js?v=88"></script>
 <script src="/static/phrases.js"></script>
 <script src="/static/subway.js"></script>
-<script src="/static/community.js?v=87"></script>
+<script src="/static/community.js?v=88"></script>
 <script>
 const $=id=>document.getElementById(id);
 const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
@@ -1639,7 +1641,7 @@ drawScenes();
 })();
 </script>
 <script src="/static/maps.js"></script>
-<script src="/static/pwa.js?v=87" defer></script>
+<script src="/static/pwa.js?v=88" defer></script>
 
 <script>
 (function(){
@@ -1934,7 +1936,7 @@ drawScenes();
         function card(p){
           if (typeof LH.waterItem === 'function') return LH.waterItem(p);
           var title = LH.esc ? LH.esc(p.title || '') : String(p.title || '');
-          return '<a class="wcard" href="/community/post/' + p.id + '"><div class="wcover wtext" style="aspect-ratio:3/4"><div class="wtext-t">' + title + '</div></div><div class="wtitle">' + title + '</div></a>';
+          var spot = (p.spot_name ? ('<div class="wspot">' + LH.esc(p.spot_name) + (p.spot_area ? '<span class="warea"> · ' + LH.esc(p.spot_area) + '</span>' : '') + '</div>') : ''); return '<a class="wcard" href="/community/post/' + p.id + '"><div class="wcover wtext" style="aspect-ratio:3/4"><div class="wtext-t">' + title + '</div></div>' + (title ? '<div class="wtitle">' + title + '</div>' : '') + spot + '</a>';
         }
         (posts || []).forEach(function(p){
           var col = cols[0];

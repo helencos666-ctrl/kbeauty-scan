@@ -10,11 +10,11 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="旅韩助手">
 <link rel="manifest" href="/manifest.webmanifest">
-<link rel="apple-touch-icon" href="/static/icons/apple-touch-icon.png?v=87">
-<link rel="icon" type="image/png" sizes="192x192" href="/static/icons/icon-192.png?v=87">
-<link rel="stylesheet" href="/static/pwa.css?v=87">
-<link rel="stylesheet" href="/static/community.css?v=87">
-<style>#preview[hidden]{display:none!important}body.compose .lh-toast{bottom:calc(72px + env(safe-area-inset-bottom))}.show-cats{gap:5px}.show-cats button{padding:6px 8px;box-sizing:border-box;white-space:nowrap}</style>
+<link rel="apple-touch-icon" href="/static/icons/apple-touch-icon.png?v=88">
+<link rel="icon" type="image/png" sizes="192x192" href="/static/icons/icon-192.png?v=88">
+<link rel="stylesheet" href="/static/pwa.css?v=88">
+<link rel="stylesheet" href="/static/community.css?v=88">
+<style>#preview[hidden]{display:none!important}#spotBox[hidden]{display:none!important}body.compose .lh-toast{bottom:calc(72px + env(safe-area-inset-bottom))}.show-cats{gap:5px}.show-cats button{padding:6px 8px;box-sizing:border-box;white-space:nowrap}.spot-box{margin:2px 0 12px}.spot-box label.f{margin:8px 0 4px;font-size:13px}.spot-box .f.sm{padding:8px 10px;font-size:14px}.price-row{display:flex;align-items:center;gap:6px}.price-row .won{flex:none;color:var(--sub);font-weight:700}.price-row input{flex:1;min-width:0}</style>
 </head>
 <body class="compose">
 <header>
@@ -85,6 +85,14 @@
       <button type="button" data-cat="selfie">自拍</button>
     </div>
     <input type="hidden" id="showCat" value="">
+    <div class="spot-box" id="spotBox" hidden>
+      <label class="f" for="spotName">店名/地名</label>
+      <input class="f sm" id="spotName" maxlength="40" placeholder="必填，例如店名或景点名" autocomplete="off">
+      <label class="f" for="spotArea">地址或区域（选填）</label>
+      <input class="f sm" id="spotArea" maxlength="40" placeholder="例如：明洞、弘大" autocomplete="off">
+      <label class="f" for="avgPrice">人均（选填）</label>
+      <div class="price-row"><span class="won">₩</span><input class="f sm" id="avgPrice" inputmode="numeric" maxlength="8" placeholder="例如 15000" autocomplete="off"></div>
+    </div>
     <label class="f" id="blab">正文（选填）</label>
     <textarea class="f" id="body" maxlength="3000" placeholder="选填，想写就写" style="min-height:140px;line-height:1.7"></textarea>
     <div class="count" id="bcount">0 / 3000</div>
@@ -117,7 +125,7 @@
   <a href="/?tab=more"><i>☰</i>全部</a>
   <a href="/me"><i>👤</i>我的</a>
 </nav>
-<script src="/static/community.js?v=87"></script>
+<script src="/static/community.js?v=88"></script>
 <script>
 var WARN = {visa: '签证问答仅限个人经验分享，禁止发布代办广告。', study: '留学打听仅限经验交流，禁止发布中介广告。',
   friends: '请勿在帖子里公开手机号、微信号、住址等隐私。想认识新朋友，也可以去“旅韩交友”发布交友资料。',
@@ -423,6 +431,12 @@ function currentShowCat(){
   var el = document.getElementById('showCat');
   return el ? el.value : '';
 }
+var SPOT_CATS = {food:1, shop:1, sight:1, hotel:1, coffee:1};
+function syncSpotBox(){
+  var box = document.getElementById('spotBox');
+  if (!box) return;
+  box.hidden = !(!LISTING && SPOT_CATS[currentShowCat()]);
+}
 function applyShowCat(val, skipSave){
   var v = val || '';
   var hid = document.getElementById('showCat');
@@ -430,6 +444,7 @@ function applyShowCat(val, skipSave){
   document.querySelectorAll('#showCats button[data-cat]').forEach(function(b){
     b.classList.toggle('on', b.getAttribute('data-cat') === v);
   });
+  syncSpotBox();
   if (!skipSave) saveDraft();
 }
 function bindShowCats(){
@@ -458,6 +473,9 @@ function saveDraft(){
       topics: document.getElementById('topics').value,
       place: document.getElementById('place').value,
       show_cat: currentShowCat(),
+      spot_name: (document.getElementById('spotName')||{}).value||'',
+      spot_area: (document.getElementById('spotArea')||{}).value||'',
+      avg_price: (document.getElementById('avgPrice')||{}).value||'',
       t: Date.now()
     };
     if (!d.board && !d.title.trim() && (!d.body.trim() || d.body === lastTpl)){
@@ -588,6 +606,9 @@ window.addEventListener('lh-compose-files', function(ev){
     document.getElementById('board').value = 'daily';
     bindShowCats();
     applyShowCat(draft.show_cat || '', true);
+    if (document.getElementById('spotName')) document.getElementById('spotName').value = draft.spot_name || '';
+    if (document.getElementById('spotArea')) document.getElementById('spotArea').value = draft.spot_area || '';
+    if (document.getElementById('avgPrice')) document.getElementById('avgPrice').value = draft.avg_price || '';
     if (draft.title) document.getElementById('title').value = draft.title;
     if (draft.body){ document.getElementById('body').value = draft.body; if (TPL[draft.board] && draft.body === TPL[draft.board]) lastTpl = draft.body; }
     if (draft.topics) document.getElementById('topics').value = draft.topics;
@@ -677,6 +698,13 @@ document.getElementById('send').onclick = async function(){
   fd.append('topics', topicsEl && !LISTING ? '' : ((topicsEl && topicsEl.value) || ''));
   fd.append('place', LISTING && document.getElementById('place') ? document.getElementById('place').value : '');
   fd.append('show_cat', LISTING ? '' : currentShowCat());
+  var spotOn = !LISTING && SPOT_CATS[currentShowCat()];
+  if (spotOn && !(document.getElementById('spotName').value || '').trim()){
+    LH.showErr(err, '请填写店名/地名'); window.scrollTo(0, 0); return;
+  }
+  fd.append('spot_name', spotOn ? document.getElementById('spotName').value : '');
+  fd.append('spot_area', spotOn ? document.getElementById('spotArea').value : '');
+  fd.append('avg_price', spotOn ? document.getElementById('avgPrice').value : '');
   if (MB[currentBoard()]){
     fd.append('tag', document.getElementById('tag').value); fd.append('offer', document.getElementById('offer').value); fd.append('valid_until', document.getElementById('valid').value);
   }
@@ -691,6 +719,6 @@ document.getElementById('send').onclick = async function(){
   } catch(e){ LH.showErr(err, e.message); LH.toast(e.message); setSending(false); window.scrollTo(0, 0); }
 };
 </script>
-<script src="/static/pwa.js?v=87" defer></script>
+<script src="/static/pwa.js?v=88" defer></script>
 </body>
 </html>

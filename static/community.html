@@ -10,10 +10,10 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="旅韩助手">
 <link rel="manifest" href="/manifest.webmanifest">
-<link rel="apple-touch-icon" href="/static/icons/apple-touch-icon.png?v=87">
-<link rel="icon" type="image/png" sizes="192x192" href="/static/icons/icon-192.png?v=87">
-<link rel="stylesheet" href="/static/pwa.css?v=87">
-<link rel="stylesheet" href="/static/community.css?v=87">
+<link rel="apple-touch-icon" href="/static/icons/apple-touch-icon.png?v=88">
+<link rel="icon" type="image/png" sizes="192x192" href="/static/icons/icon-192.png?v=88">
+<link rel="stylesheet" href="/static/pwa.css?v=88">
+<link rel="stylesheet" href="/static/community.css?v=88">
 </head>
 <body>
 <header class="xbar">
@@ -112,7 +112,7 @@
   <a href="/?tab=more"><i>☰</i>全部</a>
   <a href="/me"><i>👤</i>我的</a>
 </nav>
-<script src="/static/community.js?v=87"></script>
+<script src="/static/community.js?v=88"></script>
 <script src="/static/banners.js"></script>
 <script>
 var WARN = {
@@ -244,7 +244,7 @@ if (typeof LH.appendWater !== 'function'){
     function card(p){
       if (typeof LH.waterItem === 'function') return LH.waterItem(p);
       var title = LH.esc ? LH.esc(p.title || '') : String(p.title || '');
-      return '<a class="wcard" href="/community/post/' + p.id + '"><div class="wcover wtext" style="aspect-ratio:3/4"><div class="wtext-t">' + title + '</div></div><div class="wtitle">' + title + '</div></a>';
+      var spot = (p.spot_name ? ('<div class="wspot">' + LH.esc(p.spot_name) + (p.spot_area ? '<span class="warea"> · ' + LH.esc(p.spot_area) + '</span>' : '') + '</div>') : ''); return '<a class="wcard" href="/community/post/' + p.id + '"><div class="wcover wtext" style="aspect-ratio:3/4"><div class="wtext-t">' + title + '</div></div>' + (title ? '<div class="wtitle">' + title + '</div>' : '') + spot + '</a>';
     }
     (posts || []).forEach(function(p){
       var col = cols[0];
@@ -346,6 +346,6 @@ async function loadHome(){
   render();
 })();
 </script>
-<script src="/static/pwa.js?v=87" defer></script>
+<script src="/static/pwa.js?v=88" defer></script>
 </body>
 </html>
