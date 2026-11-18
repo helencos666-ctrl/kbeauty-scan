@@ -135,7 +135,7 @@ check("顶栏安全区只作用于 header.xbar",
       "env(safe-area-inset-top)" in xbar_css, xbar_css)
 check("main.home 单独微调上边距", bool(rule(css, "main.home")))
 
-check("community.html 使用 ?v=86", html.count("?v=86") >= 4 and "?v=81" not in html)
+check("community.html 使用 ?v=87", html.count("?v=87") >= 4 and "?v=81" not in html)
 check("未新增外链 http(s) 资源",
       "http://" not in html and "https://" not in html.replace("https://schema.org", ""))
 
@@ -162,6 +162,14 @@ check("普通写帖子去掉频道、话题和地点选项，默认 daily",
       and 'id="topicbox"' in newpost and 'id="placebox"' in newpost
       and "请选择频道" not in newpost
       and "document.getElementById('board').value = 'daily'" in newpost)
+check("普通写帖子标题和正文之间有可选分类标签",
+      'id="showCats"' in newpost and 'id="showCat"' in newpost
+      and 'data-cat="food"' in newpost and ">美食<" in newpost
+      and ">购物<" in newpost and ">景点<" in newpost and ">酒店<" in newpost
+      and ">咖啡推荐<" in newpost and ">自拍<" in newpost
+      and "function applyShowCat" in newpost and "fd.append('show_cat'" in newpost
+      and newpost.find('id="tcount"') < newpost.find('id="showCats"')
+      and newpost.find('id="showCats"') < newpost.find('id="blab"'))
 js_w = read("community.js")
 post_h = read("community-post.html")
 check("无标题帖在瀑布流不渲染空标题节点", "(title ? '<div class=" + chr(34) + "wtitle" + chr(34) + ">'" in js_w)

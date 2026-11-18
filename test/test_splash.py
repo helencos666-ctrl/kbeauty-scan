@@ -54,7 +54,7 @@ check("splash.js 广告分支有 show / skip / click 事件",
       "ev('show')" in splash and "ev('skip')" in splash and "ev('click')" in splash)
 check("splash.js 后台广告仍显示广告标与底部品牌条",
       "sp-lbl" in splash and "sp-strip" in splash
-      and "/static/icons/icon-192.png?v=86" in splash and "地铁 · 翻译 · 吃喝玩买" in splash)
+      and "/static/icons/icon-192.png?v=87" in splash and "地铁 · 翻译 · 吃喝玩买" in splash)
 check("splash.js 后台广告有 d.link 跳转", "location.href = d.link" in splash)
 
 # ---------- 3. splash.js：3 秒倒计时 / 1.5 秒图片超时 ----------
@@ -70,10 +70,10 @@ check("splash.js 超时放弃时不记已显示（成功后才写 storage）",
 
 # ---------- 4. splash.js：品牌开屏三张轮换 ----------
 for i in (1, 2, 3):
-    check("splash.js 品牌图 %d 用 webp?v=86" % i,
-          ("/static/splash/splash-%d.webp?v=86" % i) in splash)
+    check("splash.js 品牌图 %d 用 webp?v=87" % i,
+          ("/static/splash/splash-%d.webp?v=87" % i) in splash)
     check("splash.js 品牌图 %d 有 jpg 兜底" % i,
-          ("/static/splash/splash-%d.jpg?v=86" % i) in splash)
+          ("/static/splash/splash-%d.jpg?v=87" % i) in splash)
 check("splash.js 用 localStorage 键 lh_brand_splash_i", "lh_brand_splash_i" in splash)
 check("splash.js 读取后取模并写回下一张",
       "i % 3" in splash and "(cur + 1) % 3" in splash)
@@ -110,7 +110,7 @@ for i in (1, 2, 3):
           os.path.getsize(j) if os.path.exists(j) else "optional")
 
 # ---------- 7. index.html：开屏样式与脚本 ----------
-check("index.html 引用 /static/splash.js?v=86", "/static/splash.js?v=86" in index)
+check("index.html 引用 /static/splash.js?v=87", "/static/splash.js?v=87" in index)
 check("index.html 有品牌开屏 .sp-brand", "sp-brand" in index)
 check("index.html 品牌图 background-size:contain",
       re.search(r"background-size\s*:\s*contain", index) is not None)
@@ -130,8 +130,8 @@ check("首页广告区域存在 #homeAds/#adsTrack", 'id="homeAds"' in index and
 for i in (1, 2, 3, 4):
     img_m = re.search(r"<img[^>]*ad-%d\.jpg[^>]*>" % i, ads_html or index)
     img_tag = img_m.group(0) if img_m else ""
-    check("首页第 %d 张广告用 ad-%d.jpg?v=86" % (i, i),
-          ("/static/home-ads/ad-%d.jpg?v=86" % i) in (ads_html or home))
+    check("首页第 %d 张广告用 ad-%d.jpg?v=87" % (i, i),
+          ("/static/home-ads/ad-%d.jpg?v=87" % i) in (ads_html or home))
     check("首页第 %d 张广告不再 loading=lazy" % i,
           bool(img_m) and 'loading="lazy"' not in img_tag, img_tag)
 check("第 4 张广告保留 data-ad=lanjing", 'data-ad="lanjing"' in (ads_html or home))
@@ -187,7 +187,7 @@ check("首页广告片段无绝对化宣传语",
       not re.search(r"唯一|第一名|第一品牌|销量第一|排名第一|最(好|佳|优|强|低|便宜|值得|欢|专业|靠谱|出名)|顶级|极致|国家级", ads_text))
 
 # ---------- 10. Service Worker 缓存版本 ----------
-check("sw.js CACHE 为 lvhan-shell-v86", "lvhan-shell-v86" in sw)
+check("sw.js CACHE 为 lvhan-shell-v87", "lvhan-shell-v87" in sw)
 check("sw.js 不含旧缓存名", OLD_CACHE not in sw)
 # 不要求 SHELL 预缓存开屏图片
 

@@ -393,6 +393,20 @@ CREATE TABLE IF NOT EXISTS c_favorites (
 CREATE INDEX IF NOT EXISTS c_favorites_post_idx ON c_favorites(post_id);
 """
 
+# 首页「会员推荐」展示分类（与韩友圈频道 board 无关，发帖时选填）
+SHOW_CATS = {
+    "food": "美食",
+    "shop": "购物",
+    "sight": "景点",
+    "hotel": "酒店",
+    "coffee": "咖啡推荐",
+    "selfie": "自拍",
+}
+MIGRATE10 = """
+ALTER TABLE c_posts ADD COLUMN IF NOT EXISTS show_cat TEXT;
+CREATE INDEX IF NOT EXISTS c_posts_show_cat_idx ON c_posts(show_cat, id DESC) WHERE NOT deleted AND show_cat IS NOT NULL;
+"""
+
 FEED_AREA_ALIASES = {
     "首尔": ["首尔", "서울", "Seoul", "seoul", "江南", "明洞", "弘大", "东大门", "梨泰院", "新村", "蚕室"],
     "济州": ["济州", "제주", "Jeju", "jeju", "西归浦"],
@@ -516,6 +530,7 @@ def db():
                         cur.execute(MIGRATE7)
                         cur.execute(MIGRATE8)
                         cur.execute(MIGRATE9)
+                        cur.execute(MIGRATE10)
                         from points import MIGRATE_POINTS
                         cur.execute(MIGRATE_POINTS)
                         from chicken import MIGRATE_CHICKEN
@@ -1456,6 +1471,10 @@ def _post_out(r, full=False):
         o["place"] = r["place"]
     if r.get("topics"):
         o["topics"] = r["topics"]
+    sc = r.get("show_cat")
+    if sc in SHOW_CATS:
+        o["show_cat"] = sc
+        o["show_cat_name"] = SHOW_CATS[sc]
     o["favs"] = int(r.get("fav_count") or 0)
     if r.get("lat") is not None and r.get("lng") is not None:
         try:
@@ -1536,6 +1555,9 @@ def api_feed(req: Request, tab: str = "recommend", boards: str = "", offset: int
     if cat and cat not in FEED_CATS:
         raise HTTPException(400, "分类不存在")
     has_image = (req.query_params.get("has_image") or "").strip().lower() in ("1", "true", "yes")
+    show_cat = (req.query_params.get("show_cat") or "").strip()
+    if show_cat and show_cat not in ("1", "any", "all") and show_cat not in SHOW_CATS:
+        raise HTTPException(400, "分类不存在")
     try:
         km = int(float(req.query_params.get("km") or 0))
     except (TypeError, ValueError):
@@ -1573,6 +1595,10 @@ def api_feed(req: Request, tab: str = "recommend", boards: str = "", offset: int
             args += [u["id"], u["id"]]
         if has_image:
             cond.append("EXISTS (SELECT 1 FROM c_images i WHERE i.post_id=p.id)")
+        if show_cat in ("1", "any", "all"):
+            cond.append("p.show_cat = ANY(%s)"); args.append(list(SHOW_CATS))
+        elif show_cat:
+            cond.append("p.show_cat=%s"); args.append(show_cat)
         if area:
             aliases = FEED_AREA_ALIASES[area]
             likes = ["%" + a + "%" for a in aliases]
@@ -1829,7 +1855,7 @@ def api_merchant_feed(req: Request, cat: str = "", before: int = 0, limit_n: int
 async def api_new_post(req: Request, board: str = Form(""), title: str = Form(""), body: str = Form(""),
                        tag: str = Form(""), offer: str = Form(""), valid_until: str = Form(""),
                        merchant_cat: str = Form(""), topics: str = Form(""), area: str = Form(""),
-                       place: str = Form(""),
+                       place: str = Form(""), show_cat: str = Form(""),
                        images: list[UploadFile] = File(default=[])):
     csrf(req)
     board = (board or "").strip()
@@ -1845,6 +1871,11 @@ async def api_new_post(req: Request, board: str = Form(""), title: str = Form(""
     images = [f for f in (images or []) if f and f.filename]
     if not listing and not title and not body and not images:
         raise HTTPException(400, "请添加图片，或写标题或正文")
+    show_cat = (show_cat or "").strip()
+    if show_cat and show_cat not in SHOW_CATS:
+        raise HTTPException(400, "分类不存在")
+    if listing:
+        show_cat = ""
     if cat:
         if cat not in MERCHANT_CAT_KEYS:
             raise HTTPException(400, "分类不存在")
@@ -1910,9 +1941,9 @@ async def api_new_post(req: Request, board: str = Form(""), title: str = Form(""
               (u["id"],), one=True)["n"]
         if n >= 20:
             raise HTTPException(429, "今天发帖已达上限（20 篇）")
-        row = q(conn, """INSERT INTO c_posts(user_id,board,title,body,status,is_merchant,quota_kind,review_note,tag,offer,valid_until,merchant_cat,topics,area,place)
-                         VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s) RETURNING id""",
-                (u["id"], board, title, body, status, bool(u["merchant"]), quota_kind, note, *act, cat, topics or None, area or None, place or None), one=True)
+        row = q(conn, """INSERT INTO c_posts(user_id,board,title,body,status,is_merchant,quota_kind,review_note,tag,offer,valid_until,merchant_cat,topics,area,place,show_cat)
+                         VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s) RETURNING id""",
+                (u["id"], board, title, body, status, bool(u["merchant"]), quota_kind, note, *act, cat, topics or None, area or None, place or None, show_cat or None), one=True)
         for i, (big, th, w, h) in enumerate(processed):
             q(conn, "INSERT INTO c_images(post_id,pos,data,thumb,width,height) VALUES (%s,%s,%s,%s,%s,%s)",
               (row["id"], i, big, th, w, h))

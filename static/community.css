@@ -107,6 +107,9 @@ body.compose header{display:none}
 body.compose main{margin-top:0;padding-top:60px}
 body.compose .compose-top{position:fixed;left:0;right:0;top:0;z-index:12}
 .compose-who{display:flex;align-items:center;gap:8px;margin:0 0 12px;font-size:14px;font-weight:600}
+.show-cats{display:flex;flex-wrap:wrap;gap:6px;margin:2px 0 12px}
+.show-cats button{border:1px solid var(--line);background:#fff;border-radius:16px;padding:6px 10px;font-size:12px;line-height:1.2;color:var(--ink);font-family:inherit;cursor:pointer;flex:none}
+.show-cats button.on{border-color:var(--primary);background:var(--primary);color:#fff;font-weight:700}
 .compose-who .wn{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .lh-toast{position:fixed;left:50%;bottom:calc(24px + env(safe-area-inset-bottom));transform:translateX(-50%) translateY(12px);background:#1A2330;color:#fff;font-size:14px;line-height:1.5;padding:10px 16px;border-radius:12px;max-width:86%;z-index:80;opacity:0;pointer-events:none;transition:opacity .2s,transform .2s}
 .lh-toast.show{opacity:1;transform:translateX(-50%) translateY(0)}

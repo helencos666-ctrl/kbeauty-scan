@@ -10,10 +10,10 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="旅韩助手">
 <link rel="manifest" href="/manifest.webmanifest">
-<link rel="apple-touch-icon" href="/static/icons/apple-touch-icon.png?v=86">
-<link rel="icon" type="image/png" sizes="192x192" href="/static/icons/icon-192.png?v=86">
-<link rel="stylesheet" href="/static/pwa.css?v=86">
-<link rel="stylesheet" href="/static/community.css?v=86">
+<link rel="apple-touch-icon" href="/static/icons/apple-touch-icon.png?v=87">
+<link rel="icon" type="image/png" sizes="192x192" href="/static/icons/icon-192.png?v=87">
+<link rel="stylesheet" href="/static/pwa.css?v=87">
+<link rel="stylesheet" href="/static/community.css?v=87">
 <style>#preview[hidden]{display:none!important}body.compose .lh-toast{bottom:calc(72px + env(safe-area-inset-bottom))}</style>
 </head>
 <body class="compose">
@@ -76,6 +76,15 @@
     <label class="f" id="tlab">标题（选填）</label>
     <input class="f" id="title" maxlength="40" placeholder="选填，一句话也可以">
     <div class="count" id="tcount">0 / 40</div>
+    <div class="show-cats" id="showCats" role="group" aria-label="分类（选填）">
+      <button type="button" data-cat="food">美食</button>
+      <button type="button" data-cat="shop">购物</button>
+      <button type="button" data-cat="sight">景点</button>
+      <button type="button" data-cat="hotel">酒店</button>
+      <button type="button" data-cat="coffee">咖啡推荐</button>
+      <button type="button" data-cat="selfie">自拍</button>
+    </div>
+    <input type="hidden" id="showCat" value="">
     <label class="f" id="blab">正文（选填）</label>
     <textarea class="f" id="body" maxlength="3000" placeholder="选填，想写就写" style="min-height:140px;line-height:1.7"></textarea>
     <div class="count" id="bcount">0 / 3000</div>
@@ -108,7 +117,7 @@
   <a href="/?tab=more"><i>☰</i>全部</a>
   <a href="/me"><i>👤</i>我的</a>
 </nav>
-<script src="/static/community.js?v=86"></script>
+<script src="/static/community.js?v=87"></script>
 <script>
 var WARN = {visa: '签证问答仅限个人经验分享，禁止发布代办广告。', study: '留学打听仅限经验交流，禁止发布中介广告。',
   friends: '请勿在帖子里公开手机号、微信号、住址等隐私。想认识新朋友，也可以去“旅韩交友”发布交友资料。',
@@ -410,6 +419,31 @@ function updateCounts(){
   document.getElementById('tcount').textContent = t + ' / 40';
   document.getElementById('bcount').textContent = b + ' / 3000';
 }
+function currentShowCat(){
+  var el = document.getElementById('showCat');
+  return el ? el.value : '';
+}
+function applyShowCat(val, skipSave){
+  var v = val || '';
+  var hid = document.getElementById('showCat');
+  if (hid) hid.value = v;
+  document.querySelectorAll('#showCats button[data-cat]').forEach(function(b){
+    b.classList.toggle('on', b.getAttribute('data-cat') === v);
+  });
+  if (!skipSave) saveDraft();
+}
+function bindShowCats(){
+  var box = document.getElementById('showCats');
+  if (!box || box.dataset.bound) return;
+  box.dataset.bound = '1';
+  box.querySelectorAll('button[data-cat]').forEach(function(b){
+    b.onclick = function(){
+      var cur = currentShowCat();
+      var next = b.getAttribute('data-cat');
+      applyShowCat(cur === next ? '' : next);
+    };
+  });
+}
 function saveDraft(){
   try {
     var d = {
@@ -423,6 +457,7 @@ function saveDraft(){
       agree: document.getElementById('agree').checked,
       topics: document.getElementById('topics').value,
       place: document.getElementById('place').value,
+      show_cat: currentShowCat(),
       t: Date.now()
     };
     if (!d.board && !d.title.trim() && (!d.body.trim() || d.body === lastTpl)){
@@ -511,6 +546,8 @@ window.addEventListener('lh-compose-files', function(ev){
     var pb = document.getElementById('placebox'); if (pb) pb.style.display = 'none';
     document.getElementById('tlab').textContent = '标题（选填）';
     document.getElementById('blab').textContent = '正文（选填）';
+    bindShowCats();
+    var sc = document.getElementById('showCats'); if (sc) sc.style.display = 'flex';
     var who = document.getElementById('composeWho');
     if (who && d.user){
       who.hidden = false;
@@ -520,6 +557,8 @@ window.addEventListener('lh-compose-files', function(ev){
   } else {
     renderChips();
     fillPlace();
+    var sc = document.getElementById('showCats'); if (sc) sc.style.display = 'none';
+    applyShowCat('', true);
     var who = document.getElementById('composeWho'); if (who) who.hidden = true;
   }
   try { var mm = await LH.api('GET', '/api/merch/meta'); SUBC = mm.subcats || {}; MEDNOTE = mm.medical_note || ''; (mm.medical_boards || []).forEach(function(k){ MED[k] = 1; }); } catch(e){}
@@ -547,6 +586,8 @@ window.addEventListener('lh-compose-files', function(ev){
       return;
     }
     document.getElementById('board').value = 'daily';
+    bindShowCats();
+    applyShowCat(draft.show_cat || '', true);
     if (draft.title) document.getElementById('title').value = draft.title;
     if (draft.body){ document.getElementById('body').value = draft.body; if (TPL[draft.board] && draft.body === TPL[draft.board]) lastTpl = draft.body; }
     if (draft.topics) document.getElementById('topics').value = draft.topics;
@@ -635,6 +676,7 @@ document.getElementById('send').onclick = async function(){
   var topicsEl = document.getElementById('topics');
   fd.append('topics', topicsEl && !LISTING ? '' : ((topicsEl && topicsEl.value) || ''));
   fd.append('place', LISTING && document.getElementById('place') ? document.getElementById('place').value : '');
+  fd.append('show_cat', LISTING ? '' : currentShowCat());
   if (MB[currentBoard()]){
     fd.append('tag', document.getElementById('tag').value); fd.append('offer', document.getElementById('offer').value); fd.append('valid_until', document.getElementById('valid').value);
   }
@@ -649,6 +691,6 @@ document.getElementById('send').onclick = async function(){
   } catch(e){ LH.showErr(err, e.message); LH.toast(e.message); setSending(false); window.scrollTo(0, 0); }
 };
 </script>
-<script src="/static/pwa.js?v=86" defer></script>
+<script src="/static/pwa.js?v=87" defer></script>
 </body>
 </html>
