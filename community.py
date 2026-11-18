@@ -63,19 +63,29 @@ MERCHANT_BOARDS = {"hotel", "car", "clinic", "agency", "daigou", "guide", "kpop"
 MERCHANT_QUOTA = 10                            # 每 30 天周期 10 篇
 # 商家发布信息流分类（可空字段 merchant_cat；all 只用于筛选，不入库）
 MERCHANT_CATS = [
-    ("car", "租车"),
-    ("food", "餐饮美食"),
     ("guide", "地陪向导"),
     ("clinic", "医美"),
-    ("logistics", "物流快递"),
     ("daigou", "代购"),
+    ("logistics", "物流快递"),
     ("sim", "通讯电话卡"),
+    ("food", "美食"),
+    ("hotel", "住宿"),
+    ("airport", "接送机"),
+    ("interp", "翻译"),
+    ("agency", "留学签证"),
+    ("car", "租车"),
+    ("kpop", "追星活动"),
     ("other", "其它"),
 ]
 MERCHANT_CAT_KEYS = {k for k, _ in MERCHANT_CATS}
 MERCHANT_CAT_LABELS = {k: n for k, n in MERCHANT_CATS}
 # 旧帖没有 merchant_cat 时，仅用于筛选的只读兜底，不写回数据库
-BOARD_TO_MERCHANT_CAT = {"car": "car", "clinic": "clinic", "guide": "guide", "logistics": "logistics", "daigou": "daigou"}
+BOARD_TO_MERCHANT_CAT = {
+    "car": "car", "clinic": "clinic", "guide": "guide", "logistics": "logistics",
+    "daigou": "daigou", "hotel": "hotel", "agency": "agency", "kpop": "kpop",
+}
+# 更细的分类：按发帖时的小标签兜底（接送机、翻译陪同）
+CAT_TAG_FALLBACK = {"airport": "airport", "interp": "interp"}
 CYCLE_DAYS = 30
 PLAN_DAYS = {"month": 30, "year": 365}
 # 普通版块里非商家发布的明显商业信息 → 待审核
@@ -1602,6 +1612,9 @@ def _merchant_cat_clause(cat):
         mapped_boards = list(BOARD_TO_MERCHANT_CAT.keys())
         return (" AND (p.merchant_cat='other' OR ((p.merchant_cat IS NULL OR p.merchant_cat='') AND p.board <> ALL(%s)))",
                 [mapped_boards])
+    tag = CAT_TAG_FALLBACK.get(cat)
+    if tag:
+        return (" AND (p.merchant_cat=%s OR p.tag=%s)", [cat, tag])
     if mapped:
         return (" AND (p.merchant_cat=%s OR ((p.merchant_cat IS NULL OR p.merchant_cat='') AND p.board=%s))",
                 [cat, mapped[0]])

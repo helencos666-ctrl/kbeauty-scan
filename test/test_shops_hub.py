@@ -85,17 +85,30 @@ for fake in ("星巴克", "广藏市场", "明洞乐天", "第五家", "示例�
 
 # ---------- 3. 商家发布信息流 ----------
 check("shops 有「商家发布」", "商家发布" in shops)
-for key in ("all", "car", "food", "guide", "clinic", "logistics", "daigou", "sim", "other"):
+for key in ("all", "guide", "clinic", "daigou", "logistics", "sim", "food", "hotel",
+            "airport", "interp", "agency", "car", "kpop", "other"):
     check("shops 分类 key：%s" % key, ('data-cat="%s"' % key) in shops)
-for label in ("全部", "租车", "餐饮美食（炸鸡等）", "地陪向导", "医美", "物流快递", "代购", "通讯电话卡", "其它"):
+for label in ("全部", "地陪向导", "医美", "代购", "物流快递", "通讯电话卡", "美食", "住宿",
+              "接送机", "翻译", "留学签证", "租车", "追星活动", "其它"):
     check("shops 分类文案：%s" % label, label in shops)
-check("shops 分类可横向滚动", "overflow-x:auto" in shops and "scroll-snap-type" in shops)
+check("shops 分类不再截断横滑，改为换行全部可见",
+      "flex-wrap:wrap" in shops and ".cat-chips{display:flex;flex-wrap:wrap" in shops
+      and "overflow-x:auto" not in shops.split(".cat-chips")[1].split("}")[0])
+check("shops 精选商家广告条仍可左右滑动", "ad-strip" in shops and "scroll-snap-type" in shops and "overflow-x:auto" in shops)
+check("shops 无截断旧文案 餐饮美食（炸鸡等）", "餐饮美食（炸鸡等）" not in shops)
 check("shops 调用 merchant-feed 接口", "/api/community/merchant-feed" in shops)
 check("shops 传 cat/before/limit_n", "cat=" in shops and "before=" in shops and "limit_n=" in shops)
 check("shops 卡片有「立即咨询」", "立即咨询" in shops and "LH.consultHref('post'" in shops)
 check("shops 咨询按钮不包在整卡链接里", re.search(r'<a class="mcover"', shops) is not None and '<article class="mpost">' in shops)
 check("shops 空状态「暂无商家发布」", "暂无商家发布" in shops)
 check("shops 入驻按钮文案", "我是商家，申请入驻/发布" in shops)
+check("shops 商家发布下方有生活在韩国", 'id="localTitle"' in shops and shops.index('id="localTitle"') > shops.index('id="feedTitle"'))
+check("shops 生活在韩国复用六个频道卡片",
+      all(w in shops for w in ("韩友圈", "租房", "招聘 · 工作", "二手 · 闲置", "签证", "留学"))
+      and all(u in shops for u in ("/community", "/community?board=rent", "/community?board=jobs",
+                                   "/community?board=used", "/community?board=visa", "/community?board=study")))
+check("shops 生活在韩国链到独立页", 'href="/local"' in shops and "查看独立页面" in shops)
+
 check("shops 入驻按钮链到 /partner", re.search(r'href="/partner"[^>]*>我是商家，申请入驻/发布', shops) is not None)
 check("shops 有帖子时也保留入驻按钮（按钮在信息流外）",
       shops.count("我是商家，申请入驻/发布") == 1 and shops.index("我是商家，申请入驻/发布") > shops.index('id="feed"'))
@@ -150,6 +163,10 @@ else:
     check("非商家选分类返回 400", "开通商家" in snip and "选择商家分类" in snip and "HTTPException(400" in snip)
     check("商家分类入库前校验", ("MERCHANT_CAT_KEYS" in snip or "MERCHANT_STORE_KEYS" in snip)
           and "分类不存在" in snip)
+    check("后端含住宿/接送机/翻译/留学签证分类",
+          all(k in snip for k in ('("hotel", "住宿")', '("airport", "接送机")',
+                                 '("interp", "翻译")', '("agency", "留学签证")')))
+    check("后端接送机/翻译按 tag 兜底筛选", "CAT_TAG_FALLBACK" in snip and "p.tag=%s" in snip)
     check("医美分类继续调用 guard_medical", '== "clinic"' in snip and "guard_medical(" in snip)
     check("商家帖先审后发", 'status, note = "pending", "商家帖，先审后发"' in snip)
 
@@ -187,7 +204,7 @@ for name, txt in (("shops.html", shops), ("community-new.html", newpost)):
           [w for w in wx_solicit if w in txt])
 for name, txt in (("shops.html", shops), ("community-new.html", newpost)):
     vers = re.findall(r"\?v=(\d+)", txt)
-    check("%s 仍使用 ?v=73" % name, bool(vers) and set(vers) == {"72"}, set(vers))
+    check("%s 仍使用 ?v=73" % name, bool(vers) and set(vers) == {"73"}, set(vers))
 
 print("%s passed, %s failed, %s skipped" % (ok, fail, skip))
 if fail:
