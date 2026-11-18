@@ -24,7 +24,7 @@
   <a class="back" href="/community">取消</a>
   <h1 id="composeTitle">写帖子</h1>
   <div class="acts">
-    <button type="button" class="btn ghost" id="preview" disabled>预览</button>
+    <button type="button" class="btn ghost" id="preview" disabled hidden>预览</button>
     <button type="button" class="btn primary" id="send" disabled>发布</button>
   </div>
 </div>
@@ -68,25 +68,26 @@
       <input class="f" id="valid" type="date">
       <div class="tip">商家活动帖<b>先审后发</b>。请勿填写微信、QQ、电话、二维码等站外联系方式，用户会通过站内「立即咨询」联系你。</div>
     </div>
-    <label class="f" id="tlab">标题（4–40 字）</label>
-    <input class="f" id="title" maxlength="40" placeholder="一句话说清楚，例如：明洞换钱踩坑记录">
+    <div class="compose-who" id="composeWho" hidden></div>
+    <label class="f">图片（最多 6 张，会自动压缩）</label>
+    <input type="file" id="pick" accept="image/*" multiple>
+    <div class="thumbs" id="thumbs"></div>
+    <label class="f" id="tlab">标题（选填）</label>
+    <input class="f" id="title" maxlength="40" placeholder="选填，一句话也可以">
     <div class="count" id="tcount">0 / 40</div>
-    <label class="f" id="blab">正文（10–3000 字）</label>
-    <textarea class="f" id="body" maxlength="3000" placeholder="时间、地点、经过、建议……写得越具体越有用" style="min-height:200px;line-height:1.7"></textarea>
+    <label class="f" id="blab">正文（选填）</label>
+    <textarea class="f" id="body" maxlength="3000" placeholder="选填，想写就写" style="min-height:140px;line-height:1.7"></textarea>
     <div class="count" id="bcount">0 / 3000</div>
     <div id="topicbox" style="display:none">
     <input class="f" id="topics" maxlength="40" value="" autocomplete="off">
     </div>
-    <label class="f" for="place">地点（选填）</label>
-    <input class="f" id="place" maxlength="40" placeholder="城市或更具体的地点，例如 首尔 明洞">
-    <label class="f">图片（最多 6 张，会自动压缩）</label>
-    <input type="file" id="pick" accept="image/*" multiple>
-    <div class="thumbs" id="thumbs"></div>
+    <div id="placebox" style="display:none">
+    <input class="f" id="place" maxlength="40" value="" autocomplete="off">
+    </div>
     <label class="agree-line">
       <input type="checkbox" id="agree">
-      <span>我已阅读并同意<a href="/rules" target="_blank" style="color:#2c7be5">《社区约定》</a>：不发诈骗、违法、虚假、代办、违法医疗、色情赌博内容，不引流，不公开他人隐私。</span>
+      <span>我已阅读并同意<a href="/rules" target="_blank" style="color:#2c7be5">《社区约定》</a></span>
     </label>
-    <p class="tip">请勿上传含证件号、二维码、手机号的图片。图片会去除拍摄定位等信息后保存。</p>
   </div>
 </main>
 <div class="preview-mask" id="previewMask">
@@ -500,14 +501,25 @@ window.addEventListener('lh-compose-files', function(ev){
     if (!isMerchant){ gate.innerHTML = '<div class="empty">开通商家会员后才能发布商家信息<br><br><a class="btn primary" href="/member#merchant">了解商家会员</a>　<a class="btn ghost" href="/partner">商家入驻</a></div>'; return; }
   } else if (d.user.tier < 1){ gate.innerHTML = '<div class="empty">开通会员（¥' + d.prices.price_t1 + '）后即可发帖。商家信息请到「我的」页的「商家发布信息」发布。<br><br><a class="btn primary" href="/member">了解会员</a></div>'; return; }
   gate.style.display = 'none'; document.getElementById('form').style.display = 'block';
-  fillPlace();
   document.getElementById('send').disabled = false; document.getElementById('preview').disabled = false;
   if (!LISTING){
     document.getElementById('chanbox').style.display = 'none';
     document.getElementById('mcatbox').style.display = 'none';
+    document.getElementById('preview').hidden = true;
     var tb = document.getElementById('topicbox'); if (tb) tb.style.display = 'none';
+    var pb = document.getElementById('placebox'); if (pb) pb.style.display = 'none';
+    document.getElementById('tlab').textContent = '标题（选填）';
+    document.getElementById('blab').textContent = '正文（选填）';
+    var who = document.getElementById('composeWho');
+    if (who && d.user){
+      who.hidden = false;
+      who.innerHTML = LH.avatar(d.user.id, d.user.nickname, d.user.has_avatar, 'sm') +
+        '<span class="wn">' + LH.esc(d.user.nickname || '') + '</span>';
+    }
   } else {
     renderChips();
+    fillPlace();
+    var who = document.getElementById('composeWho'); if (who) who.hidden = true;
   }
   try { var mm = await LH.api('GET', '/api/merch/meta'); SUBC = mm.subcats || {}; MEDNOTE = mm.medical_note || ''; (mm.medical_boards || []).forEach(function(k){ MED[k] = 1; }); } catch(e){}
   setupListingUI();
@@ -533,7 +545,7 @@ window.addEventListener('lh-compose-files', function(ev){
       await loadPendingImages();
       return;
     }
-    applyBoard('daily', true);
+    document.getElementById('board').value = 'daily';
     if (draft.title) document.getElementById('title').value = draft.title;
     if (draft.body){ document.getElementById('body').value = draft.body; if (TPL[draft.board] && draft.body === TPL[draft.board]) lastTpl = draft.body; }
     if (draft.topics) document.getElementById('topics').value = draft.topics;
@@ -548,7 +560,7 @@ window.addEventListener('lh-compose-files', function(ev){
     syncMedNote();
     var n = document.getElementById('draftnote'); n.style.display = 'block'; n.textContent = '草稿已自动保存 · 刚刚';
   } else {
-    applyBoard('daily', false);
+    document.getElementById('board').value = 'daily'; lastTpl = '';
   }
   updateCounts();
   await loadPendingImages();
@@ -602,7 +614,10 @@ document.getElementById('previewMask').addEventListener('click', function(e){ if
 document.getElementById('send').onclick = async function(){
   var err = document.getElementById('err'); LH.showErr(err, '');
   if (!document.getElementById('agree').checked){ LH.showErr(err, '请先勾选同意社区规则'); window.scrollTo(0, 0); return; }
-  if (lastTpl && document.getElementById('body').value.trim() === lastTpl.trim()){ LH.showErr(err, '把模板里的括号和省略号换成你自己的内容再发吧'); window.scrollTo(0, 0); return; }
+  if (LISTING && lastTpl && document.getElementById('body').value.trim() === lastTpl.trim()){ LH.showErr(err, '把模板里的括号和省略号换成你自己的内容再发吧'); window.scrollTo(0, 0); return; }
+  if (!LISTING && !document.getElementById('title').value.trim() && !document.getElementById('body').value.trim() && !files.length){
+    LH.showErr(err, '请添加图片，或写标题或正文'); window.scrollTo(0, 0); return;
+  }
   if (LISTING){
     var mc = (document.getElementById('mcat') || {}).value || '';
     if (!mc){ LH.showErr(err, '请选择商家分类'); window.scrollTo(0, 0); return; }
@@ -618,7 +633,7 @@ document.getElementById('send').onclick = async function(){
   fd.append('body', document.getElementById('body').value);
   var topicsEl = document.getElementById('topics');
   fd.append('topics', topicsEl && !LISTING ? '' : ((topicsEl && topicsEl.value) || ''));
-  fd.append('place', document.getElementById('place').value);
+  fd.append('place', LISTING && document.getElementById('place') ? document.getElementById('place').value : '');
   if (MB[currentBoard()]){
     fd.append('tag', document.getElementById('tag').value); fd.append('offer', document.getElementById('offer').value); fd.append('valid_until', document.getElementById('valid').value);
   }

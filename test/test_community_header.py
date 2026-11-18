@@ -149,15 +149,23 @@ post = read("community-post.html")
 check("帖子详情有顶图轮播和底栏", 'id="hero"' in post and 'class="pbar"' in post and "说点什么" in post and "phero" in post)
 check("帖子详情有点赞收藏评论", 'id="like"' in post and 'id="fav"' in post and "/favorite" in post and "猜你想搜" in post)
 newpost = read("community-new.html")
-check("发帖页保留地点、不再展示话题选择",
-      'id="place"' in newpost and "fillPlace" in newpost
-      and 'id="topicbox"' in newpost and 'style="display:none"' in newpost[newpost.find("topicbox")-40:newpost.find("topicbox")+80])
+check("普通写帖子只保留照片、标题、正文和昵称",
+      'id="title"' in newpost and 'id="body"' in newpost and 'id="pick"' in newpost
+      and 'id="composeWho"' in newpost and "d.user.nickname" in newpost
+      and 'id="send"' in newpost
+      and "标题（选填）" in newpost and "正文（选填）" in newpost)
 check("普通写帖子无商家专区板块", "商家专区（仅限商家会员）" not in newpost and "chip-lab" not in newpost)
-check("普通写帖子不展示频道标签，默认 daily",
-      "发到哪个频道" not in newpost and 'id="board" value="daily"' in newpost
+check("普通写帖子去掉频道、话题和地点选项，默认 daily",
+      "发到哪个频道" not in newpost and "地点（选填）" not in newpost
+      and 'id="board" value="daily"' in newpost
       and 'id="chanbox" style="display:none"' in newpost
+      and 'id="topicbox"' in newpost and 'id="placebox"' in newpost
       and "请选择频道" not in newpost
       and "document.getElementById('board').value = 'daily'" in newpost)
+js_w = read("community.js")
+post_h = read("community-post.html")
+check("无标题帖在瀑布流不渲染空标题节点", "(title ? '<div class=" + chr(34) + "wtitle" + chr(34) + ">'" in js_w)
+check("详情页无标题时不渲染空 h1", "(p.title ? '<h1 class=" + chr(34) + "ptitle" + chr(34) + ">'" in post_h)
 check("商家发布走 listing 模式", "isListingMode" in newpost and "listing=1" in newpost and "CAT_TO_BOARD" in newpost and "MCAT_TPL" in newpost)
 me = read("me.html")
 check("我的页有商家发布信息入口", "商家发布信息" in me and "/community/new?listing=1" in me)

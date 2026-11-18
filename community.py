@@ -748,7 +748,7 @@ def parse_account(raw: str):
 def clean_text(s, maxlen, field, minlen=1):
     s = (s or "").replace("\r\n", "\n").replace("\x00", "").strip()
     s = re.sub(r"\n{4,}", "\n\n\n", s)
-    if len(s) < minlen:
+    if minlen > 0 and len(s) < minlen:
         raise HTTPException(400, f"{field}不能为空" if minlen == 1 else f"{field}至少 {minlen} 个字")
     if len(s) > maxlen:
         raise HTTPException(400, f"{field}最多 {maxlen} 个字")
@@ -1826,7 +1826,7 @@ def api_merchant_feed(req: Request, cat: str = "", before: int = 0, limit_n: int
 
 
 @router.post("/api/community/posts")
-async def api_new_post(req: Request, board: str = Form(""), title: str = Form(...), body: str = Form(...),
+async def api_new_post(req: Request, board: str = Form(""), title: str = Form(""), body: str = Form(""),
                        tag: str = Form(""), offer: str = Form(""), valid_until: str = Form(""),
                        merchant_cat: str = Form(""), topics: str = Form(""), area: str = Form(""),
                        place: str = Form(""),
@@ -1836,12 +1836,15 @@ async def api_new_post(req: Request, board: str = Form(""), title: str = Form(..
     if board not in BOARDS:
         board = DAILY_BOARD
     daily = board == DAILY_BOARD
-    title = clean_text(title, 40, "标题", 2 if daily else 4)
-    body = clean_text(body, 3000, "正文", 5 if daily else 10)
+    cat = (merchant_cat or "").strip()
+    listing = bool(cat) or board in MERCHANT_BOARDS
+    title = clean_text(title, 40, "标题", (2 if daily else 4) if listing else 0)
+    body = clean_text(body, 3000, "正文", (5 if daily else 10) if listing else 0)
     topics = clean_topics(topics)
     area, place = parse_area_place(place, area)
     images = [f for f in (images or []) if f and f.filename]
-    cat = (merchant_cat or "").strip()
+    if not listing and not title and not body and not images:
+        raise HTTPException(400, "请添加图片，或写标题或正文")
     if cat:
         if cat not in MERCHANT_CAT_KEYS:
             raise HTTPException(400, "分类不存在")

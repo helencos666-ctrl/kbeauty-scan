@@ -188,8 +188,11 @@ var LH = (function(){
     } else {
       cover = '<div class="wcover wtext" style="aspect-ratio:3/4"><div class="wtext-t">' + title + '</div></div>';
     }
+    if (!id && !title){
+      cover = '<div class="wcover" style="aspect-ratio:3/4"></div>';
+    }
     return '<a class="wcard" href="/community/post/' + p.id + '">' + cover +
-      '<div class="wtitle">' + title + '</div>' +
+      (title ? '<div class="wtitle">' + title + '</div>' : '') +
       '<div class="wmeta"><span class="wuser">' + avatar(p.author_id, p.author, p.has_avatar, 'xs') +
       '<span class="wnick">' + esc(p.author) + '</span></span>' +
       '<span class="wlike">♡ ' + likes + '</span></div></a>';
