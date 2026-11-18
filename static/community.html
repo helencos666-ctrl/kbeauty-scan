@@ -10,10 +10,10 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="旅韩助手">
 <link rel="manifest" href="/manifest.webmanifest">
-<link rel="apple-touch-icon" href="/static/icons/apple-touch-icon.png?v=84">
-<link rel="icon" type="image/png" sizes="192x192" href="/static/icons/icon-192.png?v=84">
-<link rel="stylesheet" href="/static/pwa.css?v=84">
-<link rel="stylesheet" href="/static/community.css?v=84">
+<link rel="apple-touch-icon" href="/static/icons/apple-touch-icon.png?v=85">
+<link rel="icon" type="image/png" sizes="192x192" href="/static/icons/icon-192.png?v=85">
+<link rel="stylesheet" href="/static/pwa.css?v=85">
+<link rel="stylesheet" href="/static/community.css?v=85">
 </head>
 <body>
 <header class="xbar">
@@ -112,7 +112,7 @@
   <a href="/?tab=more"><i>☰</i>全部</a>
   <a href="/me"><i>👤</i>我的</a>
 </nav>
-<script src="/static/community.js?v=84"></script>
+<script src="/static/community.js?v=85"></script>
 <script src="/static/banners.js"></script>
 <script>
 var WARN = {
@@ -221,6 +221,51 @@ function feedUrl(){
   if (tab === 'follow') return '/api/community/feed?tab=follow&offset=' + next;
   return '/api/community/feed?tab=recommend&offset=' + next + (fb ? '&fb=1' : '');
 }
+function followHint(needLogin){
+  var t = '还没关注任何人';
+  if (needLogin) t += ' · <a href="/login?next=/community%3Ftab%3Dfollow">登录</a>';
+  return '<div class="follow-hint">' + t + '</div>';
+}
+// 若缓存了旧版 community.js，补上瀑布流，避免信息流被错误卡片清空
+if (typeof LH.appendWater !== 'function'){
+  LH.appendWater = function(listEl, posts, reset, leadHtml){
+    if (reset){
+      listEl.className = 'waterfall';
+      listEl.innerHTML = (leadHtml || '') + '<div class="wcols"><div class="wcol"></div><div class="wcol"></div></div>';
+    }
+    var cols = listEl.querySelectorAll('.wcol');
+    if (!cols.length){
+      listEl.className = '';
+      listEl.innerHTML = (leadHtml || '') + (posts || []).map(function(p){
+        return LH.postItem ? LH.postItem(p) : ('<a class="wcard" href="/community/post/' + p.id + '">' + (LH.esc ? LH.esc(p.title || '') : (p.title || '')) + '</a>');
+      }).join('');
+      return;
+    }
+    function card(p){
+      if (typeof LH.waterItem === 'function') return LH.waterItem(p);
+      var title = LH.esc ? LH.esc(p.title || '') : String(p.title || '');
+      return '<a class="wcard" href="/community/post/' + p.id + '"><div class="wcover wtext" style="aspect-ratio:3/4"><div class="wtext-t">' + title + '</div></div><div class="wtitle">' + title + '</div></a>';
+    }
+    (posts || []).forEach(function(p){
+      var col = cols[0];
+      if (cols[1] && cols[1].offsetHeight < cols[0].offsetHeight) col = cols[1];
+      col.insertAdjacentHTML('beforeend', card(p));
+    });
+    if (typeof LH.bindWaterLazy === 'function') LH.bindWaterLazy(listEl);
+  };
+}
+function showFeed(listEl, items, reset, lead){
+  try {
+    if (typeof LH.appendWater === 'function'){
+      LH.appendWater(listEl, items, reset, lead);
+      return;
+    }
+  } catch (err) {}
+  listEl.className = '';
+  listEl.innerHTML = (lead || '') + (items || []).map(function(p){
+    return LH.postItem ? LH.postItem(p) : ('<div class="card"><a href="/community/post/' + p.id + '">' + (LH.esc ? LH.esc(p.title || '') : (p.title || '')) + '</a></div>');
+  }).join('');
+}
 async function load(reset){
   if (reset){ next = 0; fb = false; listEl.className = ''; listEl.innerHTML = '<div class="loading">加载中…</div>'; }
   try {
@@ -231,18 +276,22 @@ async function load(reset){
         (d.login_required ? '<a class="btn primary" href="/login?next=/community%3Fboard%3Dfriends">登录 / 注册</a>' : '<a class="btn primary" href="/member">了解会员</a>') + '</div>';
       LH.prices(); moreEl.style.display = 'none'; return;
     }
-    if (d.login_required){ listEl.className = ''; listEl.innerHTML = '<div class="card empty">登录后可关注用户和频道<br><br><a class="btn primary" href="/login?next=/community%3Ftab%3Dfollow">登录 / 注册</a></div>'; moreEl.style.display = 'none'; return; }
+    if (d.login_required){
+      listEl.className = '';
+      listEl.innerHTML = (tab === 'follow' && !board) ? followHint(true) : ('<div class="card empty">登录后可关注用户和频道<br><br><a class="btn primary" href="/login?next=/community%3Ftab%3Dfollow">登录 / 注册</a></div>');
+      moreEl.style.display = 'none'; return;
+    }
     fb = !!d.fallback;
     if (!d.posts.length && reset && !(d.pinned && d.pinned.length)){
       listEl.className = '';
-      listEl.innerHTML = tab === 'follow' && !board ? '<div class="card empty">还没有内容。去<a href="/community/boards">全部频道</a>关注感兴趣的频道，或在帖子里关注作者</div>' : (tab === 'area' ? '<div class="card empty">这一带暂时还没有帖子</div>' : '<div class="card empty">这里还没有帖子，来发第一篇吧</div>');
+      listEl.innerHTML = tab === 'follow' && !board ? followHint(false) : (tab === 'area' ? '<div class="card empty">这一带暂时还没有帖子</div>' : '<div class="card empty">这里还没有帖子，来发第一篇吧</div>');
       moreEl.style.display = 'none'; return;
     }
     var items = [];
     if (reset && d.pinned && d.pinned.length) items = items.concat(d.pinned);
     items = items.concat(d.posts || []);
     var lead = (reset && tab === 'search' && !board && (LH.qs('q') || '').trim()) ? ('<div class="tip" style="margin:0 0 10px">与「' + LH.esc((LH.qs('q') || '').trim()) + '」相关</div>') : '';
-    LH.appendWater(listEl, items, reset, lead);
+    showFeed(listEl, items, reset, lead);
     if (board){ if (d.posts.length) next = d.posts[d.posts.length - 1].id; } else next = d.next;
     moreEl.style.display = d.more ? 'inline-block' : 'none';
   } catch(e){ listEl.innerHTML = '<div class="card empty">' + LH.esc(e.message) + '</div>'; moreEl.style.display = 'none'; }
@@ -297,6 +346,6 @@ async function loadHome(){
   render();
 })();
 </script>
-<script src="/static/pwa.js?v=84" defer></script>
+<script src="/static/pwa.js?v=85" defer></script>
 </body>
 </html>

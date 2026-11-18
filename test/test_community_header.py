@@ -76,8 +76,27 @@ check("允许的 tab 列表含 discover/follow/area/topic",
       all(t in allowed_list for t in ("discover", "follow", "area", "topic")), allowed_list)
 check("?tab=topic 不被回退（topic 仍在允许列表）", "topic" in allowed_list, allowed_list)
 check("往期话题链接 /community?tab=topic 仍保留", "/community?tab=topic" in html)
-check("?tab=follow 未登录仍留在 follow（login_required 提示未改）",
-      "/login?next=/community%3Ftab%3Dfollow" in html)
+check("?tab=follow 未登录仍留在 follow",
+      "tab === 'follow'" in html and "/login?next=/community%3Ftab%3Dfollow" in html)
+load_fn = html[html.find("async function load(reset)"):html.find("async function loadTopics")]
+check("关注空态不再用大块 empty 或推荐回退",
+      "还没有内容。去" not in html and "先看看推荐" not in html
+      and "followNeedRec" not in html and "function recUrl" not in html
+      and "还没关注任何人" in html and "followHint" in load_fn)
+check("关注空态只用一行 follow-hint，无推荐瀑布流回退",
+      "follow-hint" in html and "showFeed" in load_fn)
+check("appendWater 有缺失时的兜底，避免信息流被错误卡片清空",
+      "typeof LH.appendWater !== 'function'" in html
+      and "function showFeed" in html
+      and "LH.appendWater = function" in html)
+check("有帖时走 showFeed / appendWater 瀑布流",
+      "showFeed(listEl, items, reset, lead)" in load_fn)
+check("社区约定卡片保留",
+      'id="rules"' in html and "社区约定（简版）" in html and "阅读完整社区约定" in html)
+check(".follow-hint 是单行细提示，不是大块 empty",
+      bool(rule(css, ".follow-hint")) and "padding:0" in (rule(css, ".follow-hint") or "")
+      and "28px" not in (rule(css, ".follow-hint") or ""), rule(css, ".follow-hint"))
+
 check("发现页默认不展开今日热议等栏目", "homeBlocks').style.display = 'none'" in html)
 check("社区信息流不再有写帖子悬浮按钮", 'id="fab"' not in html and "fab pill" not in html)
 check("发帖入口仍指向 /community/new（底栏发布）", "/community/new" in html or "/community/new" in read("pwa.js"))
@@ -116,7 +135,7 @@ check("顶栏安全区只作用于 header.xbar",
       "env(safe-area-inset-top)" in xbar_css, xbar_css)
 check("main.home 单独微调上边距", bool(rule(css, "main.home")))
 
-check("community.html 使用 ?v=84", html.count("?v=84") >= 4 and "?v=81" not in html)
+check("community.html 使用 ?v=85", html.count("?v=85") >= 4 and "?v=81" not in html)
 check("未新增外链 http(s) 资源",
       "http://" not in html and "https://" not in html.replace("https://schema.org", ""))
 
