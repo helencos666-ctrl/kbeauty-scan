@@ -59,6 +59,8 @@ BOARD_DESCS = {"pit": "换钱、打车、购物被坑的真实经历", "group": 
 NEWS_BOARDS = ["news", "visa", "study", "pit"]   # “实用干货”标签包含的频道
 HOT_HOURS, HOT_FALLBACK_DAYS = 24, 7             # 24 小时热门；24 小时内没有帖子时退回近 7 天
 RECOMMEND_DAYS = 30
+# 帖子不多时，官方账号的帖子排在会员帖后面，避免把个人帖顶下去；帖子多了可改回 False
+OFFICIAL_POSTS_LAST = True
 MERCHANT_BOARDS = {"hotel", "car", "clinic", "agency", "daigou", "guide", "kpop", "logistics"}   # 仅有效商家会员可发
 MERCHANT_QUOTA = 10                            # 每 30 天周期 10 篇
 # 商家发布信息流分类（可空字段 merchant_cat；all 只用于筛选，不入库）
@@ -1661,12 +1663,14 @@ def api_feed(req: Request, tab: str = "recommend", boards: str = "", offset: int
             order = "p.featured_at DESC NULLS LAST, p.id DESC"
 
         def run(extra, eargs):
+            sort = (("CASE WHEN COALESCE(au.is_official, FALSE) THEN 1 ELSE 0 END, " + order)
+                    if OFFICIAL_POSTS_LAST else order)
             return q(conn, f"""SELECT p.*, {AUTHOR_COLS}, au.verified, (CASE WHEN au.merchant_until>now() THEN 3 ELSE au.tier END) AS tier,
                      (au.avatar IS NOT NULL OR COALESCE(au.is_bot, FALSE)) AS has_avatar,
                      {score} AS score,
                      {IMG_COLS}
                      FROM c_posts p JOIN c_users au ON au.id=p.user_id
-                     WHERE {' AND '.join(cond + extra)} ORDER BY {order} LIMIT %s OFFSET %s""",
+                     WHERE {' AND '.join(cond + extra)} ORDER BY {sort} LIMIT %s OFFSET %s""",
                      (*args, *eargs, limit_n + 1, offset))
         fallback = False
         if tab == "recommend":
