@@ -42,16 +42,16 @@ check("商家入驻 is at bottom of #p-more", "我是商家 · 商家入驻" in 
 # ---- 新首页模块 ----
 check("home 三大入口 路线/翻译/扫描识别", 'data-go="sub"' in home and 'data-go="card"' in home
       and 'data-go="cos"' in home and "href=\"/?tab=cos\"" in home
-      and ">路线<" in home and ">翻译<" in home and ">扫描识别<" in home)
+      and ">路线<" in home and ">翻译<" in home and ">美妆识别<" in home)
 coreblk = home.split('<div class="core">', 1)[1].split('<!-- B.', 1)[0] if '<div class="core">' in home else ""
 check("home .core 三张卡同一行", coreblk.count("<a href=") == 3, coreblk.count("<a href="))
 check("home 扫描识别卡保留原有跳转", 'href="/?tab=cos" data-go="cos"' in coreblk
       and 'href="/scan"' not in index)
-check("home 扫描识别副标题用拍照", "拍照查成分" in coreblk and "扫码" not in index)
+check("home 美妆识别副标题用拍照", "拍照查成分" in coreblk and "美妆拍照识别" not in coreblk and "扫码" not in index)
 check("home 吃喝玩乐五格", "吃喝玩乐" in home and all(
     u in home for u in ["/food", "/food?cat=cafe", "/shopping", "/attractions", "/places?category=hotel"]))
 check("home 五格文案", all(w in home for w in [">美食<", ">咖啡<", ">购物<", ">景点<", ">酒店<"]))
-check("home 广告轮播四张", all("/static/home-ads/ad-%d.jpg?v=70" % i in home for i in (1, 2, 3, 4)) and "蓝憬通讯" in home and 'data-ad="lanjing"' in home
+check("home 广告轮播四张", all("/static/home-ads/ad-%d.jpg?v=71" % i in home for i in (1, 2, 3, 4)) and "蓝憬通讯" in home and 'data-ad="lanjing"' in home
       and 'class="ads' in home and "adsDots" in home)
 check("home 附近推荐", "附近推荐" in home and 'data-sort="dist"' in home and 'data-sort="rec"' in home
       and "/api/places" in index)
