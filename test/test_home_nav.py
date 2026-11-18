@@ -167,7 +167,7 @@ for name, txt in ALL.items():
 home = index.split('id="p-home"')[1].split('id="p-cos"')[0] if 'id="p-home"' in index else ""
 check("home 无示例标签", "示例" not in index)
 check("home 无示例店名", not any(w in home for w in ["广藏市场", "星巴克", "明洞乐天免税"]))
-check("home 附近推荐走 /api/places", "/api/places" in index)
+check("home 推荐卡片走 /api/places", "/api/places?limit_n=40" in index and "nearBlk" not in index)
 check("home 吃喝玩乐推荐走 /api/places", "/api/places?limit_n=40" in index and "playBlk" in index and "韩友圈分享" not in index)
 check("lanjing ad links /ads/lanjing", 'data-ad="lanjing"' in index and "ad-4.jpg" in index and 'href="/ads/lanjing"' in index)
 check("home 空状态有去处链接", "/places/new" in index and "/community/new" in index)
@@ -205,7 +205,7 @@ check("community.css .preview-mask 高于 tabbar", bool(_pm) and int(_pm.group(1
 
 
 # ---------- 首页广告轮播：字幕与四张指示点 ----------
-_ads = index.split('id="homeAds"')[1].split('id="nearBlk"')[0] if 'id="homeAds"' in index else ""
+_ads = index.split('id="homeAds"')[1].split('id="playBlk"')[0] if 'id="homeAds"' in index else ""
 check("home 广告字幕容器 #adsCap", 'class="ads-cap" id="adsCap"' in _ads)
 check("home 广告四张字幕",
       all(x in _ads for x in ("咸草酱蟹", "大家烤肉", "DAYONE", "蓝憬通讯")))

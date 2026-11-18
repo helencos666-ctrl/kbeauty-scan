@@ -206,7 +206,7 @@ html.sp-on,html.sp-on body{overflow:hidden}
 .extra a{display:flex;align-items:center;gap:10px;background:#fff;border-radius:16px;padding:14px 12px;text-decoration:none;color:var(--ink);box-shadow:0 4px 16px rgba(20,110,104,.08);font-size:15px;font-weight:700;min-height:64px}
 .extra a span{display:block;font-size:12px;font-weight:500;color:var(--sub);margin-top:2px}
 
-/* ===== 首页改版（v61）：hero / 两大入口 / 吃喝玩乐 / 广告 / 附近推荐 / 吃喝玩乐推荐 ===== */
+/* ===== 首页改版（v61）：hero / 两大入口 / 吃喝玩乐 / 广告 / 吃喝玩乐推荐 ===== */
 [hidden]{display:none!important}
 body{background:#fff;padding-bottom:calc(82px + env(safe-area-inset-bottom))}
 main{max-width:560px;margin:0 auto;padding:0}
@@ -265,34 +265,8 @@ body.is-home .disclaimer{display:none}
 .ads .dots{display:flex;align-items:center;justify-content:center;gap:5px;margin-top:6px}
 .ads .dots i{width:6px;height:6px;border-radius:50%;background:#C5E0DC;display:block;transition:width .2s,background .2s}
 .ads .dots i.on{width:14px;border-radius:4px;background:var(--primary)}
-/* D. 附近推荐 */
-.near-blk{background:var(--bg);padding:2px 0 12px}
-.near-blk .bh{display:flex;align-items:center;justify-content:space-between;gap:8px;padding:12px 18px 8px}
-.near-blk .bh h2{margin:0;font-size:17px;font-weight:800}
-.near-sort{display:flex;gap:6px}
-.near-sort button{border:1px solid var(--line);background:#fff;color:var(--sub);border-radius:14px;padding:5px 10px;font-size:12px;font-weight:700;font-family:inherit;cursor:pointer}
-.near-sort button.on{background:var(--primary);border-color:var(--primary);color:#fff}
-.near-hint{margin:0 18px 8px;font-size:12px;line-height:1.55;color:var(--sub)}
-.near-list{display:flex;flex-direction:column;gap:7px;padding:0 16px}
-.place{display:flex;align-items:center;gap:10px;padding:8px;border-radius:14px;background:#fff;box-shadow:0 2px 10px rgba(20,110,104,.05);color:var(--ink);text-decoration:none}
-.place .thumb{width:52px;height:52px;border-radius:12px;background:#EAF6F4;display:flex;align-items:center;justify-content:center;font-size:24px;flex:none;overflow:hidden}
-.place .thumb img{width:100%;height:100%;object-fit:cover;display:block}
-.place .meta{flex:1;min-width:0}
-.place .t{display:flex;align-items:center;gap:6px;min-width:0}
-.place b{font-size:14px;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.place .meta p{margin:3px 0 0;font-size:12px;color:var(--sub);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.place .dist{padding-right:4px;font-size:12px;font-weight:800;color:var(--primary);white-space:nowrap}
-.thumb.t1{background:#EAF8FB}.thumb.t2{background:#FFF6E5}.thumb.t3{background:#EAF6F4}.thumb.t4{background:#F6EFF8}.thumb.t5{background:#FFF0E8}
-
-/* E. 吃喝玩乐推荐（已审核会员地点） */
-.play{background:var(--bg);padding:6px 0 16px}
-.play .bh{display:flex;align-items:baseline;justify-content:space-between;gap:8px;padding:10px 18px}
-.play .bh h2{margin:0;font-size:17px;font-weight:800}
-.play .bh a{font-size:13px;font-weight:700;color:var(--sub);text-decoration:none}
-.play-chips{display:flex;gap:6px;padding:0 16px 10px;overflow-x:auto;scrollbar-width:none;-webkit-overflow-scrolling:touch}
-.play-chips::-webkit-scrollbar{display:none}
-.play-chips button{flex:none;border:1px solid var(--line);border-radius:14px;background:#fff;color:var(--sub);padding:5px 12px;font-size:12px;font-weight:700;font-family:inherit;cursor:pointer}
-.play-chips button.on{background:var(--primary);border-color:var(--primary);color:#fff}
+/* E. 吃喝玩乐推荐卡片（已审核会员地点，紧跟广告轮播） */
+.play{background:var(--bg);padding:4px 0 16px}
 .play-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;padding:0 16px}
 .pcard{display:block;border-radius:14px;background:#fff;overflow:hidden;box-shadow:0 2px 10px rgba(20,110,104,.05);color:var(--ink);text-decoration:none}
 .pcard .pic,.pcard .ph{width:100%;aspect-ratio:4/3;display:block;background:#EAF6F4}
@@ -303,7 +277,7 @@ body.is-home .disclaimer{display:none}
 .pcard p{margin:4px 0 0;font-size:11.5px;color:var(--sub);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .pcard .rec{margin-top:3px;font-size:11px;font-weight:600;color:var(--primary)}
 
-/* 空状态（附近推荐 / 吃喝玩乐推荐） */
+/* 空状态（吃喝玩乐推荐） */
 .empty-box{margin:0 16px;padding:16px 14px;border-radius:14px;background:#fff;box-shadow:0 2px 10px rgba(20,110,104,.05);font-size:13px;line-height:1.7;color:var(--sub)}
 .empty-box p{margin:0}
 .empty-box .lnks{display:flex;flex-wrap:wrap;gap:8px;margin-top:10px}
@@ -399,31 +373,8 @@ body.is-home .disclaimer{display:none}
       <div class="ads-cap" id="adsCap"><b>咸草酱蟹</b><span>点击查看</span></div>
       <div class="dots" id="adsDots" aria-hidden="true"><i class="on"></i><i></i><i></i><i></i></div>
     </div>
-    <!-- D. 附近推荐（只显示 /api/places 的真实数据） -->
-    <section class="near-blk" id="nearBlk" aria-labelledby="nearTitle">
-      <div class="bh">
-        <h2 id="nearTitle">附近推荐</h2>
-        <div class="near-sort" id="nearSort" role="group" aria-label="附近推荐排序">
-          <button type="button" data-sort="dist">按距离</button>
-          <button type="button" data-sort="rec" class="on">会员推荐</button>
-        </div>
-      </div>
-      <p class="near-hint" id="nearHint" hidden></p>
-      <div class="near-list" id="nearList"></div>
-    </section>
-
-    <!-- E. 吃喝玩乐推荐（只显示已审核会员地点，不编造） -->
-    <section class="play" id="playBlk" aria-labelledby="playTitle">
-      <div class="bh"><h2 id="playTitle">吃喝玩乐</h2><a href="/places">更多 ›</a></div>
-      <div class="play-chips" id="playChips" role="group" aria-label="吃喝玩乐分类">
-        <button type="button" data-f="all" class="on">全部</button>
-        <button type="button" data-f="food">美食</button>
-        <button type="button" data-f="coffee">咖啡</button>
-        <button type="button" data-f="shop">购物</button>
-        <button type="button" data-f="spot">景点</button>
-        <button type="button" data-f="hotel">酒店</button>
-        <button type="button" data-f="beauty">医美</button>
-      </div>
+    <!-- E. 吃喝玩乐推荐卡片（只显示已审核会员地点，不编造） -->
+    <section class="play" id="playBlk">
       <div class="play-grid" id="playGrid"></div>
       <div id="playEmpty" hidden></div>
     </section>
@@ -1951,102 +1902,10 @@ drawScenes();
     paint(false);
     start();
   })();
-  /* ---------- D. 附近推荐：只读 /api/places（已审核会员地点） ---------- */
-  (function(){
-    var list=byId('nearList'), sortBox=byId('nearSort'), hint=byId('nearHint');
-    if(!list||!sortBox) return;
-    var ICON={food:'🍜',cafe:'☕',coffee:'☕',shopping:'🛍️',shop:'🛍️',attraction:'🏯',sight:'🏯',hotel:'🏨',stay:'🏨',beauty:'💄',etc:'📍'};
-    var items=[], mode='rec', pos=null, loading=true;
-    function arr(d){
-      if(!d) return [];
-      if(Array.isArray(d)) return d;
-      if(Array.isArray(d.items)) return d.items;
-      if(Array.isArray(d.places)) return d.places;
-      return [];
-    }
-    function dist(p){
-      if(!pos||p.x==null||p.y==null) return null;
-      var R=6371000, r=Math.PI/180;
-      var la1=(+pos.lat)*r, la2=(+p.y)*r, dla=((+p.y)-(+pos.lat))*r, dlo=((+p.x)-(+pos.lng))*r;
-      var h=Math.sin(dla/2)*Math.sin(dla/2)+Math.cos(la1)*Math.cos(la2)*Math.sin(dlo/2)*Math.sin(dlo/2);
-      return 2*R*Math.asin(Math.min(1,Math.sqrt(h)));
-    }
-    function fmt(m){ return m<1000 ? (Math.max(10,Math.round(m/10)*10))+' 米' : (m/1000).toFixed(1)+' 公里'; }
-    function emoji(p){ return ICON[String(p.category||'').toLowerCase()]||'📍'; }
-    function sub(p){
-      var a=[p.category_label||p.category||'', p.address||''].filter(Boolean).join(' · ');
-      if(p.recommended_by) a+=(a?' · ':'')+'由会员推荐';
-      return a;
-    }
-    function card(p,i){
-      var im=p.cover_id
-        ? '<img src="/api/places/photos/'+encodeURIComponent(p.cover_id)+'?thumb=1" alt="" loading="lazy" onerror="this.style.display=&#39;none&#39;">'
-        : E(emoji(p));
-      var d=dist(p);
-      return '<a class="place" href="/places/'+encodeURIComponent(p.id)+'">'
-        + '<div class="thumb t'+((i%5)+1)+'">'+im+'</div>'
-        + '<div class="meta"><div class="t"><b>'+E(p.name||'')+'</b></div><p>'+E(sub(p))+'</p></div>'
-        + (d==null?'':'<div class="dist">'+E(fmt(d))+'</div>')
-        + '</a>';
-    }
-    function emptyBox(){
-      return '<div class="empty-box"><p><b>还没有会员推荐的地点。</b>可以先看美食和景点，或自己推荐一家。</p>'
-        + '<div class="lnks"><a href="/food">看美食</a><a href="/attractions">看景点</a><a href="/places">全部地点</a><a href="/places/new">我推荐一家</a></div></div>';
-    }
-    function render(){
-      Array.prototype.forEach.call(sortBox.querySelectorAll('button'),function(b){
-        b.classList.toggle('on', b.getAttribute('data-sort')===mode);
-      });
-      hint.hidden=true; hint.textContent='';
-      if(loading){ list.innerHTML='<div class="empty-box"><p>正在加载附近推荐…</p></div>'; return; }
-      if(!items.length){ list.innerHTML=emptyBox(); return; }
-      var rows=items.slice();
-      if(mode==='dist'&&pos){
-        rows=rows.filter(function(p){ return dist(p)!=null; }).sort(function(a,b){ return dist(a)-dist(b); });
-      }
-      if(!rows.length){
-        list.innerHTML=emptyBox();
-        hint.textContent='这些地点还没有坐标信息，暂时无法按距离排列。';
-        hint.hidden=false;
-        return;
-      }
-      list.innerHTML=rows.slice(0,8).map(card).join('');
-    }
-    function load(){
-      loading=true; render();
-      fetch('/api/places').then(function(r){ return r.json(); }).then(function(d){
-        items=arr(d).slice(0,24); loading=false; render();
-      }).catch(function(){ items=[]; loading=false; render(); });
-    }
-    sortBox.addEventListener('click',function(e){
-      var b=e.target.closest?e.target.closest('button[data-sort]'):null;
-      if(!b) return;
-      mode=b.getAttribute('data-sort');
-      if(mode==='dist'&&!pos){
-        if(navigator.geolocation){
-          hint.textContent='正在获取定位…'; hint.hidden=false;
-          navigator.geolocation.getCurrentPosition(function(g){
-            pos={lng:+g.coords.longitude.toFixed(6), lat:+g.coords.latitude.toFixed(6)};
-            render();
-          },function(){
-            pos=null;
-            hint.textContent='打开定位后可按距离排列，下面先按会员推荐显示。';
-            hint.hidden=false; render();
-          },{enableHighAccuracy:false,timeout:10000,maximumAge:300000});
-        }else{
-          hint.textContent='这个浏览器不能定位，先按会员推荐显示。';
-          hint.hidden=false;
-        }
-      }
-      render();
-    });
-    load();
-  })();
-
   /* ---------- E. 吃喝玩乐推荐：只读 /api/places（已审核地点） ---------- */
   (function(){
-    var grid=byId('playGrid'), chips=byId('playChips'), empty=byId('playEmpty');
-    if(!grid||!chips||!empty) return;
+    var grid=byId('playGrid'), empty=byId('playEmpty');
+    if(!grid||!empty) return;
     var ICON={food:'🍜',coffee:'☕',shop:'🛍️',spot:'🏯',hotel:'🏨',beauty:'💄',other:'📍'};
     var CATS={food:'美食',coffee:'咖啡',shop:'购物',spot:'景点',hotel:'酒店',beauty:'医美',other:'其他'};
     var items=[], filter='all', state='loading';
@@ -2099,9 +1958,6 @@ drawScenes();
       return rows;
     }
     function render(){
-      Array.prototype.forEach.call(chips.querySelectorAll('button'),function(b){
-        b.classList.toggle('on', b.getAttribute('data-f')===filter);
-      });
       if(state==='loading'){
         grid.innerHTML=''; grid.style.display='none';
         empty.innerHTML='<div class="empty-box"><p>正在加载推荐…</p></div>'; empty.hidden=false; return;
@@ -2114,12 +1970,6 @@ drawScenes();
       empty.hidden=true; empty.innerHTML=''; grid.style.display='grid';
       grid.innerHTML=rows.slice(0,12).map(card).join('');
     }
-    chips.addEventListener('click',function(e){
-      var b=e.target.closest?e.target.closest('button[data-f]'):null;
-      if(!b) return;
-      filter=b.getAttribute('data-f')||'all';
-      render();
-    });
     render();
     fetch('/api/places?limit_n=40').then(function(r){ return r.json(); }).then(function(d){
       items=arr(d); state='ready'; render();
