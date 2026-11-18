@@ -140,6 +140,21 @@ check("帖子详情有顶图轮播和底栏", 'id="hero"' in post and 'class="pb
 check("帖子详情有点赞收藏评论", 'id="like"' in post and 'id="fav"' in post and "/favorite" in post and "猜你想搜" in post)
 newpost = read("community-new.html")
 check("发帖页有话题和地点", 'id="topics"' in newpost and 'id="place"' in newpost and "fillPlace" in newpost)
+check("普通写帖子无商家专区板块", "商家专区（仅限商家会员）" not in newpost and "chip-lab" not in newpost)
+check("写帖子保留日常频道", "在韩日常" in newpost and "踩坑避雷" in newpost)
+check("商家发布走 listing 模式", "isListingMode" in newpost and "listing=1" in newpost and "CAT_TO_BOARD" in newpost and "MCAT_TPL" in newpost)
+me = read("me.html")
+check("我的页有商家发布信息入口", "商家发布信息" in me and "/community/new?listing=1" in me)
+pwa_js = read("pwa.js")
+pwa_css = read("pwa.css")
+check("底栏+发布弹出操作表",
+      "从相册选择" in pwa_js and "拍摄" in pwa_js and "写文字" in pwa_js and "取消" in pwa_js
+      and "openPubSheet" in pwa_js and 'data-nav="post"' in pwa_js)
+check("操作表含相册多选和拍摄",
+      "accept = 'image/*'" in pwa_js and "multiple = true" in pwa_js and "capture" in pwa_js)
+check("操作表样式为底部圆角白行",
+      "lh-pub-mask" in pwa_css and "lh-pub-group" in pwa_css and "border-radius:14px" in pwa_css)
+check("发帖页可预载操作表选中的图片", "loadPendingImages" in newpost and "lh-compose-files" in newpost)
 js = read("community.js")
 check("信息流缩略图不再用 loading=lazy", "function postPhotos" in js and "loading=\"lazy\"" not in js[js.find("function postPhotos"):js.find("function postItem")])
 

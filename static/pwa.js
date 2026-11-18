@@ -84,6 +84,141 @@
     else location.href = fallback;
   };
 
+
+  var COMPOSE_DB = 'lh-compose-pending', COMPOSE_STORE = 'files', COMPOSE_KEY = 'images';
+  function openComposeDB(){
+    return new Promise(function(resolve, reject){
+      var req = indexedDB.open(COMPOSE_DB, 1);
+      req.onupgradeneeded = function(){ req.result.createObjectStore(COMPOSE_STORE); };
+      req.onsuccess = function(){ resolve(req.result); };
+      req.onerror = function(){ reject(req.error); };
+    });
+  }
+  function stashComposeImages(fileList){
+    var arr = Array.prototype.slice.call(fileList || []).filter(function(f){ return f && (!f.type || /^image\//.test(f.type)); }).slice(0, 6);
+    return openComposeDB().then(function(db){
+      return new Promise(function(resolve, reject){
+        var tx = db.transaction(COMPOSE_STORE, 'readwrite');
+        tx.objectStore(COMPOSE_STORE).put(arr, COMPOSE_KEY);
+        tx.oncomplete = function(){ try { db.close(); } catch(e){} resolve(arr); };
+        tx.onerror = function(){ try { db.close(); } catch(e){} reject(tx.error); };
+      });
+    });
+  }
+  function takeComposeImages(){
+    return openComposeDB().then(function(db){
+      return new Promise(function(resolve){
+        var tx = db.transaction(COMPOSE_STORE, 'readwrite');
+        var st = tx.objectStore(COMPOSE_STORE);
+        var g = st.get(COMPOSE_KEY);
+        g.onsuccess = function(){
+          try { st.delete(COMPOSE_KEY); } catch(e){}
+          var val = g.result || [];
+          resolve(Array.isArray(val) ? val : []);
+        };
+        g.onerror = function(){ resolve([]); };
+        tx.oncomplete = function(){ try { db.close(); } catch(e){} };
+      });
+    }).catch(function(){ return []; });
+  }
+  window.lhStashComposeImages = stashComposeImages;
+  window.lhTakeComposeImages = takeComposeImages;
+
+  function onComposePage(){
+    var p = location.pathname;
+    return p === '/community/new' || p === '/static/community-new.html';
+  }
+  function onListingPage(){
+    if (!onComposePage()) return false;
+    var q = new URLSearchParams(location.search || '');
+    var v = (q.get('listing') || q.get('merchant') || '').toLowerCase();
+    return v === '1' || v === 'yes' || v === 'true';
+  }
+  function goCompose(files){
+    var list = Array.prototype.slice.call(files || []).slice(0, 6);
+    if (onComposePage() && !onListingPage()){
+      window.dispatchEvent(new CustomEvent('lh-compose-files', {detail: list}));
+      return;
+    }
+    var go = function(){ location.href = '/community/new'; };
+    if (!list.length){ go(); return; }
+    stashComposeImages(list).then(go).catch(go);
+  }
+
+  function ensurePubSheet(){
+    if (document.getElementById('lhPubMask')) return;
+    var mask = document.createElement('div');
+    mask.id = 'lhPubMask';
+    mask.className = 'lh-pub-mask';
+    mask.hidden = true;
+    mask.innerHTML =
+      '<div class="lh-pub-sheet" role="dialog" aria-modal="true" aria-label="发布">' +
+        '<div class="lh-pub-group">' +
+          '<button type="button" data-act="album">从相册选择</button>' +
+          '<button type="button" data-act="camera">拍摄</button>' +
+          '<button type="button" data-act="text">写文字</button>' +
+        '</div>' +
+        '<div class="lh-pub-group lh-pub-cancel-wrap">' +
+          '<button type="button" data-act="cancel">取消</button>' +
+        '</div>' +
+      '</div>';
+    document.body.appendChild(mask);
+    var album = document.createElement('input');
+    album.type = 'file'; album.id = 'lhPubAlbum'; album.accept = 'image/*'; album.multiple = true;
+    album.className = 'lh-pub-file'; album.setAttribute('tabindex', '-1');
+    var camera = document.createElement('input');
+    camera.type = 'file'; camera.id = 'lhPubCamera'; camera.accept = 'image/*';
+    camera.setAttribute('capture', 'environment');
+    camera.className = 'lh-pub-file'; camera.setAttribute('tabindex', '-1');
+    document.body.appendChild(album);
+    document.body.appendChild(camera);
+    function onPicked(input){
+      var picked = Array.prototype.slice.call(input.files || []);
+      input.value = '';
+      if (!picked.length) return;
+      if (picked.length > 6) picked = picked.slice(0, 6);
+      goCompose(picked);
+    }
+    album.addEventListener('change', function(){ onPicked(album); });
+    camera.addEventListener('change', function(){ onPicked(camera); });
+    mask.addEventListener('click', function(e){
+      var btn = e.target.closest ? e.target.closest('button[data-act]') : null;
+      if (!btn){
+        if (e.target === mask) closePubSheet();
+        return;
+      }
+      var act = btn.getAttribute('data-act');
+      if (act === 'cancel'){ closePubSheet(); return; }
+      if (act === 'text'){ closePubSheet(); goCompose([]); return; }
+      if (act === 'album'){ closePubSheet(); album.click(); return; }
+      if (act === 'camera'){ closePubSheet(); camera.click(); return; }
+    });
+    document.addEventListener('keydown', function(e){
+      if (e.key === 'Escape') closePubSheet();
+    });
+  }
+  function openPubSheet(){
+    ensurePubSheet();
+    var mask = document.getElementById('lhPubMask');
+    mask.hidden = false;
+    document.body.classList.add('lh-pub-open');
+  }
+  function closePubSheet(){
+    var mask = document.getElementById('lhPubMask');
+    if (mask) mask.hidden = true;
+    document.body.classList.remove('lh-pub-open');
+  }
+  function bindPubSheet(nav){
+    if (!nav || nav.dataset.pubBound === '1') return;
+    nav.dataset.pubBound = '1';
+    nav.addEventListener('click', function(e){
+      var a = e.target.closest ? e.target.closest('a[data-nav="post"]') : null;
+      if (!a) return;
+      e.preventDefault();
+      openPubSheet();
+    });
+  }
+
   function bindHomeLink(nav){
     if (nav.dataset.homeBound === '1') return; // 页面已自行绑定（index.html 内联脚本）时不重复绑定
     nav.dataset.homeBound = '1';
@@ -137,6 +272,7 @@
     }
     document.body.classList.add('has-tabbar');
     bindHomeLink(nav);
+    bindPubSheet(nav);
   }
 
   function refreshNav(){

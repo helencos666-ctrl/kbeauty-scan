@@ -88,6 +88,11 @@ check("pwa.js replaces old nav", "replaceChild" in pwa_js or "buildTabbar" in pw
 check("pwa.js appends tabbar when missing", "appendChild" in pwa_js)
 check("pwa.js keeps SW registration", "serviceWorker" in pwa_js and "/sw.js" in pwa_js)
 check("pwa.js keeps install prompt", "beforeinstallprompt" in pwa_js and "pwaBar" in pwa_js)
+check("pwa.js +发布打开操作表而不是直接跳转",
+      "openPubSheet" in pwa_js and "preventDefault" in pwa_js and "从相册选择" in pwa_js
+      and "拍摄" in pwa_js and "写文字" in pwa_js)
+check("pwa.css 有发布操作表样式", "lh-pub-mask" in pwa_css and "lh-pub-sheet" in pwa_css)
+check("我的页有商家发布信息", "商家发布信息" in me and 'href="/community/new?listing=1"' in me)
 check("tabbar style is scoped", "nav.tabbar" in pwa_css and "nav.tabbar a.pub .plus" in pwa_css)
 check("community.css does not override tabbar", "nav:not(.tabbar)" in comm_css)
 check("body has-tabbar padding", "body.has-tabbar" in pwa_css)

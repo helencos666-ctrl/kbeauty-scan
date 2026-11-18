@@ -147,8 +147,10 @@ check("shops 页脚「商家」仍链 /shops", re.search(r'href="/shops">商家<
 # ---------- 5. 发帖页商家分类与医疗提示 ----------
 check("community-new 有 merchant_cat", "merchant_cat" in newpost)
 check("community-new 有商家分类选择器", 'id="mcat"' in newpost and "商家分类" in newpost)
-check("community-new 仅商家显示分类器",
-      "d.user.merchant" in newpost and "mcatbox" in newpost and "isMerchant" in newpost)
+check("community-new 商家分类在 listing 发布页显示",
+      "listing" in newpost and "mcatbox" in newpost and "isMerchant" in newpost and "d.user.merchant" in newpost)
+check("community-new 普通发帖页无商家专区板块",
+      "商家专区（仅限商家会员）" not in newpost and "chip-lab" not in newpost)
 check("community-new 提交时 append merchant_cat", "fd.append('merchant_cat'" in newpost)
 check("community-new 有医疗中介提示", "不提供医疗中介" in newpost)
 check("community-new 有价格/疗效承诺提示", "不要发布价格承诺或疗效承诺" in newpost)

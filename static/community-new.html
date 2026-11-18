@@ -22,7 +22,7 @@
 </header>
 <div class="compose-top">
   <a class="back" href="/community">取消</a>
-  <h1>写帖子</h1>
+  <h1 id="composeTitle">写帖子</h1>
   <div class="acts">
     <button type="button" class="btn ghost" id="preview" disabled>预览</button>
     <button type="button" class="btn primary" id="send" disabled>发布</button>
@@ -33,9 +33,11 @@
   <div class="card" id="form" style="display:none">
     <div class="draftnote" id="draftnote"></div>
     <div class="err" id="err"></div>
-    <label class="f">发到哪个频道</label>
     <input type="hidden" id="board" value="">
+    <div id="chanbox">
+    <label class="f">发到哪个频道</label>
     <div class="chips" id="chips"></div>
+    </div>
     <div id="mcatbox" style="display:none;margin-top:10px">
       <label class="f" for="mcat">商家分类（选填）</label>
       <select class="f" id="mcat">
@@ -143,7 +145,6 @@ function fillPlace(){
     if (!el.dataset.edited) el.value = city;
   }, function(){}, {maximumAge:600000, timeout:8000, enableHighAccuracy:false});
 }
-var DRAFT_KEY = 'lh-post-draft-v1';
 var CHANNELS = [
   {key:'daily', label:'🌸 在韩日常'},
   {key:'pit', label:'踩坑避雷'},
@@ -154,16 +155,19 @@ var CHANNELS = [
   {key:'news', label:'出行提醒'},
   {key:'rent', label:'租房找房'},
   {key:'used', label:'闲置转让'},
-  {key:'jobs', label:'工作机会'},
-  {key:'hotel', label:'🛏️ 住宿推荐', merch:1},
-  {key:'car', label:'🚐 包车用车', merch:1},
-  {key:'clinic', label:'✨ 皮肤管理·医美', merch:1},
-  {key:'agency', label:'🏫 留学机构', merch:1},
-  {key:'daigou', label:'🛍️ 代购商家', merch:1},
-  {key:'guide', label:'🙋 地陪', merch:1},
-  {key:'kpop', label:'🎤 追星活动', merch:1},
-  {key:'logistics', label:'📦 中韩物流', merch:1}
+  {key:'jobs', label:'工作机会'}
 ];
+var CAT_TO_BOARD = {
+  guide:'guide', clinic:'clinic', food:'daigou', airport:'car',
+  hotel:'hotel', interp:'guide', kpop:'kpop', car:'car',
+  sim:'logistics', logistics:'logistics', daigou:'daigou', other:'daigou'
+};
+function isListingMode(){
+  var v = (LH.qs('listing') || LH.qs('merchant') || '').toLowerCase();
+  return v === '1' || v === 'yes' || v === 'true';
+}
+var LISTING = isListingMode();
+var DRAFT_KEY = LISTING ? 'lh-listing-draft-v1' : 'lh-post-draft-v1';
 var TPL = {
   daily: '今天在（地区），（一件小事）。\n想分享的是……',
   visa: '我的情况是……\n想问的是……\n已经查过……',
@@ -308,7 +312,49 @@ function applyMcat(){
   if (tvEl){
     tvEl.placeholder = (mc && MCAT_TITLE_PH[mc]) || TITLE_PH[currentBoard()] || '一句话说清楚';
   }
+  if (LISTING) syncListingFields();
   updateCounts();
+}
+function syncListingFields(){
+  if (!LISTING) return;
+  var mc = (document.getElementById('mcat') || {}).value || '';
+  var board = mc ? (CAT_TO_BOARD[mc] || 'daigou') : '';
+  document.getElementById('board').value = board;
+  var ab = document.getElementById('actbox'), subs = SUBC[board] || [];
+  ab.style.display = MB[board] ? 'block' : 'none';
+  document.getElementById('tag').innerHTML = '<option value="">请选择分类</option>' + subs.map(function(x){ return '<option value="' + x.key + '">' + x.icon + ' ' + LH.esc(x.name) + '</option>'; }).join('');
+  syncMedNote();
+  var qd = document.getElementById('quota'), u = ME && ME.user;
+  if (u && u.merchant_info){
+    var m = u.merchant_info;
+    qd.innerHTML = '本周期剩余 <b>' + m.left + '</b> / 10 篇，增发次数 <b>' + m.credits + '</b>（周期至 ' + LH.esc(m.cycle_end) + '，商家会员有效期至 ' + LH.esc(m.until) + '）';
+  } else {
+    qd.innerHTML = '你还不是商家会员，不能发布商家信息。<a href="/member#merchant" style="color:#2c7be5">了解商家会员</a>';
+  }
+  qd.style.display = 'block';
+  var w = document.getElementById('bwarn'), t = WARN[board] || '';
+  w.textContent = t; w.style.display = t ? 'block' : 'none';
+}
+function setupListingUI(){
+  if (!LISTING) return;
+  document.title = '发布商家信息 · 旅韩助手';
+  var h1 = document.getElementById('composeTitle');
+  if (h1) h1.textContent = '发布商家信息';
+  var topH = document.querySelector('header h1');
+  if (topH) topH.textContent = '发布商家信息';
+  var back = document.querySelector('.compose-top .back');
+  if (back){ back.href = '/me'; }
+  var commBack = document.querySelector('header p a');
+  if (commBack){ commBack.href = '/me'; commBack.textContent = '← 返回我的'; }
+  var chan = document.getElementById('chanbox');
+  if (chan) chan.style.display = 'none';
+  var box = document.getElementById('mcatbox');
+  if (box) box.style.display = 'block';
+  var lab = document.querySelector('#mcatbox label.f');
+  if (lab) lab.textContent = '商家分类';
+  var sel = document.getElementById('mcat');
+  if (sel && sel.options[0] && !sel.options[0].value) sel.options[0].textContent = '请选择分类';
+  syncListingFields();
 }
 function syncMedNote(){
   var mn = document.getElementById('mednote');
@@ -347,13 +393,11 @@ function applyBoard(val, fromDraft){
 }
 function renderChips(){
   var el = document.getElementById('chips'), u = ME && ME.user;
-  var normal = CHANNELS.filter(function(c){ return !c.merch; });
-  var merch = CHANNELS.filter(function(c){ return c.merch; });
   function btn(c){
     var dis = (c.key === 'friends' && u && u.tier < 2);
     return '<button type="button" data-board="' + c.key + '"' + (dis ? ' disabled' : '') + '>' + (dis ? '旅韩交友（需高级会员）' : LH.esc(c.label)) + '</button>';
   }
-  el.innerHTML = normal.map(btn).join('') + '<div class="chip-lab">商家专区（仅限商家会员）</div>' + merch.map(btn).join('');
+  el.innerHTML = CHANNELS.map(btn).join('');
   el.querySelectorAll('button[data-board]').forEach(function(b){
     b.onclick = function(){ if (b.disabled) return; applyBoard(b.getAttribute('data-board')); saveDraft(); };
   });
@@ -404,21 +448,88 @@ function scheduleDraft(){ clearTimeout(draftTimer); draftTimer = setTimeout(save
   el.addEventListener(id === 'agree' ? 'change' : 'input', function(){ updateCounts(); scheduleDraft(); });
 });
 document.getElementById('mcat').addEventListener('change', function(){ applyMcat(); syncMedNote(); scheduleDraft(); });
+function takeComposeImages(){
+  return new Promise(function(resolve){
+    try {
+      var req = indexedDB.open('lh-compose-pending', 1);
+      req.onupgradeneeded = function(){ req.result.createObjectStore('files'); };
+      req.onsuccess = function(){
+        var db = req.result, tx = db.transaction('files', 'readwrite'), st = tx.objectStore('files'), g = st.get('images');
+        g.onsuccess = function(){
+          try { st.delete('images'); } catch(e){}
+          var val = g.result || [];
+          resolve(Array.isArray(val) ? val : []);
+        };
+        g.onerror = function(){ resolve([]); };
+        tx.oncomplete = function(){ try { db.close(); } catch(e){} };
+      };
+      req.onerror = function(){ resolve([]); };
+    } catch(e){ resolve([]); }
+  });
+}
+async function loadPendingImages(){
+  var incoming = [];
+  try { incoming = await takeComposeImages(); } catch(e){ incoming = []; }
+  if ((!incoming || !incoming.length) && window.lhTakeComposeImages){
+    try { incoming = await window.lhTakeComposeImages(); } catch(e){ incoming = []; }
+  }
+  if (!incoming || !incoming.length) return;
+  for (var i = 0; i < incoming.length; i++){
+    if (files.length >= 6){ LH.toast('最多 6 张图片'); break; }
+    files.push(await LH.compress(incoming[i]));
+  }
+  drawThumbs();
+}
+window.addEventListener('lh-compose-files', function(ev){
+  var incoming = ev.detail || [];
+  (async function(){
+    for (var i = 0; i < incoming.length; i++){
+      if (files.length >= 6){ LH.toast('最多 6 张图片'); break; }
+      files.push(await LH.compress(incoming[i]));
+    }
+    drawThumbs();
+  })();
+});
 (async function(){
   var gate = document.getElementById('gate'), d;
+  var next = LISTING ? '/community/new?listing=1' : '/community/new';
   try { d = ME = await LH.me(); } catch(e){ gate.innerHTML = '<div class="empty">' + LH.esc(e.message) + '</div>'; return; }
-  if (!d.user){ gate.innerHTML = '<div class="empty">请先登录<br><br><a class="btn primary" href="/login?next=/community/new">登录 / 注册</a></div>'; return; }
-  if (d.user.tier < 1){ gate.innerHTML = '<div class="empty">开通会员（¥' + d.prices.price_t1 + '）后即可在在韩日常、踩坑避雷、签证问答等频道发帖；旅韩交友发帖需高级会员；住宿、包车、医美、留学机构、代购、地陪、追星活动、中韩物流等商家请开通商家会员<br><br><a class="btn primary" href="/member">了解会员</a></div>'; return; }
+  if (!d.user){ gate.innerHTML = '<div class="empty">请先登录<br><br><a class="btn primary" href="/login?next=' + encodeURIComponent(next) + '">登录 / 注册</a></div>'; return; }
+  var isMerchant = !!(d.user && (d.user.merchant || d.user.merchant_info));
+  if (LISTING){
+    if (!isMerchant){ gate.innerHTML = '<div class="empty">开通商家会员后才能发布商家信息<br><br><a class="btn primary" href="/member#merchant">了解商家会员</a>　<a class="btn ghost" href="/partner">商家入驻</a></div>'; return; }
+  } else if (d.user.tier < 1){ gate.innerHTML = '<div class="empty">开通会员（¥' + d.prices.price_t1 + '）后即可在在韩日常、踩坑避雷、签证问答等频道发帖；旅韩交友发帖需高级会员。商家信息请到「我的」页的「商家发布信息」发布。<br><br><a class="btn primary" href="/member">了解会员</a></div>'; return; }
   gate.style.display = 'none'; document.getElementById('form').style.display = 'block';
   fillPlace();
   document.getElementById('send').disabled = false; document.getElementById('preview').disabled = false;
   renderChips();
-  var isMerchant = !!(d.user && (d.user.merchant || d.user.merchant_info));
-  if (isMerchant) document.getElementById('mcatbox').style.display = 'block';
+  if (!LISTING) document.getElementById('mcatbox').style.display = 'none';
   try { var mm = await LH.api('GET', '/api/merch/meta'); SUBC = mm.subcats || {}; MEDNOTE = mm.medical_note || ''; (mm.medical_boards || []).forEach(function(k){ MED[k] = 1; }); } catch(e){}
+  setupListingUI();
   var draft = loadDraft();
-  var qBoard = LH.qs('board');
+  var qBoard = LISTING ? '' : LH.qs('board');
+  if (qBoard && MB[qBoard]) qBoard = '';
+  if (draft && draft.board && MB[draft.board] && !LISTING) draft.board = '';
   if (draft){
+    if (LISTING){
+      if (draft.mcat) document.getElementById('mcat').value = draft.mcat;
+      applyMcat();
+      if (draft.title) document.getElementById('title').value = draft.title;
+      if (draft.body){ document.getElementById('body').value = draft.body; if (draft.mcat && MCAT_TPL[draft.mcat] && draft.body === MCAT_TPL[draft.mcat]) lastTpl = draft.body; }
+      if (draft.topics) document.getElementById('topics').value = draft.topics;
+      if (draft.place){ document.getElementById('place').value = draft.place; document.getElementById('place').dataset.edited = '1'; }
+      if (MB[currentBoard()]){
+        if (draft.tag) document.getElementById('tag').value = draft.tag;
+        if (draft.offer) document.getElementById('offer').value = draft.offer;
+        if (draft.valid) document.getElementById('valid').value = draft.valid;
+      }
+      if (draft.agree) document.getElementById('agree').checked = true;
+      syncListingFields();
+      var n = document.getElementById('draftnote'); n.style.display = 'block'; n.textContent = '草稿已自动保存 · 刚刚';
+      updateCounts();
+      await loadPendingImages();
+      return;
+    }
     applyBoard(qBoard || draft.board || '', true);
     if (draft.title) document.getElementById('title').value = draft.title;
     if (draft.body){ document.getElementById('body').value = draft.body; if (TPL[draft.board] && draft.body === TPL[draft.board]) lastTpl = draft.body; }
@@ -437,6 +548,7 @@ document.getElementById('mcat').addEventListener('change', function(){ applyMcat
     applyBoard(qBoard || '', false);
   }
   updateCounts();
+  await loadPendingImages();
 })();
 function drawThumbs(){
   var el = document.getElementById('thumbs');
@@ -489,6 +601,12 @@ document.getElementById('send').onclick = async function(){
   var err = document.getElementById('err'); LH.showErr(err, '');
   if (!document.getElementById('agree').checked){ LH.showErr(err, '请先勾选同意社区规则'); window.scrollTo(0, 0); return; }
   if (lastTpl && document.getElementById('body').value.trim() === lastTpl.trim()){ LH.showErr(err, '把模板里的括号和省略号换成你自己的内容再发吧'); window.scrollTo(0, 0); return; }
+  if (LISTING){
+    var mc = (document.getElementById('mcat') || {}).value || '';
+    if (!mc){ LH.showErr(err, '请选择商家分类'); window.scrollTo(0, 0); return; }
+    document.getElementById('board').value = CAT_TO_BOARD[mc] || 'daigou';
+  }
+  if (!currentBoard()){ LH.showErr(err, LISTING ? '请选择商家分类' : '请选择频道'); window.scrollTo(0, 0); return; }
   var fd = new FormData();
   fd.append('board', currentBoard());
   fd.append('merchant_cat', (document.getElementById('mcat') || {}).value || '');
