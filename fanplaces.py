@@ -30,6 +30,7 @@ CATS = {
     "hotel": "酒店住宿",
     "spot": "景点",
     "shop": "购物",
+    "beauty": "医美",
     "other": "其他",
 }
 CAT_KEYS = set(CATS)
@@ -151,7 +152,7 @@ def _guard_abs(*texts):
 def _cat(v):
     k = (v or "").strip()
     if k not in CAT_KEYS:
-        raise HTTPException(400, "请选择分类（美食、咖啡、酒店住宿、景点、购物或其他）")
+        raise HTTPException(400, "请选择分类（美食、咖啡、酒店住宿、景点、购物、医美或其他）")
     return k
 
 
@@ -260,6 +261,7 @@ def _public_place(conn, row, *, with_recs=False, with_ratings=False, me=None):
         "cover_id": photos[0]["id"] if photos else None,
         "photos": [{"id": p["id"], "width": p["width"], "height": p["height"]} for p in photos],
         "recommended_by": rec_items[0]["nickname"] if rec_items else None,
+        "rec_count": len(rec_items),
         "rec_text": rec_items[0]["text"] if rec_items else None,
         "created_at": _ts(row["created_at"]),
     }

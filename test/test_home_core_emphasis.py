@@ -73,7 +73,7 @@ check("窄屏 .cats 未改动", ".cats i{width:46px;height:46px;font-size:21px}"
 check("使用 ?v=84", "?v=84" in index)
 check("没有残留 ?v=69", "?v=69" not in index)
 for label, needle in (("吃喝玩乐", "吃喝玩乐"), ("广告", "adsDots"), ("附近推荐", "附近推荐"),
-                      ("韩友圈分享", "韩友圈分享"), ("tabbar", 'class="tabbar"')):
+                      ("吃喝玩乐推荐", "playBlk"), ("tabbar", 'class="tabbar"')):
     check("保留 " + label, needle in index)
 
 # 375px：首页 main 后段规则为 padding:0，左右只扣 .core-wrap 的 16px

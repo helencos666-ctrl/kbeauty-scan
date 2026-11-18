@@ -206,7 +206,7 @@ html.sp-on,html.sp-on body{overflow:hidden}
 .extra a{display:flex;align-items:center;gap:10px;background:#fff;border-radius:16px;padding:14px 12px;text-decoration:none;color:var(--ink);box-shadow:0 4px 16px rgba(20,110,104,.08);font-size:15px;font-weight:700;min-height:64px}
 .extra a span{display:block;font-size:12px;font-weight:500;color:var(--sub);margin-top:2px}
 
-/* ===== 首页改版（v61）：hero / 两大入口 / 吃喝玩乐 / 广告 / 附近推荐 / 韩友圈分享 ===== */
+/* ===== 首页改版（v61）：hero / 两大入口 / 吃喝玩乐 / 广告 / 附近推荐 / 吃喝玩乐推荐 ===== */
 [hidden]{display:none!important}
 body{background:#fff;padding-bottom:calc(82px + env(safe-area-inset-bottom))}
 main{max-width:560px;margin:0 auto;padding:0}
@@ -284,30 +284,26 @@ body.is-home .disclaimer{display:none}
 .place .dist{padding-right:4px;font-size:12px;font-weight:800;color:var(--primary);white-space:nowrap}
 .thumb.t1{background:#EAF8FB}.thumb.t2{background:#FFF6E5}.thumb.t3{background:#EAF6F4}.thumb.t4{background:#F6EFF8}.thumb.t5{background:#FFF0E8}
 
-/* E. 韩友圈分享 */
-.circle{background:var(--bg);padding:6px 0 16px}
-.circle .bh{display:flex;align-items:baseline;justify-content:space-between;gap:8px;padding:10px 18px}
-.circle .bh h2{margin:0;font-size:17px;font-weight:800}
-.circle .bh a{font-size:13px;font-weight:700;color:var(--sub);text-decoration:none}
-.feed-chips{display:flex;gap:6px;padding:0 16px 10px;overflow-x:auto;scrollbar-width:none}
-.feed-chips::-webkit-scrollbar{display:none}
-.feed-chips button{flex:none;border:1px solid var(--line);border-radius:14px;background:#fff;color:var(--sub);padding:5px 12px;font-size:12px;font-weight:700;font-family:inherit;cursor:pointer}
-.feed-chips button.on{background:var(--primary);border-color:var(--primary);color:#fff}
-.wf{display:flex;align-items:flex-start;gap:8px;padding:0 16px}
-.wf .col{flex:1;min-width:0;display:flex;flex-direction:column;gap:8px}
-.fc{position:relative;display:block;border-radius:14px;background:#fff;overflow:hidden;box-shadow:0 2px 10px rgba(20,110,104,.06);color:var(--ink);text-decoration:none}
-.fc .pic{width:100%;min-height:96px;display:block;object-fit:cover;background:#EAF6F4;font-size:0}
-.fc .k{position:absolute;top:8px;left:8px;font-size:10px;font-weight:800;padding:2px 6px;border-radius:6px;background:rgba(26,35,48,.62);color:#fff}
-.fc .cap{padding:8px 9px 0;font-size:12.5px;line-height:1.45;font-weight:600;overflow:hidden;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical}
-.fc .meta{display:flex;align-items:center;gap:6px;padding:7px 9px 9px}
-.fc .ava{width:18px;height:18px;border-radius:50%;background:#3D8F88;display:flex;align-items:center;justify-content:center;flex:none;overflow:hidden}
-.fc .ava img{width:100%;height:100%;object-fit:cover;display:block}
-.fc .ava svg{width:12px;height:12px;display:block}
-.fc .nick{flex:1;min-width:0;font-size:11px;font-weight:600;color:var(--sub);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.fc .likes{font-size:11px;font-weight:700;color:var(--sub);white-space:nowrap}
-.fc .likes i{font-style:normal;margin-right:2px;color:#C45C4A}
+/* E. 吃喝玩乐推荐（已审核会员地点） */
+.play{background:var(--bg);padding:6px 0 16px}
+.play .bh{display:flex;align-items:baseline;justify-content:space-between;gap:8px;padding:10px 18px}
+.play .bh h2{margin:0;font-size:17px;font-weight:800}
+.play .bh a{font-size:13px;font-weight:700;color:var(--sub);text-decoration:none}
+.play-chips{display:flex;gap:6px;padding:0 16px 10px;overflow-x:auto;scrollbar-width:none;-webkit-overflow-scrolling:touch}
+.play-chips::-webkit-scrollbar{display:none}
+.play-chips button{flex:none;border:1px solid var(--line);border-radius:14px;background:#fff;color:var(--sub);padding:5px 12px;font-size:12px;font-weight:700;font-family:inherit;cursor:pointer}
+.play-chips button.on{background:var(--primary);border-color:var(--primary);color:#fff}
+.play-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;padding:0 16px}
+.pcard{display:block;border-radius:14px;background:#fff;overflow:hidden;box-shadow:0 2px 10px rgba(20,110,104,.05);color:var(--ink);text-decoration:none}
+.pcard .pic,.pcard .ph{width:100%;aspect-ratio:4/3;display:block;background:#EAF6F4}
+.pcard .pic{object-fit:cover;font-size:0}
+.pcard .ph{display:flex;align-items:center;justify-content:center;font-size:32px}
+.pcard .cap{padding:8px 9px 10px}
+.pcard b{display:block;font-size:13.5px;font-weight:700;line-height:1.35;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.pcard p{margin:4px 0 0;font-size:11.5px;color:var(--sub);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.pcard .rec{margin-top:3px;font-size:11px;font-weight:600;color:var(--primary)}
 
-/* 空状态（附近推荐 / 韩友圈） */
+/* 空状态（附近推荐 / 吃喝玩乐推荐） */
 .empty-box{margin:0 16px;padding:16px 14px;border-radius:14px;background:#fff;box-shadow:0 2px 10px rgba(20,110,104,.05);font-size:13px;line-height:1.7;color:var(--sub)}
 .empty-box p{margin:0}
 .empty-box .lnks{display:flex;flex-wrap:wrap;gap:8px;margin-top:10px}
@@ -416,17 +412,20 @@ body.is-home .disclaimer{display:none}
       <div class="near-list" id="nearList"></div>
     </section>
 
-    <!-- E. 韩友圈分享（只显示真实帖子） -->
-    <section class="circle" id="circleBlk" aria-labelledby="circleTitle">
-      <div class="bh"><h2 id="circleTitle">韩友圈分享</h2><a href="/community">更多 ›</a></div>
-      <div class="feed-chips" id="feedChips" role="group" aria-label="分享筛选">
+    <!-- E. 吃喝玩乐推荐（只显示已审核会员地点，不编造） -->
+    <section class="play" id="playBlk" aria-labelledby="playTitle">
+      <div class="bh"><h2 id="playTitle">吃喝玩乐</h2><a href="/places">更多 ›</a></div>
+      <div class="play-chips" id="playChips" role="group" aria-label="吃喝玩乐分类">
         <button type="button" data-f="all" class="on">全部</button>
         <button type="button" data-f="food">美食</button>
-        <button type="button" data-f="scenery">风景</button>
-        <button type="button" data-f="selfie">自拍</button>
+        <button type="button" data-f="coffee">咖啡</button>
+        <button type="button" data-f="shop">购物</button>
+        <button type="button" data-f="spot">景点</button>
+        <button type="button" data-f="hotel">酒店</button>
+        <button type="button" data-f="beauty">医美</button>
       </div>
-      <div class="wf" id="feedWrap"><div class="col" id="feedColA"></div><div class="col" id="feedColB"></div></div>
-      <div id="feedEmpty" hidden></div>
+      <div class="play-grid" id="playGrid"></div>
+      <div id="playEmpty" hidden></div>
     </section>
 
     <!-- F. 开业活动条（默认 hidden，/api/opening-promo 开启后显示） -->
@@ -2044,90 +2043,87 @@ drawScenes();
     load();
   })();
 
-  /* ---------- E. 韩友圈分享：只读 /api/community/posts ---------- */
+  /* ---------- E. 吃喝玩乐推荐：只读 /api/places（已审核地点） ---------- */
   (function(){
-    var wrap=byId('feedWrap'), chips=byId('feedChips'), empty=byId('feedEmpty');
-    var A=byId('feedColA'), B=byId('feedColB');
-    if(!wrap||!chips||!empty) return;
-    var AVA='<svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="8.5" r="3.6" fill="#fff"/><path d="M5 19.2c.9-3.2 3.4-5 7-5s6.1 1.8 7 5" fill="#fff"/></svg>';
-    var posts=[], filter='all', state='loading';
-    function txt(p){ return ((p.title||'')+' '+(p.board||'')+' '+(p.board_name||'')).toLowerCase(); }
-    function tags(p){
-      var t=txt(p), o={};
-      if(/food|cafe|restaurant|美食|餐厅|咖啡|烤肉|小吃|餐饮|甜品|炸鸡|奶茶|海鲜|拌饭/.test(t)) o.food=1;
-      if(/scenery|attraction|landscape|风景|景点|宫|汉江|街|夜景|公园|山|海|散步|韩屋|拍照/.test(t)) o.scenery=1;
-      if(/selfie|自拍|出镜|拍照打卡|打卡|人像|合影/.test(t)) o.selfie=1;
-      return o;
+    var grid=byId('playGrid'), chips=byId('playChips'), empty=byId('playEmpty');
+    if(!grid||!chips||!empty) return;
+    var ICON={food:'🍜',coffee:'☕',shop:'🛍️',spot:'🏯',hotel:'🏨',beauty:'💄',other:'📍'};
+    var CATS={food:'美食',coffee:'咖啡',shop:'购物',spot:'景点',hotel:'酒店',beauty:'医美',other:'其他'};
+    var items=[], filter='all', state='loading';
+    function arr(d){
+      if(!d) return [];
+      if(Array.isArray(d)) return d;
+      if(Array.isArray(d.items)) return d.items;
+      if(Array.isArray(d.places)) return d.places;
+      return [];
     }
-    function picOf(p){
-      if(p.cover) return p.cover;
-      if(Array.isArray(p.thumbs)&&p.thumbs.length) return p.thumbs[0];
-      if(p.thumbs&&typeof p.thumbs==='string'&&p.thumbs) return p.thumbs;
-      return null;
+    function areaOf(p){
+      var a=String(p.address||'').replace(/\s+/g,' ').trim();
+      if(!a) return '';
+      var keys=['首尔','济州','釜山','仁川','大邱','光州','大田','京畿','江原','明洞','弘大','江南','梨泰院','东大门','新村','蚕室','仁寺洞','合井','新沙','圣水','延南','市厅','龙山','汝矣岛'];
+      for(var i=0;i<keys.length;i++) if(a.indexOf(keys[i])>=0) return keys[i];
+      return a.length>14 ? a.slice(0,14) : a;
     }
-    function imgUrl(p){
-      var src=picOf(p);
-      if(!src&&!(p.img_n>0)) return '';
-      return '/api/community/img/'+encodeURIComponent(src||p.id)+'?t=1';
+    function recLine(p){
+      var n=+p.rec_count||0;
+      if(n>1) return n+' 人推荐';
+      if(n===1 || p.recommended_by) return '由会员推荐';
+      return '';
     }
     function card(p){
-      var src=imgUrl(p), t=tags(p), h='';
-      h+='<a class="fc" href="/community/post/'+encodeURIComponent(p.id)+'">';
-      if(src) h+='<img class="pic" src="'+E(src)+'" alt="" loading="lazy" onerror="this.style.display=&#39;none&#39;;this.parentNode.querySelectorAll(&#39;.k&#39;).forEach(function(x){x.style.display=&#39;none&#39;});">';
-      if(src&&t.food) h+='<span class="k">美食</span>';
-      else if(src&&t.scenery) h+='<span class="k">风景</span>';
-      else if(src&&t.selfie) h+='<span class="k">自拍</span>';
-      h+='<div class="cap">'+E(p.title||'')+'</div>';
-      h+='<div class="meta">';
-      h+= p.has_avatar
-        ? '<span class="ava"><img src="/api/community/avatar/'+encodeURIComponent(p.author_id)+'" alt="" loading="lazy" onerror="this.style.display=&#39;none&#39;;"></span>'
-        : '<span class="ava">'+AVA+'</span>';
-      h+='<span class="nick">'+E(p.author||'韩友')+'</span>';
-      h+='<span class="likes" aria-label="点赞"><i>♥</i>'+E(p.likes==null?0:p.likes)+'</span>';
-      h+='</div></a>';
-      return h;
+      var cat=CATS[p.category]||p.category_label||'';
+      var area=areaOf(p);
+      var sub=[cat,area].filter(Boolean).join(' · ');
+      var rec=recLine(p);
+      var im=p.cover_id
+        ? '<img class="pic" src="/api/places/photos/'+encodeURIComponent(p.cover_id)+'?thumb=1" alt="" width="320" height="240" loading="lazy" decoding="async" onerror="this.style.display=&#39;none&#39;;">'
+        : '<div class="ph">'+E(ICON[p.category]||'📍')+'</div>';
+      return '<a class="pcard" href="/places/'+encodeURIComponent(p.id)+'">'+im
+        + '<div class="cap"><b>'+E(p.name||'')+'</b>'
+        + (sub?'<p>'+E(sub)+'</p>':'')
+        + (rec?'<div class="rec">'+E(rec)+'</div>':'')
+        + '</div></a>';
     }
-    function emptyBox(msg, extra){
-      return '<div class="empty-box"><p>'+msg+'</p><div class="lnks"><a href="/community">去韩友圈</a><a href="/community/new">发一条</a>'+(extra||'')+'</div></div>';
+    function emptyBox(cat){
+      var href='/places/new'+(cat&&cat!=='all' ? '?category='+encodeURIComponent(cat) : '');
+      return '<div class="empty-box"><p>暂无推荐，去推荐</p><div class="lnks"><a href="'+href+'">去推荐</a></div></div>';
+    }
+    function rowsOf(){
+      var rows=items.slice();
+      if(filter!=='all') rows=rows.filter(function(p){ return p.category===filter; });
+      rows.sort(function(a,b){
+        var ra=(+a.rec_count||0)-(+b.rec_count||0);
+        if(ra) return -ra;
+        return (b.id||0)-(a.id||0);
+      });
+      return rows;
     }
     function render(){
+      Array.prototype.forEach.call(chips.querySelectorAll('button'),function(b){
+        b.classList.toggle('on', b.getAttribute('data-f')===filter);
+      });
       if(state==='loading'){
-        A.innerHTML=''; B.innerHTML=''; wrap.style.display='none';
-        empty.innerHTML='<div class="empty-box"><p>正在加载分享…</p></div>'; empty.hidden=false; return;
+        grid.innerHTML=''; grid.style.display='none';
+        empty.innerHTML='<div class="empty-box"><p>正在加载推荐…</p></div>'; empty.hidden=false; return;
       }
-      if(!posts.length){
-        A.innerHTML=''; B.innerHTML=''; wrap.style.display='none';
-        empty.innerHTML=emptyBox('还没有分享，来看看韩友圈，或自己发一条。'); empty.hidden=false; return;
-      }
-      var rows;
-      if(filter==='all'){
-        var withPic=posts.filter(function(p){ return !!imgUrl(p); });
-        var noPic=posts.filter(function(p){ return !imgUrl(p); });
-        rows=withPic.concat(noPic);
-      }else{
-        rows=posts.filter(function(p){ return !!tags(p)[filter]; });
-      }
+      var rows=rowsOf();
       if(!rows.length){
-        A.innerHTML=''; B.innerHTML=''; wrap.style.display='none';
-        empty.innerHTML=emptyBox('还没有这一类分享。'); empty.hidden=false; return;
+        grid.innerHTML=''; grid.style.display='none';
+        empty.innerHTML=emptyBox(filter); empty.hidden=false; return;
       }
-      empty.hidden=true; empty.innerHTML=''; wrap.style.display='flex';
-      var a='', b='';
-      rows.slice(0,12).forEach(function(p,i){ if(i%2===0) a+=card(p); else b+=card(p); });
-      A.innerHTML=a; B.innerHTML=b;
+      empty.hidden=true; empty.innerHTML=''; grid.style.display='grid';
+      grid.innerHTML=rows.slice(0,12).map(card).join('');
     }
     chips.addEventListener('click',function(e){
       var b=e.target.closest?e.target.closest('button[data-f]'):null;
       if(!b) return;
-      filter=b.getAttribute('data-f');
-      Array.prototype.forEach.call(chips.querySelectorAll('button'),function(x){ x.classList.toggle('on',x===b); });
+      filter=b.getAttribute('data-f')||'all';
       render();
     });
     render();
-    fetch('/api/community/posts?limit_n=12').then(function(r){ return r.json(); }).then(function(d){
-      posts=((d&&d.posts)||[]).slice(0,12);
-      state='ready'; render();
-    }).catch(function(){ posts=[]; state='ready'; render(); });
+    fetch('/api/places?limit_n=40').then(function(r){ return r.json(); }).then(function(d){
+      items=arr(d); state='ready'; render();
+    }).catch(function(){ items=[]; state='ready'; render(); });
   })();
 
   /* ---------- #p-more 顶部搜索：从「全部功能」里找 ---------- */

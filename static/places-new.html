@@ -68,6 +68,8 @@
   var meta = await LH.api('GET','/api/places/meta');
   document.getElementById('category').innerHTML = '<option value="">请选择</option>' +
     meta.categories.map(function(c){ return '<option value="'+LH.esc(c.id)+'">'+LH.esc(c.label)+'</option>'; }).join('');
+  var pre = (LH.qs && LH.qs('category')) || '';
+  if (pre) document.getElementById('category').value = pre;
   var files = [];
   document.getElementById('photos').addEventListener('change', async function(){
     var incoming = Array.prototype.slice.call(this.files||[]);

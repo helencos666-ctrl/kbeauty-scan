@@ -1,4 +1,4 @@
-"""首页改版后的找商家入口检查：找商家只在「全部功能」出现，首页改用路线/翻译 + 吃喝玩乐 + 广告 + 附近推荐 + 韩友圈分享。
+"""首页改版后的找商家入口检查：找商家只在「全部功能」出现，首页改用路线/翻译 + 吃喝玩乐 + 广告 + 附近推荐 + 吃喝玩乐推荐。
 python test/test_merchant_nav.py"""
 import os, re
 
@@ -55,8 +55,9 @@ check("home 广告轮播四张", all("/static/home-ads/ad-%d.jpg?v=84" % i in ho
       and 'class="ads' in home and "adsDots" in home)
 check("home 附近推荐", "附近推荐" in home and 'data-sort="dist"' in home and 'data-sort="rec"' in home
       and "/api/places" in index)
-check("home 韩友圈分享", "韩友圈分享" in home and "/api/community/posts" in index
-      and all(w in home for w in ["全部", "美食", "风景", "自拍"]))
+check("home 吃喝玩乐推荐", "playBlk" in home and "/api/places?limit_n=40" in index
+      and all(w in home for w in ["全部", "美食", "咖啡", "购物", "景点", "酒店", "医美"])
+      and "韩友圈分享" not in home and "风景" not in home and "自拍" not in home)
 check("home 开业活动条保留", 'id="openPromo"' in home and "开业活动" in index and "/api/opening-promo" in index)
 check("home 没有出发前 chips", 'class="chips home-low"' not in index and "出发前" not in index)
 check("home 没有示例店名", not any(w in home for w in ["广藏市场", "星巴克", "明洞乐天免税"]))
