@@ -212,39 +212,14 @@ table.tiers .mbadge{white-space:nowrap;margin:0}
 .quick button{border:0;border-radius:16px;padding:6px 12px;background:#E3EEEC;font-family:inherit;font-size:13px;cursor:pointer}
 
 /* ---- 韩友圈：首页头图（已精简：只留标题 + 全部频道）、分段标签、交友、按行程找话题 ---- */
-/* 韩友圈首页顶栏（关注 / 发现 / 地区） */
-header.xbar{position:sticky;top:0;z-index:20;display:flex;align-items:center;gap:2px;background:#fff;color:#111;padding:calc(6px + env(safe-area-inset-top)) 4px 0;border-radius:0;border-bottom:1px solid #f0f0f0}
+/* 韩友圈首页顶栏：关注 / 发现 / 同城（单行纯文字，白底） */
+header.xbar{position:sticky;top:0;z-index:20;display:flex;align-items:flex-end;justify-content:center;background:#fff;color:#111;padding:calc(8px + env(safe-area-inset-top)) 16px 0;border-radius:0;border-bottom:1px solid #f0f0f0;min-height:0}
 header.xbar a{color:#222}
-.xbar-side{width:44px;height:44px;flex:none;display:flex;align-items:center;justify-content:center;border:0;background:none;color:#222;text-decoration:none;font-size:20px;cursor:pointer;padding:0;font-family:inherit;line-height:1}
-.xtabs{flex:1;display:flex;align-items:flex-end;justify-content:center;gap:22px;min-width:0}
-.xtabs button{border:0;background:none;font-family:inherit;font-size:16px;color:#666;padding:10px 2px 11px;cursor:pointer;position:relative;font-weight:500;line-height:1.2;white-space:nowrap}
-.xtabs button.on{color:#111;font-weight:800}
-.xtabs button.on::after{content:"";position:absolute;left:50%;bottom:3px;transform:translateX(-50%);width:20px;height:3px;border-radius:2px;background:#FF2442}
+.xtabs{display:flex;align-items:flex-end;justify-content:center;gap:36px;width:100%;max-width:390px;margin:0 auto;flex-wrap:nowrap}
+.xtabs button{flex:none;border:0;border-radius:0;background:none;box-shadow:none;font-family:inherit;font-size:17px;color:#8a8a8a;padding:8px 0 11px;cursor:pointer;position:relative;font-weight:500;line-height:1.2;white-space:nowrap}
+.xtabs button.on{color:#111;font-weight:700;background:none}
+.xtabs button.on::after{content:"";position:absolute;left:50%;bottom:3px;transform:translateX(-50%);width:16px;height:3px;border-radius:2px;background:#FF2442}
 main.home{margin-top:0;padding-top:10px}
-.searchbar{position:sticky;top:calc(44px + env(safe-area-inset-top));z-index:19;background:#fff;padding:8px 16px 10px;border-bottom:1px solid #f0f0f0}
-.searchbar input{width:100%;border:0;border-radius:18px;background:#f5f5f5;padding:8px 14px;font-size:15px;font-family:inherit;outline:none}
-.citysheet{position:fixed;inset:0;z-index:40;background:rgba(0,0,0,.4);display:flex;align-items:flex-end;justify-content:center}
-.citysheet[hidden]{display:none}
-.citysheet-in{width:100%;max-width:560px;background:#fff;border-radius:16px 16px 0 0;padding:8px 16px calc(16px + env(safe-area-inset-bottom))}
-.citysheet-hd{text-align:center;font-weight:700;padding:10px 0 6px}
-.citylist button{display:block;width:100%;border:0;border-top:1px solid #f2f2f2;background:#fff;padding:14px 8px;font-size:16px;font-family:inherit;cursor:pointer;color:#222}
-.citylist button.on{color:#FF2442;font-weight:700}
-.city-cancel{display:block;width:100%;margin-top:8px;border:0;border-radius:12px;background:#f5f5f5;padding:12px;font-size:15px;font-family:inherit;cursor:pointer}
-.achipline{display:flex;gap:8px;overflow-x:auto;padding:2px 0 10px;-webkit-overflow-scrolling:touch;scrollbar-width:none}
-.achipline::-webkit-scrollbar{display:none}
-.achipline button{flex:none;border:1px solid #eee;background:#fff;border-radius:16px;padding:6px 12px;font-size:13px;font-family:inherit;color:#333;white-space:nowrap;cursor:pointer}
-.achipline button.on{border-color:#FF2442;color:#FF2442;font-weight:700}
-.amap-row{display:flex;gap:8px;align-items:stretch;margin:0 0 10px}
-.amap-card{flex:1;display:flex;align-items:flex-end;min-height:76px;padding:10px 12px;border:0;border-radius:12px;text-align:left;font-family:inherit;font-size:14px;font-weight:700;color:#1a3a2a;cursor:pointer;background:linear-gradient(180deg,rgba(255,255,255,.15),rgba(20,40,30,.28)),linear-gradient(90deg,rgba(180,200,170,.5) 1px,transparent 1px) 0 0/16px 16px,linear-gradient(rgba(180,200,170,.5) 1px,transparent 1px) 0 0/16px 16px,#e4efe0}
-.acity-sw{flex:none;width:76px;border:0;border-radius:12px;background:#f5f5f5;font-family:inherit;font-size:14px;font-weight:700;cursor:pointer;color:#222}
-.adist{display:flex;align-items:center;gap:8px;margin:0 0 12px;flex-wrap:wrap}
-.adist-label{font-size:13px;color:#666}
-.adist button{border:1px solid #e5e5e5;background:#fff;border-radius:14px;padding:4px 12px;font-size:13px;font-family:inherit;color:#333;cursor:pointer}
-.adist button.on{border-color:#FF2442;color:#FF2442;font-weight:700;background:#fff}
-.mapsheet-in{max-height:85vh;overflow:auto}
-.static-map{height:140px;border-radius:12px;margin:4px 0 12px;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:4px;color:#1a3a2a;font-weight:700;background:linear-gradient(180deg,rgba(255,255,255,.2),rgba(20,40,30,.2)),linear-gradient(90deg,rgba(180,200,170,.55) 1px,transparent 1px) 0 0/16px 16px,linear-gradient(rgba(180,200,170,.55) 1px,transparent 1px) 0 0/16px 16px,#e4efe0}
-.static-map span{font-size:22px}
-.map-list{min-height:40px}
 .meet{border-radius:18px;padding:14px;margin-bottom:14px;background:linear-gradient(160deg,#E6F3F1 0%,#fff 55%);border:1.5px solid #B7D4D1}
 .meet-hd{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:10px}
 .meet-hd b{display:block;font-size:18px;color:var(--primary)}

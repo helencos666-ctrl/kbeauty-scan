@@ -10,73 +10,20 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="旅韩助手">
 <link rel="manifest" href="/manifest.webmanifest">
-<link rel="apple-touch-icon" href="/static/icons/apple-touch-icon.png?v=81">
-<link rel="icon" type="image/png" sizes="192x192" href="/static/icons/icon-192.png?v=81">
-<link rel="stylesheet" href="/static/pwa.css?v=81">
-<link rel="stylesheet" href="/static/community.css?v=81">
+<link rel="apple-touch-icon" href="/static/icons/apple-touch-icon.png?v=82">
+<link rel="icon" type="image/png" sizes="192x192" href="/static/icons/icon-192.png?v=82">
+<link rel="stylesheet" href="/static/pwa.css?v=82">
+<link rel="stylesheet" href="/static/community.css?v=82">
 </head>
 <body>
 <header class="xbar">
-  <a class="xbar-side" href="/community/boards" title="全部频道" aria-label="全部频道">☰</a>
   <div class="xtabs" id="tabs" role="tablist">
     <button type="button" data-t="follow">关注</button>
     <button type="button" data-t="discover">发现</button>
-    <button type="button" data-t="area" id="areaTab">首尔</button>
+    <button type="button" data-t="area">同城</button>
   </div>
-  <button type="button" class="xbar-side" id="searchBtn" aria-label="搜索">🔍</button>
 </header>
-<div id="searchBar" class="searchbar" hidden>
-  <form id="searchForm" action="/community" method="get">
-    <input type="search" id="searchQ" name="q" placeholder="搜索帖子" maxlength="40" enterkeyhint="search" aria-label="搜索帖子">
-  </form>
-</div>
-<div id="citySheet" class="citysheet" hidden>
-  <div class="citysheet-in">
-    <div class="citysheet-hd">选择地区</div>
-    <div class="citylist" id="cityList"></div>
-    <button type="button" class="city-cancel" id="cityCancel">取消</button>
-  </div>
-</div>
 <main class="home">
-  <div id="areaPanel" hidden>
-    <div class="achipline" id="areaChips">
-      <button type="button" data-dist="" class="on" id="districtBtn">全城 ▾</button>
-      <button type="button" data-cat="food">美食</button>
-      <button type="button" data-cat="coffee">咖啡</button>
-      <button type="button" data-cat="shop">购物</button>
-      <button type="button" data-cat="sight">景点</button>
-      <button type="button" data-cat="kpop">追星</button>
-      <button type="button" data-cat="show">展览演出</button>
-      <button type="button" data-cat="citywalk">CityWalk</button>
-    </div>
-    <div class="amap-row">
-      <button type="button" class="amap-card" id="mapExplore">📍 地图探索 ›</button>
-      <button type="button" class="acity-sw" id="citySwitch">首尔 ⇋</button>
-    </div>
-    <div class="adist">
-      <span class="adist-label">位置距离</span>
-      <button type="button" data-km="0" class="on">全城</button>
-      <button type="button" data-km="1">1km</button>
-      <button type="button" data-km="3">3km</button>
-      <button type="button" data-km="5">5km</button>
-    </div>
-  </div>
-  <div id="districtSheet" class="citysheet" hidden>
-    <div class="citysheet-in">
-      <div class="citysheet-hd">选择商圈</div>
-      <div class="citylist" id="districtList"></div>
-      <button type="button" class="city-cancel" id="districtCancel">取消</button>
-    </div>
-  </div>
-  <div id="mapSheet" class="citysheet" hidden>
-    <div class="citysheet-in mapsheet-in">
-      <div class="citysheet-hd">地图探索</div>
-      <div class="static-map" id="staticMap"><span>📍</span><b id="mapCityName">首尔</b></div>
-      <div id="mapList" class="map-list"></div>
-      <button type="button" class="city-cancel" id="mapClose">关闭</button>
-    </div>
-  </div>
-
   <div id="boardBanner"></div>
   <div id="boardHead" class="card" style="display:none"></div>
   <div class="subcats" id="subcats" style="display:none"></div>
@@ -166,7 +113,7 @@
   <a href="/?tab=more"><i>☰</i>全部</a>
   <a href="/me"><i>👤</i>我的</a>
 </nav>
-<script src="/static/community.js?v=81"></script>
+<script src="/static/community.js?v=82"></script>
 <script src="/static/banners.js"></script>
 <script>
 var WARN = {
@@ -187,8 +134,8 @@ var WARN = {
   logistics: '📦 物流信息由商家自行发布并负责。请确认运费、时效、保价和清关责任，违禁品不得寄递，谨慎预付全款并保留单号凭证。',
 };
 var MB = ['hotel','car','clinic','agency','daigou','guide','kpop','logistics'], SUBC = {}, btag = LH.qs('tag') || '';
-// 允许的 tab：旧 recommend/featured/latest/news/hot 回退到发现；topic / follow 保留
-var ALLOWED_TABS = ['discover', 'follow', 'area', 'search', 'topic'];
+// 允许的 tab：旧 recommend/featured/latest/news/hot/search 回退到发现；topic / follow 保留
+var ALLOWED_TABS = ['discover', 'follow', 'area', 'topic'];
 var CITIES = ['首尔','济州','釜山','仁川','大邱','光州','大田'];
 var CITY_BOX = [
   ['济州',126.1,33.1,126.98,33.62],['釜山',128.75,34.95,129.35,35.4],
@@ -198,15 +145,11 @@ var CITY_BOX = [
 ];
 var board = LH.qs('board') || '', tab = LH.qs('tab') || 'discover', next = 0, fb = false, boards = {}, user = null;
 var city = localStorage.getItem('lh_feed_city') || '首尔', geoTried = false;
-var DISTRICTS = {首尔:['江南','明洞','弘大','东大门','梨泰院','新村','蚕室'],济州:['济州市','西归浦','城山','中文'],釜山:['海云台','西面','广安','南浦'],仁川:['松岛','东仁川','月尾岛'],大邱:['东城路','寿城'],光州:['忠壮路'],大田:['恩行洞']};
-var areaCat = '', areaDistrict = '', areaKm = 0, userLat = null, userLng = null;
 if (CITIES.indexOf(city) < 0) city = '首尔';
 var listEl = document.getElementById('list'), moreEl = document.getElementById('more');
-var searchBar = document.getElementById('searchBar'), searchQ = document.getElementById('searchQ');
 function tabUrl(t){
   if (t === 'follow') return '/community?tab=follow';
-  if (t === 'area') return '/community?tab=area&city=' + encodeURIComponent(city);
-  if (t === 'search') return '/community?tab=search&q=' + encodeURIComponent((searchQ.value || '').trim());
+  if (t === 'area') return '/community?tab=area';
   if (t === 'topic') return '/community?tab=topic';
   return '/community';
 }
@@ -227,118 +170,22 @@ function maybeGeo(){
   if (geoTried || !navigator.geolocation) return;
   geoTried = true;
   navigator.geolocation.getCurrentPosition(function(pos){
-    userLat = pos.coords.latitude; userLng = pos.coords.longitude;
-    var c = cityFromCoords(userLat, userLng);
-    if (c && c !== city && !localStorage.getItem('lh_feed_city_picked')){
+    var c = cityFromCoords(pos.coords.latitude, pos.coords.longitude);
+    if (c && c !== city){
       city = c;
       localStorage.setItem('lh_feed_city', city);
       if (tab === 'area' && !board) history.replaceState(null, '', tabUrl('area'));
+      render();
     }
-    render();
   }, function(){}, {maximumAge:600000, timeout:8000, enableHighAccuracy:false});
 }
-function openCitySheet(){
-  var box = document.getElementById('cityList');
-  box.innerHTML = CITIES.map(function(c){ return '<button type="button" data-city="' + c + '" class="' + (c === city ? 'on' : '') + '">' + c + '</button>'; }).join('');
-  document.getElementById('citySheet').hidden = false;
-}
-document.getElementById('cityCancel').onclick = function(){ document.getElementById('citySheet').hidden = true; };
-document.getElementById('citySheet').onclick = function(e){ if (e.target.id === 'citySheet') this.hidden = true; };
-document.getElementById('cityList').onclick = function(e){
-  var b = e.target.closest('button'); if (!b) return;
-  city = b.dataset.city;
-  areaDistrict = '';
-  localStorage.setItem('lh_feed_city', city);
-  localStorage.setItem('lh_feed_city_picked', '1');
-  document.getElementById('citySheet').hidden = true;
-  setTab('area');
-};
-document.getElementById('searchBtn').onclick = function(){
-  var show = searchBar.hidden;
-  searchBar.hidden = !show;
-  if (show) searchQ.focus();
-};
-document.getElementById('searchForm').onsubmit = function(e){
-  e.preventDefault();
-  if (!(searchQ.value || '').trim()) return;
-  setTab('search');
-};
 document.querySelectorAll('#tabs button').forEach(function(b){
-  b.onclick = function(){
-    if (b.dataset.t === 'area' && tab === 'area' && !board) openCitySheet();
-    else setTab(b.dataset.t);
-  };
+  b.onclick = function(){ setTab(b.dataset.t); };
 });
-document.getElementById('citySwitch').onclick = function(){ openCitySheet(); };
-document.getElementById('districtBtn').onclick = function(){ openDistrictSheet(); };
-document.getElementById('districtCancel').onclick = function(){ document.getElementById('districtSheet').hidden = true; };
-document.getElementById('districtSheet').onclick = function(e){ if (e.target.id === 'districtSheet') this.hidden = true; };
-document.getElementById('districtList').onclick = function(e){
-  var b = e.target.closest('button'); if (!b) return;
-  areaDistrict = b.dataset.dist || '';
-  document.getElementById('districtSheet').hidden = true;
-  if (tab === 'area' && !board) history.replaceState(null, '', tabUrl('area'));
-  render();
-};
-document.getElementById('areaChips').onclick = function(e){
-  var b = e.target.closest('button'); if (!b || b.id === 'districtBtn') return;
-  areaCat = (areaCat === b.dataset.cat) ? '' : (b.dataset.cat || '');
-  render();
-};
-document.querySelectorAll('.adist button').forEach(function(b){
-  b.onclick = function(){
-    var km = parseInt(b.dataset.km, 10) || 0;
-    if (!km){ areaKm = 0; render(); return; }
-    function apply(){ areaKm = (userLat == null) ? 0 : km; render(); }
-    if (userLat == null && navigator.geolocation){
-      navigator.geolocation.getCurrentPosition(function(pos){
-        userLat = pos.coords.latitude; userLng = pos.coords.longitude; apply();
-      }, function(){ areaKm = 0; render(); }, {maximumAge:600000, timeout:8000, enableHighAccuracy:false});
-    } else apply();
-  };
-});
-document.getElementById('mapExplore').onclick = function(){ openMapSheet(); };
-document.getElementById('mapClose').onclick = function(){ document.getElementById('mapSheet').hidden = true; };
-document.getElementById('mapSheet').onclick = function(e){ if (e.target.id === 'mapSheet') this.hidden = true; };
-function openDistrictSheet(){
-  var list = (DISTRICTS[city] || []).slice();
-  var box = document.getElementById('districtList');
-  box.innerHTML = '<button type="button" data-dist="" class="' + (!areaDistrict ? 'on' : '') + '">全城</button>' +
-    list.map(function(d){ return '<button type="button" data-dist="' + d + '" class="' + (d === areaDistrict ? 'on' : '') + '">' + d + '</button>'; }).join('');
-  document.getElementById('districtSheet').hidden = false;
-}
-function areaFeedQuery(){
-  var u = '/api/community/feed?tab=latest&area=' + encodeURIComponent(city);
-  if (areaDistrict) u += '&district=' + encodeURIComponent(areaDistrict);
-  if (areaCat) u += '&cat=' + encodeURIComponent(areaCat);
-  if (areaKm && userLat != null) u += '&km=' + areaKm + '&lat=' + userLat + '&lng=' + userLng;
-  return u;
-}
-async function openMapSheet(){
-  document.getElementById('mapCityName').textContent = city + (areaDistrict ? ' · ' + areaDistrict : '');
-  document.getElementById('mapSheet').hidden = false;
-  var box = document.getElementById('mapList');
-  box.innerHTML = '<div class="loading">加载中…</div>';
-  try {
-    var d = await LH.api('GET', areaFeedQuery() + '&limit_n=10');
-    if (!d.posts || !d.posts.length){ box.innerHTML = '<div class="empty" style="padding:10px">这一带暂时还没有帖子</div>'; return; }
-    box.innerHTML = d.posts.map(function(p){ return LH.postItem(p, 0); }).join('');
-  } catch(e){ box.innerHTML = '<div class="empty" style="padding:10px">' + LH.esc(e.message) + '</div>'; }
-}
-function syncAreaPanel(){
-  var on = !board && tab === 'area';
-  document.getElementById('areaPanel').hidden = !on;
-  document.getElementById('citySwitch').textContent = city + ' ⇋';
-  document.getElementById('districtBtn').textContent = (areaDistrict || '全城') + ' ▾';
-  document.querySelectorAll('#areaChips button[data-cat]').forEach(function(b){ b.className = (b.dataset.cat === areaCat) ? 'on' : ''; });
-  document.querySelectorAll('.adist button').forEach(function(b){ b.className = (String(areaKm) === b.dataset.km) ? 'on' : ''; });
-}
 function render(){
   document.querySelectorAll('#tabs button').forEach(function(b){ b.className = (!board && b.dataset.t === tab) ? 'on' : ''; });
-  document.getElementById('areaTab').textContent = city;
   var home = !board && tab === 'discover';
   document.getElementById('homeBlocks').style.display = home ? 'block' : 'none';
-  syncAreaPanel();
   var bh = document.getElementById('boardHead'), w = document.getElementById('bwarn');
   w.textContent = WARN[board] || ''; w.style.display = WARN[board] ? 'block' : 'none';
   document.getElementById('fab').href = '/community/new' + (board ? '?board=' + board : '');
@@ -371,8 +218,7 @@ async function joinState(){
 }
 function feedUrl(){
   if (board) return '/api/community/posts?board=' + board + (btag ? '&tag=' + btag : '') + (next ? '&before=' + next : '');
-  if (tab === 'search') return '/api/community/feed?tab=latest&q=' + encodeURIComponent((searchQ.value || LH.qs('q') || '').trim()) + '&offset=' + next;
-  if (tab === 'area') return areaFeedQuery() + '&offset=' + next;
+  if (tab === 'area') return '/api/community/feed?tab=latest&area=' + encodeURIComponent(city) + '&offset=' + next;
   if (tab === 'follow') return '/api/community/feed?tab=follow&offset=' + next;
   return '/api/community/feed?tab=recommend&offset=' + next + (fb ? '&fb=1' : '');
 }
@@ -436,8 +282,8 @@ async function loadHome(){
   if (d){ boards = d.boards || {}; user = d.user; if (d.merchant_boards) MB = d.merchant_boards; }
   try { SUBC = (await LH.api('GET', '/api/merch/meta')).subcats || {}; } catch(e){}
   if (board && !boards[board]) board = '';
-  // 旧链接 ?tab=news / hot / recommend / featured / latest 回退到「发现」（feed?tab=news/hot 仍由发现页栏目调用）
-  if (tab === 'news' || tab === 'hot' || tab === 'recommend' || tab === 'featured' || tab === 'latest'){
+  // 旧链接 ?tab=news / hot / recommend / featured / latest / search 回退到「发现」（feed?tab=news/hot 仍由发现页栏目调用）
+  if (tab === 'news' || tab === 'hot' || tab === 'recommend' || tab === 'featured' || tab === 'latest' || tab === 'search'){
     tab = 'discover'; board = '';
     try { history.replaceState(null, '', '/community'); } catch(e){}
   } else if (ALLOWED_TABS.indexOf(tab) < 0) tab = 'discover';
@@ -446,14 +292,10 @@ async function loadHome(){
     if (c0 && CITIES.indexOf(c0) >= 0){ city = c0; localStorage.setItem('lh_feed_city', city); }
     maybeGeo();
   }
-  if (tab === 'search'){
-    var q0 = LH.qs('q') || '';
-    if (q0){ searchBar.hidden = false; searchQ.value = q0; }
-  }
   // ?tab=topic（往期话题）和 ?tab=follow（未登录也留在 follow，由 load() 提示登录）都不改写
   render();
 })();
 </script>
-<script src="/static/pwa.js?v=81" defer></script>
+<script src="/static/pwa.js?v=82" defer></script>
 </body>
 </html>
