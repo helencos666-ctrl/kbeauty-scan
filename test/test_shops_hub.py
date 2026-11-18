@@ -71,7 +71,7 @@ check("shops 没有 LH.userbar(带参数) 的个人卡调用",
 # ---------- 2. 精选商家广告位：只用已有 4 张 ----------
 check("shops 有「精选商家」", "精选商家" in shops)
 for i in (1, 2, 3, 4):
-    check("shops 使用已有首页广告 ad-%d" % i, ("/static/home-ads/ad-%d.jpg?v=75" % i) in shops)
+    check("shops 使用已有首页广告 ad-%d" % i, ("/static/home-ads/ad-%d.jpg?v=76" % i) in shops)
 check("shops 恰好 4 张广告卡（没有第五家）", shops.count('class="ad-card"') == 4, shops.count('class="ad-card"'))
 for name in ("咸草酱蟹", "大家烤肉", "DAYONE", "蓝憬通讯"):
     check("shops 广告店名：%s" % name, name in shops)
@@ -102,12 +102,11 @@ check("shops 卡片有「立即咨询」", "立即咨询" in shops and "LH.consu
 check("shops 咨询按钮不包在整卡链接里", re.search(r'<a class="mcover"', shops) is not None and '<article class="mpost">' in shops)
 check("shops 空状态「暂无商家发布」", "暂无商家发布" in shops)
 check("shops 入驻按钮文案", "我是商家，申请入驻/发布" in shops)
-check("shops 商家发布下方有生活在韩国", 'id="localTitle"' in shops and shops.index('id="localTitle"') > shops.index('id="feedTitle"'))
-check("shops 生活在韩国复用六个频道卡片",
-      all(w in shops for w in ("韩友圈", "租房", "招聘 · 工作", "二手 · 闲置", "签证", "留学"))
-      and all(u in shops for u in ("/community", "/community?board=rent", "/community?board=jobs",
-                                   "/community?board=used", "/community?board=visa", "/community?board=study")))
-check("shops 生活在韩国链到独立页", 'href="/local"' in shops and "查看独立页面" in shops)
+check("shops 商家发布下方有行程安排", 'id="tripTitle"' in shops and shops.index('id="tripTitle"') > shops.index('id="feedTitle"'))
+check("shops 行程安排有入口卡片",
+      all(w in shops for w in ("按天安排", "热门地点", "查地铁路线", "路线卡片"))
+      and "/trips" in shops and "/?tab=sub" in shops and "/itineraries" in shops)
+check("shops 行程安排链到独立页", 'href="/trips"' in shops and "查看独立页面" in shops and "生活在韩国" not in shops)
 
 check("shops 入驻按钮链到 /partner", re.search(r'href="/partner"[^>]*>我是商家，申请入驻/发布', shops) is not None)
 check("shops 有帖子时也保留入驻按钮（按钮在信息流外）",
@@ -122,9 +121,9 @@ check("shops 忽略旧 tab/type 参数，不做重定向",
 check("shops 有 banner 位", '<div data-banner-slot="shops"></div>' in shops)
 check("shops 用汉江青 theme-color", 'name="theme-color" content="#146E68"' in shops)
 check("shops 加载 pwa.css / community.css / community.js / banners.js",
-      all(x in shops for x in ("/static/pwa.css?v=75", "/static/community.css?v=75",
-                               "/static/community.js?v=75", "/static/banners.js")))
-check("shops 加载 pwa.js?v=75 defer", '<script src="/static/pwa.js?v=75" defer></script>' in shops)
+      all(x in shops for x in ("/static/pwa.css?v=76", "/static/community.css?v=76",
+                               "/static/community.js?v=76", "/static/banners.js")))
+check("shops 加载 pwa.js?v=76 defer", '<script src="/static/pwa.js?v=76" defer></script>' in shops)
 check("shops 保留底部导航", "<nav" in shops and "底部导航" in shops)
 check("shops 免责声明完整",
       all(w in shops for w in ("免费信息网站", "仅供参考", "不是旅行社", "不代办签证")))
@@ -204,7 +203,7 @@ for name, txt in (("shops.html", shops), ("community-new.html", newpost)):
           [w for w in wx_solicit if w in txt])
 for name, txt in (("shops.html", shops), ("community-new.html", newpost)):
     vers = re.findall(r"\?v=(\d+)", txt)
-    check("%s 仍使用 ?v=75" % name, bool(vers) and set(vers) == {"75"}, set(vers))
+    check("%s 仍使用 ?v=76" % name, bool(vers) and set(vers) == {"76"}, set(vers))
 
 print("%s passed, %s failed, %s skipped" % (ok, fail, skip))
 if fail:

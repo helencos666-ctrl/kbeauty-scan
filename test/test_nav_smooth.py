@@ -26,16 +26,15 @@ index = read("static/index.html")
 community = read("static/community.html")
 shops = read("static/shops.html")
 trips = read("static/trips.html")
-local = read("static/local.html")
 me = read("static/me.html")
 seo = read("seo.py")
 lanjing = read("lanjing_seed.py")
 
 # ---------- Service Worker ----------
-check("sw.js CACHE is lvhan-shell-v75", "lvhan-shell-v75" in sw)
+check("sw.js CACHE is lvhan-shell-v76", "lvhan-shell-v76" in sw)
 check("sw.js 无旧缓存名 v63", "lvhan-shell-v63" not in sw)
-check("sw.js 使用 ?v=75", "?v=75" in sw)
-check("sw.js SHELL 含 pwa.js?v=75", "/static/pwa.js?v=75" in sw)
+check("sw.js 使用 ?v=76", "?v=76" in sw)
+check("sw.js SHELL 含 pwa.js?v=76", "/static/pwa.js?v=76" in sw)
 
 # 不应再把任意导航回退到首页文档
 fb = re.search(
@@ -63,7 +62,7 @@ check("pwa.js pageshow 清掉 lh-overlay-open", "classList.remove('lh-overlay-op
 check("七格链接完整",
       all(h in pwa for h in ("href:'/'", "href:'/community?tab=follow'",
                              "href:'/community/new'", "href:'/festival'",
-                             "href:'/shops'", "href:'/local'", "href:'/me'")))
+                             "href:'/shops'", "href:'/trips'", "href:'/me'")))
 
 # ---------- 首页：返回键与路线恢复 ----------
 check("首页 #back 不再 history.back()",
@@ -82,7 +81,7 @@ check("saveLastRoute 不再偷偷改成 tab=sub",
       "history.replaceState({t:'sub'},'','/?tab=sub')" not in index)
 check("首页仍有七格且首页 href=/",
       'href="/" data-nav="home"' in index and 'href="/community?tab=follow"' in index
-      and 'href="/festival"' in index and 'href="/shops"' in index and 'href="/local"' in index and 'data-nav="me"' in index)
+      and 'href="/festival"' in index and 'href="/shops"' in index and 'href="/trips"' in index and 'data-nav="me"' in index)
 
 # ---------- 关注 / 商业服务 / 行程 ----------
 check("community 未登录不再把 follow 改成 recommend",
@@ -94,14 +93,12 @@ check("shops 无循环 location 重定向",
       and "location.replace" not in shops)
 check("trips 返回键 href=/",
       re.search(r'<a class="back" href="/"', trips) is not None)
-check("local 返回键 href=/",
-      re.search(r'<a class="back" href="/"', local) is not None)
-check("trips/local/me 不用 javascript:history.back",
-      all("javascript:history.back" not in x for x in (trips, local, me, community, shops, index)))
+check("trips/me 不用 javascript:history.back",
+      all("javascript:history.back" not in x for x in (trips, me, community, shops, index)))
 
 # ---------- 路由无死循环迹象（静态） ----------
-check("seo 有 /trips 和 /local 和 /shops 和 /community",
-      all(s in seo for s in ('"/trips"', '"/local"', '"/shops"', '"/community"')))
+check("seo 有 /trips 和 /shops 和 /community",
+      all(s in seo for s in ('"/trips"', '"/shops"', '"/community"')))
 check("/ads/lanjing 只 302 到帖子或 /community，不回自己",
       'AD_PATH = "/ads/lanjing"' in lanjing
       and 'RedirectResponse("/ads/lanjing"' not in lanjing

@@ -1,4 +1,4 @@
-"""纯静态检查：首页七格底部导航、?v=75 缓存版本、新页面（trips/local）与禁词。
+"""纯静态检查：首页七格底部导航、?v=76 缓存版本、新页面（trips）与禁词。
 不需要启服务，直接 python test/test_home_nav.py 即可。"""
 import os, re
 
@@ -38,29 +38,29 @@ PAGES = {
 }
 
 # ---------- 1. 缓存版本 v63 ----------
-check("sw.js CACHE is lvhan-shell-v75", "'lvhan-shell-v75'" in sw or '"lvhan-shell-v75"' in sw)
-check("sw.js uses ?v=75", "?v=75" in sw)
+check("sw.js CACHE is lvhan-shell-v76", "'lvhan-shell-v76'" in sw or '"lvhan-shell-v76"' in sw)
+check("sw.js uses ?v=76", "?v=76" in sw)
 check("sw.js has no ?v=60", "?v=60" not in sw)
 for name, txt in PAGES.items():
-    check("%s uses ?v=75 (or tabbar)" % name, ("?v=75" in txt) or ("tabbar" in txt))
+    check("%s uses ?v=76 (or tabbar)" % name, ("?v=76" in txt) or ("tabbar" in txt))
     check("%s has no ?v=60" % name, "?v=60" not in txt)
-check("sw.js SHELL has four home ads", all("/static/home-ads/ad-%d.jpg?v=75" % i in sw for i in (1, 2, 3, 4)))
-check("sw.js SHELL has /trips and /local", "'/trips'" in sw and "'/local'" in sw)
-check("sw.js SHELL has trips.html/local.html", "/static/trips.html" in sw and "/static/local.html" in sw)
+check("sw.js SHELL has four home ads", all("/static/home-ads/ad-%d.jpg?v=76" % i in sw for i in (1, 2, 3, 4)))
+check("sw.js SHELL has /trips", "'/trips'" in sw and "'/local'" not in sw)
+check("sw.js SHELL has trips.html", "/static/trips.html" in sw and "/static/local.html" not in sw)
 
 # ---------- 2. 底部七格 ----------
 m = re.search(r'<nav class="tabbar"[^>]*>.*?</nav>', index, re.S)
 navblock = m.group(0) if m else ""
 check("index has nav.tabbar", bool(navblock))
-check("七格文案 首页/关注/发布/购物节/商业服务/生活在韩国/我的",
-      all(w in navblock for w in ["首页", "关注", "发布", "购物节", "商业服务", "生活在韩国", "我的"]))
+check("七格文案 首页/关注/发布/购物节/商业服务/行程安排/我的",
+      all(w in navblock for w in ["首页", "关注", "发布", "购物节", "商业服务", "行程安排", "我的"]))
 check("关注 -> /community?tab=follow", 'href="/community?tab=follow"' in navblock and 'data-nav="follow"' in navblock)
 check("发布 -> /community/new", 'href="/community/new"' in navblock and 'class="pub"' in navblock and "＋" in navblock)
 check("购物节在发布和商业服务之间",
       navblock.find('data-nav="post"') < navblock.find('data-nav="festival"') < navblock.find('data-nav="services"'))
 check("购物节 -> /festival", 'href="/festival"' in navblock and 'data-nav="festival"' in navblock and 'class="fest"' in navblock and "冬季" in navblock)
 check("商业服务 -> /shops", 'href="/shops"' in navblock and 'data-nav="services"' in navblock)
-check("生活在韩国 -> /local", 'href="/local"' in navblock and 'data-nav="local"' in navblock and "生活在韩国" in navblock)
+check("行程安排 -> /trips", 'href="/trips"' in navblock and 'data-nav="trips"' in navblock and "行程安排" in navblock)
 check("首页 -> / 且 data-nav=home", re.search(r'<a href="/" data-nav="home"', navblock) is not None)
 check("首页默认点亮", 'data-nav="home" class="on"' in navblock)
 check("行程入口 -> /trips", 'href="/trips"' in index and "🗓️" in index)
@@ -73,9 +73,9 @@ for name, txt in (("me.html", me), ("trips.html", trips), ("local.html", local))
     n = re.search(r'<nav class="tabbar"[^>]*>.*?</nav>', txt, re.S)
     nb = n.group(0) if n else ""
     check("%s has seven-grid tabbar" % name,
-          bool(nb) and all(w in nb for w in ["首页", "关注", "发布", "购物节", "商业服务", "生活在韩国", "我的"])
+          bool(nb) and all(w in nb for w in ["首页", "关注", "发布", "购物节", "商业服务", "行程安排", "我的"])
           and nb.find('data-nav="post"') < nb.find('data-nav="festival"') < nb.find('data-nav="services"'))
-check("local.html 点亮 生活在韩国", 'data-nav="local" class="loc on"' in local)
+check("trips.html 点亮 行程安排", 'data-nav="trips"' in trips and "loc on" in trips)
 check("me.html 点亮最后一个「我的」", 'data-nav="me" class="me on"' in me)
 
 # ---------- 3. pwa.js 注入/校正 tabbar ----------
@@ -89,33 +89,30 @@ check("tabbar style is scoped", "nav.tabbar" in pwa_css and "nav.tabbar a.pub .p
 check("community.css does not override tabbar", "nav:not(.tabbar)" in comm_css)
 check("body has-tabbar padding", "body.has-tabbar" in pwa_css)
 
-# ---------- 4. local.html 六个频道 ----------
-check("local 韩友圈是六宫格第一张且链到韩友圈首页",
-      "loc-grid" in local and local.split('class="loc-grid"', 1)[1].find("韩友圈") < local.split('class="loc-grid"', 1)[1].find("租房")
-      and 'href="/community"' in local and "<b>韩友圈</b>" in local
-      and "/community?board=daily" not in local)
-for board, label in (("rent", "租房"), ("jobs", "招聘"), ("used", "二手"),
-                     ("visa", "签证"), ("study", "留学")):
-    check("local has %s" % label, ("/community?board=%s" % board) in local and label in local)
-check("local 标题是生活在韩国", "生活在韩国" in local and "在韩国生活的信息频道" not in local)
-check("pwa.js 含生活在韩国和我的", "生活在韩国" in pwa_js and "label:'我的'" in pwa_js and "label:'本地生活'" not in pwa_js)
+# ---------- 4. /local 改到行程安排 ----------
+guides = read_root("guides.py")
+check("/local 重定向到 /trips", "RedirectResponse" in guides and '"/trips"' in guides and "p_local" in guides)
+check("pwa.js currentKey 把 /local 和 /trips 点亮行程安排",
+      "p === '/trips'" in pwa_js and "return 'trips'" in pwa_js)
+check("trips 标题是行程安排", "行程安排" in trips and "即将上线" not in trips)
+check("pwa.js 含行程安排和我的", "行程安排" in pwa_js and "label:'我的'" in pwa_js and "生活在韩国" not in pwa_js)
 check("pwa.js currentKey 会点亮 /me", "p === '/me'" in pwa_js or 'p === "/me"' in pwa_js)
 check("pwa.js 为「我的」拉未读角标", "/api/me/summary" in pwa_js and "tab-dot" in pwa_js and "paintMeBadge" in pwa_js)
-check("pwa.css 生活在韩国 tab 单行缩小字号",
+check("pwa.css 长文案 tab 单行缩小字号",
       "nav.tabbar a.loc" in pwa_css and "white-space:nowrap" in pwa_css and "font-size:7.5px" in pwa_css)
 check("pwa.css 有购物节红金样式且小于发布",
       "nav.tabbar a.fest" in pwa_css and "fest-ico" in pwa_css and "width:36px" in pwa_css
       and "width:42px" in pwa_css)  # 发布 ＋ 仍为 42px，购物节图标 36px
 
-# ---------- 5. trips.html 即将上线 ----------
-check("trips is 即将上线", "即将上线" in trips or "即将" in trips)
-check("trips mentions 我的行程/大家分享/平台推荐",
-      all(w in trips for w in ["我的行程", "大家分享", "平台推荐"]))
+# ---------- 5. trips.html 行程安排 ----------
+check("trips is a planner not coming-soon", "行程安排" in trips and "即将上线" not in trips)
+check("trips loads presets and saves localStorage", "trip-presets.json" in trips and "lh_trip_plan" in trips and "localStorage" in trips)
+check("trips has pace labels", "宽裕" in trips and "刚好" in trips and "太赶" in trips)
+check("trips can add/edit/delete/reorder", all(w in trips for w in ("添加地点", "删除", "上移", "下移", "stay")))
+check("trips links subway planner", "/?tab=sub" in trips)
 check("trips links /itineraries", "/itineraries" in trips)
-check("trips has no sample store names",
-      not any(w in trips for w in ["广藏市场", "星巴克", "明洞乐天免税", "北村韩屋"]))
 check("trips has back and me", 'href="/"' in trips and 'href="/me"' in trips)
-check("trips loads pwa.js?v=75", "/static/pwa.js?v=75" in trips)
+check("trips loads pwa.js?v=76", "/static/pwa.js?v=76" in trips)
 
 
 # ---------- 5b. festival.html 韩国购物节 ----------

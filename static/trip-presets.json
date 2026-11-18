@@ -1,0 +1,949 @@
+{
+  "sources": [
+    "VisitKorea suggested itineraries（english.visitkorea.or.kr，首尔 3 日安排）",
+    "VisitKorea 景福宫闭馆信息与济州交通时间（2026-07 更新）",
+    "VisitSeoul 初次到访首尔行程（english.visitseoul.net）",
+    "韩国文化遗产厅宫阙闭馆日：景福宫、宗庙周二；昌德宫、德寿宫周一"
+  ],
+  "places": {
+    "gyeongbokgung": {
+      "name": "景福宫",
+      "city": "seoul",
+      "lat": 37.5796,
+      "lng": 126.977,
+      "station": "景福宫",
+      "stay": 120,
+      "note": "11–2 月 09:00–17:00，最后入场 16:00；周二闭馆（若周二是公休日则顺延）。"
+    },
+    "bukchon": {
+      "name": "北村韩屋村",
+      "city": "seoul",
+      "lat": 37.5826,
+      "lng": 126.9831,
+      "station": "安国",
+      "stay": 45
+    },
+    "insadong": {
+      "name": "仁寺洞",
+      "city": "seoul",
+      "lat": 37.574,
+      "lng": 126.985,
+      "station": "安国",
+      "stay": 60
+    },
+    "ntower": {
+      "name": "南山首尔塔",
+      "city": "seoul",
+      "lat": 37.5512,
+      "lng": 126.9882,
+      "station": "明洞",
+      "stay": 75
+    },
+    "gwangjang": {
+      "name": "广藏市场",
+      "city": "seoul",
+      "lat": 37.57,
+      "lng": 126.9996,
+      "station": "钟路5街",
+      "stay": 75
+    },
+    "myeongdong": {
+      "name": "明洞",
+      "city": "seoul",
+      "lat": 37.5636,
+      "lng": 126.9869,
+      "station": "明洞",
+      "stay": 90
+    },
+    "ddp": {
+      "name": "东大门设计广场",
+      "city": "seoul",
+      "lat": 37.5668,
+      "lng": 127.0094,
+      "station": "东大门历史文化公园",
+      "stay": 60
+    },
+    "hongdae": {
+      "name": "弘大",
+      "city": "seoul",
+      "lat": 37.5563,
+      "lng": 126.9236,
+      "station": "弘大入口",
+      "stay": 90
+    },
+    "seoulsky": {
+      "name": "乐天世界塔·首尔天空",
+      "city": "seoul",
+      "lat": 37.5126,
+      "lng": 127.1025,
+      "station": "蚕室",
+      "stay": 90
+    },
+    "coex": {
+      "name": "COEX 星空图书馆",
+      "city": "seoul",
+      "lat": 37.511,
+      "lng": 127.0598,
+      "station": "奉恩寺",
+      "stay": 60
+    },
+    "banpo": {
+      "name": "盘浦汉江公园",
+      "city": "seoul",
+      "lat": 37.5105,
+      "lng": 126.996,
+      "station": "盘浦",
+      "stay": 60
+    },
+    "changdeok": {
+      "name": "昌德宫与后苑",
+      "city": "seoul",
+      "lat": 37.5794,
+      "lng": 126.991,
+      "station": "安国",
+      "stay": 120,
+      "note": "周一闭馆。后苑需另行预约。"
+    },
+    "ikseon": {
+      "name": "益善洞",
+      "city": "seoul",
+      "lat": 37.5745,
+      "lng": 126.9899,
+      "station": "钟路3街",
+      "stay": 60
+    },
+    "deoksugung": {
+      "name": "德寿宫",
+      "city": "seoul",
+      "lat": 37.5658,
+      "lng": 126.9751,
+      "station": "市厅",
+      "stay": 75,
+      "note": "周一闭馆。"
+    },
+    "gmp": {
+      "name": "金浦机场",
+      "city": "seoul",
+      "lat": 37.5587,
+      "lng": 126.7906,
+      "station": "金浦机场",
+      "stay": 90,
+      "note": "金浦往济州飞行约 1 小时，进出机场和候机建议一共预留约 3 小时。"
+    },
+    "cju": {
+      "name": "济州机场",
+      "city": "jeju",
+      "lat": 33.5113,
+      "lng": 126.493,
+      "station": "",
+      "stay": 40
+    },
+    "hamdeok": {
+      "name": "咸德海滩",
+      "city": "jeju",
+      "lat": 33.5431,
+      "lng": 126.6697,
+      "stay": 45
+    },
+    "seongsan": {
+      "name": "城山日出峰",
+      "city": "jeju",
+      "lat": 33.4581,
+      "lng": 126.9425,
+      "stay": 90,
+      "note": "每月第一个星期一例行闭馆，季节开放时间可能更早。"
+    },
+    "seopjikoji": {
+      "name": "涉地可支",
+      "city": "jeju",
+      "lat": 33.4237,
+      "lng": 126.9306,
+      "stay": 50
+    },
+    "jeongbang": {
+      "name": "正房瀑布",
+      "city": "jeju",
+      "lat": 33.2448,
+      "lng": 126.5717,
+      "stay": 40
+    },
+    "olle": {
+      "name": "西归浦每日偶来市场",
+      "city": "jeju",
+      "lat": 33.247,
+      "lng": 126.562,
+      "stay": 50
+    },
+    "jusang": {
+      "name": "柱状节理带",
+      "city": "jeju",
+      "lat": 33.2377,
+      "lng": 126.425,
+      "stay": 40
+    },
+    "osulloc": {
+      "name": "奥雪绿茶园",
+      "city": "jeju",
+      "lat": 33.305,
+      "lng": 126.2895,
+      "stay": 50
+    },
+    "hyeopjae": {
+      "name": "挟才海滩",
+      "city": "jeju",
+      "lat": 33.3942,
+      "lng": 126.2394,
+      "stay": 50
+    },
+    "dongmun": {
+      "name": "东门传统市场",
+      "city": "jeju",
+      "lat": 33.5126,
+      "lng": 126.528,
+      "stay": 45
+    }
+  },
+  "presets": [
+    {
+      "id": "seoul-3",
+      "title": "首尔 3 天",
+      "summary": "按 VisitKorea 首尔三日安排整理：宫廷与老街区、市场购物、江南与汉江。市内主要坐地铁。",
+      "days": [
+        {
+          "title": "第 1 天 · 宫廷与老街区",
+          "note": "景福宫周二闭馆，可改去昌德宫（周一闭馆）。",
+          "stops": [
+            {
+              "place": "gyeongbokgung",
+              "start": "09:30",
+              "stay": 120,
+              "arrive": "地铁约 20 分钟",
+              "mode": "subway",
+              "travel": 20
+            },
+            {
+              "place": "bukchon",
+              "start": "12:00",
+              "stay": 45,
+              "arrive": "步行约 15 分钟",
+              "mode": "walk",
+              "travel": 15
+            },
+            {
+              "place": "insadong",
+              "start": "13:30",
+              "stay": 60,
+              "arrive": "步行约 15 分钟",
+              "mode": "walk",
+              "travel": 15
+            },
+            {
+              "place": "ntower",
+              "start": "16:30",
+              "stay": 75,
+              "arrive": "地铁加步行约 40 分钟",
+              "mode": "subway",
+              "travel": 40
+            }
+          ]
+        },
+        {
+          "title": "第 2 天 · 市场与东大门",
+          "note": "广藏市场人多，早点去更容易入座。",
+          "stops": [
+            {
+              "place": "gwangjang",
+              "start": "10:00",
+              "stay": 75,
+              "arrive": "地铁约 20 分钟",
+              "mode": "subway",
+              "travel": 20
+            },
+            {
+              "place": "myeongdong",
+              "start": "12:00",
+              "stay": 90,
+              "arrive": "地铁约 15 分钟",
+              "mode": "subway",
+              "travel": 15
+            },
+            {
+              "place": "ddp",
+              "start": "14:30",
+              "stay": 60,
+              "arrive": "地铁约 15 分钟",
+              "mode": "subway",
+              "travel": 15
+            },
+            {
+              "place": "hongdae",
+              "start": "17:00",
+              "stay": 90,
+              "arrive": "地铁约 30 分钟",
+              "mode": "subway",
+              "travel": 30
+            }
+          ]
+        },
+        {
+          "title": "第 3 天 · 江南与汉江",
+          "note": "首尔天空观景台建议提前在官方渠道看预约情况。",
+          "stops": [
+            {
+              "place": "seoulsky",
+              "start": "10:00",
+              "stay": 90,
+              "arrive": "地铁约 30 分钟",
+              "mode": "subway",
+              "travel": 30
+            },
+            {
+              "place": "coex",
+              "start": "13:00",
+              "stay": 60,
+              "arrive": "地铁约 20 分钟",
+              "mode": "subway",
+              "travel": 20
+            },
+            {
+              "place": "banpo",
+              "start": "16:30",
+              "stay": 60,
+              "arrive": "地铁约 25 分钟",
+              "mode": "subway",
+              "travel": 25
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "seoul-5",
+      "title": "首尔 5 天",
+      "summary": "前三日沿用 VisitKorea 首尔安排，后两日补昌德宫、益善洞和德寿宫一带，节奏更松一些。",
+      "days": [
+        {
+          "title": "第 1 天 · 宫廷与老街区",
+          "note": "景福宫周二闭馆。",
+          "stops": [
+            {
+              "place": "gyeongbokgung",
+              "start": "09:30",
+              "stay": 120,
+              "arrive": "地铁约 20 分钟",
+              "mode": "subway",
+              "travel": 20
+            },
+            {
+              "place": "bukchon",
+              "start": "12:00",
+              "stay": 50,
+              "arrive": "步行约 15 分钟",
+              "mode": "walk",
+              "travel": 15
+            },
+            {
+              "place": "insadong",
+              "start": "13:30",
+              "stay": 70,
+              "arrive": "步行约 15 分钟",
+              "mode": "walk",
+              "travel": 15
+            }
+          ]
+        },
+        {
+          "title": "第 2 天 · 市场与东大门",
+          "stops": [
+            {
+              "place": "gwangjang",
+              "start": "10:00",
+              "stay": 75,
+              "arrive": "地铁约 20 分钟",
+              "mode": "subway",
+              "travel": 20
+            },
+            {
+              "place": "myeongdong",
+              "start": "12:00",
+              "stay": 90,
+              "arrive": "地铁约 15 分钟",
+              "mode": "subway",
+              "travel": 15
+            },
+            {
+              "place": "ddp",
+              "start": "15:00",
+              "stay": 70,
+              "arrive": "地铁约 15 分钟",
+              "mode": "subway",
+              "travel": 15
+            }
+          ]
+        },
+        {
+          "title": "第 3 天 · 南山与弘大",
+          "stops": [
+            {
+              "place": "ntower",
+              "start": "10:30",
+              "stay": 80,
+              "arrive": "地铁加步行约 35 分钟",
+              "mode": "subway",
+              "travel": 35
+            },
+            {
+              "place": "hongdae",
+              "start": "14:30",
+              "stay": 120,
+              "arrive": "地铁约 35 分钟",
+              "mode": "subway",
+              "travel": 35
+            }
+          ]
+        },
+        {
+          "title": "第 4 天 · 昌德宫与益善洞",
+          "note": "昌德宫周一闭馆；后苑需另行预约。",
+          "stops": [
+            {
+              "place": "changdeok",
+              "start": "09:30",
+              "stay": 120,
+              "arrive": "地铁约 20 分钟",
+              "mode": "subway",
+              "travel": 20
+            },
+            {
+              "place": "ikseon",
+              "start": "13:00",
+              "stay": 70,
+              "arrive": "步行约 10 分钟",
+              "mode": "walk",
+              "travel": 10
+            }
+          ]
+        },
+        {
+          "title": "第 5 天 · 江南与汉江",
+          "stops": [
+            {
+              "place": "seoulsky",
+              "start": "10:00",
+              "stay": 90,
+              "arrive": "地铁约 30 分钟",
+              "mode": "subway",
+              "travel": 30
+            },
+            {
+              "place": "coex",
+              "start": "13:00",
+              "stay": 60,
+              "arrive": "地铁约 20 分钟",
+              "mode": "subway",
+              "travel": 20
+            },
+            {
+              "place": "banpo",
+              "start": "16:30",
+              "stay": 60,
+              "arrive": "地铁约 25 分钟",
+              "mode": "subway",
+              "travel": 25
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "jeju-3",
+      "title": "济州 3 天",
+      "summary": "东线、西归浦、西线各一天。岛上点与点较远，默认按出租车或租车估算；坐公交请再预留时间。城山日出峰每月第一个星期一例行闭馆。",
+      "days": [
+        {
+          "title": "第 1 天 · 东线",
+          "note": "VisitKorea 数据：机场到城山日出峰，公交约 120 分钟、出租车约 70 分钟。",
+          "stops": [
+            {
+              "place": "cju",
+              "start": "09:00",
+              "stay": 30,
+              "arrive": "航班抵达后取车或坐车",
+              "mode": "taxi",
+              "travel": 0
+            },
+            {
+              "place": "hamdeok",
+              "start": "10:30",
+              "stay": 40,
+              "arrive": "出租车约 40 分钟（公交约 60 分钟）",
+              "mode": "taxi",
+              "travel": 40
+            },
+            {
+              "place": "seongsan",
+              "start": "12:30",
+              "stay": 90,
+              "arrive": "出租车约 45 分钟",
+              "mode": "taxi",
+              "travel": 45
+            },
+            {
+              "place": "seopjikoji",
+              "start": "15:00",
+              "stay": 50,
+              "arrive": "出租车约 15 分钟",
+              "mode": "taxi",
+              "travel": 15
+            }
+          ]
+        },
+        {
+          "title": "第 2 天 · 西归浦",
+          "note": "南岸景点相对集中，可用出租车在西归浦市区挪动。",
+          "stops": [
+            {
+              "place": "jeongbang",
+              "start": "10:00",
+              "stay": 40,
+              "arrive": "出租车约 20 分钟",
+              "mode": "taxi",
+              "travel": 20
+            },
+            {
+              "place": "olle",
+              "start": "11:30",
+              "stay": 50,
+              "arrive": "步行或短途车约 10 分钟",
+              "mode": "walk",
+              "travel": 10
+            },
+            {
+              "place": "jusang",
+              "start": "14:30",
+              "stay": 40,
+              "arrive": "出租车约 30 分钟",
+              "mode": "taxi",
+              "travel": 30
+            }
+          ]
+        },
+        {
+          "title": "第 3 天 · 西线并返程",
+          "note": "VisitKorea 数据：机场到挟才海滩，公交约 70 分钟、出租车约 60 分钟。",
+          "stops": [
+            {
+              "place": "osulloc",
+              "start": "09:30",
+              "stay": 50,
+              "arrive": "出租车约 40 分钟",
+              "mode": "taxi",
+              "travel": 40
+            },
+            {
+              "place": "hyeopjae",
+              "start": "11:00",
+              "stay": 50,
+              "arrive": "出租车约 25 分钟",
+              "mode": "taxi",
+              "travel": 25
+            },
+            {
+              "place": "dongmun",
+              "start": "14:00",
+              "stay": 45,
+              "arrive": "出租车约 40 分钟",
+              "mode": "taxi",
+              "travel": 40
+            },
+            {
+              "place": "cju",
+              "start": "16:00",
+              "stay": 60,
+              "arrive": "出租车约 15 分钟",
+              "mode": "taxi",
+              "travel": 15
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "seoul-jeju-6",
+      "title": "首尔 + 济州 6 天",
+      "summary": "前三天在首尔，第 4 天从金浦飞济州（飞行约 1 小时，进出机场建议预留约 3 小时），后三天按济州东、南、西线走。",
+      "days": [
+        {
+          "title": "第 1 天 · 首尔宫廷与老街区",
+          "note": "景福宫周二闭馆。",
+          "stops": [
+            {
+              "place": "gyeongbokgung",
+              "start": "09:30",
+              "stay": 120,
+              "arrive": "地铁约 20 分钟",
+              "mode": "subway",
+              "travel": 20
+            },
+            {
+              "place": "bukchon",
+              "start": "12:00",
+              "stay": 45,
+              "arrive": "步行约 15 分钟",
+              "mode": "walk",
+              "travel": 15
+            },
+            {
+              "place": "insadong",
+              "start": "13:30",
+              "stay": 60,
+              "arrive": "步行约 15 分钟",
+              "mode": "walk",
+              "travel": 15
+            },
+            {
+              "place": "ntower",
+              "start": "16:30",
+              "stay": 75,
+              "arrive": "地铁加步行约 40 分钟",
+              "mode": "subway",
+              "travel": 40
+            }
+          ]
+        },
+        {
+          "title": "第 2 天 · 首尔市场与东大门",
+          "stops": [
+            {
+              "place": "gwangjang",
+              "start": "10:00",
+              "stay": 75,
+              "arrive": "地铁约 20 分钟",
+              "mode": "subway",
+              "travel": 20
+            },
+            {
+              "place": "myeongdong",
+              "start": "12:00",
+              "stay": 90,
+              "arrive": "地铁约 15 分钟",
+              "mode": "subway",
+              "travel": 15
+            },
+            {
+              "place": "ddp",
+              "start": "14:30",
+              "stay": 60,
+              "arrive": "地铁约 15 分钟",
+              "mode": "subway",
+              "travel": 15
+            },
+            {
+              "place": "hongdae",
+              "start": "17:00",
+              "stay": 90,
+              "arrive": "地铁约 30 分钟",
+              "mode": "subway",
+              "travel": 30
+            }
+          ]
+        },
+        {
+          "title": "第 3 天 · 江南与汉江",
+          "stops": [
+            {
+              "place": "seoulsky",
+              "start": "10:00",
+              "stay": 90,
+              "arrive": "地铁约 30 分钟",
+              "mode": "subway",
+              "travel": 30
+            },
+            {
+              "place": "coex",
+              "start": "13:00",
+              "stay": 60,
+              "arrive": "地铁约 20 分钟",
+              "mode": "subway",
+              "travel": 20
+            },
+            {
+              "place": "banpo",
+              "start": "16:30",
+              "stay": 60,
+              "arrive": "地铁约 25 分钟",
+              "mode": "subway",
+              "travel": 25
+            }
+          ]
+        },
+        {
+          "title": "第 4 天 · 飞往济州并走东线",
+          "note": "金浦往济州飞行约 1 小时。抵达后再去咸德、城山，当天不宜再排太满。",
+          "stops": [
+            {
+              "place": "gmp",
+              "start": "08:00",
+              "stay": 90,
+              "arrive": "地铁约 40 分钟到金浦",
+              "mode": "subway",
+              "travel": 40
+            },
+            {
+              "place": "cju",
+              "start": "11:30",
+              "stay": 40,
+              "arrive": "飞行约 1 小时加落地",
+              "mode": "flight",
+              "travel": 180
+            },
+            {
+              "place": "seongsan",
+              "start": "14:30",
+              "stay": 90,
+              "arrive": "出租车约 70 分钟",
+              "mode": "taxi",
+              "travel": 70
+            },
+            {
+              "place": "seopjikoji",
+              "start": "16:30",
+              "stay": 40,
+              "arrive": "出租车约 15 分钟",
+              "mode": "taxi",
+              "travel": 15
+            }
+          ]
+        },
+        {
+          "title": "第 5 天 · 西归浦",
+          "stops": [
+            {
+              "place": "jeongbang",
+              "start": "10:00",
+              "stay": 40,
+              "arrive": "出租车约 20 分钟",
+              "mode": "taxi",
+              "travel": 20
+            },
+            {
+              "place": "olle",
+              "start": "11:30",
+              "stay": 50,
+              "arrive": "步行约 10 分钟",
+              "mode": "walk",
+              "travel": 10
+            },
+            {
+              "place": "jusang",
+              "start": "14:30",
+              "stay": 40,
+              "arrive": "出租车约 30 分钟",
+              "mode": "taxi",
+              "travel": 30
+            }
+          ]
+        },
+        {
+          "title": "第 6 天 · 西线返程",
+          "stops": [
+            {
+              "place": "osulloc",
+              "start": "09:30",
+              "stay": 50,
+              "arrive": "出租车约 40 分钟",
+              "mode": "taxi",
+              "travel": 40
+            },
+            {
+              "place": "hyeopjae",
+              "start": "11:00",
+              "stay": 50,
+              "arrive": "出租车约 25 分钟",
+              "mode": "taxi",
+              "travel": 25
+            },
+            {
+              "place": "dongmun",
+              "start": "13:30",
+              "stay": 40,
+              "arrive": "出租车约 40 分钟",
+              "mode": "taxi",
+              "travel": 40
+            },
+            {
+              "place": "cju",
+              "start": "15:30",
+              "stay": 70,
+              "arrive": "出租车约 15 分钟",
+              "mode": "taxi",
+              "travel": 15
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "seoul-jeju-5",
+      "title": "首尔 + 济州 5 天",
+      "summary": "首尔两天加济州三天，第 3 天飞岛。比 6 天紧一些，适合时间有限的行程。",
+      "days": [
+        {
+          "title": "第 1 天 · 宫廷、北村与南山",
+          "note": "景福宫周二闭馆。",
+          "stops": [
+            {
+              "place": "gyeongbokgung",
+              "start": "09:30",
+              "stay": 110,
+              "arrive": "地铁约 20 分钟",
+              "mode": "subway",
+              "travel": 20
+            },
+            {
+              "place": "bukchon",
+              "start": "12:00",
+              "stay": 40,
+              "arrive": "步行约 15 分钟",
+              "mode": "walk",
+              "travel": 15
+            },
+            {
+              "place": "insadong",
+              "start": "13:30",
+              "stay": 50,
+              "arrive": "步行约 15 分钟",
+              "mode": "walk",
+              "travel": 15
+            },
+            {
+              "place": "ntower",
+              "start": "16:00",
+              "stay": 70,
+              "arrive": "地铁加步行约 40 分钟",
+              "mode": "subway",
+              "travel": 40
+            }
+          ]
+        },
+        {
+          "title": "第 2 天 · 市场、明洞与弘大",
+          "stops": [
+            {
+              "place": "gwangjang",
+              "start": "10:00",
+              "stay": 70,
+              "arrive": "地铁约 20 分钟",
+              "mode": "subway",
+              "travel": 20
+            },
+            {
+              "place": "myeongdong",
+              "start": "12:00",
+              "stay": 80,
+              "arrive": "地铁约 15 分钟",
+              "mode": "subway",
+              "travel": 15
+            },
+            {
+              "place": "hongdae",
+              "start": "15:30",
+              "stay": 100,
+              "arrive": "地铁约 30 分钟",
+              "mode": "subway",
+              "travel": 30
+            }
+          ]
+        },
+        {
+          "title": "第 3 天 · 飞济州并走东线",
+          "note": "进出机场建议预留约 3 小时。城山日出峰每月第一个星期一例行闭馆。",
+          "stops": [
+            {
+              "place": "gmp",
+              "start": "08:00",
+              "stay": 90,
+              "arrive": "地铁约 40 分钟",
+              "mode": "subway",
+              "travel": 40
+            },
+            {
+              "place": "cju",
+              "start": "11:30",
+              "stay": 40,
+              "arrive": "飞行约 1 小时加落地",
+              "mode": "flight",
+              "travel": 180
+            },
+            {
+              "place": "seongsan",
+              "start": "14:30",
+              "stay": 90,
+              "arrive": "出租车约 70 分钟",
+              "mode": "taxi",
+              "travel": 70
+            }
+          ]
+        },
+        {
+          "title": "第 4 天 · 西归浦",
+          "stops": [
+            {
+              "place": "jeongbang",
+              "start": "10:00",
+              "stay": 40,
+              "arrive": "出租车约 20 分钟",
+              "mode": "taxi",
+              "travel": 20
+            },
+            {
+              "place": "olle",
+              "start": "11:30",
+              "stay": 50,
+              "arrive": "步行约 10 分钟",
+              "mode": "walk",
+              "travel": 10
+            },
+            {
+              "place": "jusang",
+              "start": "14:30",
+              "stay": 40,
+              "arrive": "出租车约 30 分钟",
+              "mode": "taxi",
+              "travel": 30
+            }
+          ]
+        },
+        {
+          "title": "第 5 天 · 西线返程",
+          "stops": [
+            {
+              "place": "osulloc",
+              "start": "09:30",
+              "stay": 50,
+              "arrive": "出租车约 40 分钟",
+              "mode": "taxi",
+              "travel": 40
+            },
+            {
+              "place": "hyeopjae",
+              "start": "11:00",
+              "stay": 45,
+              "arrive": "出租车约 25 分钟",
+              "mode": "taxi",
+              "travel": 25
+            },
+            {
+              "place": "cju",
+              "start": "14:30",
+              "stay": 70,
+              "arrive": "出租车约 60 分钟",
+              "mode": "taxi",
+              "travel": 60
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

@@ -1,10 +1,10 @@
-/* 旅韩助手：全站底部七格导航 + 注册 Service Worker + 可关闭的安装提示 */
+/* 旅韩助手：全站底部导航 + 注册 Service Worker + 可关闭的安装提示 */
 (function(){
 
   /* 开业活动脚本：红标「我的」+ 首页每日弹层 */
   if (!document.querySelector('script[data-lh-opening]')) {
     var s = document.createElement('script');
-    s.src = '/static/opening-promos.js?v=75';
+    s.src = '/static/opening-promos.js?v=76';
     s.async = true;
     s.setAttribute('data-lh-opening', '1');
     document.head.appendChild(s);
@@ -17,7 +17,7 @@
     {k:'post',     href:'/community/new',        icon:'＋', label:'发布', pub:true},
     {k:'festival', href:'/festival',             icon:'🎁', label:'购物节', fest:true},
     {k:'services', href:'/shops',                icon:'💼', label:'商业服务', cls:'svc'},
-    {k:'local',    href:'/local',                icon:'🏘️', label:'生活在韩国', cls:'loc'},
+    {k:'trips',    href:'/trips',                icon:'🗓️', label:'行程安排', cls:'loc'},
     {k:'me',       href:'/me',                   icon:'👤', label:'我的', cls:'me'}
   ];
 
@@ -25,7 +25,7 @@
     var p = location.pathname, q = new URLSearchParams(location.search || '');
     if (p === '/me' || p === '/static/me.html') return 'me';
     if (p === '/festival' || p === '/static/festival.html') return 'festival';
-    if (p === '/local' || p === '/static/local.html') return 'local';
+    if (p === '/trips' || p === '/static/trips.html' || p === '/local' || p === '/static/local.html') return 'trips';
     if (p === '/community/new') return 'post';
     if (p === '/services' || p === '/static/services.html') return 'services';
     if (p === '/shops' || p === '/static/shops.html') return 'services';

@@ -136,9 +136,9 @@ PAGES = {
         True,
     ),
     "/trips": (
-        "行程 · 旅韩助手",
-        "行程功能即将上线：我的行程、大家分享，以及根据以前游客常走路线整理的经典行程，可一键复制成自己的行程。",
-        "韩国行程,首尔行程,旅韩助手",
+        "行程安排 · 旅韩助手",
+        "首尔和济州参考行程，可按天查看站点、交通方式和大致时间，也可自己增删改排序，并查看当天是否太赶。",
+        "韩国行程,首尔行程,济州行程,旅韩助手",
         True,
     ),
     "/local": (
@@ -352,7 +352,7 @@ SITEMAP_PATHS = [
     "/", "/attractions", "/food", "/shopping", "/tips", "/beauty", "/faq",
     "/community", "/community/boards", "/community/rate", "/community/friends",
     "/rules", "/member", "/shops", "/pay", "/tax-refund", "/visa", "/itineraries", "/privacy", "/terms", "/promo/rules",
-    "/services", "/partner", "/deals", "/festival", "/opening", "/places", "/trips", "/local",
+    "/services", "/partner", "/deals", "/festival", "/opening", "/places", "/trips",
 ]
 
 router = APIRouter()
@@ -415,7 +415,7 @@ def json_ld(origin, title, desc, path, extra=None):
         "@id": origin + "/#org",
         "name": "旅韩助手",
         "url": origin + "/",
-        "logo": origin + "/static/icons/icon-512.png?v=75",
+        "logo": origin + "/static/icons/icon-512.png?v=76",
     }
     website = {
         "@type": "WebSite",

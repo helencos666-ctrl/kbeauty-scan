@@ -1,5 +1,6 @@
 """支付、退税、签证、行程等说明页路由。"""
 from fastapi import APIRouter
+from fastapi.responses import RedirectResponse
 
 from community import _page
 
@@ -32,8 +33,9 @@ def p_trips():
 
 
 @router.get("/local")
+@router.get("/local/")
 def p_local():
-    return _page("local.html", "/local")
+    return RedirectResponse("/trips", status_code=302)
 
 
 @router.get("/rate")

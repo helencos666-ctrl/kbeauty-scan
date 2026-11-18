@@ -113,14 +113,14 @@ def seed_once():
                 return
             existing = q(
                 conn,
-                """SELECT id, status FROM c_posts
-                   WHERE user_id=%s AND title=%s AND NOT deleted
+                """SELECT id, status, deleted FROM c_posts
+                   WHERE user_id=%s AND title=%s
                    ORDER BY id DESC""",
                 (u["id"], TITLE),
             )
             if existing:
                 row = existing[0]
-                _log("exists: id=%s status=%s" % (row["id"], row["status"]))
+                _log("exists: id=%s status=%s deleted=%s" % (row["id"], row["status"], row["deleted"]))
                 return
             post = q(
                 conn,

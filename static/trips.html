@@ -3,101 +3,252 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<title>行程 · 旅韩助手</title>
-<meta name="description" content="旅韩助手行程功能即将上线：我的行程、大家分享、平台推荐，可一键复制成自己的行程。">
+<title>行程安排 · 旅韩助手</title>
+<meta name="description" content="旅韩助手行程安排：首尔和济州的参考行程，可按天数查看站点和交通时间，也可自己增删改排序，并查看当天是否太赶。">
 <meta name="theme-color" content="#146E68">
-<meta name="mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-title" content="旅韩助手">
 <link rel="manifest" href="/manifest.webmanifest">
-<link rel="apple-touch-icon" href="/static/icons/apple-touch-icon.png?v=75">
-<link rel="icon" type="image/png" sizes="192x192" href="/static/icons/icon-192.png?v=75">
-<link rel="stylesheet" href="/static/pwa.css?v=75">
-<link rel="stylesheet" href="/static/community.css?v=75">
+<link rel="apple-touch-icon" href="/static/icons/apple-touch-icon.png?v=76">
+<link rel="icon" type="image/png" sizes="192x192" href="/static/icons/icon-192.png?v=76">
+<link rel="stylesheet" href="/static/pwa.css?v=76">
+<link rel="stylesheet" href="/static/community.css?v=76">
 <style>
-:root{--primary:#146E68;--secondary:#3D8F88;--accent:#B85A12;--ink:#1A2330;--sub:#4A5560;--bg:#F3F7F6;--card:#fff;--line:#D5E4E1;--soft:#E6F3F1}
+:root{--primary:#146E68;--ink:#1A2330;--sub:#4A5560;--bg:#F3F7F6}
 body{background:#fff}
-main{max-width:560px;margin:0 auto;padding:0 16px 8px}
 .topbar{display:flex;align-items:center;gap:6px;padding:calc(10px + env(safe-area-inset-top)) 8px 4px 4px;max-width:560px;margin:0 auto}
-.topbar .back{width:34px;height:34px;display:flex;align-items:center;justify-content:center;font-size:26px;line-height:1;color:var(--ink);text-decoration:none;flex:none}
-.topbar b{flex:1;min-width:0;font-size:19px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.trip-hero{margin:8px 0 14px;padding:18px 16px;border-radius:18px;background:linear-gradient(150deg,#EAF6F4 0%,#FFFFFF 70%);border:1px solid #E2EFEC}
-.trip-hero .tag{display:inline-block;font-size:11px;font-weight:800;color:var(--primary);background:#E6F3F1;border-radius:8px;padding:3px 8px;letter-spacing:.5px}
-.trip-hero h1{margin:10px 0 6px;font-size:22px;line-height:1.35;font-weight:800}
-.trip-hero p{margin:0;font-size:14px;line-height:1.7;color:var(--sub)}
-.trip-list{display:flex;flex-direction:column;gap:10px;margin:0 0 14px}
-.trip-item{display:flex;gap:12px;align-items:flex-start;background:#fff;border:1px solid #F0F6F5;border-radius:16px;padding:14px;box-shadow:0 4px 16px rgba(20,110,104,.06)}
-.trip-item .ico{width:42px;height:42px;border-radius:13px;background:#EAF6F4;display:flex;align-items:center;justify-content:center;font-size:21px;flex:none}
-.trip-item .tx{flex:1;min-width:0}
-.trip-item b{display:block;font-size:15px;font-weight:800}
-.trip-item p{margin:4px 0 0;font-size:13px;line-height:1.65;color:var(--sub)}
-.trip-item em{font-style:normal;font-size:11px;font-weight:800;color:var(--accent);background:#FFF3E8;border-radius:8px;padding:2px 7px;white-space:nowrap;margin-left:6px;vertical-align:2px}
-.trip-ref{display:flex;align-items:center;gap:12px;background:#F7FBFA;border:1px solid #DDEDEA;border-radius:16px;padding:14px;text-decoration:none;color:var(--ink);margin:0 0 12px}
-.trip-ref .tx{flex:1;min-width:0}
-.trip-ref b{display:block;font-size:15px;font-weight:800}
-.trip-ref p{margin:3px 0 0;font-size:12.5px;color:var(--sub);line-height:1.6}
-.trip-ref .ar{font-size:20px;color:#B7D4D1;flex:none}
-.trip-note{margin:0 0 14px;padding:12px 14px;border-radius:14px;background:#FFFBF5;border:1px solid #F4E4D0;font-size:12.5px;line-height:1.7;color:var(--sub)}
-.trip-note b{color:var(--ink)}
-.trip-foot{margin:4px 0 8px;text-align:center;font-size:12px;color:#999;line-height:1.7}
-.trip-foot a{color:#888}
+.topbar .back{width:34px;height:34px;display:flex;align-items:center;justify-content:center;font-size:26px;color:var(--ink);text-decoration:none}
+.topbar b{flex:1;font-size:19px}
+main{max-width:560px;margin:0 auto;padding:0 16px 24px}
+.hero{margin:8px 0 14px;padding:16px;border-radius:18px;background:linear-gradient(150deg,#EAF6F4 0%,#fff 70%);border:1px solid #E2EFEC}
+.hero h1{margin:0 0 6px;font-size:22px}
+.hero p{margin:0;font-size:13.5px;line-height:1.7;color:var(--sub)}
+.chips{display:flex;flex-wrap:wrap;gap:8px;margin:0 0 14px}
+.chips button{border:1px solid #E2EFEC;background:#fff;border-radius:999px;padding:7px 12px;font:inherit;font-size:13px;cursor:pointer;color:var(--ink)}
+.chips button.on{background:#146E68;border-color:#146E68;color:#fff;font-weight:700}
+.day{background:#fff;border-radius:16px;padding:14px;margin:0 0 12px;box-shadow:0 4px 16px rgba(20,110,104,.08)}
+.day-h{display:flex;align-items:center;gap:8px;margin:0 0 8px}
+.day-h h2{margin:0;font-size:16px;flex:1}
+.pace{font-size:11px;font-weight:800;border-radius:8px;padding:2px 7px;white-space:nowrap}
+.pace.ok{background:#E6F3F1;color:#146E68}
+.pace.fit{background:#FFF3E8;color:#B85A12}
+.pace.rush{background:#FDECEA;color:#C62828}
+.day .note{margin:0 0 10px;font-size:12.5px;line-height:1.65;color:var(--sub)}
+.stop{padding:8px 0;border-top:1px solid #F0F1F4}
+.stop:first-of-type{border-top:0}
+.leg{font-size:12px;color:#146E68;margin:0 0 4px}
+.stop-h{display:flex;align-items:baseline;gap:8px}
+.stop-h b{font-size:15px;flex:1}
+.when{font-size:12px;color:#8a8f99;flex:none}
+.meta{font-size:12.5px;color:var(--sub);margin:4px 0 0}
+.stop input{width:52px;border:1px solid #E2EFEC;border-radius:8px;padding:3px 6px;font:inherit;font-size:13px}
+.acts{display:flex;flex-wrap:wrap;gap:6px;margin-top:6px}
+.acts button,.acts a{border:0;background:#F3F7F6;border-radius:8px;padding:4px 8px;font:inherit;font-size:12px;color:#146E68;text-decoration:none;cursor:pointer}
+.add-row{display:flex;gap:8px;margin-top:10px}
+.add-row select{flex:1;border:1px solid #E2EFEC;border-radius:10px;padding:8px;font:inherit;font-size:13px}
+.add-row button{border:0;background:#146E68;color:#fff;border-radius:10px;padding:8px 12px;font:inherit;font-size:13px;font-weight:700;cursor:pointer}
+.tools{display:flex;flex-wrap:wrap;gap:8px;margin:0 0 16px}
+.tools button,.tools a{border:1px solid #E2EFEC;background:#fff;border-radius:12px;padding:8px 12px;font:inherit;font-size:13px;text-decoration:none;color:var(--ink);cursor:pointer}
+.foot{font-size:12.5px;line-height:1.7;color:var(--sub);margin:8px 0 16px}
+.err{color:#C62828;font-size:13px}
 </style>
 </head>
 <body>
-<div class="topbar">
-  <a class="back" href="/" aria-label="返回首页">‹</a>
-  <b>行程</b>
-</div>
-
+<div class="topbar"><a class="back" href="/" aria-label="返回首页">‹</a><b>行程安排</b></div>
 <main>
-  <section class="trip-hero">
-    <span class="tag">即将上线</span>
-    <h1>行程功能正在准备</h1>
-    <p>把去过的、想去的、别人走过的路线放在一起，按天排好，出门前扫一眼就够。现在先把入口留在这里，上线后可以直接从首页「行程」进来。</p>
+  <section class="hero">
+    <h1>按天排一版能走完的行程</h1>
+    <p>先选一份首尔或济州的参考行程，再按自己的节奏增删和调整停留时间。每天会标出宽裕、刚好或太赶。交通时间是估算，请以现场为准。</p>
   </section>
-
-  <div class="trip-list">
-    <div class="trip-item">
-      <div class="ico">🗓️</div>
-      <div class="tx"><b>我的行程</b>
-        <p>按天排自己的安排，地铁站、店铺和营业时间都能记进去，行程自动保存在账号里。</p>
-      </div>
-    </div>
-    <div class="trip-item">
-      <div class="ico">👥</div>
-      <div class="tx"><b>大家分享</b>
-        <p>其他游客公开的行程可以浏览，觉得合适就复制一份，再改成自己的节奏。</p>
-      </div>
-    </div>
-    <div class="trip-item">
-      <div class="ico">🧭</div>
-      <div class="tx"><b>平台推荐<em>整理中</em></b>
-        <p>根据以前游客常走的路线整理的经典行程，按天数、区域和主题分类，可一键复制成自己的行程。</p>
-      </div>
-    </div>
+  <div class="chips" id="presets"></div>
+  <div class="tools">
+    <button type="button" id="btnNew">新建空白行程</button>
+    <a href="/?tab=sub">去查地铁路线</a>
+    <a href="/itineraries">先看路线卡片</a>
   </div>
-
-  <a class="trip-ref" href="/itineraries">
-    <div class="tx"><b>先看现有的路线卡片</b><p>按首次经典、购物美妆、追星、美食分好的路线，含地铁线路和站号，可以当作临时参考。</p></div>
-    <span class="ar" aria-hidden="true">›</span>
-  </a>
-
-  <p class="trip-note"><b>说明：</b>行程里的地点、时间和走法来自公开信息与用户分享，仅供参考；交通、营业时间和门票请以现场标识与官方信息为准。</p>
-
-  <p class="trip-foot">旅韩助手为个人运营的免费信息网站，不是旅行社。<br><a href="/terms">用户协议与免责声明</a> · <a href="/privacy">隐私政策</a></p>
+  <p class="err" id="err" hidden></p>
+  <div id="plan"></div>
+  <p class="foot" id="foot"></p>
 </main>
-
 <nav class="tabbar" aria-label="底部导航">
   <a href="/" data-nav="home"><i>🏠</i>首页</a>
   <a href="/community?tab=follow" data-nav="follow"><i>👥</i>关注</a>
   <a href="/community/new" data-nav="post" class="pub"><span class="plus">＋</span>发布</a>
   <a href="/festival" data-nav="festival" class="fest"><span class="fest-ico">🎁<em>冬季</em></span>购物节</a>
   <a href="/shops" data-nav="services" class="svc"><i>💼</i>商业服务</a>
-  <a href="/local" data-nav="local" class="loc"><i>🏘️</i>生活在韩国</a>
+  <a href="/trips" data-nav="trips" class="loc on" aria-current="page"><i>🗓️</i>行程安排</a>
   <a href="/me" data-nav="me" class="me"><i>👤</i>我的</a>
 </nav>
+<script src="/static/pwa.js?v=76" defer></script>
+<script>
+(function(){
+  var KEY='lh_trip_plan';
+  var MODE={walk:'步行',subway:'地铁',bus:'公交',taxi:'出租车',flight:'飞机'};
+  var data=null, plan=null, places={};
 
-<script src="/static/community.js?v=75" defer></script>
-<script src="/static/pwa.js?v=75" defer></script>
+  function $(id){return document.getElementById(id)}
+  function esc(s){return String(s==null?'':s).replace(/[&<>"']/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]})}
+  function pl(id){return places[id]||{name:id,stay:60,station:''}}
+  function km(a,b){
+    if(!a||!b||a.lat==null||b.lat==null) return 0;
+    var R=6371, dLat=(b.lat-a.lat)*Math.PI/180, dLng=(b.lng-a.lng)*Math.PI/180;
+    var x=Math.sin(dLat/2)**2+Math.cos(a.lat*Math.PI/180)*Math.cos(b.lat*Math.PI/180)*Math.sin(dLng/2)**2;
+    return 2*R*Math.asin(Math.min(1,Math.sqrt(x)));
+  }
+  function estimate(a,b){
+    if(!a||!b) return {mode:'walk',travel:10};
+    if((a.city==='seoul'&&b.city==='jeju')||(a.city==='jeju'&&b.city==='seoul')) return {mode:'flight',travel:180};
+    var d=km(a,b);
+    if(d<1.2) return {mode:'walk',travel:Math.max(8,Math.round(d*12+5))};
+    if(a.city==='jeju'||b.city==='jeju') return {mode:'taxi',travel:Math.max(15,Math.round(8+d*2))};
+    return {mode:'subway',travel:Math.max(12,Math.round(10+d*2.4))};
+  }
+  function mins(hhmm){
+    var p=String(hhmm||'09:00').split(':');
+    return (+p[0]||0)*60+(+p[1]||0);
+  }
+  function fmt(m){
+    m=((m%1440)+1440)%1440;
+    return String(Math.floor(m/60)).padStart(2,'0')+':'+String(m%60).padStart(2,'0');
+  }
+  function paceOf(day){
+    var used=0, start=mins((day.stops[0]&&day.stops[0].start)||'09:30');
+    (day.stops||[]).forEach(function(s,i){
+      if(i) used += (+s.travel||0);
+      used += (+s.stay||0);
+    });
+    var end=start+used, leftover=20*60-end;
+    if(end>21*60 || leftover<30) return {k:'rush',t:'太赶',used:used,end:end};
+    if(leftover<120) return {k:'fit',t:'刚好',used:used,end:end};
+    return {k:'ok',t:'宽裕',used:used,end:end};
+  }
+  function refreshLegs(day){
+    (day.stops||[]).forEach(function(s,i){
+      if(!i) return;
+      var prev=pl(day.stops[i-1].place), cur=pl(s.place);
+      if(s.locked) return;
+      var e=estimate(prev,cur);
+      s.mode=e.mode; s.travel=e.travel;
+      s.arrive=(MODE[e.mode]||e.mode)+'约 '+e.travel+' 分钟';
+    });
+  }
+  function clonePreset(p){
+    return JSON.parse(JSON.stringify({id:p.id,title:p.title,days:p.days,custom:false}));
+  }
+  function save(){
+    try{localStorage.setItem(KEY, JSON.stringify(plan))}catch(e){}
+  }
+  function loadSaved(){
+    try{
+      var raw=localStorage.getItem(KEY);
+      if(!raw) return null;
+      var j=JSON.parse(raw);
+      if(j&&j.days) return j;
+    }catch(e){}
+    return null;
+  }
+
+  function renderPresets(){
+    var box=$('presets');
+    box.innerHTML=(data.presets||[]).map(function(p){
+      return '<button type="button" data-id="'+esc(p.id)+'"'+(plan&&plan.id===p.id?' class="on"':'')+'>'+esc(p.title)+'</button>';
+    }).join('')+'<button type="button" data-id="custom"'+(plan&&plan.custom?' class="on"':'')+'>我的行程</button>';
+    box.onclick=function(e){
+      var b=e.target.closest('button'); if(!b) return;
+      if(b.dataset.id==='custom'){
+        if(!plan||!plan.custom){
+          plan={id:'custom',title:'我的行程',custom:true,days:[{title:'第 1 天',note:'',stops:[]}]};
+        }
+      }else{
+        var p=(data.presets||[]).filter(function(x){return x.id===b.dataset.id})[0];
+        if(p) plan=clonePreset(p);
+      }
+      save(); render();
+    };
+  }
+
+  function placeOptions(){
+    return Object.keys(places).map(function(id){
+      return '<option value="'+esc(id)+'">'+esc(places[id].name)+'</option>';
+    }).join('');
+  }
+
+  function render(){
+    renderPresets();
+    if(!plan){ $('plan').innerHTML=''; return; }
+    var html='';
+    (plan.days||[]).forEach(function(day,di){
+      refreshLegs(day);
+      var pace=paceOf(day);
+      html+='<section class="day"><div class="day-h"><h2>'+esc(day.title||('第 '+(di+1)+' 天'))+'</h2>';
+      html+='<span class="pace '+pace.k+'">'+pace.t;
+      if(day.stops&&day.stops.length) html+=' · 约到 '+fmt(pace.end);
+      html+='</span></div>';
+      if(day.note) html+='<p class="note">'+esc(day.note)+'</p>';
+      (day.stops||[]).forEach(function(s,si){
+        var p=pl(s.place);
+        if(si) html+='<div class="leg">'+esc(s.arrive||((MODE[s.mode]||'')+'约 '+(s.travel||0)+' 分钟'))+'</div>';
+        html+='<div class="stop"><div class="stop-h"><b>'+esc(p.name)+'</b><span class="when">'+(s.start?esc(s.start)+' 起':'')+'</span></div>';
+        html+='<div class="meta">停留 <input data-d="'+di+'" data-s="'+si+'" data-k="stay" type="number" min="10" max="360" step="5" value="'+(+s.stay||p.stay||60)+'"> 分钟';
+        if(p.note) html+=' · '+esc(p.note);
+        html+='</div><div class="acts">';
+        if(p.station) html+='<a href="/?tab=sub&to='+encodeURIComponent(p.station)+'">查到这里的地铁</a>';
+        if(si){
+          var prev=pl(day.stops[si-1].place);
+          if(prev.station&&p.station) html+='<a href="/?tab=sub&from='+encodeURIComponent(prev.station)+'&to='+encodeURIComponent(p.station)+'">查上一段地铁</a>';
+        }
+        html+='<button type="button" data-act="up" data-d="'+di+'" data-s="'+si+'">上移</button>';
+        html+='<button type="button" data-act="down" data-d="'+di+'" data-s="'+si+'">下移</button>';
+        html+='<button type="button" data-act="del" data-d="'+di+'" data-s="'+si+'">删除</button>';
+        html+='</div></div>';
+      });
+      html+='<div class="add-row"><select data-add="'+di+'">'+placeOptions()+'</select><button type="button" data-act="add" data-d="'+di+'">添加地点</button></div>';
+      html+='</section>';
+    });
+    html+='<div class="tools"><button type="button" id="btnAddDay">再加一天</button></div>';
+    $('plan').innerHTML=html;
+    $('foot').textContent='行程和交通时间只作参考，请再核对开放时间、天气和现场交通。资料来源：'+(data.sources||[]).join('；')+'。';
+  }
+
+  $('plan').addEventListener('change',function(e){
+    var el=e.target;
+    if(el.dataset.k==='stay'){
+      var s=plan.days[+el.dataset.d].stops[+el.dataset.s];
+      s.stay=Math.max(10,Math.min(360,+el.value||60));
+      s.locked=false;
+      save(); render();
+    }
+  });
+  $('plan').addEventListener('click',function(e){
+    var btn=e.target.closest('[data-act]'); if(!btn) return;
+    var di=+btn.dataset.d, si=+btn.dataset.s, day=plan.days[di], act=btn.dataset.act;
+    if(act==='add'){
+      var sel=btn.parentNode.querySelector('select');
+      var id=sel&&sel.value; if(!id) return;
+      var p=pl(id);
+      day.stops=day.stops||[];
+      day.stops.push({place:id,stay:p.stay||60,start: day.stops.length?undefined: '09:30'});
+    }else if(act==='del'){ day.stops.splice(si,1); }
+    else if(act==='up'&&si>0){ var t=day.stops[si-1]; day.stops[si-1]=day.stops[si]; day.stops[si]=t; }
+    else if(act==='down'&&si<day.stops.length-1){ var t2=day.stops[si+1]; day.stops[si+1]=day.stops[si]; day.stops[si]=t2; }
+    else if(act==='addday'){ return; }
+    save(); render();
+  });
+  document.addEventListener('click',function(e){
+    if(e.target.id==='btnAddDay'){
+      plan.days.push({title:'第 '+(plan.days.length+1)+' 天',note:'',stops:[]});
+      plan.custom=true; save(); render();
+    }
+    if(e.target.id==='btnNew'){
+      plan={id:'custom',title:'我的行程',custom:true,days:[{title:'第 1 天',note:'',stops:[]}]};
+      save(); render();
+    }
+  });
+
+  fetch('/static/trip-presets.json?v=76').then(function(r){return r.json()}).then(function(j){
+    data=j; places=j.places||{};
+    plan=loadSaved() || clonePreset(j.presets[0]);
+    render();
+  }).catch(function(){ $('err').hidden=false; $('err').textContent='行程数据暂时读不到，请稍后重试。'; });
+})();
+</script>
 </body>
 </html>

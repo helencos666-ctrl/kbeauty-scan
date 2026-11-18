@@ -9,11 +9,11 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="旅韩助手">
 <link rel="manifest" href="/manifest.webmanifest">
-<link rel="apple-touch-icon" href="/static/icons/apple-touch-icon.png?v=75">
-<link rel="icon" type="image/png" sizes="192x192" href="/static/icons/icon-192.png?v=75">
-<link rel="stylesheet" href="/static/pwa.css?v=75">
-<link rel="stylesheet" href="/static/community.css?v=75">
-<link rel="stylesheet" href="/static/me.css?v=75">
+<link rel="apple-touch-icon" href="/static/icons/apple-touch-icon.png?v=76">
+<link rel="icon" type="image/png" sizes="192x192" href="/static/icons/icon-192.png?v=76">
+<link rel="stylesheet" href="/static/pwa.css?v=76">
+<link rel="stylesheet" href="/static/community.css?v=76">
+<link rel="stylesheet" href="/static/me.css?v=76">
 </head>
 <body class="mepage">
 <div class="metop">我的<a class="bell" href="/community/notices" aria-label="通知">🔔<span class="dot" id="bellDot" hidden></span></a></div>
@@ -43,8 +43,8 @@
   </div></div>
   <p class="tip" style="text-align:center;margin:-4px 0 12px">从底部「我的」可以回到这里。所有入口都收在「全部功能」里。</p>
   <div class="card mecard menu">
-    <a href="/opening" id="openPromoRow"><span class="e">🎉</span>开业活动<span class="hint">进行中</span><span class="ar">›</span></a>
-    <a href="/invite"><span class="e">🎁</span>邀请有奖<span class="hint">双方得抵用券</span><span class="ar">›</span></a>
+    <a href="/opening" id="openPromoRow" class="promo-hot"><span class="e">🎉</span>开业活动<span class="hint">进行中</span><span class="ar">›</span></a>
+    <a href="/invite" id="inviteRow" class="promo-hot"><span class="e">🎁</span>邀请有奖<span class="hint">双方得抵用券</span><span class="ar">›</span></a>
     <a href="/partner"><span class="e">🏪</span>我是商家 · 商家入驻<span class="ar">›</span></a>
     <a href="#" id="mFb"><span class="e">📮</span>意见反馈<span class="ar">›</span></a>
     <a href="#" id="mSet"><span class="e">⚙️</span>设置<span class="ar">›</span></a>
@@ -61,10 +61,10 @@
   <a href="/community/new" data-nav="post" class="pub"><span class="plus">＋</span>发布</a>
   <a href="/festival" data-nav="festival" class="fest"><span class="fest-ico">🎁<em>冬季</em></span>购物节</a>
   <a href="/shops" data-nav="services" class="svc"><i>💼</i>商业服务</a>
-  <a href="/local" data-nav="local" class="loc"><i>🏘️</i>生活在韩国</a>
+  <a href="/trips" data-nav="trips" class="loc"><i>🗓️</i>行程安排</a>
   <a href="/me" data-nav="me" class="me on" aria-current="page"><i>👤</i>我的</a>
 </nav>
-<script src="/static/community.js?v=75"></script>
+<script src="/static/community.js?v=76"></script>
 <script src="/static/ref.js"></script>
 <script>
 (function(){
@@ -155,7 +155,7 @@
 })();
 </script>
 
-<script src="/static/opening-promos.js?v=75" data-lh-opening="1"></script>
+<script src="/static/opening-promos.js?v=76" data-lh-opening="1"></script>
 <script>
 document.addEventListener('DOMContentLoaded', function(){
   if (!window.LHOpening) return;
@@ -169,6 +169,6 @@ document.addEventListener('DOMContentLoaded', function(){
   });
 });
 </script>
-<script src="/static/pwa.js?v=75" defer></script>
+<script src="/static/pwa.js?v=76" defer></script>
 </body>
 </html>

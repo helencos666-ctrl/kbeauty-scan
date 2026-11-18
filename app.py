@@ -3,7 +3,7 @@ import base64, io, json, os, re, time, threading, datetime
 from collections import defaultdict, deque
 import httpx
 from fastapi import FastAPI, Request, UploadFile, File, HTTPException
-from fastapi.responses import FileResponse, JSONResponse
+from fastapi.responses import FileResponse, JSONResponse, RedirectResponse
 from fastapi.staticfiles import StaticFiles
 from PIL import Image, ImageOps
 
@@ -497,6 +497,8 @@ def terms():
 @app.get("/static/{name}.html")
 def static_html(name: str):
     """静态目录里的 .html 也走页面渲染（加 SEO 标签和脚本 nonce）；其它静态文件仍由 StaticFiles 提供。"""
+    if name == "local":
+        return RedirectResponse("/trips", status_code=302)
     if not re.fullmatch(r"[a-z0-9][a-z0-9\-]{0,40}", name) or not os.path.isfile(os.path.join(BASE, "static", name + ".html")):
         raise HTTPException(404, "Not Found")
     return html_file_response(name + ".html")
@@ -504,11 +506,13 @@ def static_html(name: str):
 
 from lanjing_seed import router as lanjing_router, seed_once as seed_lanjing  # noqa: E402
 from guides_seed import seed_once as seed_guides  # noqa: E402
+from hide_shop_posts_v76 import hide_once as hide_shop_posts_v76  # noqa: E402
 app.include_router(lanjing_router)
 
 @app.on_event("startup")
 def _startup_seeds():
     seed_lanjing()
+    hide_shop_posts_v76()
     seed_guides()
 
 app.mount("/static", StaticFiles(directory=os.path.join(BASE, "static")), name="static")
