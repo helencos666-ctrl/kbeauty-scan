@@ -10,21 +10,20 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="旅韩助手">
 <link rel="manifest" href="/manifest.webmanifest">
-<link rel="apple-touch-icon" href="/static/icons/apple-touch-icon.png?v=82">
-<link rel="icon" type="image/png" sizes="192x192" href="/static/icons/icon-192.png?v=82">
-<link rel="stylesheet" href="/static/pwa.css?v=82">
-<link rel="stylesheet" href="/static/community.css?v=82">
-<link rel="stylesheet" href="/static/chat.css?v=82">
+<link rel="apple-touch-icon" href="/static/icons/apple-touch-icon.png?v=83">
+<link rel="icon" type="image/png" sizes="192x192" href="/static/icons/icon-192.png?v=83">
+<link rel="stylesheet" href="/static/pwa.css?v=83">
+<link rel="stylesheet" href="/static/community.css?v=83">
+<link rel="stylesheet" href="/static/chat.css?v=83">
 </head>
-<body>
-<header>
-  <h1>🧭 韩友圈</h1>
-  <p><a href="/community">← 返回社区</a></p>
-</header>
+<body class="post-page no-hero">
+<a class="pback" href="/community" aria-label="返回">‹</a>
 <main>
+  <div id="hero"></div>
+  <div class="pwrap">
   <div id="warn"></div>
-  <div class="card" id="post"><div class="loading">加载中…</div></div>
-  <div class="card" id="cbox" style="display:none">
+  <div id="post"><div class="loading">加载中…</div></div>
+  <div id="cbox" style="display:none">
     <h2 id="ctitle">评论</h2>
     <div id="clist"></div>
     <div id="cform" style="margin-top:10px"></div>
@@ -32,7 +31,14 @@
   <div class="disclaimer">帖子内容为网友个人经验，仅供参考，不代表本站观点。商家信息由商家自行负责。</div>
   <div class="footlinks"><a href="/rules">社区约定</a>·<a href="/member">会员说明</a>·<a href="/community">社区首页</a></div>
   <p style="font-size:12px;color:#888;text-align:center;margin:10px 0 16px;line-height:1.7">旅韩助手为个人运营的免费信息网站，内容仅供参考，不是旅行社，不代办签证。<br><a href="/terms" style="color:#2c7be5">用户协议与免责声明</a> · <a href="/privacy" style="color:#2c7be5">隐私政策</a> · <a href="/rules" style="color:#2c7be5">社区约定</a></p>
+  </div>
 </main>
+<div class="pbar" id="pbar" hidden>
+  <button type="button" class="pbar-in" id="pbarTalk">说点什么...</button>
+  <button type="button" class="pact" id="like" aria-label="点赞">♡<small id="likeN">0</small></button>
+  <button type="button" class="pact" id="fav" aria-label="收藏">☆<small id="favN">0</small></button>
+  <button type="button" class="pact" id="cmtBtn" aria-label="评论">💬<small id="cmtN">0</small></button>
+</div>
 <div class="lightbox" id="lb"><img alt=""></div>
 <nav>
   <a href="/"><i>🏠</i>首页</a>
@@ -42,7 +48,7 @@
   <a href="/?tab=more"><i>☰</i>全部</a>
   <a href="/me"><i>👤</i>我的</a>
 </nav>
-<script src="/static/community.js?v=82"></script>
+<script src="/static/community.js?v=83"></script>
 <script>
 var pid = parseInt(location.pathname.split('/').pop(), 10);
 var WARN = {visa: '⚠️ 本帖为网友个人签证经验，本站不提供签证代办。政策以韩国驻华使领馆、韩国签证申请中心和 K-ETA 官网为准。',
@@ -61,6 +67,54 @@ var WARN = {visa: '⚠️ 本帖为网友个人签证经验，本站不提供签
 var lb = document.getElementById('lb');
 lb.onclick = function(){ lb.style.display = 'none'; };
 function zoom(src){ lb.querySelector('img').src = src; lb.style.display = 'flex'; }
+function topicList(p){
+  var ts = [];
+  String(p.topics || '').split(/\s+/).forEach(function(t){ if (t && ts.indexOf(t) < 0) ts.push(t); });
+  (String(p.body || '').match(/#([^\s#]{1,20})/g) || []).forEach(function(h){
+    var t = h.slice(1); if (t && ts.indexOf(t) < 0) ts.push(t);
+  });
+  return ts;
+}
+function linkBody(text){
+  return LH.esc(text).replace(/#([^\s#]{1,20})/g, function(_, t){
+    return '<a class="hash" href="/community?tab=search&q=' + encodeURIComponent(t) + '">#' + t + '</a>';
+  });
+}
+function needLogin(){
+  location.href = '/login?next=' + encodeURIComponent(location.pathname);
+}
+function syncBar(p){
+  document.getElementById('pbar').hidden = false;
+  var lk = document.getElementById('like'), fv = document.getElementById('fav');
+  lk.className = 'pact' + (p.liked ? ' on' : '');
+  lk.innerHTML = (p.liked ? '♥' : '♡') + '<small id="likeN">' + (p.likes || 0) + '</small>';
+  fv.className = 'pact' + (p.favorited ? ' on' : '');
+  fv.innerHTML = (p.favorited ? '★' : '☆') + '<small id="favN">' + (p.favs || 0) + '</small>';
+  document.getElementById('cmtN').textContent = p.comments || (p.comment_list || []).length || 0;
+}
+function bindHero(images){
+  var box = document.getElementById('hero');
+  if (!images || !images.length){
+    document.body.classList.add('no-hero'); box.innerHTML = ''; return;
+  }
+  document.body.classList.remove('no-hero');
+  var dots = images.length > 1 ? '<div class="pdots">' + images.map(function(_, i){ return '<i' + (i ? '' : ' class="on"') + '></i>'; }).join('') + '</div>' : '';
+  box.innerHTML = '<div class="phero"><div class="phero-track" id="heroTrack">' + images.map(function(im, i){
+    return '<img alt="" decoding="async" src="/api/community/img/' + im.id + '" data-full="/api/community/img/' + im.id + '">';
+  }).join('') + '</div>' + dots + '</div>';
+  var track = document.getElementById('heroTrack');
+  var ds = box.querySelectorAll('.pdots i');
+  track.addEventListener('scroll', function(){
+    var i = Math.round(track.scrollLeft / Math.max(track.clientWidth, 1));
+    ds.forEach(function(d, j){ d.className = (j === i) ? 'on' : ''; });
+  }, {passive: true});
+  track.querySelectorAll('img').forEach(function(im){ im.onclick = function(){ zoom(im.dataset.full); }; });
+}
+function goComments(){
+  var el = document.getElementById('cbox');
+  if (el) el.scrollIntoView({behavior: 'smooth', block: 'start'});
+  var c = document.getElementById('cbody'); if (c) try { c.focus(); } catch(e){}
+}
 var me = null, booted = false;
 async function load(){
   if (!booted){ me = await LH.userbar(); booted = true; }
@@ -72,42 +126,66 @@ async function load(){
     return;
   }
   document.title = p.title + ' · 韩友圈';
+  bindHero(p.images || []);
   document.getElementById('warn').innerHTML = (p.status === 'pending' ? '<div class="pending">⏳ 这篇帖子正在等待管理员审核，目前只有你自己能看到。' + (p.review_note ? '（' + LH.esc(p.review_note) + '）' : '') + '住宿、包车用车、医美等商业信息请开通商家会员后在商家专区发布。详见<a href="/rules#r3">社区约定</a>。</div>' : '') +
     (p.status === 'rejected' ? '<div class="pending">❌ 这篇帖子未通过审核：' + LH.esc(p.review_note || '') + '</div>' : '') +
     (WARN[p.board] ? '<div class="warn">' + WARN[p.board] + '</div>' : '');
-  var g = p.images.length ? '<div class="post-gallery n' + Math.min(p.images.length, 3) + (p.images.length === 1 ? ' one' : '') + '">' + p.images.map(function(i){
-    return '<img loading="lazy" alt="" src="/api/community/img/' + i.id + (p.images.length === 1 ? '' : '?t=1') + '" data-full="/api/community/img/' + i.id + '">';
-  }).join('') + '</div>' : '';
-  box.innerHTML = '<div class="meta" style="margin-top:0">' + LH.postFlags(p) + (p.merchant ? '<span class="tag biz">商家</span>' : '') + '<span class="tag">' + LH.esc(p.board_name) + '</span>' + (p.tag_name ? '<span class="tag">' + LH.esc(p.tag_name) + '</span>' : '') + '<span>' + LH.esc(p.time) + '</span>' + (p.merchant || p.views ? '<span>👁 ' + (p.views || 0) + '</span>' : '') + '</div>' +
-    '<h2 style="color:var(--ink);font-size:19px;margin:10px 0 4px">' + (p.tag_name ? '<span style="color:#146E68">[' + LH.esc(p.tag_name) + ']</span> ' : '') + LH.esc(p.title) + '</h2>' +
+  var topics = topicList(p);
+  var bodyHtml = linkBody(p.body || '');
+  topics.forEach(function(t){
+    if ((p.body || '').indexOf('#' + t) < 0) bodyHtml += ' <a class="hash" href="/community?tab=search&q=' + encodeURIComponent(t) + '">#' + LH.esc(t) + '</a>';
+  });
+  var locParts = [];
+  if (p.area) locParts.push(p.area);
+  if (p.place && (!p.area || p.place.indexOf(p.area) < 0)) locParts.push(p.place);
+  else if (p.place && p.place !== p.area) locParts = [p.place.indexOf(p.area) >= 0 ? p.place : (p.area + ' · ' + p.place)];
+  var locText = (p.place && p.area && p.place !== p.area && p.place.indexOf(p.area) < 0) ? (p.area + ' · ' + p.place) : (p.place || p.area || '');
+  var guess = topics[0] || p.place || p.area || '';
+  if (guess && locText && guess === p.area && p.place) guess = p.place;
+  var chips = '';
+  if (locText) chips += '<a class="pchip" href="/community?tab=area&city=' + encodeURIComponent(p.area || '') + '">📍 ' + LH.esc(locText) + '</a>';
+  if (guess) chips += '<a class="pchip search" href="/community?tab=search&q=' + encodeURIComponent(guess) + '">猜你想搜  ' + LH.esc(guess) + '</a>';
+  box.innerHTML =
+    '<div class="meta" style="margin-top:0">' + LH.postFlags(p) + (p.merchant ? '<span class="tag biz">商家</span>' : '') + '<span class="tag">' + LH.esc(p.board_name) + '</span>' + (p.tag_name ? '<span class="tag">' + LH.esc(p.tag_name) + '</span>' : '') + '<span>' + LH.esc(p.time) + '</span>' + (p.merchant || p.views ? '<span>👁 ' + (p.views || 0) + '</span>' : '') + '</div>' +
+    '<h1 class="ptitle">' + (p.tag_name ? '<span style="color:#146E68">[' + LH.esc(p.tag_name) + ']</span> ' : '') + LH.esc(p.title) + '</h1>' +
     '<div class="author-row"><span>' + LH.avatar(p.author_id, p.author, p.has_avatar, 'lg') + '</span><div class="who-txt"><div><a href="/community/u/' + p.author_id + '" style="color:inherit;text-decoration:none">' + LH.esc(p.author) + '</a>' + LH.badge(p.author_tier) + LH.vb(p.author_verified) + LH.ubadges(p.author_badges, p.author_official, 4) + '</div>' +
     (p.mine ? '' : '<div class="pm-acts">' +
       '<button class="jbtn' + (p.following ? ' on' : '') + '" id="fol" style="padding:2px 10px;font-size:12px">' + (p.following ? '已关注' : '＋ 关注') + '</button>' +
       (p.consult ? '<a class="btn sm primary" href="' + LH.consultHref('post', p.id) + '">💬 立即咨询</a>' : '<button class="btn sm primary" type="button" id="pmBtn">✉️ 私聊</button>') +
     '</div>') + '</div></div>' +
     (p.offer || p.valid_until ? '<div class="offerbox">' + (p.offer ? '🎁 <b>' + LH.esc(p.offer) + '</b>' : '') + (p.valid_until ? '<div class="tip" style="margin:4px 0 0">有效期至 ' + LH.esc(p.valid_until) + '</div>' : '') + '</div>' : '') +
-    '<div class="body">' + LH.esc(p.body) + '</div>' + g +
+    '<div class="body">' + bodyHtml + '</div>' +
+    (chips ? '<div class="pchips">' + chips + '</div>' : '') +
     (p.medical_note ? '<div class="mednote">⚠️ ' + LH.esc(p.medical_note) + '</div>' : '') +
     (p.consult ? LH.consultBtn('post', p.id, '立即咨询（站内沟通）') : '') +
-    '<div class="row" style="margin-top:14px;justify-content:space-between"><span class="row" style="gap:8px"><button class="btn sm ghost" id="like">' + (p.liked ? '❤️ 已赞 ' : '🤍 点赞 ') + p.likes + '</button>' +
-    '<button class="btn sm ghost" type="button" id="share">分享</button></span>' +
+    '<div class="row" style="margin-top:14px;justify-content:space-between"><span class="row" style="gap:8px"><button class="btn sm ghost" type="button" id="share">分享</button></span>' +
     '<span class="row">' + (p.mine ? '<button class="linkbtn" id="delp">删除</button>' : '') + '<button class="linkbtn" id="repp">🚩 举报</button></span></div>';
-  box.querySelectorAll('.post-gallery img').forEach(function(im){ im.onclick = function(){ zoom(im.dataset.full); }; });
+  syncBar(p);
   document.getElementById('like').onclick = async function(){
-    if (!me || !me.user){ location.href = '/login?next=' + encodeURIComponent(location.pathname); return; }
+    if (!me || !me.user){ needLogin(); return; }
     if (me.user.tier < 1){ if (confirm('开通会员后才能点赞。去了解会员？')) location.href = '/member'; return; }
-    try { var r = await LH.api('POST', '/api/community/posts/' + pid + '/like', {}); this.textContent = (r.liked ? '❤️ 已赞 ' : '🤍 点赞 ') + r.likes; } catch(e){ alert(e.message); }
+    try { var r = await LH.api('POST', '/api/community/posts/' + pid + '/like', {}); p.liked = r.liked; p.likes = r.likes; syncBar(p); } catch(e){ alert(e.message); }
+  };
+  document.getElementById('fav').onclick = async function(){
+    if (!me || !me.user){ needLogin(); return; }
+    if (me.user.tier < 1){ if (confirm('开通会员后才能收藏。去了解会员？')) location.href = '/member'; return; }
+    try { var r = await LH.api('POST', '/api/community/posts/' + pid + '/favorite', {}); p.favorited = r.favorited; p.favs = r.favs; syncBar(p); } catch(e){ alert(e.message); }
+  };
+  document.getElementById('cmtBtn').onclick = goComments;
+  document.getElementById('pbarTalk').onclick = function(){
+    if (!me || !me.user){ needLogin(); return; }
+    goComments();
   };
   document.getElementById('share').onclick = function(){ LH.share({title: p.title, text: '来自旅韩助手韩友圈', url: location.origin + '/community/post/' + pid, targetType: 'post', targetId: pid}); };
   document.getElementById('repp').onclick = function(){ LH.report('post', pid); };
   var fol = document.getElementById('fol');
   if (fol) fol.onclick = async function(){
-    if (!me || !me.user){ location.href = '/login?next=' + encodeURIComponent(location.pathname); return; }
+    if (!me || !me.user){ needLogin(); return; }
     try { var r = await LH.api('POST', '/api/community/follow/' + p.author_id, {}); fol.className = 'jbtn' + (r.following ? ' on' : ''); fol.textContent = r.following ? '已关注' : '＋ 关注'; } catch(e){ alert(e.message); }
   };
   var pm = document.getElementById('pmBtn');
   if (pm) pm.onclick = async function(){
-    if (!me || !me.user){ location.href = '/login?next=' + encodeURIComponent(location.pathname); return; }
+    if (!me || !me.user){ needLogin(); return; }
     pm.disabled = true;
     try { var r = await LH.api('POST', '/api/chat/start', {post_id: pid}); location.href = '/community/messages/' + r.thread_id; }
     catch(e){ alert(e.message); pm.disabled = false; }
@@ -144,6 +222,6 @@ async function load(){
 }
 load();
 </script>
-<script src="/static/pwa.js?v=82" defer></script>
+<script src="/static/pwa.js?v=83" defer></script>
 </body>
 </html>

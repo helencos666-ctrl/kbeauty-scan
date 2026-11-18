@@ -147,11 +147,14 @@ var LH = (function(){
   function postPhotos(p){
     var ids = (p.thumbs && p.thumbs.length) ? p.thumbs : (p.cover ? [p.cover] : []);
     if (!ids.length) return '';
-    if (ids.length === 1) return '<img class="photo" loading="lazy" alt="" src="/api/community/img/' + ids[0] + '?t=1">';
+    function img(id, cls){
+      return '<img' + (cls ? ' class="' + cls + '"' : '') + ' alt="" decoding="async" src="/api/community/img/' + id + '?t=1" onerror="if(this.dataset.fb){this.onerror=null;return;}this.dataset.fb=1;this.src=\'/api/community/img/' + id + '\';">';
+    }
+    if (ids.length === 1) return img(ids[0], 'photo');
     var n = p.img_n || ids.length;
     var cells = ids.slice(0, 3).map(function(id, i){
       var more = (i === 2 && n > 3) ? '<span class="more">+' + (n - 2) + '</span>' : '';
-      return '<span class="ph">' + more + '<img loading="lazy" alt="" src="/api/community/img/' + id + '?t=1"></span>';
+      return '<span class="ph">' + more + img(id, '') + '</span>';
     }).join('');
     return '<div class="photos n' + Math.min(ids.length, 3) + '">' + cells + '</div>';
   }
@@ -178,7 +181,7 @@ var LH = (function(){
       var r = await api('GET', '/api/consult/unread'), n = r.n || 0;
       document.querySelectorAll('[data-consult-dot]').forEach(function(el){ el.textContent = n > 99 ? '99+' : n; el.style.display = n ? '' : 'none'; });
       if (_cn >= 0 && n > _cn && document.hidden && window.Notification && Notification.permission === 'granted' && !/^\/consult\/\d/.test(location.pathname)){
-        var opt = {body: '你有 ' + n + ' 条未读咨询消息', icon: '/static/icons/icon-192.png?v=82', tag: 'lh-consult', data: {url: '/consult'}};
+        var opt = {body: '你有 ' + n + ' 条未读咨询消息', icon: '/static/icons/icon-192.png?v=83', tag: 'lh-consult', data: {url: '/consult'}};
         try { var reg = navigator.serviceWorker && await navigator.serviceWorker.getRegistration(); if (reg) reg.showNotification('旅韩助手 · 站内咨询', opt); else new Notification('旅韩助手 · 站内咨询', opt); } catch(e){}
       }
       _cn = n;

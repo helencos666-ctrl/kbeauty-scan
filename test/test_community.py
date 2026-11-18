@@ -390,7 +390,7 @@ check("community home: tabs", all(w in ch for w in ['data-t="follow"', 'data-t="
       and ">实用干货<" not in ch and ">今日热议<" not in ch and ">🌟 精选<" not in ch and ">我关注的<" not in ch
       and ">推荐<" not in ch and ">我关注<" not in ch)
 check("community home: journey topics", all(w in ch for w in ["出发前", "在韩国", "找商家", "签证问答", "留学打听", "结伴同行", "踩坑避雷", "出行提醒", "租房找房", "闲置转让", "工作机会", "汇率换算", "住宿推荐", "包车用车", "皮肤管理·医美"]) and ch.count('class="topic"') >= 12 and 'class="tools"' not in ch)
-check("community home: 旅韩交友 + sections + fab", all(w in ch for w in ["旅韩交友", "/community/friends", "今日热议", "避坑 &amp; 签证新帖", "刚发布", 'class="fab pill"', "写帖子", "韩友圈"]))
+check("community home: 旅韩交友 + sections + fab", all(w in ch for w in ["旅韩交友", "/community/friends", "今日热议", "避坑 &amp; 签证新帖", "刚发布", "韩友圈"]) and 'class="fab pill"' not in ch)
 _seo_pages = "".join(guest.get(p).text for p in ["/community", "/community/friends", "/community/boards"])
 _seo_pages = _seo_pages.replace("https://lvhanzhushou.com", "").replace("https://schema.org", "")
 check("no external assets on new pages", "http://" not in _seo_pages and "https://" not in _seo_pages)

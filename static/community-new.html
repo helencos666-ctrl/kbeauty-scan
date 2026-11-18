@@ -10,10 +10,10 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="旅韩助手">
 <link rel="manifest" href="/manifest.webmanifest">
-<link rel="apple-touch-icon" href="/static/icons/apple-touch-icon.png?v=82">
-<link rel="icon" type="image/png" sizes="192x192" href="/static/icons/icon-192.png?v=82">
-<link rel="stylesheet" href="/static/pwa.css?v=82">
-<link rel="stylesheet" href="/static/community.css?v=82">
+<link rel="apple-touch-icon" href="/static/icons/apple-touch-icon.png?v=83">
+<link rel="icon" type="image/png" sizes="192x192" href="/static/icons/icon-192.png?v=83">
+<link rel="stylesheet" href="/static/pwa.css?v=83">
+<link rel="stylesheet" href="/static/community.css?v=83">
 </head>
 <body class="compose">
 <header>
@@ -73,6 +73,10 @@
     <label class="f" id="blab">正文（10–3000 字）</label>
     <textarea class="f" id="body" maxlength="3000" placeholder="时间、地点、经过、建议……写得越具体越有用" style="min-height:200px;line-height:1.7"></textarea>
     <div class="count" id="bcount">0 / 3000</div>
+    <label class="f" for="topics">话题（选填）</label>
+    <input class="f" id="topics" maxlength="40" placeholder="例如 明洞 换季，用空格分开，会显示成 #话题">
+    <label class="f" for="place">地点（选填）</label>
+    <input class="f" id="place" maxlength="40" placeholder="城市或更具体的地点，例如 首尔 明洞">
     <label class="f">图片（最多 6 张，会自动压缩）</label>
     <input type="file" id="pick" accept="image/*" multiple>
     <div class="thumbs" id="thumbs"></div>
@@ -100,7 +104,7 @@
   <a href="/?tab=more"><i>☰</i>全部</a>
   <a href="/me"><i>👤</i>我的</a>
 </nav>
-<script src="/static/community.js?v=82"></script>
+<script src="/static/community.js?v=83"></script>
 <script>
 var WARN = {visa: '签证问答仅限个人经验分享，禁止发布代办广告。', study: '留学打听仅限经验交流，禁止发布中介广告。',
   friends: '请勿在帖子里公开手机号、微信号、住址等隐私。想认识新朋友，也可以去“旅韩交友”发布交友资料。',
@@ -117,6 +121,28 @@ var WARN = {visa: '签证问答仅限个人经验分享，禁止发布代办广�
 var MB = {hotel: 1, car: 1, clinic: 1, agency: 1, daigou: 1, guide: 1, kpop: 1, logistics: 1}, ME = null;
 var NORMAL_HINT = '普通频道里含酒店预订、租车包车、医美、微信号、代办等商业内容的帖子会先进入人工审核。';
 var files = [], SUBC = {}, MED = {}, MEDNOTE = '', lastTpl = '';
+
+var CITY_BOX = [
+  ['济州',126.1,33.1,126.98,33.62],['釜山',128.75,34.95,129.35,35.4],
+  ['大邱',128.4,35.7,128.8,36.05],['光州',126.7,35.05,127.05,35.28],
+  ['大田',127.25,36.2,127.55,36.5],['仁川',126.35,37.35,126.78,37.58],
+  ['首尔',126.78,37.42,127.2,37.72]
+];
+function fillPlace(){
+  var el = document.getElementById('place'); if (!el || el.dataset.edited) return;
+  if (!el.value.trim()) el.value = '首尔';
+  el.addEventListener('input', function(){ el.dataset.edited = '1'; });
+  if (!navigator.geolocation) return;
+  navigator.geolocation.getCurrentPosition(function(pos){
+    if (el.dataset.edited) return;
+    var lat = pos.coords.latitude, lng = pos.coords.longitude, city = '首尔';
+    for (var i = 0; i < CITY_BOX.length; i++){
+      var b = CITY_BOX[i];
+      if (lng >= b[1] && lat >= b[2] && lng <= b[3] && lat <= b[4]){ city = b[0]; break; }
+    }
+    if (!el.dataset.edited) el.value = city;
+  }, function(){}, {maximumAge:600000, timeout:8000, enableHighAccuracy:false});
+}
 var DRAFT_KEY = 'lh-post-draft-v1';
 var CHANNELS = [
   {key:'daily', label:'🌸 在韩日常'},
@@ -349,6 +375,8 @@ function saveDraft(){
       valid: document.getElementById('valid').value,
       mcat: (document.getElementById('mcat') || {}).value || '',
       agree: document.getElementById('agree').checked,
+      topics: document.getElementById('topics').value,
+      place: document.getElementById('place').value,
       t: Date.now()
     };
     if (!d.board && !d.title.trim() && (!d.body.trim() || d.body === lastTpl)){
@@ -371,7 +399,7 @@ function loadDraft(){
 function clearDraft(){ try { localStorage.removeItem(DRAFT_KEY); } catch(e){} }
 var draftTimer = 0;
 function scheduleDraft(){ clearTimeout(draftTimer); draftTimer = setTimeout(saveDraft, 400); }
-['title','body','offer','valid','tag','agree'].forEach(function(id){
+['title','body','offer','valid','tag','agree','topics','place'].forEach(function(id){
   var el = document.getElementById(id);
   el.addEventListener(id === 'agree' ? 'change' : 'input', function(){ updateCounts(); scheduleDraft(); });
 });
@@ -382,6 +410,7 @@ document.getElementById('mcat').addEventListener('change', function(){ applyMcat
   if (!d.user){ gate.innerHTML = '<div class="empty">请先登录<br><br><a class="btn primary" href="/login?next=/community/new">登录 / 注册</a></div>'; return; }
   if (d.user.tier < 1){ gate.innerHTML = '<div class="empty">开通会员（¥' + d.prices.price_t1 + '）后即可在在韩日常、踩坑避雷、签证问答等频道发帖；旅韩交友发帖需高级会员；住宿、包车、医美、留学机构、代购、地陪、追星活动、中韩物流等商家请开通商家会员<br><br><a class="btn primary" href="/member">了解会员</a></div>'; return; }
   gate.style.display = 'none'; document.getElementById('form').style.display = 'block';
+  fillPlace();
   document.getElementById('send').disabled = false; document.getElementById('preview').disabled = false;
   renderChips();
   var isMerchant = !!(d.user && (d.user.merchant || d.user.merchant_info));
@@ -393,6 +422,8 @@ document.getElementById('mcat').addEventListener('change', function(){ applyMcat
     applyBoard(qBoard || draft.board || '', true);
     if (draft.title) document.getElementById('title').value = draft.title;
     if (draft.body){ document.getElementById('body').value = draft.body; if (TPL[draft.board] && draft.body === TPL[draft.board]) lastTpl = draft.body; }
+    if (draft.topics) document.getElementById('topics').value = draft.topics;
+    if (draft.place){ document.getElementById('place').value = draft.place; document.getElementById('place').dataset.edited = '1'; }
     if (MB[currentBoard()]){
       if (draft.tag) document.getElementById('tag').value = draft.tag;
       if (draft.offer) document.getElementById('offer').value = draft.offer;
@@ -463,6 +494,8 @@ document.getElementById('send').onclick = async function(){
   fd.append('merchant_cat', (document.getElementById('mcat') || {}).value || '');
   fd.append('title', document.getElementById('title').value);
   fd.append('body', document.getElementById('body').value);
+  fd.append('topics', document.getElementById('topics').value);
+  fd.append('place', document.getElementById('place').value);
   if (MB[currentBoard()]){
     fd.append('tag', document.getElementById('tag').value); fd.append('offer', document.getElementById('offer').value); fd.append('valid_until', document.getElementById('valid').value);
   }
@@ -477,6 +510,6 @@ document.getElementById('send').onclick = async function(){
   } catch(e){ LH.showErr(err, e.message); LH.toast(e.message); setSending(false); window.scrollTo(0, 0); }
 };
 </script>
-<script src="/static/pwa.js?v=82" defer></script>
+<script src="/static/pwa.js?v=83" defer></script>
 </body>
 </html>

@@ -379,6 +379,20 @@ ALTER TABLE c_posts ADD COLUMN IF NOT EXISTS lng DOUBLE PRECISION;
 CREATE INDEX IF NOT EXISTS c_posts_area_idx ON c_posts(area) WHERE area IS NOT NULL AND NOT deleted;
 """
 
+# 话题、地点与收藏
+MIGRATE9 = """
+ALTER TABLE c_posts ADD COLUMN IF NOT EXISTS topics TEXT;
+ALTER TABLE c_posts ADD COLUMN IF NOT EXISTS place TEXT;
+ALTER TABLE c_posts ADD COLUMN IF NOT EXISTS fav_count INT NOT NULL DEFAULT 0;
+CREATE TABLE IF NOT EXISTS c_favorites (
+  user_id BIGINT NOT NULL REFERENCES c_users(id) ON DELETE CASCADE,
+  post_id BIGINT NOT NULL REFERENCES c_posts(id) ON DELETE CASCADE,
+  created_at TIMESTAMPTZ NOT NULL DEFAULT now(),
+  PRIMARY KEY (user_id, post_id)
+);
+CREATE INDEX IF NOT EXISTS c_favorites_post_idx ON c_favorites(post_id);
+"""
+
 FEED_AREA_ALIASES = {
     "首尔": ["首尔", "서울", "Seoul", "seoul", "江南", "明洞", "弘大", "东大门", "梨泰院", "新村", "蚕室"],
     "济州": ["济州", "제주", "Jeju", "jeju", "西归浦"],
@@ -406,6 +420,48 @@ FEED_CATS = {
     "show": {"boards": (), "words": ["展览", "演出", "音乐剧", "展览会", "公演", "艺术展"]},
     "citywalk": {"boards": (), "words": ["CityWalk", "citywalk", "城市漫步", "散步", "漫步"]},
 }
+
+def clean_topics(s):
+    parts = re.split(r"[\s,，#]+", (s or "").strip())
+    out = []
+    for p in parts:
+        p = p.strip()[:20]
+        if p and p not in out:
+            out.append(p)
+        if len(out) >= 5:
+            break
+    return " ".join(out)
+
+def parse_area_place(place, area=""):
+    place = (place or "").strip()[:40]
+    area = (area or "").strip()
+    if area not in FEED_AREA_ALIASES:
+        area = ""
+    blob = place
+    if not area:
+        for city, aliases in FEED_AREA_ALIASES.items():
+            if any(a in blob for a in aliases):
+                area = city
+                break
+    return area, place
+
+def infer_area_place(title, body, area=None, place=None):
+    text = (title or "") + "\n" + (body or "")
+    if not area:
+        for city, aliases in FEED_AREA_ALIASES.items():
+            if any(a in text for a in aliases):
+                area = city
+                break
+    if not place:
+        for ds in FEED_DISTRICTS.values():
+            for d in ds:
+                if d in text:
+                    place = d
+                    break
+            if place:
+                break
+    return area, place
+
 
 BOT_NICK = "旅韩小助手"
 BOT_PW_HASH = "disabled"          # 非 scrypt 格式，check_pw 恒为失败，不能登录
@@ -459,6 +515,7 @@ def db():
                         cur.execute(MIGRATE6)
                         cur.execute(MIGRATE7)
                         cur.execute(MIGRATE8)
+                        cur.execute(MIGRATE9)
                         from points import MIGRATE_POINTS
                         cur.execute(MIGRATE_POINTS)
                         from chicken import MIGRATE_CHICKEN
@@ -1395,6 +1452,11 @@ def _post_out(r, full=False):
         o["valid_until"] = str(r["valid_until"])
     if r.get("area"):
         o["area"] = r["area"]
+    if r.get("place"):
+        o["place"] = r["place"]
+    if r.get("topics"):
+        o["topics"] = r["topics"]
+    o["favs"] = int(r.get("fav_count") or 0)
     if r.get("lat") is not None and r.get("lng") is not None:
         try:
             o["lat"] = float(r["lat"]); o["lng"] = float(r["lng"])
@@ -1515,8 +1577,8 @@ def api_feed(req: Request, tab: str = "recommend", boards: str = "", offset: int
             args += [area, likes, likes]
         if qtext:
             like = '%' + qtext.replace('\\', '\\\\').replace('%', '\\%').replace('_', '\\_') + '%'
-            cond.append("(p.title ILIKE %s ESCAPE '\\' OR p.body ILIKE %s ESCAPE '\\')")
-            args += [like, like]
+            cond.append("(p.title ILIKE %s ESCAPE '\\' OR p.body ILIKE %s ESCAPE '\\' OR COALESCE(p.topics,'') ILIKE %s ESCAPE '\\')")
+            args += [like, like, like]
         if district:
             dlike = '%' + district + '%'
             cond.append("(COALESCE(p.area,'') = %s OR p.title ILIKE %s OR p.body ILIKE %s)")
@@ -1678,13 +1740,20 @@ def api_post(req: Request, pid: int):
                          JOIN c_users au ON au.id=c.user_id
                          WHERE c.post_id=%s AND NOT c.deleted AND NOT au.is_banned ORDER BY c.id LIMIT 500""", (pid,))
         liked = bool(u and q(conn, "SELECT 1 AS x FROM c_likes WHERE post_id=%s AND user_id=%s", (pid, u["id"]), one=True))
+        favorited = bool(u and q(conn, "SELECT 1 AS x FROM c_favorites WHERE post_id=%s AND user_id=%s", (pid, u["id"]), one=True))
         following = bool(u and q(conn, "SELECT 1 AS x FROM c_follows WHERE follower_id=%s AND followee_id=%s", (u["id"], r["user_id"]), one=True))
     o = _post_out(r, full=True)
+    area, place = infer_area_place(r.get("title"), r.get("body"), r.get("area"), r.get("place"))
+    if area:
+        o["area"] = area
+    if place:
+        o["place"] = place
     o["author_id"] = r["user_id"]
     o["author_verified"] = bool(r["verified"])
     o["following"] = following
     o["images"] = [{"id": i["id"], "w": i["width"], "h": i["height"]} for i in imgs]
     o["liked"] = liked
+    o["favorited"] = favorited
     o["mine"] = bool(u and u["id"] == r["user_id"])
     o["comment_tier"] = 2 if r["board"] in LOGIN_ONLY_BOARDS else 1
     o["review_note"] = r.get("review_note")
@@ -1756,7 +1825,8 @@ def api_merchant_feed(req: Request, cat: str = "", before: int = 0, limit_n: int
 @router.post("/api/community/posts")
 async def api_new_post(req: Request, board: str = Form(...), title: str = Form(...), body: str = Form(...),
                        tag: str = Form(""), offer: str = Form(""), valid_until: str = Form(""),
-                       merchant_cat: str = Form(""),
+                       merchant_cat: str = Form(""), topics: str = Form(""), area: str = Form(""),
+                       place: str = Form(""),
                        images: list[UploadFile] = File(default=[])):
     csrf(req)
     if board not in BOARDS:
@@ -1764,6 +1834,8 @@ async def api_new_post(req: Request, board: str = Form(...), title: str = Form(.
     daily = board == DAILY_BOARD
     title = clean_text(title, 40, "标题", 2 if daily else 4)
     body = clean_text(body, 3000, "正文", 5 if daily else 10)
+    topics = clean_topics(topics)
+    area, place = parse_area_place(place, area)
     images = [f for f in (images or []) if f and f.filename]
     cat = (merchant_cat or "").strip()
     if cat:
@@ -1831,9 +1903,9 @@ async def api_new_post(req: Request, board: str = Form(...), title: str = Form(.
               (u["id"],), one=True)["n"]
         if n >= 20:
             raise HTTPException(429, "今天发帖已达上限（20 篇）")
-        row = q(conn, """INSERT INTO c_posts(user_id,board,title,body,status,is_merchant,quota_kind,review_note,tag,offer,valid_until,merchant_cat)
-                         VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s) RETURNING id""",
-                (u["id"], board, title, body, status, bool(u["merchant"]), quota_kind, note, *act, cat), one=True)
+        row = q(conn, """INSERT INTO c_posts(user_id,board,title,body,status,is_merchant,quota_kind,review_note,tag,offer,valid_until,merchant_cat,topics,area,place)
+                         VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s) RETURNING id""",
+                (u["id"], board, title, body, status, bool(u["merchant"]), quota_kind, note, *act, cat, topics or None, area or None, place or None), one=True)
         for i, (big, th, w, h) in enumerate(processed):
             q(conn, "INSERT INTO c_images(post_id,pos,data,thumb,width,height) VALUES (%s,%s,%s,%s,%s,%s)",
               (row["id"], i, big, th, w, h))
@@ -1863,24 +1935,28 @@ def api_del_post(req: Request, pid: int):
 
 @router.get("/api/community/img/{iid}")
 def api_img(req: Request, iid: int, t: int = 0):
-    col = "thumb" if t else "data"
     with db() as conn:
-        r = q(conn, f"""SELECT i.{col} AS d, p.board, p.status, p.user_id FROM c_images i JOIN c_posts p ON p.id=i.post_id
+        r = q(conn, """SELECT i.thumb, i.data AS data, p.board, p.status, p.user_id FROM c_images i JOIN c_posts p ON p.id=i.post_id
                         JOIN c_users au ON au.id=p.user_id
                         WHERE i.id=%s AND NOT p.deleted AND NOT au.is_banned""", (iid,), one=True)
         if not r:
+            raise HTTPException(404, "图片不存在")
+        blob = r["thumb"] if t and r.get("thumb") else r["data"]
+        if not blob:
+            blob = r.get("data")
+        if not blob:
             raise HTTPException(404, "图片不存在")
         if r["status"] != "published":
             cu = current_user(conn, req)
             if not cu or cu["id"] != r["user_id"]:
                 raise HTTPException(404, "图片不存在")
-            return Response(bytes(r["d"]), media_type="image/jpeg", headers={"Cache-Control": "private, no-store"})
+            return Response(bytes(blob), media_type="image/jpeg", headers={"Cache-Control": "private, no-store"})
         if r["board"] in LOGIN_ONLY_BOARDS:
             cu = current_user(conn, req)
             if not cu or cu["tier"] < 1:
                 raise HTTPException(403, "开通会员后查看")
     cache = "private, max-age=86400" if r["board"] in LOGIN_ONLY_BOARDS else "public, max-age=604800"
-    return Response(bytes(r["d"]), media_type="image/jpeg", headers={"Cache-Control": cache})
+    return Response(bytes(blob), media_type="image/jpeg", headers={"Cache-Control": cache})
 
 @router.post("/api/community/posts/{pid}/comments")
 async def api_comment(req: Request, pid: int):
@@ -1937,6 +2013,21 @@ def api_like(req: Request, pid: int):
         r = q(conn, "UPDATE c_posts SET like_count=(SELECT count(*) FROM c_likes WHERE post_id=%s) WHERE id=%s RETURNING like_count",
               (pid, pid), one=True)
     return {"liked": not had, "likes": r["like_count"]}
+
+@router.post("/api/community/posts/{pid}/favorite")
+def api_favorite(req: Request, pid: int):
+    csrf(req)
+    with db() as conn:
+        u = need_tier(conn, req, 1, "开通会员（¥{t1}）后才能收藏")
+        limit("fav:" + str(u["id"]), 60, 600)
+        if not q(conn, "SELECT id FROM c_posts WHERE id=%s AND NOT deleted AND status='published'", (pid,), one=True):
+            raise HTTPException(404, "帖子不存在")
+        had = q(conn, "DELETE FROM c_favorites WHERE post_id=%s AND user_id=%s RETURNING post_id", (pid, u["id"]), one=True)
+        if not had:
+            q(conn, "INSERT INTO c_favorites(post_id,user_id) VALUES (%s,%s) ON CONFLICT DO NOTHING", (pid, u["id"]))
+        r = q(conn, "UPDATE c_posts SET fav_count=(SELECT count(*) FROM c_favorites WHERE post_id=%s) WHERE id=%s RETURNING fav_count",
+              (pid, pid), one=True)
+    return {"favorited": not had, "favs": r["fav_count"]}
 
 @router.post("/api/community/report")
 async def api_report(req: Request):

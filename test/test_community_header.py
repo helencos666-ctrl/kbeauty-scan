@@ -88,7 +88,8 @@ check("「避坑 & 签证新帖」栏目仍在",
       "避坑 &amp; 签证新帖" in html and 'id="sfList"' in html)
 check("「今日热议」列表容器仍在",
       'id="hotList"' in html and 'id="hotTitle"' in html)
-check("写帖子按钮保留", 'id="fab"' in html and "写帖子" in html)
+check("社区信息流不再有写帖子悬浮按钮", 'id="fab"' not in html and "fab pill" not in html)
+check("发帖入口仍指向 /community/new（底栏发布）", "/community/new" in html or "/community/new" in read("pwa.js"))
 check("同城仍有地理定位与城市回退首尔",
       "geolocation" in html and "首尔" in html and "area=" in html)
 
@@ -124,7 +125,7 @@ check("顶栏安全区只作用于 header.xbar",
       "env(safe-area-inset-top)" in xbar_css, xbar_css)
 check("main.home 单独微调上边距", bool(rule(css, "main.home")))
 
-check("community.html 使用 ?v=82", html.count("?v=82") >= 4 and "?v=81" not in html)
+check("community.html 使用 ?v=83", html.count("?v=83") >= 4 and "?v=81" not in html)
 check("未新增外链 http(s) 资源",
       "http://" not in html and "https://" not in html.replace("https://schema.org", ""))
 
@@ -132,6 +133,15 @@ BAN = re.compile(r"最好的|最佳|最强|最便宜|最低价|第一名|全网�
 m = BAN.search(xbar + tabs)
 check("新增的可见文案无「最 / 第一 / 唯一」类禁词", m is None, m.group(0) if m else "")
 check("顶部文案不含微信 / 二维码", "微信" not in xbar and "二维码" not in tabs)
+
+
+post = read("community-post.html")
+check("帖子详情有顶图轮播和底栏", 'id="hero"' in post and 'class="pbar"' in post and "说点什么" in post and "phero" in post)
+check("帖子详情有点赞收藏评论", 'id="like"' in post and 'id="fav"' in post and "/favorite" in post and "猜你想搜" in post)
+newpost = read("community-new.html")
+check("发帖页有话题和地点", 'id="topics"' in newpost and 'id="place"' in newpost and "fillPlace" in newpost)
+js = read("community.js")
+check("信息流缩略图不再用 loading=lazy", "function postPhotos" in js and "loading=\"lazy\"" not in js[js.find("function postPhotos"):js.find("function postItem")])
 
 print("%s passed, %s failed" % (ok, fail))
 if fail:
