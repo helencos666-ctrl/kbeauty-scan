@@ -10,9 +10,9 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="旅韩助手">
 <link rel="manifest" href="/manifest.webmanifest">
-<link rel="apple-touch-icon" href="/static/icons/apple-touch-icon.png?v=71">
-<link rel="icon" type="image/png" sizes="192x192" href="/static/icons/icon-192.png?v=71">
-<link rel="stylesheet" href="/static/pwa.css?v=71">
+<link rel="apple-touch-icon" href="/static/icons/apple-touch-icon.png?v=72">
+<link rel="icon" type="image/png" sizes="192x192" href="/static/icons/icon-192.png?v=72">
+<link rel="stylesheet" href="/static/pwa.css?v=72">
 <style>
 :root{--primary:#146E68;--secondary:#3D8F88;--accent:#B85A12;--pink:var(--primary);--ink:#1A2330;--sub:#4A5560;--bg:#F3F7F6;--card:#fff;--line:#D5E4E1;--success:#1B7A45;--warning:#B45309}
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
@@ -236,6 +236,7 @@ body.is-home .disclaimer{display:none}
 .core a{display:flex;flex-direction:column;align-items:center;justify-content:flex-start;gap:6px;min-width:0;padding:11px 6px 10px;border-radius:16px;background:linear-gradient(160deg,#146E68 0%,#0F5A55 100%);border:0;box-shadow:0 6px 18px rgba(20,110,104,.28);color:#fff;text-decoration:none;text-align:center;overflow:hidden}
 .core .ico{width:36px;height:36px;border-radius:12px;background:rgba(255,255,255,.18);border:1px solid rgba(255,255,255,.35);display:flex;align-items:center;justify-content:center;color:#fff;flex:none;line-height:1;font-size:0}
 .core .ico svg{width:20px;height:20px;display:block}
+.core .ico-lip{background:#fff;border-color:#fff}
 .core .tx{min-width:0;width:100%}
 .core b{display:block;font-size:15px;font-weight:800;line-height:1.2;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;color:#fff}
 .core span{display:block;margin-top:2px;font-size:10px;font-weight:600;line-height:1.3;color:#E6F3F1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
@@ -358,7 +359,7 @@ body.is-home .disclaimer{display:none}
 <body class="is-home">
 <header></header>
 <div class="hero" id="hero">
-  <a class="brand" href="/"><img src="/static/icons/icon-192.png?v=71" alt="">旅韩助手</a>
+  <a class="brand" href="/"><img src="/static/icons/icon-192.png?v=72" alt="">旅韩助手</a>
   <a class="trip-entry" href="/trips"><i>🗓️</i>行程</a>
 </div>
 <p class="hero-sub">地铁 · 翻译 · 吃喝玩，中文一站搞定</p>
@@ -375,7 +376,7 @@ body.is-home .disclaimer{display:none}
       <div class="core">
         <a href="/?tab=sub" data-go="sub"><div class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="5" y="3" width="14" height="14" rx="3"/><path d="M5 10.5h14M9 3v7.5M15 3v7.5"/><circle cx="9" cy="13.6" r=".7" fill="currentColor" stroke="none"/><circle cx="15" cy="13.6" r=".7" fill="currentColor" stroke="none"/><path d="M8 21l2-3.5M16 21l-2-3.5"/></svg></div><div class="tx"><b>路线</b><span>地铁公交</span></div></a>
         <a href="/?tab=card" data-go="card"><div class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 6.5A2.5 2.5 0 0 1 6.5 4h7A2.5 2.5 0 0 1 16 6.5v3A2.5 2.5 0 0 1 13.5 12H10l-3 2.6V12h-.5A2.5 2.5 0 0 1 4 9.5z"/><path d="M17.5 8.5H18a2 2 0 0 1 2 2v3a2 2 0 0 1-2 2h-.5V18l-2.8-2.5H12"/></svg></div><div class="tx"><b>翻译</b><span>沟通卡片</span></div></a>
-        <a href="/?tab=cos" data-go="cos"><div class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9.5 10.5V8.2L12 3.5l2.5 4.7v2"/><rect x="9.5" y="10.5" width="5" height="6.5" rx="0.8"/><path d="M9.5 13.4h5"/><path d="M8.5 17h7v2.4a1.8 1.8 0 0 1-1.8 1.8h-3.4A1.8 1.8 0 0 1 8.5 19.4z"/></svg></div><div class="tx"><b>美妆识别</b><span>拍照查成分</span></div></a>
+        <a href="/?tab=cos" data-go="cos"><div class="ico ico-lip"><svg viewBox="0 0 24 24" aria-hidden="true"><path fill="#E23B4C" d="M9.7 10.6V8.15L12 3.45l2.3 4.7V10.6z"/><path fill="#F8A0A8" d="M12.15 4.7 13.5 7.45V9.3h-1.35z" opacity=".9"/><rect x="9.5" y="10.4" width="5" height="6.7" rx=".85" fill="#E2B84A"/><rect x="9.5" y="12.85" width="5" height="1.15" fill="#B8860B"/><path fill="#3B2A16" d="M8.45 17.05h7.1v2.55c0 .95-.75 1.75-1.75 1.75h-3.6c-1 0-1.75-.8-1.75-1.75z"/></svg></div><div class="tx"><b>美妆识别</b><span>拍照查成分</span></div></a>
       </div>
     </div>
 
@@ -395,10 +396,10 @@ body.is-home .disclaimer{display:none}
     <div class="ads" id="homeAds">
       <div class="ads-viewport">
         <div class="ads-track" id="adsTrack">
-          <a class="slide" href="/food#hamcho-myeongdong"><img src="/static/home-ads/ad-1.jpg?v=71" alt="咸草酱蟹：明洞酱蟹，点击查看" width="640" height="320" draggable="false" onerror="this.style.display=&#39;none&#39;;"></a>
-          <a class="slide" href="/food#daega-myeongdong"><img src="/static/home-ads/ad-2.jpg?v=71" alt="大家烤肉：明洞烤肉，点击查看" width="640" height="320" draggable="false" onerror="this.style.display=&#39;none&#39;;"></a>
-          <a class="slide" href="/shops"><img src="/static/home-ads/ad-3.jpg?v=71" alt="DAYONE：商业服务，点击查看" width="640" height="320" draggable="false" onerror="this.style.display=&#39;none&#39;;"></a>
-          <a class="slide" data-ad="lanjing" href="/ads/lanjing"><img src="/static/home-ads/ad-4.jpg?v=71" alt="蓝憬通讯：推荐2位好友注册 免费领韩国手机卡" width="640" height="320" draggable="false" onerror="this.style.display=&#39;none&#39;;"></a>
+          <a class="slide" href="/food#hamcho-myeongdong"><img src="/static/home-ads/ad-1.jpg?v=72" alt="咸草酱蟹：明洞酱蟹，点击查看" width="640" height="320" draggable="false" onerror="this.style.display=&#39;none&#39;;"></a>
+          <a class="slide" href="/food#daega-myeongdong"><img src="/static/home-ads/ad-2.jpg?v=72" alt="大家烤肉：明洞烤肉，点击查看" width="640" height="320" draggable="false" onerror="this.style.display=&#39;none&#39;;"></a>
+          <a class="slide" href="/shops"><img src="/static/home-ads/ad-3.jpg?v=72" alt="DAYONE：商业服务，点击查看" width="640" height="320" draggable="false" onerror="this.style.display=&#39;none&#39;;"></a>
+          <a class="slide" data-ad="lanjing" href="/ads/lanjing"><img src="/static/home-ads/ad-4.jpg?v=72" alt="蓝憬通讯：推荐2位好友注册 免费领韩国手机卡" width="640" height="320" draggable="false" onerror="this.style.display=&#39;none&#39;;"></a>
         </div>
       </div>
       <div class="ads-cap" id="adsCap"><b>咸草酱蟹</b><span>点击查看</span></div>
@@ -583,7 +584,7 @@ body.is-home .disclaimer{display:none}
 </div>
 
 <script src="/static/ref.js"></script>
-<script src="/static/splash.js?v=71"></script>
+<script src="/static/splash.js?v=72"></script>
 <script src="/static/phrases.js"></script>
 <script src="/static/subway.js"></script>
 <script>
@@ -1671,7 +1672,7 @@ drawScenes();
 })();
 </script>
 <script src="/static/maps.js"></script>
-<script src="/static/pwa.js?v=71" defer></script>
+<script src="/static/pwa.js?v=72" defer></script>
 
 <script>
 (function(){

@@ -51,7 +51,7 @@ check("home 美妆识别副标题用拍照", "拍照查成分" in coreblk and "�
 check("home 吃喝玩乐五格", "吃喝玩乐" in home and all(
     u in home for u in ["/food", "/food?cat=cafe", "/shopping", "/attractions", "/places?category=hotel"]))
 check("home 五格文案", all(w in home for w in [">美食<", ">咖啡<", ">购物<", ">景点<", ">酒店<"]))
-check("home 广告轮播四张", all("/static/home-ads/ad-%d.jpg?v=71" % i in home for i in (1, 2, 3, 4)) and "蓝憬通讯" in home and 'data-ad="lanjing"' in home
+check("home 广告轮播四张", all("/static/home-ads/ad-%d.jpg?v=72" % i in home for i in (1, 2, 3, 4)) and "蓝憬通讯" in home and 'data-ad="lanjing"' in home
       and 'class="ads' in home and "adsDots" in home)
 check("home 附近推荐", "附近推荐" in home and 'data-sort="dist"' in home and 'data-sort="rec"' in home
       and "/api/places" in index)
@@ -114,6 +114,9 @@ check("home .core b 字号至少 15px", bool(re.search(r"font-size:(1[5-9]|[2-9]
 check("home .core .ico 内为 svg 而非 emoji", "<svg" in coreblk
       and not any(e in coreblk for e in ("🚇", "💬", "📷")))
 check("home .core .ico 保留 36×36", "width:36px" in core_ico and "height:36px" in core_ico)
+check("home 美妆识别标题副标题未改", "<b>美妆识别</b><span>拍照查成分</span>" in coreblk)
+check("home 美妆图标为彩色口红", "#E23B4C" in coreblk and "#E2B84A" in coreblk and "#3B2A16" in coreblk)
+check("home 美妆图标白底瓷砖", 'class="ico ico-lip"' in coreblk and "background:#fff" in css_first(".core .ico-lip"))
 
 print("%s passed, %s failed" % (ok, fail))
 if fail:

@@ -56,7 +56,13 @@ check("图标尺寸 36×36", "width:36px" in ico and "height:36px" in ico)
 check("ico 内为 inline svg", coreblk.count("<svg") == 3 and "<svg" in coreblk)
 check("ico 不再含 emoji", not any(e in coreblk for e in ("🚇", "💬", "📷")))
 check("svg 均 aria-hidden", coreblk.count('aria-hidden="true"') == 3)
-check("svg 白色描边", coreblk.count('stroke="currentColor"') == 3)
+svgs = re.findall(r"<svg[^>]*>.*?</svg>", coreblk, re.S)
+check("路线/翻译仍为白色描边", len(svgs)==3 and all('stroke="currentColor"' in s for s in svgs[:2]))
+check("美妆图标为彩色口红", len(svgs)==3 and "#E23B4C" in svgs[2] and "#E2B84A" in svgs[2] and "#3B2A16" in svgs[2])
+check("美妆图标不用 currentColor", len(svgs)==3 and "currentColor" not in svgs[2])
+check("美妆图标白底瓷砖", ".core .ico-lip" in index and "background:#fff" in rule(".core .ico-lip"))
+check("第三卡 ico-lip 类名", 'class="ico ico-lip"' in coreblk)
+check("标题副标题未改", "<b>美妆识别</b><span>拍照查成分</span>" in coreblk)
 
 narrow = index[index.find("@media (max-width:359px){"):]
 check("窄屏图标 32×32", "width:32px" in narrow and "height:32px" in narrow)
@@ -64,7 +70,7 @@ check("窄屏标题 14px", ".core b{font-size:14px}" in narrow)
 check("窄屏 .cats 未改动", ".cats i{width:46px;height:46px;font-size:21px}" in narrow
       and ".cats a{font-size:11px}" in narrow)
 
-check("使用 ?v=71", "?v=71" in index)
+check("使用 ?v=72", "?v=72" in index)
 check("没有残留 ?v=69", "?v=69" not in index)
 for label, needle in (("吃喝玩乐", "吃喝玩乐"), ("广告", "adsDots"), ("附近推荐", "附近推荐"),
                       ("韩友圈分享", "韩友圈分享"), ("tabbar", 'class="tabbar"')):

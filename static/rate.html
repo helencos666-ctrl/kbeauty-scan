@@ -10,10 +10,10 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="旅韩助手">
 <link rel="manifest" href="/manifest.webmanifest">
-<link rel="apple-touch-icon" href="/static/icons/apple-touch-icon.png?v=71">
-<link rel="icon" type="image/png" sizes="192x192" href="/static/icons/icon-192.png?v=71">
-<link rel="stylesheet" href="/static/pwa.css?v=71">
-<link rel="stylesheet" href="/static/community.css?v=71">
+<link rel="apple-touch-icon" href="/static/icons/apple-touch-icon.png?v=72">
+<link rel="icon" type="image/png" sizes="192x192" href="/static/icons/icon-192.png?v=72">
+<link rel="stylesheet" href="/static/pwa.css?v=72">
+<link rel="stylesheet" href="/static/community.css?v=72">
 </head>
 <header>
   <h1>💱 汇率换算</h1>
@@ -47,7 +47,7 @@
   <a href="/?tab=more"><i>☰</i>全部</a>
   <a href="/me"><i>👤</i>我的</a>
 </nav>
-<script src="/static/community.js?v=71"></script>
+<script src="/static/community.js?v=72"></script>
 <script>
 var rate = 195, cny = document.getElementById('cny'), krw = document.getElementById('krw');
 function fmt(n, d){ return isFinite(n) ? (Math.round(n * Math.pow(10, d)) / Math.pow(10, d)) : ''; }
@@ -60,6 +60,6 @@ document.querySelectorAll('#quick button').forEach(function(b){ b.onclick = func
 LH.api('GET', '/api/community/rate').then(function(d){ rate = d.cny_krw; show(); }).catch(show);
 function show(){ document.getElementById('rinfo').textContent = '参考汇率：1 人民币 ≈ ' + rate + ' 韩元；1000 韩元 ≈ ' + fmt(1000 / rate, 2) + ' 人民币（管理员手动设置）'; if (cny.value) cny.oninput(); }
 </script>
-<script src="/static/pwa.js?v=71" defer></script>
+<script src="/static/pwa.js?v=72" defer></script>
 </body>
 </html>

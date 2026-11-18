@@ -32,10 +32,10 @@ seo = read("seo.py")
 lanjing = read("lanjing_seed.py")
 
 # ---------- Service Worker ----------
-check("sw.js CACHE is lvhan-shell-v71", "lvhan-shell-v71" in sw)
+check("sw.js CACHE is lvhan-shell-v72", "lvhan-shell-v72" in sw)
 check("sw.js 无旧缓存名 v63", "lvhan-shell-v63" not in sw)
-check("sw.js 使用 ?v=71", "?v=71" in sw)
-check("sw.js SHELL 含 pwa.js?v=71", "/static/pwa.js?v=71" in sw)
+check("sw.js 使用 ?v=72", "?v=72" in sw)
+check("sw.js SHELL 含 pwa.js?v=72", "/static/pwa.js?v=72" in sw)
 
 # 不应再把任意导航回退到首页文档
 fb = re.search(
