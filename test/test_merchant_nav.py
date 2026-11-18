@@ -55,7 +55,7 @@ check("home 广告轮播四张", all("/static/home-ads/ad-%d.jpg?v=87" % i in ho
       and 'class="ads' in home and "adsDots" in home)
 check("home 无附近推荐板块", "附近推荐" not in home and "nearBlk" not in index and "按距离" not in home)
 check("home 吃喝玩乐瀑布流紧跟广告", "playBlk" in home and "playGrid" in home
-      and "/api/community/feed?tab=latest&has_image=1&show_cat=any" in index
+      and "/api/community/feed?tab=latest&has_image=1&show_cat=home" in index
       and "/api/places?limit_n=40" not in index
       and "会员推荐" in home and "play-lab" in home and "playChips" not in home and "playTitle" not in home and "更多 ›" not in home
       and "韩友圈分享" not in home

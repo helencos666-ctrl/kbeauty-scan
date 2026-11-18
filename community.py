@@ -402,6 +402,8 @@ SHOW_CATS = {
     "coffee": "咖啡推荐",
     "selfie": "自拍",
 }
+# 首页「会员推荐」只用这五项；自拍可发、可在发现/同城出现，但不进该栏
+HOME_SHOW_CATS = ("food", "shop", "sight", "hotel", "coffee")
 MIGRATE10 = """
 ALTER TABLE c_posts ADD COLUMN IF NOT EXISTS show_cat TEXT;
 CREATE INDEX IF NOT EXISTS c_posts_show_cat_idx ON c_posts(show_cat, id DESC) WHERE NOT deleted AND show_cat IS NOT NULL;
@@ -1556,7 +1558,7 @@ def api_feed(req: Request, tab: str = "recommend", boards: str = "", offset: int
         raise HTTPException(400, "分类不存在")
     has_image = (req.query_params.get("has_image") or "").strip().lower() in ("1", "true", "yes")
     show_cat = (req.query_params.get("show_cat") or "").strip()
-    if show_cat and show_cat not in ("1", "any", "all") and show_cat not in SHOW_CATS:
+    if show_cat and show_cat not in ("1", "any", "all", "home") and show_cat not in SHOW_CATS:
         raise HTTPException(400, "分类不存在")
     try:
         km = int(float(req.query_params.get("km") or 0))
@@ -1597,6 +1599,12 @@ def api_feed(req: Request, tab: str = "recommend", boards: str = "", offset: int
             cond.append("EXISTS (SELECT 1 FROM c_images i WHERE i.post_id=p.id)")
         if show_cat in ("1", "any", "all"):
             cond.append("p.show_cat = ANY(%s)"); args.append(list(SHOW_CATS))
+        elif show_cat == "home":
+            hit = q(conn, "SELECT 1 AS ok FROM c_posts p JOIN c_users au ON au.id=p.user_id WHERE "
+                    + " AND ".join(cond) + " AND p.show_cat = ANY(%s) LIMIT 1",
+                    args + [list(HOME_SHOW_CATS)], one=True)
+            if hit:
+                cond.append("p.show_cat = ANY(%s)"); args.append(list(HOME_SHOW_CATS))
         elif show_cat:
             cond.append("p.show_cat=%s"); args.append(show_cat)
         if area:

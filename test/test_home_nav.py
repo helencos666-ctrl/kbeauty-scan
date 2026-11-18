@@ -169,7 +169,7 @@ check("home 无示例标签", "示例" not in index)
 check("home 无示例店名", not any(w in home for w in ["广藏市场", "星巴克", "明洞乐天免税"]))
 check("home 横幅下改为韩友圈带图帖瀑布流",
       "playBlk" in index and "playGrid" in index and "nearBlk" not in index
-      and "/api/community/feed?tab=latest&has_image=1&show_cat=any" in index
+      and "/api/community/feed?tab=latest&has_image=1&show_cat=home" in index
       and "/api/places?limit_n=40" not in index
       and "韩友圈分享" not in index
       and "会员推荐" in index and "play-lab" in index

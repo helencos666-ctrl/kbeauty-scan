@@ -1957,7 +1957,7 @@ drawScenes();
       }).join('');
     }
     var next = 0, loading = false;
-    function feedUrl(){ return '/api/community/feed?tab=latest&has_image=1&show_cat=any&limit_n=20&offset=' + next; }
+    function feedUrl(){ return '/api/community/feed?tab=latest&has_image=1&show_cat=home&limit_n=20&offset=' + next; }
     function load(reset){
       if (loading) return;
       loading = true;
