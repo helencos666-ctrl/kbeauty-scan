@@ -185,7 +185,7 @@ document.querySelectorAll('#tabs button').forEach(function(b){
 function render(){
   document.querySelectorAll('#tabs button').forEach(function(b){ b.className = (!board && b.dataset.t === tab) ? 'on' : ''; });
   var home = !board && tab === 'discover';
-  document.getElementById('homeBlocks').style.display = home ? 'block' : 'none';
+  document.getElementById('homeBlocks').style.display = 'none';
   var bh = document.getElementById('boardHead'), w = document.getElementById('bwarn');
   w.textContent = WARN[board] || ''; w.style.display = WARN[board] ? 'block' : 'none';
   if (board){
@@ -203,8 +203,7 @@ function render(){
     sc.innerHTML = '<button data-k="" class="' + (btag ? '' : 'on') + '"><i>🗂️</i>全部</button>' + subs.map(function(x){ return '<button data-k="' + x.key + '" class="' + (btag === x.key ? 'on' : '') + '"><i>' + x.icon + '</i>' + LH.esc(x.name) + '</button>'; }).join('');
     sc.querySelectorAll('button').forEach(function(b){ b.onclick = function(){ btag = b.dataset.k; history.replaceState(null, '', '/community?board=' + board + (btag ? '&tag=' + btag : '')); render(); }; });
   } else { sc.style.display = 'none'; bb.hidden = true; bb.innerHTML = ''; btag = ''; }
-  if (home) loadHome();
-  loadTopics(home);
+  loadTopics(false);
   load(true);
 }
 async function joinState(){
@@ -223,25 +222,27 @@ function feedUrl(){
   return '/api/community/feed?tab=recommend&offset=' + next + (fb ? '&fb=1' : '');
 }
 async function load(reset){
-  if (reset){ next = 0; fb = false; listEl.innerHTML = '<div class="loading">加载中…</div>'; }
+  if (reset){ next = 0; fb = false; listEl.className = ''; listEl.innerHTML = '<div class="loading">加载中…</div>'; }
   try {
     var d = await LH.api('GET', feedUrl());
-    if (reset) listEl.innerHTML = (tab === 'search' && !board && (LH.qs('q') || '').trim()) ? ('<div class="tip" style="margin:0 0 10px">与「' + LH.esc((LH.qs('q') || '').trim()) + '」相关</div>') : '';
     if (d.tier_required){
+      listEl.className = '';
       listEl.innerHTML = '<div class="card empty">旅韩交友需' + (d.login_required ? '登录并' : '') + '开通会员（¥<span data-p="price_t1">9.9</span>）后查看<br><br>' +
         (d.login_required ? '<a class="btn primary" href="/login?next=/community%3Fboard%3Dfriends">登录 / 注册</a>' : '<a class="btn primary" href="/member">了解会员</a>') + '</div>';
       LH.prices(); moreEl.style.display = 'none'; return;
     }
-    if (d.login_required){ listEl.innerHTML = '<div class="card empty">登录后可关注用户和频道<br><br><a class="btn primary" href="/login?next=/community%3Ftab%3Dfollow">登录 / 注册</a></div>'; moreEl.style.display = 'none'; return; }
-    if (d.fallback && reset && tab === 'hot' && !board) listEl.insertAdjacentHTML('beforeend', '<div class="tip" style="margin:0 0 8px">今天还没有热议的帖子，下面是近 7 天讨论最多的</div>');
+    if (d.login_required){ listEl.className = ''; listEl.innerHTML = '<div class="card empty">登录后可关注用户和频道<br><br><a class="btn primary" href="/login?next=/community%3Ftab%3Dfollow">登录 / 注册</a></div>'; moreEl.style.display = 'none'; return; }
     fb = !!d.fallback;
     if (!d.posts.length && reset && !(d.pinned && d.pinned.length)){
+      listEl.className = '';
       listEl.innerHTML = tab === 'follow' && !board ? '<div class="card empty">还没有内容。去<a href="/community/boards">全部频道</a>关注感兴趣的频道，或在帖子里关注作者</div>' : (tab === 'area' ? '<div class="card empty">这一带暂时还没有帖子</div>' : '<div class="card empty">这里还没有帖子，来发第一篇吧</div>');
+      moreEl.style.display = 'none'; return;
     }
-    var rankBase = (tab === 'hot' && !board) ? next : -1;
-    var bizList = board && MB.indexOf(board) >= 0;
-    if (reset && d.pinned && d.pinned.length) listEl.insertAdjacentHTML('beforeend', d.pinned.map(function(p){ return bizList ? LH.bizItem(p) : LH.postItem(p, 0); }).join(''));
-    listEl.insertAdjacentHTML('beforeend', d.posts.map(function(p, i){ return bizList ? LH.bizItem(p) : LH.postItem(p, rankBase >= 0 ? rankBase + i + 1 : 0); }).join(''));
+    var items = [];
+    if (reset && d.pinned && d.pinned.length) items = items.concat(d.pinned);
+    items = items.concat(d.posts || []);
+    var lead = (reset && tab === 'search' && !board && (LH.qs('q') || '').trim()) ? ('<div class="tip" style="margin:0 0 10px">与「' + LH.esc((LH.qs('q') || '').trim()) + '」相关</div>') : '';
+    LH.appendWater(listEl, items, reset, lead);
     if (board){ if (d.posts.length) next = d.posts[d.posts.length - 1].id; } else next = d.next;
     moreEl.style.display = d.more ? 'inline-block' : 'none';
   } catch(e){ listEl.innerHTML = '<div class="card empty">' + LH.esc(e.message) + '</div>'; moreEl.style.display = 'none'; }

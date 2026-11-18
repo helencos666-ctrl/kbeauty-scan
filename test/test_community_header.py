@@ -58,7 +58,7 @@ check("旧 tab 推荐/精选/刚发布/我关注已从 tab 栏移除",
       all(w not in tabs for w in ("推荐", "精选", "刚发布", "我关注")))
 check("整页不再出现「实用干货」或「我关注的」",
       "实用干货" not in html and "我关注的" not in html)
-check("「今日热议」栏目标题仍保留（发现页 section）", "今日热议" in html)
+check("信息流改为双列瀑布流", "appendWater" in html and "waterItem" in read("community.js") and ".wcard{" in read("community.css"))
 check("默认 tab 为 discover",
       "LH.qs('tab') || 'discover'" in html or "LH.qs('tab')||'discover'" in html)
 
@@ -78,16 +78,7 @@ check("?tab=topic 不被回退（topic 仍在允许列表）", "topic" in allowe
 check("往期话题链接 /community?tab=topic 仍保留", "/community?tab=topic" in html)
 check("?tab=follow 未登录仍留在 follow（login_required 提示未改）",
       "/login?next=/community%3Ftab%3Dfollow" in html)
-check("发现页仍调用 /api/community/feed?tab=hot",
-      re.search(r"/api/community/feed\?tab=hot", html) is not None)
-check("发现页避坑栏目仍调用 feed?tab=latest&boards=pit,visa",
-      "/api/community/feed?tab=latest&boards=pit,visa" in html)
-check("旧「更多」链接 ?tab=news 仍在（打开后回退到发现）",
-      "/community?tab=news" in html)
-check("「避坑 & 签证新帖」栏目仍在",
-      "避坑 &amp; 签证新帖" in html and 'id="sfList"' in html)
-check("「今日热议」列表容器仍在",
-      'id="hotList"' in html and 'id="hotTitle"' in html)
+check("发现页默认不展开今日热议等栏目", "homeBlocks').style.display = 'none'" in html)
 check("社区信息流不再有写帖子悬浮按钮", 'id="fab"' not in html and "fab pill" not in html)
 check("发帖入口仍指向 /community/new（底栏发布）", "/community/new" in html or "/community/new" in read("pwa.js"))
 check("同城仍有地理定位与城市回退首尔",
@@ -156,7 +147,10 @@ check("操作表样式为底部圆角白行",
       "lh-pub-mask" in pwa_css and "lh-pub-group" in pwa_css and "border-radius:14px" in pwa_css)
 check("发帖页可预载操作表选中的图片", "loadPendingImages" in newpost and "lh-compose-files" in newpost)
 js = read("community.js")
+check("瀑布流封面用 IntersectionObserver 懒加载", "IntersectionObserver" in js and "data-src" in js and "function waterItem" in js and "loading=\"lazy\"" not in js[js.find("function waterItem"):js.find("function bindWaterLazy")])
+check("瀑布流卡片无置顶精选摘要评论数和宫格", "function waterItem" in js and "置顶" not in js[js.find("function waterItem"):js.find("function bindWaterLazy")] and "精选" not in js[js.find("function waterItem"):js.find("function bindWaterLazy")] and "comments" not in js[js.find("function waterItem"):js.find("function bindWaterLazy")])
 check("信息流缩略图不再用 loading=lazy", "function postPhotos" in js and "loading=\"lazy\"" not in js[js.find("function postPhotos"):js.find("function postItem")])
+check("底栏关注为爱心图标且保留关注文案", "icon:'❤️', label:'关注'" in pwa_js and "👥" not in pwa_js and "<i>❤️</i>关注" in me)
 
 print("%s passed, %s failed" % (ok, fail))
 if fail:

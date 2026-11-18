@@ -171,6 +171,87 @@ var LH = (function(){
       '<div class="meta"><span class="tag">' + esc(p.board_name) + '</span>' +
       '<span class="acts"><span>🤍 ' + p.likes + '</span><span>💬 ' + p.comments + '</span></span></div></a>';
   }
+  function coverId(p){
+    if (p.thumbs && p.thumbs.length) return p.thumbs[0];
+    if (p.cover) return p.cover;
+    return null;
+  }
+  function waterItem(p){
+    var id = coverId(p);
+    var title = esc(p.title || '');
+    var likes = (p.likes == null ? 0 : p.likes);
+    var cover;
+    if (id){
+      var src = '/api/community/img/' + id + '?t=1';
+      var full = '/api/community/img/' + id;
+      cover = '<div class="wcover" style="aspect-ratio:3/4"><img alt="" decoding="async" data-src="' + src + '" data-full="' + full + '"></div>';
+    } else {
+      cover = '<div class="wcover wtext" style="aspect-ratio:3/4"><div class="wtext-t">' + title + '</div></div>';
+    }
+    return '<a class="wcard" href="/community/post/' + p.id + '">' + cover +
+      '<div class="wtitle">' + title + '</div>' +
+      '<div class="wmeta"><span class="wuser">' + avatar(p.author_id, p.author, p.has_avatar, 'xs') +
+      '<span class="wnick">' + esc(p.author) + '</span></span>' +
+      '<span class="wlike">♡ ' + likes + '</span></div></a>';
+  }
+  var _wIO = null;
+  function bindWaterLazy(root){
+    if (typeof IntersectionObserver === 'undefined'){
+      (root || document).querySelectorAll('.wcard img[data-src]').forEach(function(img){
+        if (!img.getAttribute('src')){
+          img.onerror = function(){ if (img.dataset.fb) return; img.dataset.fb = '1'; var f = img.getAttribute('data-full'); if (f) img.src = f; };
+          img.src = img.getAttribute('data-src');
+        }
+      });
+      return;
+    }
+    if (!_wIO){
+      _wIO = new IntersectionObserver(function(entries){
+        entries.forEach(function(en){
+          if (!en.isIntersecting) return;
+          var img = en.target;
+          _wIO.unobserve(img);
+          var src = img.getAttribute('data-src');
+          if (!src || img.getAttribute('src')) return;
+          img.onload = function(){
+            var w = img.naturalWidth, h = img.naturalHeight;
+            if (!w || !h) return;
+            var r = w / h;
+            if (r < 0.75) r = 0.75;
+            if (r > 4/3) r = 4/3;
+            var box = img.parentElement;
+            if (box && box.classList.contains('wcover')) box.style.aspectRatio = String(r);
+          };
+          img.onerror = function(){
+            if (img.dataset.fb) return;
+            img.dataset.fb = '1';
+            var full = img.getAttribute('data-full');
+            if (full) img.src = full;
+          };
+          img.src = src;
+        });
+      }, {rootMargin: '800px 0px', threshold: 0.01});
+    }
+    (root || document).querySelectorAll('.wcard img[data-src]:not([src])').forEach(function(img){ _wIO.observe(img); });
+  }
+  function shorterCol(cols){
+    if (!cols || !cols.length) return null;
+    if (cols.length < 2) return cols[0];
+    return cols[0].offsetHeight <= cols[1].offsetHeight ? cols[0] : cols[1];
+  }
+  function appendWater(listEl, posts, reset, leadHtml){
+    if (reset){
+      listEl.className = 'waterfall';
+      listEl.innerHTML = (leadHtml || '') + '<div class="wcols"><div class="wcol"></div><div class="wcol"></div></div>';
+    }
+    var cols = listEl.querySelectorAll('.wcol');
+    (posts || []).forEach(function(p){
+      var col = shorterCol(cols);
+      if (!col) return;
+      col.insertAdjacentHTML('beforeend', waterItem(p));
+    });
+    bindWaterLazy(listEl);
+  }
   function bizItem(p){ return postItem(p); }
   function consultHref(kind, id){ return '/consult/new?kind=' + encodeURIComponent(kind) + '&id=' + encodeURIComponent(id); }
   function consultBtn(kind, id, label){ return '<a class="btn primary block consult-btn" href="' + consultHref(kind, id) + '">💬 ' + esc(label || '立即咨询') + '</a>'; }
@@ -320,6 +401,6 @@ var LH = (function(){
     }
   }
   return {prices: prices, esc: esc, api: api, me: me, badge: badge, showErr: showErr, qs: qs, compress: compress, userbar: userbar, report: report, toast: toast, relTime: relTime,
-          vb: vb, avatar: avatar, pickAvatar: pickAvatar, postItem: postItem, bizItem: bizItem, ubadges: ubadges, BADGES: BADGES, postFlags: postFlags, consultHref: consultHref, consultBtn: consultBtn, startConsultPoll: startConsultPoll, friendCard: friendCard, lockedPrompt: lockedPrompt, ANTISCAM: ANTISCAM, share: share,
+          vb: vb, avatar: avatar, pickAvatar: pickAvatar, postItem: postItem, waterItem: waterItem, appendWater: appendWater, bindWaterLazy: bindWaterLazy, bizItem: bizItem, ubadges: ubadges, BADGES: BADGES, postFlags: postFlags, consultHref: consultHref, consultBtn: consultBtn, startConsultPoll: startConsultPoll, friendCard: friendCard, lockedPrompt: lockedPrompt, ANTISCAM: ANTISCAM, share: share,
           mapLinks: mapLinks, copyText: copyText, krwCny: krwCny, menuHtml: menuHtml, locHtml: locHtml, ratingText: ratingText, bindShopExtras: bindShopExtras, starsHtml: starsHtml, priceLine: priceLine};
 })();

@@ -55,6 +55,8 @@ check("index has nav.tabbar", bool(navblock))
 check("七格文案 首页/关注/发布/购物节/商业服务/行程安排/我的",
       all(w in navblock for w in ["首页", "关注", "发布", "购物节", "商业服务", "行程安排", "我的"]))
 check("关注 -> /community?tab=follow", 'href="/community?tab=follow"' in navblock and 'data-nav="follow"' in navblock)
+check("关注图标为爱心而非双人", "<i>❤️</i>关注" in navblock and "👥" not in navblock)
+check("pwa.js 关注图标为爱心", "icon:'❤️', label:'关注'" in pwa_js and "👥" not in pwa_js)
 check("发布 -> /community/new", 'href="/community/new"' in navblock and 'class="pub"' in navblock and "＋" in navblock)
 check("购物节在发布和商业服务之间",
       navblock.find('data-nav="post"') < navblock.find('data-nav="festival"') < navblock.find('data-nav="services"'))

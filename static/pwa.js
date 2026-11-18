@@ -13,7 +13,7 @@
   /* ===================== 底部七格导航（必须在安装提示的 return 之前执行） ===================== */
   var TABS = [
     {k:'home',     href:'/',                    icon:'🏠', label:'首页'},
-    {k:'follow',   href:'/community?tab=follow', icon:'👥', label:'关注'},
+    {k:'follow',   href:'/community?tab=follow', icon:'❤️', label:'关注'},
     {k:'post',     href:'/community/new',        icon:'＋', label:'发布', pub:true},
     {k:'festival', href:'/festival',             icon:'🎁', label:'购物节', fest:true},
     {k:'services', href:'/shops',                icon:'💼', label:'商业服务', cls:'svc'},
