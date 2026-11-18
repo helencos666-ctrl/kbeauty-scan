@@ -6,6 +6,7 @@ import math
 import os
 import re
 import threading
+import time
 from collections import OrderedDict
 
 import httpx
@@ -87,6 +88,39 @@ def dict_ko(q: str) -> str:
 
 _conv = OrderedDict()
 _conv_lock = threading.Lock()
+
+# ---------- 大众交通路线内存缓存（同一对起终点 15 分钟内不重复打 Kakao）----------
+RPLAN_TTL = 900          # 秒
+RPLAN_MAX = 200          # 条数上限
+_rplan = OrderedDict()
+_rplan_lock = threading.Lock()
+
+
+def _rplan_key(sx, sy, ex, ey, sn, en):
+    return (round(sx, 4), round(sy, 4), round(ex, 4), round(ey, 4), sn, en)
+
+
+def _rplan_get(k):
+    now = time.time()
+    with _rplan_lock:
+        it = _rplan.get(k)
+        if not it:
+            return None
+        body, ts = it
+        if now - ts > RPLAN_TTL:
+            _rplan.pop(k, None)
+            return None
+        _rplan.move_to_end(k)
+        return body
+
+
+def _rplan_put(k, body):
+    with _rplan_lock:
+        _rplan[k] = (body, time.time())
+        _rplan.move_to_end(k)
+        while len(_rplan) > RPLAN_MAX:
+            _rplan.popitem(last=False)
+
 CONV_PROMPT = ("把中国游客在韩国输入的地点名称转换成适合在 Kakao 地图搜索的韩文关键词。"
                "可能是中文、英文、拼音或韩文罗马字（例如 dayone→데이원，myeongdong→명동），也可能是品牌名+分店。"
                "输出 JSON：{\"queries\":[\"最可能的韩文关键词\",\"备选\"]}，最多 3 个，按可能性排序；"
@@ -231,21 +265,30 @@ async def route_plan(request: Request):
     if not key:
         raise HTTPException(503, "路线服务暂未开通")
     rate_limit(request, "transit", per_min=6, per_day=40)
+    ck = _rplan_key(sx, sy, ex, ey, sn, en)
+    t0 = time.time()
+    hit = _rplan_get(ck)
+    if hit is not None:
+        log.info("transit %dms cache", int((time.time() - t0) * 1000))
+        return hit
     try:
         async with httpx.AsyncClient(timeout=8) as c:
             r = await c.get(KAKAO + "/v2/routing/publictraffic", headers={"Authorization": "KakaoAK " + key},
                             params={"start_x": f"{sx:.6f}", "start_y": f"{sy:.6f}", "end_x": f"{ex:.6f}", "end_y": f"{ey:.6f}",
                                     "s_name": sn, "e_name": en})
     except Exception as ex_:  # noqa: BLE001
-        log.warning("transit: %s", type(ex_).__name__)
+        log.warning("transit %dms error %s", int((time.time() - t0) * 1000), type(ex_).__name__)
         raise HTTPException(503, "路线服务暂时连不上")
     if r.status_code != 200:
-        log.warning("transit status %s", r.status_code)
+        log.warning("transit %dms status %s", int((time.time() - t0) * 1000), r.status_code)
         raise HTTPException(503, "今日路线查询次数已满或服务繁忙" if r.status_code == 429 else "路线服务暂时不可用")
     j = r.json()
     walk_only = {"m": int(dist * 1.25), "min": max(1, round(dist * 1.25 / 70))}
     if j.get("status") != "OK":
-        return {"ok": True, "status": j.get("status"), "routes": [], "walk": walk_only, "link": None}
+        body = {"ok": True, "status": j.get("status"), "routes": [], "walk": walk_only, "link": None}
+        _rplan_put(ck, body)
+        log.info("transit %dms kakao", int((time.time() - t0) * 1000))
+        return body
     import datetime as _dt
     hour = _dt.datetime.now(_dt.timezone(_dt.timedelta(hours=9))).hour
     day = 5 <= hour < 23
@@ -287,4 +330,7 @@ async def route_plan(request: Request):
                        "walk": round(sum(x["m"] for x in steps if x["t"] in ("walk", "walking"))), "steps": steps})
     routes.sort(key=lambda x: (x["min"] + 4 * x["xf"]))
     link = (j.get("properties") or {}).get("landingURL")
-    return {"ok": True, "status": "OK", "routes": routes[:5], "walk": walk_only, "link": link, "src": "Kakao"}
+    body = {"ok": True, "status": "OK", "routes": routes[:5], "walk": walk_only, "link": link, "src": "Kakao"}
+    _rplan_put(ck, body)
+    log.info("transit %dms kakao", int((time.time() - t0) * 1000))
+    return body

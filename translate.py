@@ -24,7 +24,9 @@ HANZI = re.compile(r"[\u4e00-\u9fff]")
 CF_API = "https://api.cloudflare.com/client/v4/accounts/{acc}/ai/run/{model}"
 PRIMARY_MODEL = os.getenv("CF_TRANSLATE_MODEL", "@cf/mistralai/mistral-small-3.1-24b-instruct")
 M2M_MODEL = "@cf/meta/m2m100-1.2b"
-LLM_TIMEOUT = float(os.getenv("CF_TRANSLATE_TIMEOUT", "2.0"))
+LLM_TIMEOUT = float(os.getenv("CF_TRANSLATE_TIMEOUT", "3.0"))
+# LLM 与 m2m 并行：m2m 仍按自己的超时先返回，LLM 在 LLM_TIMEOUT 内成功就用 LLM
+RESCUE_WAIT = float(os.getenv("CF_TRANSLATE_RESCUE_WAIT", "3.5"))
 M2M_TIMEOUT = float(os.getenv("CF_M2M_TIMEOUT", "1.2"))
 MAX_TOKENS = 200
 
@@ -125,6 +127,96 @@ _tcache: OrderedDict = OrderedDict()
 _tcache_lock = threading.Lock()
 TCACHE_MAX = 3000
 CACHE_VER = 2
+# 内存缓存落盘（重启/部署后不用重新翻译常用句）；写失败忽略
+TCACHE_FILE = os.getenv("LH_TCACHE_FILE", "/tmp/lh_tcache_v2.json")
+
+
+def _save_tcache():
+    try:
+        with _tcache_lock:
+            items = [[list(k), v] for k, v in _tcache.items()]
+        tmp = TCACHE_FILE + ".tmp"
+        with open(tmp, "w", encoding="utf-8") as f:
+            json.dump({"v": CACHE_VER, "items": items}, f, ensure_ascii=False)
+        os.replace(tmp, TCACHE_FILE)
+    except Exception:
+        pass
+
+
+def _load_tcache():
+    try:
+        with open(TCACHE_FILE, encoding="utf-8") as f:
+            d = json.load(f)
+        if int(d.get("v") or 0) != CACHE_VER:
+            return
+        with _tcache_lock:
+            for k, v in d.get("items") or []:
+                if not isinstance(k, list) or len(k) != 5 or not isinstance(v, dict):
+                    continue
+                key = tuple(k)
+                _tcache[key] = v
+                while len(_tcache) > TCACHE_MAX:
+                    _tcache.popitem(last=False)
+    except Exception:
+        pass
+
+
+def _phrases_path():
+    """常用句文件：优先仓库根目录的 static/phrases.js，其次与本文件同级的 static/ 或 src/。"""
+    here = os.path.dirname(os.path.abspath(__file__))
+    for p in (os.path.join(here, "static", "phrases.js"),
+              os.path.join(here, "src", "phrases.js"),
+              os.path.join(os.path.dirname(here), "static", "phrases.js")):
+        if os.path.isfile(p):
+            return p
+    return ""
+
+
+def load_phrases() -> int:
+    """把 static/phrases.js 里的 [zh, ko, roman] 三元组写进缓存（zh2ko 与 ko2zh，scene=general）。
+    解析失败就跳过，不让进程挂掉。返回写入条数。"""
+    path = _phrases_path()
+    if not path:
+        return 0
+    try:
+        with open(path, encoding="utf-8") as f:
+            src = f.read()
+    except Exception:
+        log.warning("phrases read failed")
+        return 0
+    m = re.search(r"window\.LH_SCENES\s*=", src)
+    if not m:
+        return 0
+    try:
+        data, _ = json.JSONDecoder().raw_decode(src, m.end())
+    except Exception:
+        log.warning("phrases parse failed")
+        return 0
+    if not isinstance(data, dict):
+        return 0
+    n = 0
+    for _scene, items in data.items():
+        if not isinstance(items, list):
+            continue
+        for it in items:
+            if not isinstance(it, (list, tuple)) or len(it) < 2:
+                continue
+            zh, ko = str(it[0] or "").strip(), str(it[1] or "").strip()
+            if not zh or not ko or not HANGUL.search(ko) or not HANZI.search(zh):
+                continue
+            ko = apply_place_ko(ko, zh)
+            zkey = (CACHE_VER, "zh2ko", "general", pre_normalize_zh(norm_text(zh)), False)
+            kkey = (CACHE_VER, "ko2zh", "", norm_text(ko), False)
+            with _tcache_lock:
+                if zkey not in _tcache:
+                    _tcache[zkey] = {"ko": ko, "roman": romanize(ko), "engine": "phrase"}
+                    n += 1
+                if kkey not in _tcache:
+                    _tcache[kkey] = {"zh": zh, "engine": "phrase"}
+                    n += 1
+                while len(_tcache) > TCACHE_MAX:
+                    _tcache.popitem(last=False)
+    return n
 
 
 def cf_creds():
@@ -147,7 +239,6 @@ def _tc_put(k, v):
         _tcache.move_to_end(k)
         while len(_tcache) > TCACHE_MAX:
             _tcache.popitem(last=False)
-
 
 def norm_text(t, n=600):
     return re.sub(r"\s+", " ", str(t or "")).strip()[:n]
@@ -423,9 +514,13 @@ async def translate_text(text: str, direction: str = "zh2ko", scene: str = "gene
 
     cache_key = (CACHE_VER, direction, scene if direction == "zh2ko" else "", src, bool(from_asr))
     hit = _tc_get(cache_key)
+    if not hit and direction == "zh2ko" and scene != "general":
+        hit = _tc_get((CACHE_VER, "zh2ko", "general", src, bool(from_asr)))
     if hit:
         out = dict(hit)
-        out.update(cached=True, engine=out.get("engine") or "cache", ms=int((time.time() - t0) * 1000), src=src)
+        ms0 = int((time.time() - t0) * 1000)
+        out.update(cached=True, engine=out.get("engine") or "cache", ms=ms0, src=src)
+        log.info("translate %s cache %dms", direction, ms0)
         return out
 
     account, token = cf_creds()
@@ -444,73 +539,78 @@ async def translate_text(text: str, direction: str = "zh2ko", scene: str = "gene
         user = src
         if places:
             user = "地名对照：" + places + "\n\n" + src
-        try:
-            raw = await _llm(account, token, [{"role": "system", "content": sys},
-                                              {"role": "user", "content": user}], LLM_TIMEOUT)
+
+        def _accept(raw: str):
+            """校验 LLM/m2m 输出，合格返回 (result, engine)，否则返回 (None, 拒绝的译文)。"""
             obj = parse_obj(raw)
             if direction == "zh2ko":
                 ko = apply_place_ko(_pick_ko(obj, raw), src)
                 if _ok_ko(src, ko) and not missing_places(src, ko, "zh2ko"):
-                    result = {"ko": ko, "roman": romanize(ko) if want_roman else ""}
-                    engine = "llm"
-                elif ko:
-                    rejected_out = ko
-            else:
-                zh = _pick_zh(obj, raw)
-                if _ok_zh(src, zh) and not missing_places(src, zh, "ko2zh"):
-                    result = {"zh": zh}
-                    engine = "llm"
-                elif zh:
-                    rejected_out = zh
+                    return {"ko": ko, "roman": romanize(ko) if want_roman else ""}, None
+                return None, ko
+            zh = _pick_zh(obj, raw)
+            if _ok_zh(src, zh) and not missing_places(src, zh, "ko2zh"):
+                return {"zh": zh}, None
+            return None, zh
+
+        # LLM 与 m2m 并行：不再先等 LLM 超时再串行跑 m2m（那样失败路径要 ~4s）
+        loop = asyncio.get_running_loop()
+        llm_task = loop.create_task(_llm(account, token, [{"role": "system", "content": sys},
+                                                         {"role": "user", "content": user}], LLM_TIMEOUT))
+        m2m_task = loop.create_task(_m2m(account, token, src, direction, M2M_TIMEOUT))
+        m2m_raw = None
+        try:
+            await asyncio.wait({llm_task, m2m_task}, timeout=max(LLM_TIMEOUT, M2M_TIMEOUT) + 0.5,
+                               return_when=asyncio.FIRST_COMPLETED)
+            # m2m 一般 1s 内就返回；等 LLM 是否能在超时内给出更好的结果（上限 RESCUE_WAIT）
+            if not llm_task.done() and m2m_task.done():
+                remain = max(0.1, LLM_TIMEOUT - (time.time() - t0))
+                try:
+                    await asyncio.wait_for(asyncio.shield(llm_task), timeout=remain)
+                except (asyncio.TimeoutError, Exception):
+                    pass
+            if m2m_task.done() and not m2m_task.cancelled() and not m2m_task.exception():
+                m2m_raw = m2m_task.result()
+            if llm_task.done() and not llm_task.cancelled() and not llm_task.exception():
+                res_, rej = _accept(llm_task.result() or "")
+                if res_:
+                    result, engine = res_, "llm"
+                elif rej:
+                    rejected_out = rej
         except (httpx.TimeoutException, asyncio.TimeoutError):
             log.warning("llm timeout %s", direction)
         except Exception:
             log.warning("llm failed %s", direction, exc_info=False)
 
         # 地名漏译（如 홍대→洪水）时再试一次，不把错误结果写入缓存
-        if not engine and rejected_out and account and token:
+        if not engine and rejected_out:
             try:
                 hint = "请务必使用这些地名：" + "、".join(place_hints(src, direction).split("、")[:8])
                 raw = await _llm(account, token, [
                     {"role": "system", "content": sys},
                     {"role": "user", "content": user + "\n" + hint},
                 ], max(0.8, LLM_TIMEOUT - 0.3))
-                obj = parse_obj(raw)
-                if direction == "zh2ko":
-                    ko = apply_place_ko(_pick_ko(obj, raw), src)
-                    if _ok_ko(src, ko) and not missing_places(src, ko, "zh2ko"):
-                        result = {"ko": ko, "roman": romanize(ko) if want_roman else ""}
-                        engine = "llm"
-                else:
-                    zh = _pick_zh(obj, raw)
-                    if _ok_zh(src, zh) and not missing_places(src, zh, "ko2zh"):
-                        result = {"zh": zh}
-                        engine = "llm"
+                res2, _ = _accept(raw or "")
+                if res2:
+                    result, engine = res2, "llm"
             except Exception:
                 log.warning("llm retry failed %s", direction, exc_info=False)
 
-        if not engine:
-            try:
-                m2m_in = src
-                raw = await _m2m(account, token, m2m_in, direction, M2M_TIMEOUT)
-                if direction == "zh2ko":
-                    ko = apply_place_ko((raw or "").strip(), src)
-                    if _ok_ko(src, ko):
-                        result = {"ko": ko, "roman": romanize(ko) if want_roman else ""}
-                        engine = "m2m100"
-                else:
-                    zh = (raw or "").strip()
-                    if _ok_zh(src, zh):
-                        result = {"zh": zh}
-                        engine = "m2m100"
-            except Exception:
-                log.warning("m2m failed %s", direction, exc_info=False)
+        if not engine and m2m_raw is not None:
+            res3, _ = _accept(m2m_raw or "")
+            if res3:
+                result, engine = res3, "m2m100"
+
+        for t in (llm_task, m2m_task):
+            if not t.done():
+                t.cancel()
 
     ms = int((time.time() - t0) * 1000)
     if result:
         store = dict(result)
         store["engine"] = engine
         _tc_put(cache_key, store)
+        _save_tcache()
         if direction == "zh2ko" and result.get("ko"):
             _schedule_back(result["ko"])
         log.info("translate %s %s %dms", direction, engine, ms)
@@ -558,3 +658,18 @@ async def back_translate(ko: str) -> dict:
     if zh:
         _tc_put(key, {"zh": zh, "engine": out["engine"]})
     return out
+
+
+# ---------- 启动初始化：读回落盘缓存 + 导入常用句（任何一步失败都不影响进程） ----------
+def _boot():
+    _load_tcache()
+    n = load_phrases()
+    if n:
+        log.info("phrases loaded %d", n)
+    _save_tcache()
+
+
+try:
+    _boot()
+except Exception:
+    log.warning("cache boot skipped", exc_info=False)

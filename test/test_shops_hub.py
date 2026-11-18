@@ -55,9 +55,9 @@ seo = read_first("seo.py", required=False)
 check("shops <title> 是商家", "<title>商家 · 旅韩助手</title>" in shops)
 check("shops <h1> 是商家", re.search(r"<h1[^>]*>\s*商家\s*</h1>", shops) is not None)
 check("shops 不再以「找商家」作标题或页脚", "找商家" not in shops)
-check("shops 副标题中性", "精选推荐和商家服务" in shops)
+check("shops 无「精选推荐和商家服务」副标题", "精选推荐和商家服务" not in shops and "商家推荐" not in shops)
 check("shops meta description 已同步",
-      'name="description"' in shops and "精选商家" in shops and "审核" in shops and "找商家" not in shops.split("</head>")[0])
+      'name="description"' in shops and "商家服务" in shops and "精选商家" not in shops and "找商家" not in shops.split("</head>")[0])
 
 check("shops 没有旧 shoptabs", "shoptabs" not in shops)
 for old in ("推荐店铺", "服务商家", "韩友圈商家", "还没有通过审核的服务商"):
@@ -69,9 +69,9 @@ check("shops 没有 LH.userbar(带参数) 的个人卡调用",
       all(not a.strip() for a in re.findall(r"LH\.userbar\s*\(([^)]*)\)", shops)))
 
 # ---------- 2. 精选商家广告位：只用已有 4 张 ----------
-check("shops 有「精选商家」", "精选商家" in shops)
+check("shops 无「精选商家」和左右滑动提示", "精选商家" not in shops and "左右滑动查看" not in shops and "featTitle" not in shops)
 for i in (1, 2, 3, 4):
-    check("shops 使用已有首页广告 ad-%d" % i, ("/static/home-ads/ad-%d.jpg?v=78" % i) in shops)
+    check("shops 使用已有首页广告 ad-%d" % i, ("/static/home-ads/ad-%d.jpg?v=79" % i) in shops)
 check("shops 恰好 4 张广告卡（没有第五家）", shops.count('class="ad-card"') == 4, shops.count('class="ad-card"'))
 for name in ("咸草酱蟹", "大家烤肉", "DAYONE", "蓝憬通讯"):
     check("shops 广告店名：%s" % name, name in shops)
@@ -88,7 +88,7 @@ check("shops 有「商家服务」", "商家服务" in shops and "feedTitle" in 
 for key in ("guide", "clinic", "daigou", "logistics", "sim", "food", "hotel",
             "airport", "interp", "agency", "car", "kpop", "other"):
     check("shops 分类 key：%s" % key, ('data-cat="%s"' % key) in shops)
-for label in ("地陪向导", "医美", "代购", "物流快递", "通讯电话卡", "美食", "住宿",
+for label in ("地陪向导", "医美", "代购", "物流快递", "通讯电话卡", "美食代点外卖", "住宿",
               "接送机", "翻译", "留学签证", "租车", "追星活动", "其它"):
     check("shops 分类文案：%s" % label, label in shops)
 check("shops 分类与韩国生活同为三列图标网格",
@@ -124,9 +124,9 @@ check("shops 忽略旧 tab/type 参数，不做重定向",
 check("shops 有 banner 位", '<div data-banner-slot="shops"></div>' in shops)
 check("shops 用汉江青 theme-color", 'name="theme-color" content="#146E68"' in shops)
 check("shops 加载 pwa.css / community.css / community.js / banners.js",
-      all(x in shops for x in ("/static/pwa.css?v=78", "/static/community.css?v=78",
-                               "/static/community.js?v=78", "/static/banners.js")))
-check("shops 加载 pwa.js?v=78 defer", '<script src="/static/pwa.js?v=78" defer></script>' in shops)
+      all(x in shops for x in ("/static/pwa.css?v=79", "/static/community.css?v=79",
+                               "/static/community.js?v=79", "/static/banners.js")))
+check("shops 加载 pwa.js?v=79 defer", '<script src="/static/pwa.js?v=79" defer></script>' in shops)
 check("shops 保留底部导航", "<nav" in shops and "底部导航" in shops)
 check("shops 免责声明完整",
       all(w in shops for w in ("免费信息网站", "仅供参考", "不是旅行社", "不代办签证")))
@@ -188,8 +188,8 @@ else:
     print("SKIP partner.html 不存在")
 if seo:
     check("seo /shops 标题是商家", '"商家 · 旅韩助手"' in seo)
-    check("seo /shops 描述含精选商家/商家发布/审核",
-          all(w in seo for w in ("精选商家", "商家发布", "审核")))
+    check("seo /shops 描述含商家服务且无精选商家",
+          "商家服务" in seo and "精选商家" not in seo and "商家推荐" not in seo)
     check("seo 不再用找商家作 /shops 标题", "找商家 · 旅韩助手" not in seo)
 else:
     skip += 1
@@ -206,7 +206,7 @@ for name, txt in (("shops.html", shops), ("community-new.html", newpost)):
           [w for w in wx_solicit if w in txt])
 for name, txt in (("shops.html", shops), ("community-new.html", newpost)):
     vers = re.findall(r"\?v=(\d+)", txt)
-    check("%s 仍使用 ?v=78" % name, bool(vers) and set(vers) == {"78"}, set(vers))
+    check("%s 仍使用 ?v=79" % name, bool(vers) and set(vers) == {"79"}, set(vers))
 
 print("%s passed, %s failed, %s skipped" % (ok, fail, skip))
 if fail:

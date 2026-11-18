@@ -51,7 +51,7 @@ check("home 美妆识别副标题用拍照", "拍照查成分" in coreblk and "�
 check("home 吃喝玩乐五格", "吃喝玩乐" in home and all(
     u in home for u in ["/food", "/food?cat=cafe", "/shopping", "/attractions", "/places?category=hotel"]))
 check("home 五格文案", all(w in home for w in [">美食<", ">咖啡<", ">购物<", ">景点<", ">酒店<"]))
-check("home 广告轮播四张", all("/static/home-ads/ad-%d.jpg?v=78" % i in home for i in (1, 2, 3, 4)) and "蓝憬通讯" in home and 'data-ad="lanjing"' in home
+check("home 广告轮播四张", all("/static/home-ads/ad-%d.jpg?v=79" % i in home for i in (1, 2, 3, 4)) and "蓝憬通讯" in home and 'data-ad="lanjing"' in home
       and 'class="ads' in home and "adsDots" in home)
 check("home 附近推荐", "附近推荐" in home and 'data-sort="dist"' in home and 'data-sort="rec"' in home
       and "/api/places" in index)
@@ -74,7 +74,7 @@ check("TTS 保留", "/api/tts" in index and "speak(" in index)
 
 # ---- 商家 hub ----
 check("shops is 商家 hub", "<h1>商家</h1>" in shops or "<h1>🏪 商家</h1>" in shops or "<title>商家" in shops)
-check("shops 有精选商家和商家服务", "精选商家" in shops and "商家服务" in shops)
+check("shops 有商家服务、无精选商家标题", "商家服务" in shops and "精选商家" not in shops)
 check("shops 有四张已有广告", all(x in shops for x in ("咸草酱蟹", "大家烤肉", "DAYONE", "蓝憬通讯", "/ads/lanjing")))
 check("shops 不再是旧三 tab", "shoptabs" not in shops and "推荐店铺" not in shops)
 check("/services 301 in providers.py", "RedirectResponse(\"/shops" in prov and "status_code=301" in prov)

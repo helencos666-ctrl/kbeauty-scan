@@ -10,10 +10,10 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="旅韩助手">
 <link rel="manifest" href="/manifest.webmanifest">
-<link rel="apple-touch-icon" href="/static/icons/apple-touch-icon.png?v=78">
-<link rel="icon" type="image/png" sizes="192x192" href="/static/icons/icon-192.png?v=78">
-<link rel="stylesheet" href="/static/pwa.css?v=78">
-<link rel="stylesheet" href="/static/community.css?v=78">
+<link rel="apple-touch-icon" href="/static/icons/apple-touch-icon.png?v=79">
+<link rel="icon" type="image/png" sizes="192x192" href="/static/icons/icon-192.png?v=79">
+<link rel="stylesheet" href="/static/pwa.css?v=79">
+<link rel="stylesheet" href="/static/community.css?v=79">
 </head>
 <body class="compose">
 <header>
@@ -45,7 +45,7 @@
         <option value="daigou">代购</option>
         <option value="logistics">物流快递</option>
         <option value="sim">通讯电话卡</option>
-        <option value="food">美食</option>
+        <option value="food">美食代点外卖</option>
         <option value="hotel">住宿</option>
         <option value="airport">接送机</option>
         <option value="interp">翻译</option>
@@ -101,7 +101,7 @@
   <a href="/?tab=more"><i>☰</i>全部</a>
   <a href="/me"><i>👤</i>我的</a>
 </nav>
-<script src="/static/community.js?v=78"></script>
+<script src="/static/community.js?v=79"></script>
 <script>
 var WARN = {visa: '签证问答仅限个人经验分享，禁止发布代办广告。', study: '留学打听仅限经验交流，禁止发布中介广告。',
   friends: '请勿在帖子里公开手机号、微信号、住址等隐私。想认识新朋友，也可以去“旅韩交友”发布交友资料。',
@@ -151,7 +151,147 @@ var TPL = {
   jobs: '岗位 / 地区：\n签证要求：\n工作内容和待遇：'
 };
 var TITLE_PH = {daily: '一句话也行，例如：今天在汉江边吃了炸鸡', visa: '例如：D-4 转 D-2 需要准备什么？', pit: '例如：明洞换钱踩坑记录'};
+
+/* 商家分类模板：选 #mcat 时预填结构化正文；括号里是提示，发布前要换成自己的内容。
+   联系方式只写站内「立即咨询」，不写站外联系方式。 */
+var MCAT_TPL = {
+  guide:
+    '服务范围：（例如：首尔市区陪逛、机场接送衔接、景点讲解、翻译陪同）\n' +
+    '时长与人数：（例如：半天 4 小时，1 人起，最多 6 人）\n' +
+    '收费说明：（例如：按小时计费，费用包含交通与门票，是否另计请写明）\n' +
+    '集合方式：（例如：在约定地铁站出口集合，提前一天站内确认）\n' +
+    '服务说明：（可从业年限、熟悉区域、会说的语言，如实填写，不夸大）\n' +
+    '示例：「明洞、弘大、北村一带都可以安排；按半天 4 小时计费；在约定地铁站出口集合；会中文和韩语，路线可以提前一起定。」\n' +
+    '请通过站内「立即咨询」联系，不要留站外联系方式。',
+  clinic:
+    '机构名称：（写营业执照上的名称）\n' +
+    '地址：（写清楼栋楼层，方便到店核对）\n' +
+    '项目说明：（只写项目名称与流程，不写效果、不写前后对比）\n' +
+    '预约须知：（例如：需提前预约，到店出示护照，未成年人需监护人陪同）\n' +
+    '费用说明：以到店核实为准（项目、次数、是否含税请到店确认）\n' +
+    '服务说明：（持证医师与资质情况如实填写；效果因人而异，不做任何承诺）\n' +
+    '示例：「机构名称：某某皮肤科（例）；地址：首尔某区某路 12 3 楼；可预约项目以到店咨询为准；到店请出示护照；费用以到店核实为准。」\n' +
+    '请通过站内「立即咨询」联系，不要留站外联系方式。',
+  daigou:
+    '品类：（例如：护肤、彩妆、零食、母婴，写清具体品类）\n' +
+    '价格说明：（写清标价是否含代购费，汇率如何折算，以当时报价为准）\n' +
+    '发货与时效：（例如：首尔发出，一般 3–7 天到国内，节假日顺延）\n' +
+    '售后：（例如：破损可补寄，个人原因不退换，保留开箱视频）\n' +
+    '说明：（货源渠道、是否直邮、免税与关税如何承担，如实写明；不售假货与违禁品）\n' +
+    '示例：「品类：护肤与彩妆；价格按当日汇率折算，代购费另计；首尔发出一般 3–7 天到国内；破损凭开箱视频补寄。」\n' +
+    '请通过站内「立即咨询」联系，不要留站外联系方式。',
+  logistics:
+    '线路：（例如：首尔 → 青岛/威海，空运或海运）\n' +
+    '计费：（按公斤或体积重，写清首重续重与附加费用）\n' +
+    '时效：（例如：空运 3–5 天，海运 7–15 天，节假日顺延）\n' +
+    '禁运提醒：（不承运违禁品、易燃品、未申报的烟酒与药品，请如实申报）\n' +
+    '说明：（取件方式、打包要求、清关资料与责任划分，如实写明）\n' +
+    '示例：「线路：首尔到青岛空运；按公斤计费，首重与续重写清；空运 3–5 天；不收液体与烟酒。」\n' +
+    '请通过站内「立即咨询」联系，不要留站外联系方式。',
+  sim:
+    '套餐：（例如：30 天，含流量额度与通话额度）\n' +
+    '开通方式：（例如：到店凭护照开卡，或线上实名后邮寄）\n' +
+    '有效期：（例如：开通后 30 天，可续费）\n' +
+    '领取/邮寄说明：（例如：机场自提点、门店自取、韩国境内邮寄）\n' +
+    '说明：（是否需要实名、支持的机型、退换规则，如实写明）\n' +
+    '示例：「套餐：30 天含流量与通话；到店凭护照开卡；开通后 30 天有效；可机场自提。」\n' +
+    '请通过站内「立即咨询」联系，不要留站外联系方式。',
+  food:
+    '店名：（写餐厅招牌或代点店铺名称）\n' +
+    '可点范围：（例如：明洞、弘大，或具体分店）\n' +
+    '营业与配送时间：（例如：11:00–22:00，截止下单时间）\n' +
+    '代点与外卖：（如何下单、可否外卖配送或店内打包，配送范围与时长）\n' +
+    '价位与费用：（人均或起送价，代点服务费如何计，以当时报价为准）\n' +
+    '说明：（菜单是否有中文、需提前多久、口味备注怎么写，如实写明）\n' +
+    '示例：「店名：某某烤肉（例）；可代点明洞店；11:00–22:00；可外卖送到酒店，代点服务费另计。」\n' +
+    '请通过站内「立即咨询」联系，不要留站外联系方式。',
+  hotel:
+    '店名：（写营业执照上的名称）\n' +
+    '地址：（写清楼栋楼层与最近地铁站）\n' +
+    '房型与价格：（例如：双人房，区间价位，是否含早餐与税费）\n' +
+    '入住说明：（例如：入住与退房时间、是否需要押金、可否寄存行李）\n' +
+    '说明：（是否已办理合法住宿业登记、可否开发票，如实写明）\n' +
+    '示例：「店名：某某民宿（例）；某某站 2 号出口步行 5 分钟；双人房含早餐；入住 15:00 后、退房 11:00 前。」\n' +
+    '请通过站内「立即咨询」联系，不要留站外联系方式。',
+  airport:
+    '出发/到达机场：（仁川机场 1 号或 2 号航站楼 / 金浦机场）\n' +
+    '车型人数：（例如：5 座轿车可坐 3 人 3 件行李，7 座可坐 5 人）\n' +
+    '收费：（写清起步价与跨区附加，是否含高速费、夜间是否加价）\n' +
+    '等待规则：（例如：航班落地后免费等 60 分钟，超时如何计费）\n' +
+    '说明：（持什么资质、可否开发票、儿童座椅是否提供，如实写明）\n' +
+    '示例：「仁川机场 2 号航站楼接送；5 座车坐 3 人；市区单程按报价一口价含高速费；落地后免费等 60 分钟。」\n' +
+    '请通过站内「立即咨询」联系，不要留站外联系方式。',
+  interp:
+    '语言：（中文 ↔ 韩文，可加英语）\n' +
+    '场合：（例如：就医陪同、商务会谈、看房、办理手续）\n' +
+    '时长：（例如：2 小时起，可按半天安排）\n' +
+    '收费：（写清按小时或按天计费，差旅与交通如何计）\n' +
+    '说明：（从业经验、擅长领域，如实填写；不代替本人签署文件）\n' +
+    '示例：「语言：中韩互译；场合：就医陪同与商务会谈；2 小时起；按小时计费，交通另计。」\n' +
+    '请通过站内「立即咨询」联系，不要留站外联系方式。',
+  agency:
+    '机构名称：（写营业执照上的名称）\n' +
+    '服务内容：（例如：院校信息咨询、材料翻译与整理、申请流程陪跑）\n' +
+    '收费：（写清咨询费、服务费包含哪几项，不写包过类表述）\n' +
+    '说明：（只做信息咨询与材料协助；录取与签证结果由学校与使领馆决定，不承诺结果）\n' +
+    '示例：「机构名称：某某教育咨询（例）；服务内容：材料整理与流程说明；收费写清包含项目；结果以学校与使领馆通知为准。」\n' +
+    '请通过站内「立即咨询」联系，不要留站外联系方式。',
+  car:
+    '车型：（例如：5 座轿车、9 座商务车，座位与行李数）\n' +
+    '租用时长/范围：（例如：按天计费，市内可去首尔近郊，出市需提前说）\n' +
+    '收费：（写清是否含油费、过路费、司机餐费，夜间如何计）\n' +
+    '取还车：（取车与还车地点时间，可否送车到酒店）\n' +
+    '说明：（证件要求、是否需要押金、是否含保险，如实写明）\n' +
+    '示例：「9 座商务车；按天计费，可去首尔与近郊；费用含油费与过路费；可送车到酒店。」\n' +
+    '请通过站内「立即咨询」联系，不要留站外联系方式。',
+  kpop:
+    '活动名称：（写官方活动名称）\n' +
+    '时间地点：（日期、场馆与最近地铁站）\n' +
+    '主办/来源：（写主办方与信息来源，便于核实）\n' +
+    '参与方式：（例如：官方平台购票、应援物领取规则、团体行程集合点）\n' +
+    '说明：（严禁倒卖门票与代抢票，不得抬价转让；门票请走官方渠道）\n' +
+    '示例：「活动名称：某某见面会（例）；某月某日某场馆；来源：主办方官方公告；门票请走官方平台。」\n' +
+    '请通过站内「立即咨询」联系，不要留站外联系方式。',
+  other:
+    '服务名称：（一句话说清楚提供什么）\n' +
+    '内容：（具体包含哪些环节，需要提前准备什么）\n' +
+    '收费：（写清计费方式与包含项，是否有附加费用）\n' +
+    '说明：（服务范围、可否开发票、退改规则，如实填写）\n' +
+    '示例：「服务名称：行李寄存与转运（例）；内容：按件寄存并可送到机场；收费：按件按天计费。」\n' +
+    '请通过站内「立即咨询」联系，不要留站外联系方式。'
+};
+var MCAT_TITLE_PH = {
+  guide: '例如：首尔市区半天陪逛，中韩双语', clinic: '例如：明洞皮肤科，项目与预约说明',
+  daigou: '例如：韩妆代购，首尔直发国内', logistics: '例如：首尔到青岛空运，按公斤计费',
+  sim: '例如：游客卡 30 天，门店开卡', food: '例如：明洞烤肉代点外卖，可送到酒店',
+  hotel: '例如：某某站附近民宿，双人房', airport: '例如：仁川机场接送，5 座车',
+  interp: '例如：就医陪同翻译，中韩互译', agency: '例如：留学材料协助，收费说明',
+  car: '例如：首尔包车一天，9 座商务车', kpop: '例如：某活动应援物领取说明',
+  other: '例如：行李寄存与转运'
+};
 function currentBoard(){ return document.getElementById('board').value; }
+/* 选商家分类时预填结构化模板：只在正文为空或仍是上一份模板时覆盖 */
+function lastTplKey(s){
+  for (var k in MCAT_TPL){ if (MCAT_TPL[k] === s) return k; }
+  return '';
+}
+function applyMcat(){
+  var sel = document.getElementById('mcat');
+  var mc = sel ? sel.value : '';
+  var bd = document.getElementById('body'), tvEl = document.getElementById('title');
+  var tpl = MCAT_TPL[mc] || '';
+  var isMcatTpl = !!lastTpl && !!MCAT_TPL[lastTplKey(lastTpl)];
+  if (tpl && (!bd.value.trim() || bd.value === lastTpl)){
+    bd.value = tpl; lastTpl = tpl;
+  } else if (!mc && isMcatTpl && bd.value.trim() === lastTpl.trim()){
+    // 分类清空：若正文仍是商家模板，恢复当前频道模板（没有就清空）
+    bd.value = TPL[currentBoard()] || ''; lastTpl = bd.value;
+  }
+  if (tvEl){
+    tvEl.placeholder = (mc && MCAT_TITLE_PH[mc]) || TITLE_PH[currentBoard()] || '一句话说清楚';
+  }
+  updateCounts();
+}
 function syncMedNote(){
   var mn = document.getElementById('mednote');
   var mcs = document.getElementById('mcat');
@@ -243,7 +383,7 @@ function scheduleDraft(){ clearTimeout(draftTimer); draftTimer = setTimeout(save
   var el = document.getElementById(id);
   el.addEventListener(id === 'agree' ? 'change' : 'input', function(){ updateCounts(); scheduleDraft(); });
 });
-document.getElementById('mcat').addEventListener('change', function(){ syncMedNote(); scheduleDraft(); });
+document.getElementById('mcat').addEventListener('change', function(){ applyMcat(); syncMedNote(); scheduleDraft(); });
 (async function(){
   var gate = document.getElementById('gate'), d;
   try { d = ME = await LH.me(); } catch(e){ gate.innerHTML = '<div class="empty">' + LH.esc(e.message) + '</div>'; return; }
@@ -266,7 +406,7 @@ document.getElementById('mcat').addEventListener('change', function(){ syncMedNo
       if (draft.offer) document.getElementById('offer').value = draft.offer;
       if (draft.valid) document.getElementById('valid').value = draft.valid;
     }
-    if (draft.mcat) document.getElementById('mcat').value = draft.mcat;
+    if (draft.mcat) { document.getElementById('mcat').value = draft.mcat; if (MCAT_TPL[draft.mcat] && draft.body === MCAT_TPL[draft.mcat]) lastTpl = draft.body; }
     if (draft.agree) document.getElementById('agree').checked = true;
     syncMedNote();
     var n = document.getElementById('draftnote'); n.style.display = 'block'; n.textContent = '草稿已自动保存 · 刚刚';
@@ -345,6 +485,6 @@ document.getElementById('send').onclick = async function(){
   } catch(e){ LH.showErr(err, e.message); LH.toast(e.message); setSending(false); window.scrollTo(0, 0); }
 };
 </script>
-<script src="/static/pwa.js?v=78" defer></script>
+<script src="/static/pwa.js?v=79" defer></script>
 </body>
 </html>

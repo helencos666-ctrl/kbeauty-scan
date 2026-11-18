@@ -68,7 +68,7 @@ MERCHANT_CATS = [
     ("daigou", "代购"),
     ("logistics", "物流快递"),
     ("sim", "通讯电话卡"),
-    ("food", "美食"),
+    ("food", "美食代点外卖"),
     ("hotel", "住宿"),
     ("airport", "接送机"),
     ("interp", "翻译"),

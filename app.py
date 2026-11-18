@@ -1,6 +1,6 @@
 """韩国化妆品拍照识别 - 后端代理（密钥只在服务端读取环境变量，不写入日志/前端）"""
-import base64, io, json, os, re, time, threading, datetime
-from collections import defaultdict, deque
+import base64, hashlib, io, json, os, re, time, threading, datetime
+from collections import defaultdict, deque, OrderedDict
 import httpx
 from fastapi import FastAPI, Request, UploadFile, File, HTTPException
 from fastapi.responses import FileResponse, JSONResponse, RedirectResponse
@@ -109,15 +109,19 @@ JSON 字段：
 如果图片不是化妆品，is_cosmetic=false，其余字段尽量留空，并在 notes 说明。"""
 
 def prep_image(raw: bytes) -> str:
+    return "data:image/jpeg;base64," + base64.b64encode(prep_jpeg(raw)).decode()
+
+def prep_jpeg(raw: bytes) -> bytes:
+    """统一压缩成 JPEG 字节（最长边 1024，质量 72），拍照识别与站牌识别共用。"""
     try:
         im = Image.open(io.BytesIO(raw)); im.verify()
         im = Image.open(io.BytesIO(raw))
         im = ImageOps.exif_transpose(im).convert("RGB")
     except Exception:
         raise HTTPException(400, "图片无法识别，请换一张 JPG/PNG 照片")
-    if max(im.size) > 1600: im.thumbnail((1600, 1600))
-    b = io.BytesIO(); im.save(b, "JPEG", quality=85)
-    return "data:image/jpeg;base64," + base64.b64encode(b.getvalue()).decode()
+    if max(im.size) > 1024: im.thumbnail((1024, 1024))
+    b = io.BytesIO(); im.save(b, "JPEG", quality=72)
+    return b.getvalue()
 
 async def chat(messages, max_tokens=1500):
     body = {"model": MODEL, "messages": messages, "max_tokens": max_tokens,
@@ -159,19 +163,45 @@ app.middleware("http")(visit_middleware)
 app.add_middleware(SecurityMiddleware, max_body=MAX_UPLOAD + 100_000,
                    big_paths={"/api/community/posts", "/api/admin/shop-photos"}, big_body=20 * 1024 * 1024)
 
+# ---------- 拍照识别结果缓存（同一张处理后图片不重复调用视觉模型） ----------
+SCAN_CACHE_MAX = 60
+_scan_cache: "OrderedDict[str, dict]" = OrderedDict()
+_scan_lock = threading.Lock()
+
+def _scan_get(h: str):
+    with _scan_lock:
+        v = _scan_cache.get(h)
+        if v is not None:
+            _scan_cache.move_to_end(h)
+        return v
+
+def _scan_put(h: str, res: dict):
+    with _scan_lock:
+        _scan_cache[h] = res
+        _scan_cache.move_to_end(h)
+        while len(_scan_cache) > SCAN_CACHE_MAX:
+            _scan_cache.popitem(last=False)
+
 @app.post("/api/scan")
 async def scan(request: Request, image: UploadFile = File(...)):
     rate_limit(request, "scan")
     raw = await image.read(MAX_UPLOAD + 1)
     if len(raw) > MAX_UPLOAD: raise HTTPException(413, "图片太大（最大 8MB）")
     if len(raw) < 1000: raise HTTPException(400, "图片太小或为空")
-    data_url = prep_image(raw)
+    jpg = prep_jpeg(raw)
+    digest = hashlib.sha256(jpg).hexdigest()
     t = time.time()
+    hit = _scan_get(digest)
+    if hit is not None:
+        print(f"scan cache {(time.time()-t)*1000:.0f}ms", flush=True)
+        return {"result": hit}
+    data_url = "data:image/jpeg;base64," + base64.b64encode(jpg).decode()
     res, usage = await chat([{"role": "user", "content": [
         {"type": "text", "text": SCAN_PROMPT},
         {"type": "image_url", "image_url": {"url": data_url}}]}])
     res = clean_obj(res)
     print(f"scan ok {time.time()-t:.1f}s tokens in={usage.get('prompt_tokens')} out={usage.get('completion_tokens')}", flush=True)
+    _scan_put(digest, res)
     return {"result": res}
 
 PRICE_PROMPT = """下面是网页搜索结果（编号、网址、日期、正文片段）。目标产品：{product}。
@@ -516,5 +546,16 @@ def _startup_seeds():
     hide_shop_posts_v76()
     hide_shop_posts_v77()
     seed_guides()
+
+@app.get("/static/subway.json")
+def static_subway_json():
+    """地铁数据：独立路由加长缓存（mount 之前注册，query string 不影响文件查找）。"""
+    return FileResponse(os.path.join(BASE, "static", "subway.json"), media_type="application/json",
+                        headers={"Cache-Control": "public, max-age=86400"})
+
+@app.get("/static/stations.json")
+def static_stations_json():
+    return FileResponse(os.path.join(BASE, "static", "stations.json"), media_type="application/json",
+                        headers={"Cache-Control": "public, max-age=86400"})
 
 app.mount("/static", StaticFiles(directory=os.path.join(BASE, "static")), name="static")

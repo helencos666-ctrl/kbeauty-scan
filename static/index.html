@@ -10,9 +10,10 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="旅韩助手">
 <link rel="manifest" href="/manifest.webmanifest">
-<link rel="apple-touch-icon" href="/static/icons/apple-touch-icon.png?v=78">
-<link rel="icon" type="image/png" sizes="192x192" href="/static/icons/icon-192.png?v=78">
-<link rel="stylesheet" href="/static/pwa.css?v=78">
+<link rel="apple-touch-icon" href="/static/icons/apple-touch-icon.png?v=79">
+<link rel="icon" type="image/png" sizes="192x192" href="/static/icons/icon-192.png?v=79">
+<link rel="stylesheet" href="/static/pwa.css?v=79">
+<link rel="preload" href="/static/subway.json?v=79" as="fetch" crossorigin>
 <style>
 :root{--primary:#146E68;--secondary:#3D8F88;--accent:#B85A12;--pink:var(--primary);--ink:#1A2330;--sub:#4A5560;--bg:#F3F7F6;--card:#fff;--line:#D5E4E1;--success:#1B7A45;--warning:#B45309}
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
@@ -359,7 +360,7 @@ body.is-home .disclaimer{display:none}
 <body class="is-home">
 <header></header>
 <div class="hero" id="hero">
-  <a class="brand" href="/"><img src="/static/icons/icon-192.png?v=78" alt="">旅韩助手</a>
+  <a class="brand" href="/"><img src="/static/icons/icon-192.png?v=79" alt="">旅韩助手</a>
   <a class="trip-entry" href="/trips"><i>🗓️</i>行程</a>
 </div>
 <p class="hero-sub">地铁 · 翻译 · 吃喝玩，中文一站搞定</p>
@@ -396,10 +397,10 @@ body.is-home .disclaimer{display:none}
     <div class="ads" id="homeAds">
       <div class="ads-viewport">
         <div class="ads-track" id="adsTrack">
-          <a class="slide" href="/food#hamcho-myeongdong"><img src="/static/home-ads/ad-1.jpg?v=78" alt="咸草酱蟹：明洞酱蟹，点击查看" width="640" height="320" draggable="false" onerror="this.style.display=&#39;none&#39;;"></a>
-          <a class="slide" href="/food#daega-myeongdong"><img src="/static/home-ads/ad-2.jpg?v=78" alt="大家烤肉：明洞烤肉，点击查看" width="640" height="320" draggable="false" onerror="this.style.display=&#39;none&#39;;"></a>
-          <a class="slide" href="/shops"><img src="/static/home-ads/ad-3.jpg?v=78" alt="DAYONE：商业服务，点击查看" width="640" height="320" draggable="false" onerror="this.style.display=&#39;none&#39;;"></a>
-          <a class="slide" data-ad="lanjing" href="/ads/lanjing"><img src="/static/home-ads/ad-4.jpg?v=78" alt="蓝憬通讯：推荐2位好友注册 免费领韩国手机卡" width="640" height="320" draggable="false" onerror="this.style.display=&#39;none&#39;;"></a>
+          <a class="slide" href="/food#hamcho-myeongdong"><img src="/static/home-ads/ad-1.jpg?v=79" alt="咸草酱蟹：明洞酱蟹，点击查看" width="640" height="320" draggable="false" onerror="this.style.display=&#39;none&#39;;"></a>
+          <a class="slide" href="/food#daega-myeongdong"><img src="/static/home-ads/ad-2.jpg?v=79" alt="大家烤肉：明洞烤肉，点击查看" width="640" height="320" draggable="false" onerror="this.style.display=&#39;none&#39;;"></a>
+          <a class="slide" href="/shops"><img src="/static/home-ads/ad-3.jpg?v=79" alt="DAYONE：商业服务，点击查看" width="640" height="320" draggable="false" onerror="this.style.display=&#39;none&#39;;"></a>
+          <a class="slide" data-ad="lanjing" href="/ads/lanjing"><img src="/static/home-ads/ad-4.jpg?v=79" alt="蓝憬通讯：推荐2位好友注册 免费领韩国手机卡" width="640" height="320" draggable="false" onerror="this.style.display=&#39;none&#39;;"></a>
         </div>
       </div>
       <div class="ads-cap" id="adsCap"><b>咸草酱蟹</b><span>点击查看</span></div>
@@ -585,7 +586,7 @@ body.is-home .disclaimer{display:none}
 </div>
 
 <script src="/static/ref.js"></script>
-<script src="/static/splash.js?v=78"></script>
+<script src="/static/splash.js?v=79"></script>
 <script src="/static/phrases.js"></script>
 <script src="/static/subway.js"></script>
 <script>
@@ -780,11 +781,11 @@ $('fCam').onchange=e=>handle(e.target.files[0]);$('fPick').onchange=e=>handle(e.
 async function shrink(file,pv){
   const url=URL.createObjectURL(file);
   const img=await new Promise((ok,no)=>{const i=new Image();i.onload=()=>ok(i);i.onerror=no;i.src=url});
-  const M=1600,s=Math.min(1,M/Math.max(img.width,img.height));
+  const M=1024,s=Math.min(1,M/Math.max(img.width,img.height));
   const c=document.createElement('canvas');c.width=Math.round(img.width*s);c.height=Math.round(img.height*s);
   c.getContext('2d').drawImage(img,0,0,c.width,c.height);
   pv.src=url;pv.style.display='block';
-  return await new Promise(r=>c.toBlob(r,'image/jpeg',0.85));
+  return await new Promise(r=>c.toBlob(r,'image/jpeg',0.72));
 }
 async function handle(file){
   if(!file)return;const m=mode;
@@ -1125,8 +1126,14 @@ async function resolveSt(id){
     if(ps.length){const p=Object.assign({kind:'place'},ps[0]);return {s:p,alt:null,guess:`「${raw}」按地点「${p.name}」（${p.addr||''}）查询，如不对请在下拉列表里重新选`}}
   }catch(e){}
   if(list.length) return {s:list[0],alt:null};
-  const r=await fetch('/api/station',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({name:raw})});
-  const j=await r.json().catch(()=>({}));
+  // 站名转换走 LLM，上游可能很慢：4 秒没结果就当失败，别让页面一直等
+  const ac=new AbortController();let j={};
+  const tm=setTimeout(()=>ac.abort(),4000);
+  try{
+    const r=await fetch('/api/station',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({name:raw}),signal:ac.signal});
+    j=await r.json().catch(()=>({}));
+  }catch(e){ j={}; }
+  finally{ clearTimeout(tm); }
   const s=j.station_ko&&LHSub.byKo(j.station_ko);
   if(!s) throw new Error('没找到「'+raw+'」，请换个写法（韩文店名、地址或附近地铁站），或从下拉列表里选');
   return {s:s,alt:null};
@@ -1670,10 +1677,12 @@ drawScenes();
     const t=new URLSearchParams(location.search).get('tab');
     if(t==='sub'&&loadLastRoute()&&$('rtOut')&&!$('rtOut').innerHTML) restoreLastRoute();
   });
+  // 首页空闲时预取地铁数据（只预取，不恢复上次路线），首次打开路线页就不用等 100KB+ 的 json
+  (window.requestIdleCallback||function(cb){setTimeout(cb,1)})(function(){ if(window.LHSub) LHSub.load(); });
 })();
 </script>
 <script src="/static/maps.js"></script>
-<script src="/static/pwa.js?v=78" defer></script>
+<script src="/static/pwa.js?v=79" defer></script>
 
 <script>
 (function(){

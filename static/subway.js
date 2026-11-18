@@ -1,5 +1,5 @@
 /* 旅韩助手：首都圈地铁站内路线计算（纯前端，离线可用）
- * 数据：/static/subway.json，由 scripts/build_subway.py 生成
+ * 数据：/static/subway.json?v=79，由 scripts/build_subway.py 生成
  * 来源：© OpenStreetMap contributors（ODbL 1.0）线路与停靠顺序；Wikidata（CC0）中文站名补充。
  * 时间为按站间距离估算，票价按首尔交通公社公布的距离制规则估算（基本 1,550 韩元/10km，交通卡），均仅供参考。
  */
@@ -11,7 +11,7 @@ var LHSub = (function(){
   // 站距较长的近郊/机场线，平均车速较快
   var FAST = {'공항철도':1,'경의·중앙':1,'경춘':1,'수인·분당':1,'서해':1,'경강':1,'1':0};
   function load(){
-    if (!P) P = fetch('/static/subway.json').then(function(r){ if(!r.ok) throw new Error('load'); return r.json(); }).then(function(j){ D = prep(j); return D; });
+    if (!P) P = fetch('/static/subway.json?v=79').then(function(r){ if(!r.ok) throw new Error('load'); return r.json(); }).then(function(j){ D = prep(j); return D; });
     P.catch(function(){ P = null; });
     return P;
   }
@@ -26,6 +26,12 @@ var LHSub = (function(){
     var x=Math.sin(dLa/2)*Math.sin(dLa/2)+Math.cos(a[1]*r)*Math.cos(b[1]*r)*Math.sin(dLo/2)*Math.sin(dLo/2);
     return 2*R*Math.asin(Math.sqrt(x));
   }
+  // 前缀索引：norm(key) 的前 1–2 个字符（以及完整 key）-> 站索引数组
+  function addIdx(ix, k, i){
+    if (!k) return;
+    var a = ix[k]; if (!a) a = ix[k] = [];
+    if (a[a.length-1] !== i) a.push(i);
+  }
   function prep(j){
     var st = j.st.map(function(s,i){ return {i:i, ko:s[0], zh:s[1], en:s[2], p:[s[3],s[4]], lines:s[5], keys:s[6]}; });
     var lines = j.lines.map(function(l){ return {id:l[0], zh:l[1], ko:l[2], color:l[3]}; });
@@ -37,7 +43,25 @@ var LHSub = (function(){
       out[e[0]].push({to:e[1], line:e[2], loop:e[3]||'', km:km, min:Math.max(1.5, 0.5 + km*(fast?0.9:1.25))});
     });
     var nameCount = {}; st.forEach(function(s){ nameCount[s.ko]=(nameCount[s.ko]||0)+1; });
-    return {st:st, lines:lines, lineIdx:lineIdx, out:out, nameCount:nameCount, source:j.source};
+    // 每个站已归一化的 key 列表（search 时不必再 norm），并建前缀索引
+    var nkeys = st.map(function(s){
+      var ks = [], seen = {};
+      for (var k=0;k<s.keys.length;k++){
+        var kk = norm(s.keys[k]);
+        if (kk && !seen[kk]){ seen[kk]=1; ks.push(kk); }
+      }
+      return ks;
+    });
+    var idx = {};
+    nkeys.forEach(function(ks, i){
+      for (var k=0;k<ks.length;k++){
+        var key = ks[k];
+        addIdx(idx, key, i);
+        addIdx(idx, key.slice(0,1), i);
+        if (key.length >= 2) addIdx(idx, key.slice(0,2), i);
+      }
+    });
+    return {st:st, lines:lines, lineIdx:lineIdx, out:out, nameCount:nameCount, nkeys:nkeys, idx:idx, source:j.source};
   }
   function lev(a,b){
     if (Math.abs(a.length-b.length)>2) return 9;
@@ -47,25 +71,55 @@ var LHSub = (function(){
       m[i][j]=Math.min(m[i-1][j]+1,m[i][j-1]+1,m[i-1][j-1]+(b.charAt(i-1)===a.charAt(j-1)?0:1));
     return m[b.length][a.length];
   }
+  // 取候选站索引：完整 key / 前 1–2 个字符的前缀桶
+  function candidates(n){
+    var ix = D.idx, set = {}, list = [];
+    function take(bucket){
+      var a = bucket && ix[bucket]; if (!a) return;
+      for (var i=0;i<a.length;i++){ var s = a[i]; if (!set[s]){ set[s]=1; list.push(s); } }
+    }
+    take(n);
+    take(n.slice(0,1));
+    if (n.length >= 2) take(n.slice(0,2));
+    return list;
+  }
+  function score(s, n){
+    var best = 0, ks = D.nkeys[s.i];
+    for (var k=0;k<ks.length;k++){
+      var key = ks[k]; if (!key) continue;
+      var sc = 0;
+      if (key===n) sc = 100;
+      else if (key.indexOf(n)===0) sc = 80 - Math.min(20, key.length-n.length);
+      else if (n.length>=2 && key.indexOf(n)>0) sc = 55;
+      if (sc>best) best = sc;
+    }
+    return best;
+  }
   // 返回按匹配度排序的车站
   function search(q, limit){
     if (!D) return [];
     var n = norm(q); if (!n) return [];
     var latin = /^[a-z0-9]+$/.test(n), res = [];
-    D.st.forEach(function(s){
-      var best = 0;
-      for (var k=0;k<s.keys.length;k++){
-        var key = norm(s.keys[k]); if (!key) continue;
-        var sc = 0;
-        if (key===n) sc = 100;
-        else if (key.indexOf(n)===0) sc = 80 - Math.min(20, key.length-n.length);
-        else if (n.length>=2 && key.indexOf(n)>0) sc = 55;
-        else if (latin && n.length>=4 && lev(n,key)<=(n.length>=7?2:1)) sc = 45;
-        if (sc>best) best = sc;
-      }
+    var cands = candidates(n);
+    for (var c=0;c<cands.length;c++){
+      var s = D.st[cands[c]], best = score(s, n);
       if (best) res.push({s:s, sc:best + Math.min(6, s.lines.length)});
-    });
-    res.sort(function(a,b){ return b.sc-a.sc; });
+    }
+    // 拉丁字母查询且前缀候选不够时：只对“库内存在 n 的前缀候选”这一类做编辑距离
+    if (latin && n.length>=4 && res.length < (limit||8)){
+      var lim = n.length>=7 ? 2 : 1, extra = {};
+      for (var c2=0;c2<cands.length;c2++) extra[cands[c2]] = 1;
+      var ks = D.idx[n.slice(0,2)] || [];
+      for (var t=0;t<ks.length;t++){
+        var si = ks[t]; if (extra[si]) continue;
+        var keys = D.nkeys[si], hit = 0;
+        for (var k=0;k<keys.length;k++){ if (lev(n, keys[k]) <= lim){ hit = 1; break; } }
+        if (hit){ extra[si] = 1; res.push({s:D.st[si], sc:45 + Math.min(6, D.st[si].lines.length)}); }
+      }
+      res.sort(function(a,b){ return b.sc-a.sc; });
+    } else {
+      res.sort(function(a,b){ return b.sc-a.sc; });
+    }
     return res.slice(0, limit||8).map(function(r){ return r.s; });
   }
   function byKo(ko){
