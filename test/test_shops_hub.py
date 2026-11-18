@@ -71,7 +71,7 @@ check("shops 没有 LH.userbar(带参数) 的个人卡调用",
 # ---------- 2. 精选商家广告位：只用已有 4 张 ----------
 check("shops 无「精选商家」和左右滑动提示", "精选商家" not in shops and "左右滑动查看" not in shops and "featTitle" not in shops)
 for i in (1, 2, 3, 4):
-    check("shops 使用已有首页广告 ad-%d" % i, ("/static/home-ads/ad-%d.jpg?v=79" % i) in shops)
+    check("shops 使用已有首页广告 ad-%d" % i, ("/static/home-ads/ad-%d.jpg?v=80" % i) in shops)
 check("shops 恰好 4 张广告卡（没有第五家）", shops.count('class="ad-card"') == 4, shops.count('class="ad-card"'))
 for name in ("咸草酱蟹", "大家烤肉", "DAYONE", "蓝憬通讯"):
     check("shops 广告店名：%s" % name, name in shops)
@@ -85,15 +85,21 @@ for fake in ("星巴克", "广藏市场", "明洞乐天", "第五家", "示例�
 
 # ---------- 3. 商家服务（无信息流） ----------
 check("shops 有「商家服务」", "商家服务" in shops and "feedTitle" in shops)
-for key in ("guide", "clinic", "daigou", "logistics", "sim", "food", "hotel",
-            "airport", "interp", "agency", "car", "kpop", "other"):
+for key in ("guide", "clinic", "food", "airport", "hotel", "interp",
+            "kpop", "car", "sim", "logistics", "daigou", "other"):
     check("shops 分类 key：%s" % key, ('data-cat="%s"' % key) in shops)
-for label in ("地陪向导", "医美", "代购", "物流快递", "通讯电话卡", "美食代点外卖", "住宿",
-              "接送机", "翻译", "留学签证", "租车", "追星活动", "其它"):
+for label in ("地陪向导", "医美", "美食代点外卖", "接送机", "住宿", "翻译",
+              "追星活动", "租车", "通讯电话卡", "物流快递", "代购", "其它"):
     check("shops 分类文案：%s" % label, label in shops)
+check("shops 无「留学签证」分类且韩国生活仍有签证留学",
+      "留学签证" not in shops and 'data-cat="agency"' not in shops
+      and "/community?board=visa" in shops and "/community?board=study" in shops)
+check("shops 商家分类顺序",
+      [m.group(1) for m in __import__("re").finditer(r'data-cat="([^"]+)"', shops)]
+      == ["guide","clinic","food","airport","hotel","interp","kpop","car","sim","logistics","daigou","other"])
 check("shops 分类与韩国生活同为三列图标网格",
       ".icon-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr))" in shops
-      and shops.count('class="icon-tile"') == 19
+      and shops.count('class="icon-tile"') == 18
       and "overflow-x:auto" not in shops.split(".icon-grid")[1].split("}")[0])
 check("shops 精选商家广告条仍可左右滑动", "ad-strip" in shops and "scroll-snap-type" in shops and "overflow-x:auto" in shops)
 check("shops 无截断旧文案 餐饮美食（炸鸡等）", "餐饮美食（炸鸡等）" not in shops)
@@ -124,9 +130,9 @@ check("shops 忽略旧 tab/type 参数，不做重定向",
 check("shops 有 banner 位", '<div data-banner-slot="shops"></div>' in shops)
 check("shops 用汉江青 theme-color", 'name="theme-color" content="#146E68"' in shops)
 check("shops 加载 pwa.css / community.css / community.js / banners.js",
-      all(x in shops for x in ("/static/pwa.css?v=79", "/static/community.css?v=79",
-                               "/static/community.js?v=79", "/static/banners.js")))
-check("shops 加载 pwa.js?v=79 defer", '<script src="/static/pwa.js?v=79" defer></script>' in shops)
+      all(x in shops for x in ("/static/pwa.css?v=80", "/static/community.css?v=80",
+                               "/static/community.js?v=80", "/static/banners.js")))
+check("shops 加载 pwa.js?v=80 defer", '<script src="/static/pwa.js?v=80" defer></script>' in shops)
 check("shops 保留底部导航", "<nav" in shops and "底部导航" in shops)
 check("shops 免责声明完整",
       all(w in shops for w in ("免费信息网站", "仅供参考", "不是旅行社", "不代办签证")))
@@ -165,9 +171,10 @@ else:
     check("非商家选分类返回 400", "开通商家" in snip and "选择商家分类" in snip and "HTTPException(400" in snip)
     check("商家分类入库前校验", ("MERCHANT_CAT_KEYS" in snip or "MERCHANT_STORE_KEYS" in snip)
           and "分类不存在" in snip)
-    check("后端含住宿/接送机/翻译/留学签证分类",
+    check("后端含住宿/接送机/翻译，无留学签证分类",
           all(k in snip for k in ('("hotel", "住宿")', '("airport", "接送机")',
-                                 '("interp", "翻译")', '("agency", "留学签证")')))
+                                 '("interp", "翻译")'))
+          and '("agency", "留学签证")' not in snip)
     check("后端接送机/翻译按 tag 兜底筛选", "CAT_TAG_FALLBACK" in snip and "p.tag=%s" in snip)
     check("医美分类继续调用 guard_medical", '== "clinic"' in snip and "guard_medical(" in snip)
     check("商家帖先审后发", 'status, note = "pending", "商家帖，先审后发"' in snip)
@@ -206,7 +213,7 @@ for name, txt in (("shops.html", shops), ("community-new.html", newpost)):
           [w for w in wx_solicit if w in txt])
 for name, txt in (("shops.html", shops), ("community-new.html", newpost)):
     vers = re.findall(r"\?v=(\d+)", txt)
-    check("%s 仍使用 ?v=79" % name, bool(vers) and set(vers) == {"79"}, set(vers))
+    check("%s 仍使用 ?v=80" % name, bool(vers) and set(vers) == {"80"}, set(vers))
 
 print("%s passed, %s failed, %s skipped" % (ok, fail, skip))
 if fail:

@@ -70,7 +70,7 @@ check("窄屏标题 14px", ".core b{font-size:14px}" in narrow)
 check("窄屏 .cats 未改动", ".cats i{width:46px;height:46px;font-size:21px}" in narrow
       and ".cats a{font-size:11px}" in narrow)
 
-check("使用 ?v=79", "?v=79" in index)
+check("使用 ?v=80", "?v=80" in index)
 check("没有残留 ?v=69", "?v=69" not in index)
 for label, needle in (("吃喝玩乐", "吃喝玩乐"), ("广告", "adsDots"), ("附近推荐", "附近推荐"),
                       ("韩友圈分享", "韩友圈分享"), ("tabbar", 'class="tabbar"')):

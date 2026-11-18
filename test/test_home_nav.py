@@ -1,4 +1,4 @@
-"""纯静态检查：首页七格底部导航、?v=79 缓存版本、新页面（trips）与禁词。
+"""纯静态检查：首页七格底部导航、?v=80 缓存版本、新页面（trips）与禁词。
 不需要启服务，直接 python test/test_home_nav.py 即可。"""
 import os, re
 
@@ -38,13 +38,13 @@ PAGES = {
 }
 
 # ---------- 1. 缓存版本 v63 ----------
-check("sw.js CACHE is lvhan-shell-v79", "'lvhan-shell-v79'" in sw or '"lvhan-shell-v79"' in sw)
-check("sw.js uses ?v=79", "?v=79" in sw)
+check("sw.js CACHE is lvhan-shell-v80", "'lvhan-shell-v80'" in sw or '"lvhan-shell-v80"' in sw)
+check("sw.js uses ?v=80", "?v=80" in sw)
 check("sw.js has no ?v=60", "?v=60" not in sw)
 for name, txt in PAGES.items():
-    check("%s uses ?v=79 (or tabbar)" % name, ("?v=79" in txt) or ("tabbar" in txt))
+    check("%s uses ?v=80 (or tabbar)" % name, ("?v=80" in txt) or ("tabbar" in txt))
     check("%s has no ?v=60" % name, "?v=60" not in txt)
-check("sw.js SHELL has four home ads", all("/static/home-ads/ad-%d.jpg?v=79" % i in sw for i in (1, 2, 3, 4)))
+check("sw.js SHELL has four home ads", all("/static/home-ads/ad-%d.jpg?v=80" % i in sw for i in (1, 2, 3, 4)))
 check("sw.js SHELL has /trips", "'/trips'" in sw and "'/local'" not in sw)
 check("sw.js SHELL has trips.html", "/static/trips.html" in sw and "/static/local.html" not in sw)
 
@@ -61,6 +61,9 @@ check("购物节在发布和商业服务之间",
 check("购物节 -> /festival", 'href="/festival"' in navblock and 'data-nav="festival"' in navblock and 'class="fest"' in navblock and "冬季" in navblock)
 check("商业服务 -> /shops", 'href="/shops"' in navblock and 'data-nav="services"' in navblock)
 check("行程安排 -> /trips", 'href="/trips"' in navblock and 'data-nav="trips"' in navblock and "行程安排" in navblock)
+check("首页顶栏无「行程」按钮，底栏仍有行程安排",
+      "trip-entry" not in index and ">行程<" not in index
+      and 'data-nav="trips"' in index and "行程安排" in index)
 check("首页 -> / 且 data-nav=home", re.search(r'<a href="/" data-nav="home"', navblock) is not None)
 check("首页默认点亮", 'data-nav="home" class="on"' in navblock)
 check("行程入口 -> /trips", 'href="/trips"' in index and "🗓️" in index)
@@ -112,7 +115,7 @@ check("trips can add/edit/delete/reorder", all(w in trips for w in ("添加地�
 check("trips links subway planner", "/?tab=sub" in trips)
 check("trips links /itineraries", "/itineraries" in trips)
 check("trips has back and me", 'href="/"' in trips and 'href="/me"' in trips)
-check("trips loads pwa.js?v=79", "/static/pwa.js?v=79" in trips)
+check("trips loads pwa.js?v=80", "/static/pwa.js?v=80" in trips)
 
 
 # ---------- 5b. festival.html 韩国购物节 ----------

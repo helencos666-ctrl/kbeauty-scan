@@ -107,7 +107,7 @@ PAGES = {
     ),
     "/shops": (
         "商家 · 旅韩助手",
-        "旅韩助手商家页：按地陪向导、医美、代购、物流快递、通讯电话卡、美食代点外卖、住宿、接送机、翻译、留学签证、租车等分类查看商家服务，在站内咨询联系商家。",
+        "旅韩助手商家页：按地陪向导、医美、美食代点外卖、接送机、住宿、翻译、追星活动、租车、通讯电话卡、物流快递、代购等分类查看商家服务，在站内咨询联系商家。",
         "商家,商家服务,韩国商家,旅韩助手",
         True,
     ),
@@ -415,7 +415,7 @@ def json_ld(origin, title, desc, path, extra=None):
         "@id": origin + "/#org",
         "name": "旅韩助手",
         "url": origin + "/",
-        "logo": origin + "/static/icons/icon-512.png?v=79",
+        "logo": origin + "/static/icons/icon-512.png?v=80",
     }
     website = {
         "@type": "WebSite",

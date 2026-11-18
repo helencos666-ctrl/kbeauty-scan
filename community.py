@@ -65,16 +65,15 @@ MERCHANT_QUOTA = 10                            # 每 30 天周期 10 篇
 MERCHANT_CATS = [
     ("guide", "地陪向导"),
     ("clinic", "医美"),
-    ("daigou", "代购"),
-    ("logistics", "物流快递"),
-    ("sim", "通讯电话卡"),
     ("food", "美食代点外卖"),
-    ("hotel", "住宿"),
     ("airport", "接送机"),
+    ("hotel", "住宿"),
     ("interp", "翻译"),
-    ("agency", "留学签证"),
-    ("car", "租车"),
     ("kpop", "追星活动"),
+    ("car", "租车"),
+    ("sim", "通讯电话卡"),
+    ("logistics", "物流快递"),
+    ("daigou", "代购"),
     ("other", "其它"),
 ]
 MERCHANT_CAT_KEYS = {k for k, _ in MERCHANT_CATS}
@@ -82,7 +81,7 @@ MERCHANT_CAT_LABELS = {k: n for k, n in MERCHANT_CATS}
 # 旧帖没有 merchant_cat 时，仅用于筛选的只读兜底，不写回数据库
 BOARD_TO_MERCHANT_CAT = {
     "car": "car", "clinic": "clinic", "guide": "guide", "logistics": "logistics",
-    "daigou": "daigou", "hotel": "hotel", "agency": "agency", "kpop": "kpop",
+    "daigou": "daigou", "hotel": "hotel", "agency": "other", "kpop": "kpop",
 }
 # 更细的分类：按发帖时的小标签兜底（接送机、翻译陪同）
 CAT_TAG_FALLBACK = {"airport": "airport", "interp": "interp"}

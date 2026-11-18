@@ -10,10 +10,10 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="旅韩助手">
 <link rel="manifest" href="/manifest.webmanifest">
-<link rel="apple-touch-icon" href="/static/icons/apple-touch-icon.png?v=79">
-<link rel="icon" type="image/png" sizes="192x192" href="/static/icons/icon-192.png?v=79">
-<link rel="stylesheet" href="/static/pwa.css?v=79">
-<link rel="stylesheet" href="/static/community.css?v=79">
+<link rel="apple-touch-icon" href="/static/icons/apple-touch-icon.png?v=80">
+<link rel="icon" type="image/png" sizes="192x192" href="/static/icons/icon-192.png?v=80">
+<link rel="stylesheet" href="/static/pwa.css?v=80">
+<link rel="stylesheet" href="/static/community.css?v=80">
 </head>
 <body class="compose">
 <header>
@@ -42,16 +42,15 @@
         <option value="">不选择</option>
         <option value="guide">地陪向导</option>
         <option value="clinic">医美</option>
-        <option value="daigou">代购</option>
-        <option value="logistics">物流快递</option>
-        <option value="sim">通讯电话卡</option>
         <option value="food">美食代点外卖</option>
-        <option value="hotel">住宿</option>
         <option value="airport">接送机</option>
+        <option value="hotel">住宿</option>
         <option value="interp">翻译</option>
-        <option value="agency">留学签证</option>
-        <option value="car">租车</option>
         <option value="kpop">追星活动</option>
+        <option value="car">租车</option>
+        <option value="sim">通讯电话卡</option>
+        <option value="logistics">物流快递</option>
+        <option value="daigou">代购</option>
         <option value="other">其它</option>
       </select>
       <div class="tip">商家发布先审后发；分类会显示在商家页的「商家发布」信息流里，选「医美」时请遵守下面的医疗内容规范。</div>
@@ -101,7 +100,7 @@
   <a href="/?tab=more"><i>☰</i>全部</a>
   <a href="/me"><i>👤</i>我的</a>
 </nav>
-<script src="/static/community.js?v=79"></script>
+<script src="/static/community.js?v=80"></script>
 <script>
 var WARN = {visa: '签证问答仅限个人经验分享，禁止发布代办广告。', study: '留学打听仅限经验交流，禁止发布中介广告。',
   friends: '请勿在帖子里公开手机号、微信号、住址等隐私。想认识新朋友，也可以去“旅韩交友”发布交友资料。',
@@ -229,13 +228,6 @@ var MCAT_TPL = {
     '说明：（从业经验、擅长领域，如实填写；不代替本人签署文件）\n' +
     '示例：「语言：中韩互译；场合：就医陪同与商务会谈；2 小时起；按小时计费，交通另计。」\n' +
     '请通过站内「立即咨询」联系，不要留站外联系方式。',
-  agency:
-    '机构名称：（写营业执照上的名称）\n' +
-    '服务内容：（例如：院校信息咨询、材料翻译与整理、申请流程陪跑）\n' +
-    '收费：（写清咨询费、服务费包含哪几项，不写包过类表述）\n' +
-    '说明：（只做信息咨询与材料协助；录取与签证结果由学校与使领馆决定，不承诺结果）\n' +
-    '示例：「机构名称：某某教育咨询（例）；服务内容：材料整理与流程说明；收费写清包含项目；结果以学校与使领馆通知为准。」\n' +
-    '请通过站内「立即咨询」联系，不要留站外联系方式。',
   car:
     '车型：（例如：5 座轿车、9 座商务车，座位与行李数）\n' +
     '租用时长/范围：（例如：按天计费，市内可去首尔近郊，出市需提前说）\n' +
@@ -265,7 +257,7 @@ var MCAT_TITLE_PH = {
   daigou: '例如：韩妆代购，首尔直发国内', logistics: '例如：首尔到青岛空运，按公斤计费',
   sim: '例如：游客卡 30 天，门店开卡', food: '例如：明洞烤肉代点外卖，可送到酒店',
   hotel: '例如：某某站附近民宿，双人房', airport: '例如：仁川机场接送，5 座车',
-  interp: '例如：就医陪同翻译，中韩互译', agency: '例如：留学材料协助，收费说明',
+  interp: '例如：就医陪同翻译，中韩互译',
   car: '例如：首尔包车一天，9 座商务车', kpop: '例如：某活动应援物领取说明',
   other: '例如：行李寄存与转运'
 };
@@ -485,6 +477,6 @@ document.getElementById('send').onclick = async function(){
   } catch(e){ LH.showErr(err, e.message); LH.toast(e.message); setSending(false); window.scrollTo(0, 0); }
 };
 </script>
-<script src="/static/pwa.js?v=79" defer></script>
+<script src="/static/pwa.js?v=80" defer></script>
 </body>
 </html>
