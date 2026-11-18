@@ -386,8 +386,9 @@ check("friend page shows member_no", "P.member_no" in guest.get("/community/frie
 ptp = guest.get("/community/post/1").text; check("post page has AI tag markup", "ai-tag" in ptp and "c.is_bot" in ptp)
 
 ch = guest.get("/community").text
-check("community home: tabs", all(w in ch for w in ['data-t="follow"', '>推荐<', '>精选<', '>刚发布<', '>我关注<'])
-      and ">实用干货<" not in ch and ">今日热议<" not in ch and ">🌟 精选<" not in ch and ">我关注的<" not in ch)
+check("community home: tabs", all(w in ch for w in ['data-t="follow"', 'data-t="discover"', 'data-t="area"', '>关注<', '>发现<'])
+      and ">实用干货<" not in ch and ">今日热议<" not in ch and ">🌟 精选<" not in ch and ">我关注的<" not in ch
+      and ">推荐<" not in ch and ">我关注<" not in ch)
 check("community home: journey topics", all(w in ch for w in ["出发前", "在韩国", "找商家", "签证问答", "留学打听", "结伴同行", "踩坑避雷", "出行提醒", "租房找房", "闲置转让", "工作机会", "汇率换算", "住宿推荐", "包车用车", "皮肤管理·医美"]) and ch.count('class="topic"') >= 12 and 'class="tools"' not in ch)
 check("community home: 旅韩交友 + sections + fab", all(w in ch for w in ["旅韩交友", "/community/friends", "今日热议", "避坑 &amp; 签证新帖", "刚发布", 'class="fab pill"', "写帖子", "韩友圈"]))
 _seo_pages = "".join(guest.get(p).text for p in ["/community", "/community/friends", "/community/boards"])

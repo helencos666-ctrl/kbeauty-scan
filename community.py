@@ -371,6 +371,42 @@ CREATE INDEX IF NOT EXISTS c_posts_merchant_feed_idx
   ON c_posts(id DESC) WHERE is_merchant AND NOT deleted AND status='published';
 """
 
+# 帖子地区：可空，用于韩友圈「地区」信息流筛选；旧帖仍可按正文关键词匹配
+MIGRATE8 = """
+ALTER TABLE c_posts ADD COLUMN IF NOT EXISTS area TEXT;
+ALTER TABLE c_posts ADD COLUMN IF NOT EXISTS lat DOUBLE PRECISION;
+ALTER TABLE c_posts ADD COLUMN IF NOT EXISTS lng DOUBLE PRECISION;
+CREATE INDEX IF NOT EXISTS c_posts_area_idx ON c_posts(area) WHERE area IS NOT NULL AND NOT deleted;
+"""
+
+FEED_AREA_ALIASES = {
+    "首尔": ["首尔", "서울", "Seoul", "seoul", "江南", "明洞", "弘大", "东大门", "梨泰院", "新村", "蚕室"],
+    "济州": ["济州", "제주", "Jeju", "jeju", "西归浦"],
+    "釜山": ["釜山", "부산", "Busan", "busan", "海云台", "西面", "广安"],
+    "仁川": ["仁川", "인천", "Incheon", "incheon"],
+    "大邱": ["大邱", "대구", "Daegu", "daegu"],
+    "光州": ["光州", "광주", "Gwangju", "gwangju"],
+    "大田": ["大田", "대전", "Daejeon", "daejeon"],
+}
+FEED_DISTRICTS = {
+    "首尔": ["江南", "明洞", "弘大", "东大门", "梨泰院", "新村", "蚕室"],
+    "济州": ["济州市", "西归浦", "城山", "中文"],
+    "釜山": ["海云台", "西面", "广安", "南浦"],
+    "仁川": ["松岛", "东仁川", "月尾岛"],
+    "大邱": ["东城路", "寿城"],
+    "光州": ["忠壮路"],
+    "大田": ["恩行洞"],
+}
+FEED_CATS = {
+    "food": {"boards": (), "words": ["美食", "餐厅", "烤肉", "韩餐", "食堂", "小吃", "料理", "外卖"]},
+    "coffee": {"boards": (), "words": ["咖啡", "cafe", "Café", "카페", "咖啡店"]},
+    "shop": {"boards": (), "words": ["购物", "买手", "免税店", "逛街", "购物袋"]},
+    "sight": {"boards": (), "words": ["景点", "打卡", "公园", "游览", "观光", "景福", "南山"]},
+    "kpop": {"boards": ("kpop",), "words": ["追星", "应援", "演唱会", "偶像", "见面会"]},
+    "show": {"boards": (), "words": ["展览", "演出", "音乐剧", "展览会", "公演", "艺术展"]},
+    "citywalk": {"boards": (), "words": ["CityWalk", "citywalk", "城市漫步", "散步", "漫步"]},
+}
+
 BOT_NICK = "旅韩小助手"
 BOT_PW_HASH = "disabled"          # 非 scrypt 格式，check_pw 恒为失败，不能登录
 AI_TIMEOUT = 20
@@ -422,6 +458,7 @@ def db():
                         cur.execute(MIGRATE5)
                         cur.execute(MIGRATE6)
                         cur.execute(MIGRATE7)
+                        cur.execute(MIGRATE8)
                         from points import MIGRATE_POINTS
                         cur.execute(MIGRATE_POINTS)
                         from chicken import MIGRATE_CHICKEN
@@ -1356,6 +1393,13 @@ def _post_out(r, full=False):
         o["offer"] = r["offer"]
     if r.get("valid_until"):
         o["valid_until"] = str(r["valid_until"])
+    if r.get("area"):
+        o["area"] = r["area"]
+    if r.get("lat") is not None and r.get("lng") is not None:
+        try:
+            o["lat"] = float(r["lat"]); o["lng"] = float(r["lng"])
+        except (TypeError, ValueError):
+            pass
     if full:
         o["body"] = r["body"]
     else:
@@ -1408,8 +1452,8 @@ def api_posts(req: Request, board: str = "", before: int = 0, limit_n: int = 20,
 FEED_TABS = ("recommend", "news", "hot", "latest", "follow", "featured", "topic")
 
 @router.get("/api/community/feed")
-def api_feed(req: Request, tab: str = "recommend", boards: str = "", offset: int = 0, limit_n: int = 20):
-    """首页信息流：精选 / 实用干货 / 今日热议 / 刚发布 / 我关注的（关注=关注的用户 + 关注的频道）"""
+def api_feed(req: Request, tab: str = "recommend", boards: str = "", offset: int = 0, limit_n: int = 20, area: str = ""):
+    """首页信息流：发现（推荐）/ 关注 / 地区 / 搜索；旧 tab 仍可用"""
     if tab not in FEED_TABS:
         raise HTTPException(400, "标签不存在")
     limit_n = max(1, min(limit_n, 30))
@@ -1417,6 +1461,31 @@ def api_feed(req: Request, tab: str = "recommend", boards: str = "", offset: int
     bl = [b for b in boards.split(",") if b][:12]
     if any(b not in BOARDS for b in bl):
         raise HTTPException(400, "频道不存在")
+    area = (area or "").strip()
+    if area and area not in FEED_AREA_ALIASES:
+        raise HTTPException(400, "地区不存在")
+    qtext = (req.query_params.get("q") or "").strip()[:40]
+    district = (req.query_params.get("district") or "").strip()
+    if district:
+        allowed_d = FEED_DISTRICTS.get(area, ()) if area else [d for ds in FEED_DISTRICTS.values() for d in ds]
+        if district not in allowed_d:
+            raise HTTPException(400, "地区不存在")
+    cat = (req.query_params.get("cat") or "").strip()
+    if cat and cat not in FEED_CATS:
+        raise HTTPException(400, "分类不存在")
+    try:
+        km = int(float(req.query_params.get("km") or 0))
+    except (TypeError, ValueError):
+        km = 0
+    if km not in (0, 1, 3, 5):
+        km = 0
+    try:
+        ulat = float(req.query_params.get("lat") or "")
+        ulng = float(req.query_params.get("lng") or "")
+    except (TypeError, ValueError):
+        ulat = ulng = None
+    if ulat is not None and not (32.0 <= ulat <= 39.5 and 124.0 <= ulng <= 132.5):
+        ulat = ulng = None
     with db() as conn:
         u = current_user(conn, req)
         tier = u["tier"] if u else 0
@@ -1439,6 +1508,35 @@ def api_feed(req: Request, tab: str = "recommend", boards: str = "", offset: int
             cond.append("""(p.user_id IN (SELECT followee_id FROM c_follows WHERE follower_id=%s)
                            OR p.board IN (SELECT board FROM c_board_follows WHERE user_id=%s))""")
             args += [u["id"], u["id"]]
+        if area:
+            aliases = FEED_AREA_ALIASES[area]
+            likes = ["%" + a + "%" for a in aliases]
+            cond.append("(COALESCE(p.area,'') = %s OR p.title ILIKE ANY(%s) OR p.body ILIKE ANY(%s))")
+            args += [area, likes, likes]
+        if qtext:
+            like = '%' + qtext.replace('\\', '\\\\').replace('%', '\\%').replace('_', '\\_') + '%'
+            cond.append("(p.title ILIKE %s ESCAPE '\\' OR p.body ILIKE %s ESCAPE '\\')")
+            args += [like, like]
+        if district:
+            dlike = '%' + district + '%'
+            cond.append("(COALESCE(p.area,'') = %s OR p.title ILIKE %s OR p.body ILIKE %s)")
+            args += [district, dlike, dlike]
+        if cat:
+            meta = FEED_CATS[cat]
+            parts, pargs = [], []
+            if meta['boards']:
+                parts.append('p.board = ANY(%s)')
+                pargs.append(list(meta['boards']))
+            if meta['words']:
+                likes = ['%' + w + '%' for w in meta['words']]
+                parts.append('(p.title ILIKE ANY(%s) OR p.body ILIKE ANY(%s))')
+                pargs += [likes, likes]
+            if parts:
+                cond.append('(' + ' OR '.join(parts) + ')')
+                args += pargs
+        if km and ulat is not None and ulng is not None:
+            cond.append("p.lat IS NOT NULL AND p.lng IS NOT NULL AND sqrt(power((p.lat - %s) * 111.32, 2) + power((p.lng - %s) * 111.32 * cos(radians(%s)), 2)) <= %s")
+            args += [ulat, ulng, ulat, km]
         score, order = "0", "p.id DESC"
         if tab == "recommend":
             score = """((p.like_count*2 + p.comment_count*3 + 1 + CASE WHEN EXISTS (SELECT 1 FROM c_images i WHERE i.post_id=p.id) THEN 1 ELSE 0 END)

@@ -71,7 +71,7 @@ check("shops 没有 LH.userbar(带参数) 的个人卡调用",
 # ---------- 2. 精选商家广告位：只用已有 4 张 ----------
 check("shops 无「精选商家」和左右滑动提示", "精选商家" not in shops and "左右滑动查看" not in shops and "featTitle" not in shops)
 for i in (1, 2, 3, 4):
-    check("shops 使用已有首页广告 ad-%d" % i, ("/static/home-ads/ad-%d.jpg?v=80" % i) in shops)
+    check("shops 使用已有首页广告 ad-%d" % i, ("/static/home-ads/ad-%d.jpg?v=81" % i) in shops)
 check("shops 恰好 4 张广告卡（没有第五家）", shops.count('class="ad-card"') == 4, shops.count('class="ad-card"'))
 for name in ("咸草酱蟹", "大家烤肉", "DAYONE", "蓝憬通讯"):
     check("shops 广告店名：%s" % name, name in shops)
@@ -117,9 +117,14 @@ check("shops 正文不再出现行程安排区块",
 
 check("shops 分类钮默认可点选且默认不选中",
       "getElementById('catChips')" in shops and 'class="on"' not in shops.split('id="catChips"')[1].split('</div>')[0])
-check("shops 韩国生活无导语框",
+check("shops 韩国生活无导语框且无查看韩友圈链接",
       "loc-hero" not in shops and "韩友圈是在韩国生活的交流入口" not in shops
-      and "查看韩友圈" in shops and 'id="localTitle"' in shops)
+      and "查看韩友圈" not in shops and 'id="localTitle"' in shops)
+life = shops.split('aria-label="韩国生活频道"', 1)[1].split("</div>", 1)[0]
+check("shops 韩国生活卡片顺序 租房/招聘/二手/签证/留学/韩友圈",
+      re.findall(r'href="([^"]+)"', life) == [
+          "/community?board=rent", "/community?board=jobs", "/community?board=used",
+          "/community?board=visa", "/community?board=study", "/community"])
 check("shops 没有旧推荐/服务商 JS 残留",
       all(x not in shops for x in ("setTab", "svcTabs", "/api/providers", "/api/shops", "typechips")))
 check("shops 忽略旧 tab/type 参数，不做重定向",
@@ -130,9 +135,9 @@ check("shops 忽略旧 tab/type 参数，不做重定向",
 check("shops 有 banner 位", '<div data-banner-slot="shops"></div>' in shops)
 check("shops 用汉江青 theme-color", 'name="theme-color" content="#146E68"' in shops)
 check("shops 加载 pwa.css / community.css / community.js / banners.js",
-      all(x in shops for x in ("/static/pwa.css?v=80", "/static/community.css?v=80",
-                               "/static/community.js?v=80", "/static/banners.js")))
-check("shops 加载 pwa.js?v=80 defer", '<script src="/static/pwa.js?v=80" defer></script>' in shops)
+      all(x in shops for x in ("/static/pwa.css?v=81", "/static/community.css?v=81",
+                               "/static/community.js?v=81", "/static/banners.js")))
+check("shops 加载 pwa.js?v=81 defer", '<script src="/static/pwa.js?v=81" defer></script>' in shops)
 check("shops 保留底部导航", "<nav" in shops and "底部导航" in shops)
 check("shops 免责声明完整",
       all(w in shops for w in ("免费信息网站", "仅供参考", "不是旅行社", "不代办签证")))
@@ -213,7 +218,7 @@ for name, txt in (("shops.html", shops), ("community-new.html", newpost)):
           [w for w in wx_solicit if w in txt])
 for name, txt in (("shops.html", shops), ("community-new.html", newpost)):
     vers = re.findall(r"\?v=(\d+)", txt)
-    check("%s 仍使用 ?v=80" % name, bool(vers) and set(vers) == {"80"}, set(vers))
+    check("%s 仍使用 ?v=81" % name, bool(vers) and set(vers) == {"81"}, set(vers))
 
 print("%s passed, %s failed, %s skipped" % (ok, fail, skip))
 if fail:
