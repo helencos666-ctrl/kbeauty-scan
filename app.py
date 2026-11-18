@@ -536,6 +536,7 @@ def static_html(name: str):
 
 from lanjing_seed import router as lanjing_router, seed_once as seed_lanjing  # noqa: E402
 from guides_seed import seed_once as seed_guides  # noqa: E402
+from official_daily_seed import seed_once as seed_official_daily  # noqa: E402
 from hide_shop_posts_v76 import hide_once as hide_shop_posts_v76  # noqa: E402
 from hide_shop_posts_v77 import hide_once as hide_shop_posts_v77  # noqa: E402
 app.include_router(lanjing_router)
@@ -546,6 +547,7 @@ def _startup_seeds():
     hide_shop_posts_v76()
     hide_shop_posts_v77()
     seed_guides()
+    seed_official_daily()
 
 @app.get("/static/subway.json")
 def static_subway_json():
