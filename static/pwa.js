@@ -1,10 +1,11 @@
-/* 旅韩助手：全站底部六格导航 + 注册 Service Worker + 可关闭的安装提示 */
+/* 旅韩助手：全站底部七格导航 + 注册 Service Worker + 可关闭的安装提示 */
 (function(){
-  /* ===================== 底部六格导航（必须在安装提示的 return 之前执行） ===================== */
+  /* ===================== 底部七格导航（必须在安装提示的 return 之前执行） ===================== */
   var TABS = [
     {k:'home',     href:'/',                    icon:'🏠', label:'首页'},
     {k:'follow',   href:'/community?tab=follow', icon:'👥', label:'关注'},
     {k:'post',     href:'/community/new',        icon:'＋', label:'发布', pub:true},
+    {k:'festival', href:'/festival',             icon:'🎁', label:'购物节', fest:true},
     {k:'services', href:'/shops',                icon:'💼', label:'商业服务', cls:'svc'},
     {k:'local',    href:'/local',                icon:'🏘️', label:'生活在韩国', cls:'loc'},
     {k:'me',       href:'/me',                   icon:'👤', label:'我的', cls:'me'}
@@ -13,6 +14,7 @@
   function currentKey(){
     var p = location.pathname, q = new URLSearchParams(location.search || '');
     if (p === '/me' || p === '/static/me.html') return 'me';
+    if (p === '/festival' || p === '/static/festival.html') return 'festival';
     if (p === '/local' || p === '/static/local.html') return 'local';
     if (p === '/community/new') return 'post';
     if (p === '/services' || p === '/static/services.html') return 'services';
@@ -31,6 +33,9 @@
     return TABS.map(function(t){
       if (t.pub) {
         return '<a href="' + t.href + '" data-nav="' + t.k + '" class="pub"><span class="plus">＋</span>' + t.label + '</a>';
+      }
+      if (t.fest) {
+        return '<a href="' + t.href + '" data-nav="' + t.k + '" class="fest"><span class="fest-ico">🎁<em>冬季</em></span>' + t.label + '</a>';
       }
       return '<a href="' + t.href + '" data-nav="' + t.k + '"' + (t.cls ? ' class="' + t.cls + '"' : '') +
         '><i>' + t.icon + '</i>' + t.label + '</a>';
@@ -101,7 +106,7 @@
       var old = document.querySelector('nav');
       var fresh = buildTabbar();
       if (old && (looksLikeOldNav(old) || isBottomNav(old))) {
-        // 旧版底部 nav（地铁 / 翻译 / 韩友圈 / 全部，或上一版五格）统一换成六格
+        // 旧版底部 nav（地铁 / 翻译 / 韩友圈 / 全部，或上一版五格）统一换成七格
         old.parentNode.replaceChild(fresh, old);
       } else {
         // 页面本来没有底部导航：补一个

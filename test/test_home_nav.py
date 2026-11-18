@@ -1,4 +1,4 @@
-"""纯静态检查：首页六格底部导航、?v=72 缓存版本、新页面（trips/local）与禁词。
+"""纯静态检查：首页七格底部导航、?v=73 缓存版本、新页面（trips/local）与禁词。
 不需要启服务，直接 python test/test_home_nav.py 即可。"""
 import os, re
 
@@ -26,6 +26,7 @@ index = read("index.html")
 me = read("me.html")
 trips = read("trips.html")
 local = read("local.html")
+festival = read("festival.html")
 pwa_css = read("pwa.css")
 pwa_js = read("pwa.js")
 comm_css = read("community.css")
@@ -33,28 +34,31 @@ sw = read("sw.js")
 
 PAGES = {
     "index.html": index, "me.html": me, "trips.html": trips, "local.html": local,
-    "pwa.css": pwa_css, "pwa.js": pwa_js,
+    "festival.html": festival, "pwa.css": pwa_css, "pwa.js": pwa_js,
 }
 
 # ---------- 1. 缓存版本 v63 ----------
-check("sw.js CACHE is lvhan-shell-v72", "'lvhan-shell-v72'" in sw or '"lvhan-shell-v72"' in sw)
-check("sw.js uses ?v=72", "?v=72" in sw)
+check("sw.js CACHE is lvhan-shell-v73", "'lvhan-shell-v73'" in sw or '"lvhan-shell-v73"' in sw)
+check("sw.js uses ?v=73", "?v=73" in sw)
 check("sw.js has no ?v=60", "?v=60" not in sw)
 for name, txt in PAGES.items():
-    check("%s uses ?v=72 (or tabbar)" % name, ("?v=72" in txt) or ("tabbar" in txt))
+    check("%s uses ?v=73 (or tabbar)" % name, ("?v=73" in txt) or ("tabbar" in txt))
     check("%s has no ?v=60" % name, "?v=60" not in txt)
-check("sw.js SHELL has four home ads", all("/static/home-ads/ad-%d.jpg?v=72" % i in sw for i in (1, 2, 3, 4)))
+check("sw.js SHELL has four home ads", all("/static/home-ads/ad-%d.jpg?v=73" % i in sw for i in (1, 2, 3, 4)))
 check("sw.js SHELL has /trips and /local", "'/trips'" in sw and "'/local'" in sw)
 check("sw.js SHELL has trips.html/local.html", "/static/trips.html" in sw and "/static/local.html" in sw)
 
-# ---------- 2. 底部六格 ----------
+# ---------- 2. 底部七格 ----------
 m = re.search(r'<nav class="tabbar"[^>]*>.*?</nav>', index, re.S)
 navblock = m.group(0) if m else ""
 check("index has nav.tabbar", bool(navblock))
-check("六格文案 首页/关注/发布/商业服务/生活在韩国/我的",
-      all(w in navblock for w in ["首页", "关注", "发布", "商业服务", "生活在韩国", "我的"]))
+check("七格文案 首页/关注/发布/购物节/商业服务/生活在韩国/我的",
+      all(w in navblock for w in ["首页", "关注", "发布", "购物节", "商业服务", "生活在韩国", "我的"]))
 check("关注 -> /community?tab=follow", 'href="/community?tab=follow"' in navblock and 'data-nav="follow"' in navblock)
 check("发布 -> /community/new", 'href="/community/new"' in navblock and 'class="pub"' in navblock and "＋" in navblock)
+check("购物节在发布和商业服务之间",
+      navblock.find('data-nav="post"') < navblock.find('data-nav="festival"') < navblock.find('data-nav="services"'))
+check("购物节 -> /festival", 'href="/festival"' in navblock and 'data-nav="festival"' in navblock and 'class="fest"' in navblock and "冬季" in navblock)
 check("商业服务 -> /shops", 'href="/shops"' in navblock and 'data-nav="services"' in navblock)
 check("生活在韩国 -> /local", 'href="/local"' in navblock and 'data-nav="local"' in navblock and "生活在韩国" in navblock)
 check("首页 -> / 且 data-nav=home", re.search(r'<a href="/" data-nav="home"', navblock) is not None)
@@ -68,8 +72,9 @@ check("trips 不再放右上角我的头像", "me-ava" not in trips)
 for name, txt in (("me.html", me), ("trips.html", trips), ("local.html", local)):
     n = re.search(r'<nav class="tabbar"[^>]*>.*?</nav>', txt, re.S)
     nb = n.group(0) if n else ""
-    check("%s has six-grid tabbar" % name,
-          bool(nb) and all(w in nb for w in ["首页", "关注", "发布", "商业服务", "生活在韩国", "我的"]))
+    check("%s has seven-grid tabbar" % name,
+          bool(nb) and all(w in nb for w in ["首页", "关注", "发布", "购物节", "商业服务", "生活在韩国", "我的"])
+          and nb.find('data-nav="post"') < nb.find('data-nav="festival"') < nb.find('data-nav="services"'))
 check("local.html 点亮 生活在韩国", 'data-nav="local" class="loc on"' in local)
 check("me.html 点亮最后一个「我的」", 'data-nav="me" class="me on"' in me)
 
@@ -97,7 +102,10 @@ check("pwa.js 含生活在韩国和我的", "生活在韩国" in pwa_js and "lab
 check("pwa.js currentKey 会点亮 /me", "p === '/me'" in pwa_js or 'p === "/me"' in pwa_js)
 check("pwa.js 为「我的」拉未读角标", "/api/me/summary" in pwa_js and "tab-dot" in pwa_js and "paintMeBadge" in pwa_js)
 check("pwa.css 生活在韩国 tab 单行缩小字号",
-      "nav.tabbar a.loc" in pwa_css and "white-space:nowrap" in pwa_css and "font-size:8px" in pwa_css)
+      "nav.tabbar a.loc" in pwa_css and "white-space:nowrap" in pwa_css and "font-size:7.5px" in pwa_css)
+check("pwa.css 有购物节红金样式且小于发布",
+      "nav.tabbar a.fest" in pwa_css and "fest-ico" in pwa_css and "width:36px" in pwa_css
+      and "width:42px" in pwa_css)  # 发布 ＋ 仍为 42px，购物节图标 36px
 
 # ---------- 5. trips.html 即将上线 ----------
 check("trips is 即将上线", "即将上线" in trips or "即将" in trips)
@@ -107,7 +115,32 @@ check("trips links /itineraries", "/itineraries" in trips)
 check("trips has no sample store names",
       not any(w in trips for w in ["广藏市场", "星巴克", "明洞乐天免税", "北村韩屋"]))
 check("trips has back and me", 'href="/"' in trips and 'href="/me"' in trips)
-check("trips loads pwa.js?v=72", "/static/pwa.js?v=72" in trips)
+check("trips loads pwa.js?v=73", "/static/pwa.js?v=73" in trips)
+
+
+# ---------- 5b. festival.html 韩国购物节 ----------
+check("festival 标题是韩国购物节", "韩国购物节" in festival and "Korea Grand Sale" in festival)
+check("festival 有冬季购物季档期", "2026-12-23" in festival and "2027-02-13" in festival and "冬季购物季" in festival)
+check("festival 有倒计时", "cdown" in festival and "距离开始" in festival)
+check("festival 含已核对商家入口",
+      all(u in festival for u in (
+          "big5chinese.visitkorea.or.kr/svc/contents/contentsView.do?vcontsId=85435",
+          "chinese.visitkorea.or.kr/svc/contents/contentsView.do?vcontsId=1590193",
+          "big5chinese.visitkorea.or.kr/svc/contents/contentsView.do?vcontsId=1593473",
+          "www.shilladutyfree.cn/comm/kr/zh/shoppingGuideStep1",
+          "wav.ca.amadeus.com/CN/GB/promotion/XINS2026",
+          "ginatw.com/oliveyoung-coupon/",
+          "cn.trippose.com/shopping/olive-young-incheon-coupon-pass/coupon",
+          "/tax-refund",
+          "lacha.co.kr/korea-guide/zh-cn/olive-young-foreigner-shopping-tips/",
+      )))
+check("festival 第三方条目标待核实", "待核实" in festival)
+check("festival 声明无联盟链接", "没有任何联盟或推广合作链接" in festival)
+check("festival 链到优惠合集", 'href="/deals"' in festival)
+check("festival 点亮购物节", 'data-nav="festival" class="fest on"' in festival)
+check("pwa.js 含购物节且在发布之后",
+      "label:'购物节'" in pwa_js and pwa_js.find("label:'发布'") < pwa_js.find("label:'购物节'") < pwa_js.find("label:'商业服务'"))
+check("sw.js SHELL 含 /festival", "'/festival'" in sw and "/static/festival.html" in sw)
 
 # ---------- 6. 禁词 ----------
 ALL = dict(PAGES)
@@ -132,7 +165,7 @@ check("home 韩友圈走 /api/community/posts", "/api/community/posts" in index)
 check("lanjing ad links /ads/lanjing", 'data-ad="lanjing"' in index and "ad-4.jpg" in index and 'href="/ads/lanjing"' in index)
 check("home 空状态有去处链接", "/places/new" in index and "/community/new" in index)
 
-# ---------- 8. 弹层不被底部六格导航遮挡（2026-11-17） ----------
+# ---------- 8. 弹层不被底部七格导航遮挡（2026-11-17） ----------
 # 追加到 test_home_nav.py 末尾（print 汇总之前）。复用已有的 me / pwa_css / comm_css 变量。
 check("me.html 打开弹层时加 lh-overlay-open", "classList.add('lh-overlay-open')" in me)
 check("me.html 关闭弹层时移除 lh-overlay-open", "classList.remove('lh-overlay-open')" in me)

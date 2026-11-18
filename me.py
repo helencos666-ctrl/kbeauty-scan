@@ -132,6 +132,11 @@ def p_deals():
     return _page("deals.html", "/deals", extra={"title": "购物优惠合集｜免税店、药妆、退税与韩国购物季 · 旅韩助手",
                                                  "description": "汇总官方公开的韩国购物优惠：Korea Grand Sale、免税店会员活动、退税要点与大促提醒，每条注明来源。"})
 
+@router.get("/festival")
+def p_festival():
+    return _page("festival.html", "/festival", extra={"title": "韩国购物节｜Korea Grand Sale 冬季购物季 · 旅韩助手",
+                                                       "description": "Korea Grand Sale 冬季购物季（2026-12-23 至 2027-02-13）：官方活动、免税店、药妆与退税入口，每条注明来源。"})
+
 @router.get("/invite")
 def p_invite():
     return _page("invite.html", "/invite", extra={"title": "邀请有奖 · 旅韩助手",

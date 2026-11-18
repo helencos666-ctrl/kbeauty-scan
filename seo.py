@@ -183,6 +183,12 @@ PAGES = {
         "韩国购物优惠,免税店优惠,Korea Grand Sale,韩国退税,旅韩助手",
         True,
     ),
+    "/festival": (
+        "韩国购物节｜Korea Grand Sale 冬季购物季 · 旅韩助手",
+        "Korea Grand Sale 冬季购物季（2026-12-23 至 2027-02-13）：官方活动、免税店、药妆与退税入口，每条注明来源。",
+        "韩国购物节,Korea Grand Sale,冬季购物季,免税店优惠,韩国退税,旅韩助手",
+        True,
+    ),
     "/me": ("我的 · 旅韩助手", "我的旅行豆、卡券、帖子与常用工具。", "旅韩助手", False),
     "/invite": ("邀请有奖 · 旅韩助手", "邀请同行一起用旅韩助手，好友完成首次使用后双方都可获得站内抵用券。", "旅韩助手", False),
     "/services": (
@@ -293,6 +299,7 @@ FILE_PATHS = {
     "partner.html": "/partner",
     "me.html": "/me",
     "deals.html": "/deals",
+    "festival.html": "/festival",
     "invite.html": "/invite",
     "services.html": "/services",
     "consult.html": "/consult",
@@ -338,7 +345,7 @@ SITEMAP_PATHS = [
     "/", "/attractions", "/food", "/shopping", "/tips", "/beauty", "/faq",
     "/community", "/community/boards", "/community/rate", "/community/friends",
     "/rules", "/member", "/shops", "/pay", "/tax-refund", "/visa", "/itineraries", "/privacy", "/terms", "/promo/rules",
-    "/services", "/partner", "/deals", "/places", "/trips", "/local",
+    "/services", "/partner", "/deals", "/festival", "/places", "/trips", "/local",
 ]
 
 router = APIRouter()
@@ -401,7 +408,7 @@ def json_ld(origin, title, desc, path, extra=None):
         "@id": origin + "/#org",
         "name": "旅韩助手",
         "url": origin + "/",
-        "logo": origin + "/static/icons/icon-512.png?v=72",
+        "logo": origin + "/static/icons/icon-512.png?v=73",
     }
     website = {
         "@type": "WebSite",
