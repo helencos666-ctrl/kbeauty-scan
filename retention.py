@@ -317,7 +317,7 @@ def api_user_profile(req: Request, uid: int):
     from community import _post_out, AUTHOR_COLS
     with db() as conn:
         me = current_user(conn, req)
-        u = q(conn, """SELECT id,nickname,member_no,tier,merchant_until,is_official,verified,created_at,
+        u = q(conn, """SELECT id,nickname,member_no,tier,merchant_until,is_official,verified,created_at,bio,
                               (avatar IS NOT NULL OR COALESCE(is_bot,FALSE)) AS has_avatar, COALESCE(is_bot,FALSE) AS is_bot
                        FROM c_users WHERE id=%s AND NOT is_banned""", (uid,), one=True)
         if not u:
@@ -326,7 +326,10 @@ def api_user_profile(req: Request, uid: int):
         st = q(conn, """SELECT (SELECT count(*) FROM c_posts WHERE user_id=%s AND NOT deleted AND status='published') AS posts,
                                (SELECT count(*) FROM c_posts WHERE user_id=%s AND NOT deleted AND status='published' AND featured) AS featured,
                                (SELECT count(*) FROM c_follows WHERE followee_id=%s) AS followers,
-                               (SELECT count(*) FROM c_comments WHERE user_id=%s AND NOT deleted) AS comments""", (uid, uid, uid, uid), one=True)
+                               (SELECT count(*) FROM c_follows WHERE follower_id=%s) AS following,
+                               (SELECT COALESCE(SUM(like_count),0) FROM c_posts WHERE user_id=%s AND NOT deleted AND status='published') AS likes,
+                               (SELECT count(*) FROM c_comments WHERE user_id=%s AND NOT deleted) AS comments""",
+                  (uid, uid, uid, uid, uid, uid), one=True)
         tier = me["tier"] if me else 0
         rows = q(conn, f"""SELECT p.*, {AUTHOR_COLS}, (CASE WHEN au.merchant_until>now() THEN 3 ELSE au.tier END) AS tier,
                            (au.avatar IS NOT NULL OR COALESCE(au.is_bot, FALSE)) AS has_avatar,
@@ -334,17 +337,20 @@ def api_user_profile(req: Request, uid: int):
                            (SELECT count(*) FROM c_images i WHERE i.post_id=p.id) AS img_n
                            FROM c_posts p JOIN c_users au ON au.id=p.user_id
                            WHERE p.user_id=%s AND NOT p.deleted AND p.status='published' {'' if tier >= 1 else 'AND p.board <> ALL(%s)'}
-                           ORDER BY p.id DESC LIMIT 20""", (uid,) if tier >= 1 else (uid, list(LOGIN_ONLY_BOARDS)))
+                           ORDER BY p.id DESC LIMIT 50""", (uid,) if tier >= 1 else (uid, list(LOGIN_ONLY_BOARDS)))
         following = bool(me and q(conn, "SELECT 1 AS x FROM c_follows WHERE follower_id=%s AND followee_id=%s", (me["id"], uid), one=True))
     import datetime
     disp = 3 if (u["merchant_until"] and u["merchant_until"] > datetime.datetime.now(datetime.timezone.utc)) else u["tier"]
     posts = []
     for r in rows:
         o = _post_out(r); o["cover"] = r["cover"]; o["img_n"] = r["img_n"]; posts.append(o)
+    stats = {"posts": int(st["posts"] or 0), "featured": int(st["featured"] or 0),
+             "followers": int(st["followers"] or 0), "following": int(st["following"] or 0),
+             "likes": int(st["likes"] or 0), "comments": int(st["comments"] or 0)}
     return {"id": u["id"], "nickname": u["nickname"], "member_no": u["member_no"] or u["id"], "tier": disp, "tier_name": TIER_NAMES.get(disp, ""),
             "official": bool(u["is_official"]), "verified": bool(u["verified"]), "has_avatar": bool(u["has_avatar"]),
-            "is_bot": bool(u["is_bot"]),
-            "joined": _ts(u["created_at"]), "stats": st, "following": following, "mine": bool(me and me["id"] == uid),
+            "is_bot": bool(u["is_bot"]), "bio": (u.get("bio") or "") or "",
+            "joined": _ts(u["created_at"]), "stats": stats, "following": following, "mine": bool(me and me["id"] == uid),
             "badges": [dict(BADGES[b["badge"]], key=b["badge"], time=_ts(b["created_at"])) for b in bs if b["badge"] in BADGES],
             "posts": posts}
 

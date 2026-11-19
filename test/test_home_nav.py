@@ -1,4 +1,4 @@
-"""纯静态检查：首页七格底部导航、?v=89 缓存版本、新页面（trips）与禁词。
+"""纯静态检查：首页七格底部导航、?v=90 缓存版本、新页面（trips）与禁词。
 不需要启服务，直接 python test/test_home_nav.py 即可。"""
 import os, re
 
@@ -38,13 +38,13 @@ PAGES = {
 }
 
 # ---------- 1. 缓存版本 v63 ----------
-check("sw.js CACHE is lvhan-shell-v89", "'lvhan-shell-v89'" in sw or '"lvhan-shell-v89"' in sw)
-check("sw.js uses ?v=89", "?v=89" in sw)
+check("sw.js CACHE is lvhan-shell-v90", "'lvhan-shell-v90'" in sw or '"lvhan-shell-v90"' in sw)
+check("sw.js uses ?v=90", "?v=90" in sw)
 check("sw.js has no ?v=60", "?v=60" not in sw)
 for name, txt in PAGES.items():
-    check("%s uses ?v=89 (or tabbar)" % name, ("?v=89" in txt) or ("tabbar" in txt))
+    check("%s uses ?v=90 (or tabbar)" % name, ("?v=90" in txt) or ("tabbar" in txt))
     check("%s has no ?v=60" % name, "?v=60" not in txt)
-check("sw.js SHELL has four home ads", all("/static/home-ads/ad-%d.jpg?v=89" % i in sw for i in (1, 2, 3, 4)))
+check("sw.js SHELL has four home ads", all("/static/home-ads/ad-%d.jpg?v=90" % i in sw for i in (1, 2, 3, 4)))
 check("sw.js SHELL has /trips", "'/trips'" in sw and "'/local'" not in sw)
 check("sw.js SHELL has trips.html", "/static/trips.html" in sw and "/static/local.html" not in sw)
 
@@ -122,7 +122,7 @@ check("trips can add/edit/delete/reorder", all(w in trips for w in ("添加地�
 check("trips links subway planner", "/?tab=sub" in trips)
 check("trips links /itineraries", "/itineraries" in trips)
 check("trips has back and me", 'href="/"' in trips and 'href="/me"' in trips)
-check("trips loads pwa.js?v=89", "/static/pwa.js?v=89" in trips)
+check("trips loads pwa.js?v=90", "/static/pwa.js?v=90" in trips)
 
 
 # ---------- 5b. festival.html 韩国购物节 ----------
@@ -228,6 +228,12 @@ check("home 广告停留 3000ms 且有无缝克隆",
 
 
 comm_py = read_root("community.py")
+check("评论可回复且有频率与联系方式过滤",
+      "MIGRATE12" in comm_py and "parent_id" in comm_py
+      and "guard_text" in comm_py and 'limit("cm:"' in comm_py)
+ret_py = read_root("retention.py")
+check("博主主页统计含粉丝关注获赞",
+      "AS following" in ret_py and "AS likes" in ret_py and 'u.get("bio")' in ret_py)
 check("官方帖可临时排在会员帖后面",
       "OFFICIAL_POSTS_LAST = True" in comm_py
       and "CASE WHEN COALESCE(au.is_official, FALSE) THEN 1 ELSE 0 END" in comm_py)

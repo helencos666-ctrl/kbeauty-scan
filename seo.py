@@ -160,9 +160,9 @@ PAGES = {
         False,
     ),
     "/community/u": (
-        "个人主页 · 旅韩助手",
-        "韩友圈个人主页：徽章与帖子。",
-        "韩友圈,旅韩助手",
+        "博主主页 · 旅韩助手",
+        "韩友圈博主主页：作品、粉丝与获赞。",
+        "韩友圈,旅韩助手,博主",
         False,
     ),
     "/consult": (
@@ -415,7 +415,7 @@ def json_ld(origin, title, desc, path, extra=None):
         "@id": origin + "/#org",
         "name": "旅韩助手",
         "url": origin + "/",
-        "logo": origin + "/static/icons/icon-512.png?v=89",
+        "logo": origin + "/static/icons/icon-512.png?v=90",
     }
     website = {
         "@type": "WebSite",

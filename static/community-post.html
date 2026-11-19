@@ -10,11 +10,11 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="旅韩助手">
 <link rel="manifest" href="/manifest.webmanifest">
-<link rel="apple-touch-icon" href="/static/icons/apple-touch-icon.png?v=89">
-<link rel="icon" type="image/png" sizes="192x192" href="/static/icons/icon-192.png?v=89">
-<link rel="stylesheet" href="/static/pwa.css?v=89">
-<link rel="stylesheet" href="/static/community.css?v=89">
-<link rel="stylesheet" href="/static/chat.css?v=89">
+<link rel="apple-touch-icon" href="/static/icons/apple-touch-icon.png?v=90">
+<link rel="icon" type="image/png" sizes="192x192" href="/static/icons/icon-192.png?v=90">
+<link rel="stylesheet" href="/static/pwa.css?v=90">
+<link rel="stylesheet" href="/static/community.css?v=90">
+<link rel="stylesheet" href="/static/chat.css?v=90">
 </head>
 <body class="post-page no-hero">
 <a class="pback" href="/community" aria-label="返回">‹</a>
@@ -48,7 +48,7 @@
   <a href="/?tab=more"><i>☰</i>全部</a>
   <a href="/me"><i>👤</i>我的</a>
 </nav>
-<script src="/static/community.js?v=89"></script>
+<script src="/static/community.js?v=90"></script>
 <script>
 var pid = parseInt(location.pathname.split('/').pop(), 10);
 var WARN = {visa: '⚠️ 本帖为网友个人签证经验，本站不提供签证代办。政策以韩国驻华使领馆、韩国签证申请中心和 K-ETA 官网为准。',
@@ -154,7 +154,7 @@ async function load(){
     '<div class="meta" style="margin-top:0">' + LH.postFlags(p) + (p.merchant ? '<span class="tag biz">商家</span>' : '') + '<span class="tag">' + LH.esc(p.board_name) + '</span>' + (p.tag_name ? '<span class="tag">' + LH.esc(p.tag_name) + '</span>' : '') + '<span>' + LH.esc(p.time) + '</span>' + (p.merchant || p.views ? '<span>👁 ' + (p.views || 0) + '</span>' : '') + '</div>' +
     (p.title ? '<h1 class="ptitle">' + (p.tag_name ? '<span style="color:#146E68">[' + LH.esc(p.tag_name) + ']</span> ' : '') + LH.esc(p.title) + '</h1>' : '') +
     spotHtml +
-    '<div class="author-row"><span>' + LH.avatar(p.author_id, p.author, p.has_avatar, 'lg') + '</span><div class="who-txt"><div><a href="/community/u/' + p.author_id + '" style="color:inherit;text-decoration:none">' + LH.esc(p.author) + '</a>' + LH.badge(p.author_tier) + LH.vb(p.author_verified) + LH.ubadges(p.author_badges, p.author_official, 4) + '</div>' +
+    '<div class="author-row"><a class="avlink" href="/community/u/' + p.author_id + '">' + LH.avatar(p.author_id, p.author, p.has_avatar, 'lg') + '</a><div class="who-txt"><div><a href="/community/u/' + p.author_id + '" style="color:inherit;text-decoration:none">' + LH.esc(p.author) + '</a>' + LH.badge(p.author_tier) + LH.vb(p.author_verified) + LH.ubadges(p.author_badges, p.author_official, 4) + '</div>' +
     (p.mine ? '' : '<div class="pm-acts">' +
       '<button class="jbtn' + (p.following ? ' on' : '') + '" id="fol" style="padding:2px 10px;font-size:12px">' + (p.following ? '已关注' : '＋ 关注') + '</button>' +
       (p.consult ? '<a class="btn sm primary" href="' + LH.consultHref('post', p.id) + '">💬 立即咨询</a>' : '<button class="btn sm primary" type="button" id="pmBtn">✉️ 私聊</button>') +
@@ -199,35 +199,78 @@ async function load(){
   var dp = document.getElementById('delp');
   if (dp) dp.onclick = async function(){ if (!confirm('确定删除这篇帖子？')) return; try { await LH.api('DELETE', '/api/community/posts/' + pid); location.href = '/community'; } catch(e){ alert(e.message); } };
   document.getElementById('cbox').style.display = 'block';
-  document.getElementById('ctitle').textContent = '评论 ' + p.comment_list.length;
+  var list = p.comment_list || [];
+  document.getElementById('ctitle').textContent = '评论 ' + list.length;
   var cl = document.getElementById('clist');
-  cl.innerHTML = p.comment_list.length ? p.comment_list.map(function(c){
-    return '<div class="cmt" id="c' + c.id + '">' + LH.avatar(c.author_id, c.author, c.has_avatar || c.is_bot, 'sm') +
-      '<div class="cmt-main"><div class="row" style="justify-content:space-between"><span class="who"><a href="/community/u/' + c.author_id + '" style="color:inherit;text-decoration:none">' + LH.esc(c.author) + '</a>' + (c.is_bot ? '<span class="ai-tag">AI</span>' : LH.badge(c.author_tier) + LH.ubadges(c.badges, c.official, 2)) +
+  var byId = {};
+  list.forEach(function(c){ byId[c.id] = c; });
+  var kids = {};
+  var roots = [];
+  list.forEach(function(c){
+    if (c.parent_id && byId[c.parent_id]) {
+      (kids[c.parent_id] = kids[c.parent_id] || []).push(c);
+    } else {
+      roots.push(c);
+    }
+  });
+  function cmtHtml(c, isReply){
+    var who = (c.official ? '<span class="woff">官方</span>' : '');
+    var replyTo = (isReply && c.parent_id && byId[c.parent_id]) ? ('<span style="color:var(--sub);font-weight:400"> 回复 </span>@' + LH.esc(byId[c.parent_id].author)) : '';
+    return '<div class="cmt' + (isReply ? ' reply' : '') + '" id="c' + c.id + '">' +
+      '<a class="avlink" href="/community/u/' + c.author_id + '">' + LH.avatar(c.author_id, c.author, c.has_avatar || c.is_bot, 'sm') + '</a>' +
+      '<div class="cmt-main"><div class="row" style="justify-content:space-between"><span class="who"><a href="/community/u/' + c.author_id + '" style="color:inherit;text-decoration:none">' + LH.esc(c.author) + '</a>' + who + (c.is_bot ? '<span class="ai-tag">AI</span>' : LH.badge(c.author_tier) + LH.ubadges(c.badges, c.official, 2)) +
+      replyTo +
       ' <span style="font-weight:400;color:var(--sub);font-size:12px">' + LH.esc(c.time) + '</span></span><span>' +
       (c.mine ? '<button class="linkbtn" data-delc="' + c.id + '">删除</button>' : '') + '<button class="linkbtn" data-repc="' + c.id + '">举报</button></span></div>' +
-      '<div class="ct">' + LH.esc(c.body) + '</div></div></div>';
-  }).join('') : '<div class="empty" style="padding:12px">还没有评论</div>';
+      '<div class="ct">' + LH.esc(c.body) + '</div>' +
+      '<button type="button" class="creply" data-reply="' + c.id + '" data-name="' + LH.esc(c.author) + '">回复</button></div></div>';
+  }
+  var html = '';
+  roots.forEach(function(c){
+    html += cmtHtml(c, false);
+    (kids[c.id] || []).forEach(function(k){ html += cmtHtml(k, true); });
+  });
+  cl.innerHTML = list.length ? html : '<div class="empty" style="padding:12px">还没有评论</div>';
   cl.querySelectorAll('[data-repc]').forEach(function(b){ b.onclick = function(){ LH.report('comment', +b.dataset.repc); }; });
   cl.querySelectorAll('[data-delc]').forEach(function(b){ b.onclick = async function(){ if (!confirm('删除这条评论？')) return; try { await LH.api('DELETE', '/api/community/comments/' + b.dataset.delc); load(); } catch(e){ alert(e.message); } }; });
+  var replyTo = null;
+  function bindReplyBtns(){
+    cl.querySelectorAll('[data-reply]').forEach(function(b){
+      b.onclick = function(){
+        var ta = document.getElementById('cbody');
+        if (!ta){ location.href = '/login?next=' + encodeURIComponent(location.pathname); return; }
+        replyTo = {id: +b.dataset.reply, name: b.dataset.name || ''};
+        var tip = document.getElementById('replyTip');
+        if (tip){ tip.hidden = false; tip.innerHTML = '回复 @' + LH.esc(replyTo.name) + ' <button type="button" class="linkbtn" id="replyCancel">取消</button>';
+          var cbtn = document.getElementById('replyCancel');
+          if (cbtn) cbtn.onclick = function(){ replyTo = null; tip.hidden = true; ta.placeholder = '友善发言，分享你的经验'; };
+        }
+        ta.placeholder = '回复 @' + replyTo.name;
+        ta.focus();
+      };
+    });
+  }
+  bindReplyBtns();
   var cf = document.getElementById('cform');
   if (!me || !me.user){
     cf.innerHTML = '<a class="btn ghost block" href="/login?next=' + encodeURIComponent(location.pathname) + '">登录后参与讨论</a>';
   } else if (me.user.tier < p.comment_tier){
     cf.innerHTML = p.comment_tier >= 2 ? '<a class="btn primary block" href="/member">旅韩交友评论需开通高级会员</a>' : '<a class="btn primary block" href="/member">开通会员即可评论</a>';
   } else {
-    cf.innerHTML = '<div class="err" id="cerr"></div><textarea class="f" id="cbody" maxlength="500" style="min-height:80px" placeholder="友善发言，分享你的经验"></textarea>' +
+    cf.innerHTML = '<div class="err" id="cerr"></div><div class="reply-tip" id="replyTip" hidden></div><textarea class="f" id="cbody" maxlength="500" style="min-height:80px" placeholder="友善发言，分享你的经验"></textarea>' +
       '<button class="btn primary block" id="csend" style="margin-top:8px">发表评论</button>';
     document.getElementById('csend').onclick = async function(){
       var t = document.getElementById('cbody').value.trim(); if (!t) return;
       this.disabled = true;
-      try { await LH.api('POST', '/api/community/posts/' + pid + '/comments', {body: t}); load(); }
+      var payload = {body: t};
+      if (replyTo && replyTo.id) payload.parent_id = replyTo.id;
+      try { await LH.api('POST', '/api/community/posts/' + pid + '/comments', payload); load(); }
       catch(e){ LH.showErr(document.getElementById('cerr'), e.message); this.disabled = false; }
     };
   }
 }
 load();
 </script>
-<script src="/static/pwa.js?v=89" defer></script>
+<script src="/static/pwa.js?v=90" defer></script>
 </body>
 </html>

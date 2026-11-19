@@ -194,12 +194,17 @@ var LH = (function(){
     var spot = esc(p.spot_name || '');
     var sarea = esc(p.spot_area || '');
     var spotLine = spot ? ('<div class="wspot">' + spot + (sarea ? '<span class="warea"> · ' + sarea + '</span>' : '') + '</div>') : '';
-    return '<a class="wcard" href="/community/post/' + p.id + '">' + cover +
+    var cmts = (p.comments == null ? 0 : p.comments);
+    var uid = p.author_id;
+    var off = p.author_official ? '<span class="woff">官方</span>' : '';
+    var userInner = avatar(uid, p.author, p.has_avatar, 'xs') + '<span class="wnick">' + esc(p.author) + '</span>' + off;
+    var user = uid ? ('<a class="wuser-a" href="/community/u/' + uid + '">' + userInner + '</a>') : ('<span class="wuser">' + userInner + '</span>');
+    return '<article class="wcard">' +
+      '<a class="wlink" href="/community/post/' + p.id + '">' + cover +
       (title ? '<div class="wtitle">' + title + '</div>' : '') +
-      spotLine +
-      '<div class="wmeta"><span class="wuser">' + avatar(p.author_id, p.author, p.has_avatar, 'xs') +
-      '<span class="wnick">' + esc(p.author) + '</span></span>' +
-      '<span class="wlike">♡ ' + likes + '</span></div></a>';
+      spotLine + '</a>' +
+      '<div class="wmeta"><span class="wuser">' + user + '</span>' +
+      '<span class="wstats"><span class="wlike">♡ ' + likes + '</span><span class="wcmt">💬 ' + cmts + '</span></span></div></article>';
   }
   var _wIO = null;
   function bindWaterLazy(root){
@@ -269,7 +274,7 @@ var LH = (function(){
       var r = await api('GET', '/api/consult/unread'), n = r.n || 0;
       document.querySelectorAll('[data-consult-dot]').forEach(function(el){ el.textContent = n > 99 ? '99+' : n; el.style.display = n ? '' : 'none'; });
       if (_cn >= 0 && n > _cn && document.hidden && window.Notification && Notification.permission === 'granted' && !/^\/consult\/\d/.test(location.pathname)){
-        var opt = {body: '你有 ' + n + ' 条未读咨询消息', icon: '/static/icons/icon-192.png?v=89', tag: 'lh-consult', data: {url: '/consult'}};
+        var opt = {body: '你有 ' + n + ' 条未读咨询消息', icon: '/static/icons/icon-192.png?v=90', tag: 'lh-consult', data: {url: '/consult'}};
         try { var reg = navigator.serviceWorker && await navigator.serviceWorker.getRegistration(); if (reg) reg.showNotification('旅韩助手 · 站内咨询', opt); else new Notification('旅韩助手 · 站内咨询', opt); } catch(e){}
       }
       _cn = n;

@@ -516,6 +516,10 @@ def service_worker():
         headers={"Cache-Control": "no-cache", "Service-Worker-Allowed": "/"},
     )
 
+@app.get("/notices")
+def notices_redir():
+    return RedirectResponse("/community/notices", status_code=302)
+
 @app.get("/privacy")
 def privacy():
     return html_file_response("privacy.html", "/privacy")

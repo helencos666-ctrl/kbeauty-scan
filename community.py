@@ -415,6 +415,10 @@ ALTER TABLE c_posts ADD COLUMN IF NOT EXISTS spot_name TEXT;
 ALTER TABLE c_posts ADD COLUMN IF NOT EXISTS spot_area TEXT;
 ALTER TABLE c_posts ADD COLUMN IF NOT EXISTS avg_price INT;
 """
+MIGRATE12 = """
+ALTER TABLE c_comments ADD COLUMN IF NOT EXISTS parent_id BIGINT REFERENCES c_comments(id) ON DELETE SET NULL;
+CREATE INDEX IF NOT EXISTS c_comments_parent_idx ON c_comments(parent_id) WHERE parent_id IS NOT NULL;
+"""
 
 FEED_AREA_ALIASES = {
     "首尔": ["首尔", "서울", "Seoul", "seoul", "江南", "明洞", "弘大", "东大门", "梨泰院", "新村", "蚕室"],
@@ -541,6 +545,7 @@ def db():
                         cur.execute(MIGRATE9)
                         cur.execute(MIGRATE10)
                         cur.execute(MIGRATE11)
+                        cur.execute(MIGRATE12)
                         from points import MIGRATE_POINTS
                         cur.execute(MIGRATE_POINTS)
                         from chicken import MIGRATE_CHICKEN
@@ -1741,7 +1746,8 @@ def api_follow(req: Request, uid: int):
             q(conn, "INSERT INTO c_follows(follower_id,followee_id) VALUES (%s,%s) ON CONFLICT DO NOTHING", (u["id"], uid))
             from retention import on_follow
             on_follow(conn, u, uid)
-    return {"following": not had}
+        n = q(conn, "SELECT count(*) AS n FROM c_follows WHERE followee_id=%s", (uid,), one=True)["n"]
+    return {"following": not had, "followers": int(n)}
 
 @router.get("/api/community/rate")
 def api_rate():
@@ -1786,7 +1792,7 @@ def api_post(req: Request, pid: int):
         if r["board"] in LOGIN_ONLY_BOARDS and u["tier"] < 1:
             raise HTTPException(403, "旅韩交友频道需开通会员（¥%s）后查看" % price(conn, "price_t1"))
         imgs = q(conn, "SELECT id,width,height FROM c_images WHERE post_id=%s ORDER BY pos", (pid,))
-        cms = q(conn, f"""SELECT c.id,c.body,c.created_at,c.user_id,{AUTHOR_COLS},au.is_bot,
+        cms = q(conn, f"""SELECT c.id,c.body,c.created_at,c.user_id,c.parent_id,{AUTHOR_COLS},au.is_bot,
                                  (CASE WHEN au.merchant_until>now() THEN 3 ELSE au.tier END) AS tier,
                                  (au.avatar IS NOT NULL OR COALESCE(au.is_bot, FALSE)) AS has_avatar
                          FROM c_comments c
@@ -1818,6 +1824,7 @@ def api_post(req: Request, pid: int):
                           "author_tier": c["tier"], "has_avatar": has_avatar_row(c),
                           "time": _ts(c["created_at"]), "mine": bool(u and u["id"] == c["user_id"]),
                           "is_bot": bool(c.get("is_bot")), "official": bool(c.get("is_official")),
+                          "parent_id": c.get("parent_id"),
                           "badges": (__import__("retention").badges_out(c.get("badges")))} for c in cms]
     return o
 
@@ -2046,6 +2053,11 @@ async def api_comment(req: Request, pid: int):
     csrf(req)
     d = await _json(req)
     body = clean_text(d.get("body"), 500, "评论")
+    raw_parent = d.get("parent_id")
+    try:
+        parent_id = int(raw_parent) if raw_parent not in (None, "", 0, "0") else None
+    except (TypeError, ValueError):
+        raise HTTPException(400, "回复目标不正确")
     with db() as conn:
         u = need_tier(conn, req, 1, "开通会员（¥{t1}）后才能评论")
         p = q(conn, "SELECT id,board,user_id,title FROM c_posts WHERE id=%s AND NOT deleted AND status='published'", (pid,), one=True)
@@ -2055,8 +2067,17 @@ async def api_comment(req: Request, pid: int):
             raise HTTPException(403, "旅韩交友频道评论需开通高级会员（¥%s）" % price(conn, "price_t2"))
         if u.get("id") and is_bot_uid(conn, u["id"]):
             raise HTTPException(403, "系统账号不能发言")
+        from contact_guard import guard_text
+        guard_text(conn, u["id"], "comment", body)
+        if parent_id:
+            pr = q(conn, "SELECT id, parent_id FROM c_comments WHERE id=%s AND post_id=%s AND NOT deleted",
+                   (parent_id, pid), one=True)
+            if not pr:
+                raise HTTPException(400, "要回复的评论不存在")
+            parent_id = pr.get("parent_id") or pr["id"]
         limit("cm:" + str(u["id"]), 10, 300, "评论太频繁，请稍后再试")
-        r = q(conn, "INSERT INTO c_comments(post_id,user_id,body) VALUES (%s,%s,%s) RETURNING id", (pid, u["id"], body), one=True)
+        r = q(conn, "INSERT INTO c_comments(post_id,user_id,body,parent_id) VALUES (%s,%s,%s,%s) RETURNING id",
+              (pid, u["id"], body, parent_id), one=True)
         q(conn, "UPDATE c_posts SET comment_count=(SELECT count(*) FROM c_comments WHERE post_id=%s AND NOT deleted) WHERE id=%s", (pid, pid))
         from retention import on_comment
         on_comment(conn, u, p, r["id"], body)

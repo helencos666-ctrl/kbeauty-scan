@@ -3,53 +3,87 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<title>个人主页 · 旅韩助手</title>
-<meta name="description" content="韩友圈个人主页：徽章与帖子。">
+<title>博主主页 · 旅韩助手</title>
+<meta name="description" content="韩友圈博主主页：作品、粉丝与获赞。">
 <meta name="theme-color" content="#146E68">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="旅韩助手">
 <link rel="manifest" href="/manifest.webmanifest">
-<link rel="apple-touch-icon" href="/static/icons/apple-touch-icon.png?v=89">
-<link rel="icon" type="image/png" sizes="192x192" href="/static/icons/icon-192.png?v=89">
-<link rel="stylesheet" href="/static/pwa.css?v=89">
-<link rel="stylesheet" href="/static/community.css?v=89">
-<link rel="stylesheet" href="/static/chat.css?v=89">
+<link rel="apple-touch-icon" href="/static/icons/apple-touch-icon.png?v=90">
+<link rel="icon" type="image/png" sizes="192x192" href="/static/icons/icon-192.png?v=90">
+<link rel="stylesheet" href="/static/pwa.css?v=90">
+<link rel="stylesheet" href="/static/community.css?v=90">
 <meta name="robots" content="noindex">
 </head>
-<body>
-<header style="padding-bottom:24px">
-  <h1 id="h1">👤 个人主页</h1>
-  <p><a href="/community">‹ 韩友圈</a></p>
-</header>
-<main style="padding-bottom:70px">
+<body class="upage">
+<a class="pback" href="/community" aria-label="返回">‹</a>
+<main>
   <div id="box"><div class="loading">加载中…</div></div>
 </main>
-<nav>
-  <a href="/"><i>🏠</i>首页</a>
-  <a href="/?tab=sub"><i>🚇</i>地铁</a>
-  <a href="/?tab=card"><i>💬</i>翻译</a>
-  <a href="/community" class="on"><i>🧭</i>韩友圈</a>
-  <a href="/?tab=more"><i>☰</i>全部</a>
-  <a href="/me"><i>👤</i>我的</a>
-</nav>
-<script src="/static/community.js?v=89"></script>
+<script src="/static/community.js?v=90"></script>
 <script>
-var uid = parseInt(location.pathname.split('/').pop(), 10), E = LH.esc;
-(async function(){
-  var box = document.getElementById('box'), P;
-  try { P = await LH.api('GET', '/api/community/users/' + uid); } catch(e){ box.innerHTML = '<div class="card empty">' + E(e.message) + '</div>'; return; }
-  document.getElementById('h1').textContent = '👤 ' + P.nickname;
-  box.innerHTML = '<div class="card"><div class="author-row"><span>' + LH.avatar(P.id, P.nickname, P.has_avatar, 'lg') + '</span><div class="who-txt"><div><b style="font-size:17px">' + E(P.nickname) + '</b>' + LH.badge(P.tier) + LH.vb(P.verified) + LH.ubadges([], P.official) + '</div>' +
-      '<div class="tip" style="margin:2px 0 0">编号 ' + E(String(P.member_no)) + ' · ' + E(P.joined) + ' 加入</div></div></div>' +
-      '<div class="row" style="gap:16px;margin-top:10px;font-size:13px;color:var(--sub)"><span><b style="color:var(--ink)">' + P.stats.posts + '</b> 帖子</span><span><b style="color:var(--ink)">' + P.stats.featured + '</b> 精选</span><span><b style="color:var(--ink)">' + P.stats.comments + '</b> 评论</span><span><b style="color:var(--ink)">' + P.stats.followers + '</b> 粉丝</span></div>' +
-      (P.mine || P.is_bot ? '' : '<div class="pm-acts" style="margin-top:10px"><button class="jbtn' + (P.following ? ' on' : '') + '" id="fol">' + (P.following ? '已关注' : '＋ 关注') + '</button> <button class="btn sm primary" type="button" id="pmBtn">✉️ 私聊</button></div>') + '</div>' +
-    '<div class="card"><h2>🏅 徽章</h2>' + (P.badges.length ? '<div class="bdg-grid">' + P.badges.map(function(b){ return '<div class="bdg"><i>' + b.icon + '</i><b>' + E(b.name) + '</b><small>' + E(b.desc) + '</small></div>'; }).join('') + '</div>' : '<div class="tip" style="margin:0">还没有徽章。发第一篇帖子就能获得「✍️ 首帖」。</div>') + '</div>' +
-    '<div class="sech" style="margin:4px 2px 10px"><h2>📝 帖子</h2></div>' + (P.posts.length ? P.posts.map(function(p){ return LH.postItem(p, 0); }).join('') : '<div class="card empty">还没有公开的帖子</div>');
+var uid = parseInt(location.pathname.split('/').pop(), 10), E = LH.esc, P;
+function num(n){ n = parseInt(n, 10) || 0; return n > 9999 ? (Math.round(n/1000)/10 + '万') : String(n); }
+function render(){
+  var box = document.getElementById('box');
+  var st = P.stats || {};
+  var off = P.official ? '<span class="woff">官方</span>' : '';
+  var bio = (P.bio || '').trim();
+  var acts = '';
+  if (!P.mine && !P.is_bot){
+    acts = '<div class="uacts">' +
+      '<button type="button" class="jbtn' + (P.following ? ' on' : '') + '" id="fol">' + (P.following ? '已关注' : '关注') + '</button>' +
+      '<button type="button" class="btn sm primary" id="pmBtn">私聊</button>' +
+    '</div>';
+  } else if (P.mine){
+    acts = '<div class="uacts"><a class="btn sm ghost" href="/me">编辑资料</a></div>';
+  }
+  var badges = (P.badges && P.badges.length) ? ('<div class="ubadges">' + P.badges.map(function(b){
+    return '<span class="ubg" title="' + E(b.desc || '') + '">' + (b.icon || '') + ' ' + E(b.name) + '</span>';
+  }).join('') + '</div>') : '';
+  box.innerHTML =
+    '<div class="uhero">' +
+      '<div class="urow">' +
+        '<span class="uav">' + LH.avatar(P.id, P.nickname, P.has_avatar, 'xl') + '</span>' +
+        '<div class="uwho">' +
+          '<div class="un">' + E(P.nickname) + off + LH.badge(P.tier) + LH.vb(P.verified) + '</div>' +
+          '<div class="umeta">加入于 ' + E(P.joined || '') + '</div>' +
+          '<div class="ubio">' + (bio ? E(bio) : '<span class="ubio-empty">还没有简介</span>') + '</div>' +
+        '</div>' +
+      '</div>' +
+      '<div class="ustats">' +
+        '<span><b id="stLikes">' + num(st.likes) + '</b>获赞</span>' +
+        '<span><b id="stFans">' + num(st.followers) + '</b>粉丝</span>' +
+        '<span><b id="stFollow">' + num(st.following) + '</b>关注</span>' +
+      '</div>' +
+      acts + badges +
+    '</div>' +
+    '<div class="uworks"><div class="ulab">作品 ' + num(st.posts) + '</div><div id="uGrid"></div><div id="uEmpty" class="play-hint" hidden></div></div>';
+  document.title = (P.nickname || '博主') + ' · 韩友圈';
+  var grid = document.getElementById('uGrid'), empty = document.getElementById('uEmpty');
+  var posts = P.posts || [];
+  if (!posts.length){
+    if (empty){ empty.hidden = false; empty.textContent = '还没有公开的作品'; }
+  } else if (typeof LH.appendWater === 'function'){
+    LH.appendWater(grid, posts, true);
+  } else {
+    grid.innerHTML = posts.map(function(p){ return LH.postItem(p, 0); }).join('');
+  }
   var fol = document.getElementById('fol');
   if (fol) fol.onclick = async function(){
-    try { var r = await LH.api('POST', '/api/community/follow/' + uid, {}); fol.className = 'jbtn' + (r.following ? ' on' : ''); fol.textContent = r.following ? '已关注' : '＋ 关注'; }
-    catch(e){ if (e.status === 401) location.href = '/login?next=' + encodeURIComponent(location.pathname); else alert(e.message); }
+    try {
+      var r = await LH.api('POST', '/api/community/follow/' + uid, {});
+      P.following = r.following;
+      if (r.followers != null) P.stats.followers = r.followers;
+      fol.className = 'jbtn' + (r.following ? ' on' : '');
+      fol.textContent = r.following ? '已关注' : '关注';
+      var el = document.getElementById('stFans');
+      if (el) el.textContent = num(P.stats.followers);
+    } catch(e){
+      if (e.status === 401) location.href = '/login?next=' + encodeURIComponent(location.pathname);
+      else alert(e.message);
+    }
   };
   var pm = document.getElementById('pmBtn');
   if (pm) pm.onclick = async function(){
@@ -57,8 +91,13 @@ var uid = parseInt(location.pathname.split('/').pop(), 10), E = LH.esc;
     try { var r = await LH.api('POST', '/api/chat/start', {peer_id: uid}); location.href = '/community/messages/' + r.thread_id; }
     catch(e){ if (e.status === 401) location.href = '/login?next=' + encodeURIComponent(location.pathname); else { alert(e.message); pm.disabled = false; } }
   };
+}
+(async function(){
+  var box = document.getElementById('box');
+  try { P = await LH.api('GET', '/api/community/users/' + uid); } catch(e){ box.innerHTML = '<div class="card empty">' + E(e.message) + '</div>'; return; }
+  render();
 })();
 </script>
-<script src="/static/pwa.js?v=89" defer></script>
+<script src="/static/pwa.js?v=90" defer></script>
 </body>
 </html>

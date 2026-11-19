@@ -135,7 +135,7 @@ check("顶栏安全区只作用于 header.xbar",
       "env(safe-area-inset-top)" in xbar_css, xbar_css)
 check("main.home 单独微调上边距", bool(rule(css, "main.home")))
 
-check("community.html 使用 ?v=89", html.count("?v=89") >= 4 and "?v=81" not in html)
+check("community.html 使用 ?v=90", html.count("?v=90") >= 4 and "?v=81" not in html)
 check("未新增外链 http(s) 资源",
       "http://" not in html and "https://" not in html.replace("https://schema.org", ""))
 
@@ -199,7 +199,19 @@ check("操作表样式为底部圆角白行",
 check("发帖页可预载操作表选中的图片", "loadPendingImages" in newpost and "lh-compose-files" in newpost)
 js = read("community.js")
 check("瀑布流封面用 IntersectionObserver 懒加载", "IntersectionObserver" in js and "data-src" in js and "function waterItem" in js and "loading=\"lazy\"" not in js[js.find("function waterItem"):js.find("function bindWaterLazy")])
-check("瀑布流卡片无置顶精选摘要评论数和宫格", "function waterItem" in js and "置顶" not in js[js.find("function waterItem"):js.find("function bindWaterLazy")] and "精选" not in js[js.find("function waterItem"):js.find("function bindWaterLazy")] and "comments" not in js[js.find("function waterItem"):js.find("function bindWaterLazy")])
+check("瀑布流卡片无置顶精选摘要和宫格", "function waterItem" in js and "置顶" not in js[js.find("function waterItem"):js.find("function bindWaterLazy")] and "精选" not in js[js.find("function waterItem"):js.find("function bindWaterLazy")])
+check("瀑布流卡片显示点赞和评论数，头像进博主主页",
+      "wcmt" in js[js.find("function waterItem"):js.find("function bindWaterLazy")]
+      and "p.comments" in js[js.find("function waterItem"):js.find("function bindWaterLazy")]
+      and "/community/u/" in js[js.find("function waterItem"):js.find("function bindWaterLazy")])
+userp = read("user.html")
+check("博主主页有获赞粉丝关注和作品瀑布流",
+      "获赞" in userp and "粉丝" in userp and "关注" in userp and "作品" in userp
+      and "uGrid" in userp and "appendWater" in userp and "P.bio" in userp
+      and "st.followers" in userp and "st.likes" in userp and "st.following" in userp and "stats.followers" in userp
+      and "地铁" not in userp)
+check("帖子详情可回复评论且头像进主页",
+      "parent_id" in post_h and "data-reply" in post_h and 'class="avlink"' in post_h)
 check("信息流缩略图不再用 loading=lazy", "function postPhotos" in js and "loading=\"lazy\"" not in js[js.find("function postPhotos"):js.find("function postItem")])
 check("底栏关注为爱心图标且保留关注文案", "icon:'❤️', label:'关注'" in pwa_js and "👥" not in pwa_js and "<i>❤️</i>关注" in me)
 
