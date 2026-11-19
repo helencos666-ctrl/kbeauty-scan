@@ -46,6 +46,34 @@ CARDS = [
         "bottom": (223, 232, 244),
         "accent": (92, 62, 36),
     },
+    {
+        "file": "2026-11-20-hongdae-night.jpg",
+        "kicker": "避雷 · 弘大夜玩",
+        "title": "弘大夜里玩\n先记这几条",
+        "bullets": [
+            ("cup", "入场：先问清费用和消费门槛"),
+            ("bag", "随身：证件自己拿，杯子不离手"),
+            ("taxi", "回程：查末班车，上正规车"),
+            ("camera", "街拍：先问价，不想就直接说"),
+        ],
+        "top": (236, 234, 246),
+        "bottom": (214, 219, 238),
+        "accent": (58, 54, 108),
+    },
+    {
+        "file": "2026-11-20-korea-housing.jpg",
+        "kicker": "韩国生活 · 留学生找房",
+        "title": "在韩找房\n看这四步",
+        "bullets": [
+            ("home", "房型：先分清四种常见住处"),
+            ("coin", "押金与月租：逐项写进合同"),
+            ("key", "看房：水压、霉斑、暖气都试"),
+            ("doc", "签约：核对房东与登记簿"),
+        ],
+        "top": (250, 243, 233),
+        "bottom": (240, 227, 231),
+        "accent": (118, 62, 54),
+    },
 ]
 
 
@@ -149,6 +177,65 @@ def icon(d, kind, box, accent):
                             radius=8, fill=pale)
         for xx in (x0 + w * .26, x1 - w * .40):
             d.ellipse([xx, y1 - w * .38, xx + w * .14, y1 - w * .24], fill=accent)
+    elif kind == "cup":
+        # 鸡尾酒杯
+        d.polygon([(x0 + w * .24, y0 + w * .24), (x1 - w * .24, y0 + w * .24),
+                   (cx, y1 - w * .40)], fill=pale, outline=accent)
+        d.line([(x0 + w * .24, y0 + w * .24), (x1 - w * .24, y0 + w * .24)], fill=accent, width=7)
+        d.line([(cx, y1 - w * .40), (cx, y1 - w * .20)], fill=accent, width=7)
+        d.line([(cx - w * .16, y1 - w * .20), (cx + w * .16, y1 - w * .20)], fill=accent, width=7)
+        d.line([(cx + w * .06, y0 + w * .22), (cx + w * .16, y0 + w * .04)], fill=accent, width=6)
+    elif kind == "bag":
+        # 斜挎包
+        d.arc([cx - w * .20, y0 + w * .12, cx + w * .20, y0 + w * .54],
+              start=180, end=360, fill=accent, width=7)
+        d.rounded_rectangle([x0 + w * .20, y0 + w * .38, x1 - w * .20, y1 - w * .12],
+                            radius=14, fill=(255, 255, 255), outline=accent, width=5)
+        d.rounded_rectangle([cx - w * .05, y0 + w * .54, cx + w * .05, y0 + w * .66],
+                            radius=5, fill=dark)
+    elif kind == "taxi":
+        # 出租车
+        d.rounded_rectangle([x0 + w * .12, y0 + w * .44, x1 - w * .12, y1 - w * .22],
+                            radius=14, fill=(255, 255, 255), outline=accent, width=5)
+        d.rounded_rectangle([x0 + w * .30, y0 + w * .26, x1 - w * .30, y0 + w * .48],
+                            radius=10, fill=pale, outline=accent, width=4)
+        d.rounded_rectangle([cx - w * .09, y0 + w * .14, cx + w * .09, y0 + w * .28],
+                            radius=5, fill=accent)
+        for xx in (x0 + w * .22, x1 - w * .38):
+            d.ellipse([xx, y1 - w * .34, xx + w * .16, y1 - w * .18], fill=accent)
+    elif kind == "camera":
+        # 相机
+        d.rounded_rectangle([x0 + w * .12, y0 + w * .30, x1 - w * .12, y1 - w * .20],
+                            radius=12, fill=(255, 255, 255), outline=accent, width=5)
+        d.rounded_rectangle([cx - w * .14, y0 + w * .18, cx + w * .14, y0 + w * .34],
+                            radius=6, fill=pale)
+        d.ellipse([cx - w * .17, y0 + w * .40, cx + w * .17, y1 - w * .26],
+                  outline=accent, width=6)
+        d.ellipse([x1 - w * .30, y0 + w * .38, x1 - w * .24, y0 + w * .44], fill=accent)
+    elif kind == "home":
+        # 房子
+        d.polygon([(cx, y0 + w * .12), (x1 - w * .14, y0 + w * .42),
+                   (x0 + w * .14, y0 + w * .42)], fill=pale, outline=accent)
+        d.rounded_rectangle([x0 + w * .22, y0 + w * .40, x1 - w * .22, y1 - w * .12],
+                            radius=8, fill=(255, 255, 255), outline=accent, width=5)
+        d.rounded_rectangle([cx - w * .07, y1 - w * .36, cx + w * .07, y1 - w * .12],
+                            radius=4, fill=accent)
+    elif kind == "key":
+        # 钥匙
+        d.ellipse([x0 + w * .14, y0 + w * .26, x0 + w * .52, y0 + w * .64],
+                  outline=accent, width=9)
+        d.line([(x0 + w * .50, y0 + w * .45), (x1 - w * .12, y0 + w * .45)], fill=accent, width=9)
+        d.line([(x1 - w * .30, y0 + w * .45), (x1 - w * .30, y1 - w * .26)], fill=accent, width=9)
+        d.line([(x1 - w * .12, y0 + w * .45), (x1 - w * .12, y1 - w * .20)], fill=accent, width=9)
+    elif kind == "doc":
+        # 登记簿/文件
+        d.rounded_rectangle([x0 + w * .22, y0 + w * .12, x1 - w * .22, y1 - w * .12],
+                            radius=10, fill=(255, 255, 255), outline=accent, width=5)
+        for i in range(3):
+            yy = y0 + w * .28 + i * w * .12
+            d.line([(x0 + w * .32, yy), (x1 - w * .32, yy)], fill=pale, width=7)
+        d.line([(x0 + w * .32, y1 - w * .26), (cx - w * .02, y1 - w * .26)], fill=accent, width=8)
+        d.line([(cx - w * .02, y1 - w * .26), (x1 - w * .30, y0 + w * .58)], fill=accent, width=8)
     elif kind == "bank":
         d.polygon([(cx, y0 + w * .14), (x1 - w * .14, y0 + w * .36),
                    (x0 + w * .14, y0 + w * .36)], fill=pale, outline=accent)
