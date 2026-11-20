@@ -183,6 +183,12 @@ def mark_deposit_paid(conn, uid, proof_id):
 
 
 # ---------------- 商家端 ----------------
+@router.get("/chicken-join")
+@router.get("/chicken-join.html")
+def p_join_old():
+    from fastapi.responses import RedirectResponse
+    return RedirectResponse("/chicken/join", status_code=301)
+
 @router.get("/chicken/join")
 def p_join():
     return _page("chicken-join.html", "/chicken/join")

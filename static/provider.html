@@ -1,0 +1,74 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>商家详情 · 旅韩助手</title>
+<meta name="description" content="旅韩助手商家详情：服务介绍、价格和照片。">
+<meta name="theme-color" content="#146E68">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<link rel="manifest" href="/manifest.webmanifest">
+<link rel="apple-touch-icon" href="/static/icons/apple-touch-icon.png?v=91">
+<link rel="icon" type="image/png" sizes="192x192" href="/static/icons/icon-192.png?v=91">
+<link rel="stylesheet" href="/static/pwa.css?v=91">
+<link rel="stylesheet" href="/static/community.css?v=91">
+<style>
+.gal{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin:0 0 10px}
+.gal a{display:block;border-radius:12px;overflow:hidden;background:#E3EEEC;aspect-ratio:4/3}
+.gal img{width:100%;height:100%;object-fit:cover;display:block}
+.gal.n1{grid-template-columns:1fr}
+.gal.n2{grid-template-columns:repeat(2,1fr)}
+</style>
+</head>
+<body>
+<header>
+  <p style="margin:0 0 6px"><a href="/shops" id="back">← 全部商家</a></p>
+  <h1 id="hname">商家详情</h1>
+  <p id="hsub">加载中…</p>
+</header>
+<main>
+  <div id="box"><div class="card">加载中…</div></div>
+  <p style="font-size:12px;color:#888;text-align:center;margin:10px 0 16px;line-height:1.7">价格和服务以商家说明为准，仅供参考。请通过站内咨询联系，不要添加站外联系方式。<br><a href="/terms" style="color:#2c7be5">用户协议与免责声明</a> · <a href="/rules" style="color:#2c7be5">社区约定</a></p>
+</main>
+<nav class="tabbar" aria-label="底部导航">
+  <a href="/" data-nav="home"><i>🏠</i>首页</a>
+  <a href="/community?tab=follow" data-nav="follow"><i>❤️</i>关注</a>
+  <a href="/community/new" data-nav="post" class="pub"><span class="plus">＋</span>发布</a>
+  <a href="/festival" data-nav="festival" class="fest"><span class="fest-ico">🎁<em>冬季</em></span>购物节</a>
+  <a href="/shops" data-nav="services" class="svc on" aria-current="page"><i>💼</i>商业服务</a>
+  <a href="/trips" data-nav="trips" class="loc"><i>🗓️</i>行程安排</a>
+  <a href="/me" data-nav="me" class="me"><i>👤</i>我的</a>
+</nav>
+<script src="/static/community.js?v=91"></script>
+<script>
+(async function(){
+  var m = location.pathname.match(/\/shops\/p\/(\d+)/), pid = m ? +m[1] : 0;
+  var box = document.getElementById('box');
+  var r;
+  try { r = await LH.api('GET', '/api/providers/' + pid); }
+  catch(e){ box.innerHTML = '<div class="card"><div class="empty">' + LH.esc(e.message) + '</div><a class="btn ghost block" href="/shops">返回全部商家</a></div>'; document.getElementById('hsub').textContent = ''; return; }
+  var s = r.item;
+  document.getElementById('hname').textContent = s.name;
+  document.getElementById('hsub').textContent = (s.area || '') + ' · ' + (s.category_name || '');
+  document.getElementById('back').href = s.category ? ('/shops?cat=' + encodeURIComponent(s.category)) : '/shops';
+  var photos = s.photos || (s.photo ? [s.photo] : []);
+  var gal = photos.length
+    ? '<div class="gal n' + Math.min(photos.length, 6) + '">' + photos.slice(0, 6).map(function(u, i){
+        return '<a href="' + LH.esc(u) + '" target="_blank" rel="noopener"><img alt="' + LH.esc(s.name) + ' 照片' + (i+1) + '" loading="lazy" src="' + LH.esc(u) + '"></a>';
+      }).join('') + '</div>'
+    : '<div class="gallery-empty">商家还没有上传照片</div>';
+  box.innerHTML =
+    '<div class="card">' + gal +
+      '<div class="meta" style="margin-bottom:6px"><span class="tag">' + LH.esc(s.category_name || '') + '</span><span>' + LH.esc(s.area || '') + '</span></div>' +
+      (s.services ? '<p style="margin:8px 0;line-height:1.7;white-space:pre-wrap">' + LH.esc(s.services) + '</p>' : '') +
+    '</div>' +
+    '<div class="card">' + LH.consultBtn('provider', s.id, '立即咨询（站内沟通）') + '<div class="tip" style="margin:6px 0 0">所有咨询在站内完成，请勿添加站外联系方式。</div></div>' +
+    '<div class="card"><h2>价格</h2><p style="white-space:pre-wrap;margin:0;line-height:1.75">' + LH.esc(s.price || '暂未填写') + '</p></div>' +
+    (s.hours ? '<div class="card"><h2>时间</h2><p style="margin:0">' + LH.esc(s.hours) + '</p></div>' : '') +
+    (s.address ? '<div class="card"><h2>地址</h2><p style="margin:0">' + LH.esc(s.address) + '</p></div>' : '');
+})();
+</script>
+<script src="/static/pwa.js?v=91" defer></script>
+</body>
+</html>

@@ -1,4 +1,4 @@
-"""纯静态检查：首页七格底部导航、?v=90 缓存版本、新页面（trips）与禁词。
+"""纯静态检查：首页七格底部导航、?v=91 缓存版本、新页面（trips）与禁词。
 不需要启服务，直接 python test/test_home_nav.py 即可。"""
 import os, re
 
@@ -38,13 +38,13 @@ PAGES = {
 }
 
 # ---------- 1. 缓存版本 v63 ----------
-check("sw.js CACHE is lvhan-shell-v90", "'lvhan-shell-v90'" in sw or '"lvhan-shell-v90"' in sw)
-check("sw.js uses ?v=90", "?v=90" in sw)
+check("sw.js CACHE is lvhan-shell-v91", "'lvhan-shell-v91'" in sw or '"lvhan-shell-v91"' in sw)
+check("sw.js uses ?v=91", "?v=91" in sw)
 check("sw.js has no ?v=60", "?v=60" not in sw)
 for name, txt in PAGES.items():
-    check("%s uses ?v=90 (or tabbar)" % name, ("?v=90" in txt) or ("tabbar" in txt))
+    check("%s uses ?v=91 (or tabbar)" % name, ("?v=91" in txt) or ("tabbar" in txt))
     check("%s has no ?v=60" % name, "?v=60" not in txt)
-check("sw.js SHELL has four home ads", all("/static/home-ads/ad-%d.jpg?v=90" % i in sw for i in (1, 2, 3, 4)))
+check("sw.js SHELL has four home ads", all("/static/home-ads/ad-%d.jpg?v=91" % i in sw for i in (1, 2, 3, 4)))
 check("sw.js SHELL has /trips", "'/trips'" in sw and "'/local'" not in sw)
 check("sw.js SHELL has trips.html", "/static/trips.html" in sw and "/static/local.html" not in sw)
 
@@ -94,7 +94,7 @@ check("pwa.js +发布打开操作表而不是直接跳转",
       "openPubSheet" in pwa_js and "preventDefault" in pwa_js and "从相册选择" in pwa_js
       and "拍摄" in pwa_js and "写文字" in pwa_js)
 check("pwa.css 有发布操作表样式", "lh-pub-mask" in pwa_css and "lh-pub-sheet" in pwa_css)
-check("我的页有商家发布信息", "商家发布信息" in me and 'href="/community/new?listing=1"' in me)
+check("我的页有合并后的商家入口", "我是商家 · 入驻并发布服务" in me and 'href="/shops/start"' in me and "商家发布信息" not in me)
 check("tabbar style is scoped", "nav.tabbar" in pwa_css and "nav.tabbar a.pub .plus" in pwa_css)
 check("community.css does not override tabbar", "nav:not(.tabbar)" in comm_css)
 check("body has-tabbar padding", "body.has-tabbar" in pwa_css)
@@ -122,7 +122,7 @@ check("trips can add/edit/delete/reorder", all(w in trips for w in ("添加地�
 check("trips links subway planner", "/?tab=sub" in trips)
 check("trips links /itineraries", "/itineraries" in trips)
 check("trips has back and me", 'href="/"' in trips and 'href="/me"' in trips)
-check("trips loads pwa.js?v=90", "/static/pwa.js?v=90" in trips)
+check("trips loads pwa.js?v=91", "/static/pwa.js?v=91" in trips)
 
 
 # ---------- 5b. festival.html 韩国购物节 ----------

@@ -10,10 +10,17 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="旅韩助手">
 <link rel="manifest" href="/manifest.webmanifest">
-<link rel="apple-touch-icon" href="/static/icons/apple-touch-icon.png?v=90">
-<link rel="icon" type="image/png" sizes="192x192" href="/static/icons/icon-192.png?v=90">
-<link rel="stylesheet" href="/static/pwa.css?v=90">
-<link rel="stylesheet" href="/static/community.css?v=90">
+<link rel="apple-touch-icon" href="/static/icons/apple-touch-icon.png?v=91">
+<link rel="icon" type="image/png" sizes="192x192" href="/static/icons/icon-192.png?v=91">
+<link rel="stylesheet" href="/static/pwa.css?v=91">
+<link rel="stylesheet" href="/static/community.css?v=91">
+<style>
+.gal6{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin:0 0 10px}
+.gal6 a{display:block;border-radius:12px;overflow:hidden;background:#E3EEEC;aspect-ratio:4/3}
+.gal6 img{width:100%;height:100%;object-fit:cover;display:block}
+.gal6.n1{grid-template-columns:1fr}
+.gal6.n2{grid-template-columns:repeat(2,1fr)}
+</style>
 </head>
 <body>
 <header>
@@ -36,7 +43,7 @@
   <a href="/?tab=more"><i>☰</i>全部</a>
   <a href="/me"><i>👤</i>我的</a>
 </nav>
-<script src="/static/community.js?v=90"></script>
+<script src="/static/community.js?v=91"></script>
 <script>
 (async function(){
   var E = LH.esc, err = document.getElementById('err'), ok = document.getElementById('ok');
@@ -50,7 +57,8 @@
   var s = r.item, rate = r.rate_cny_krw;
   document.getElementById('hname').textContent = s.name;
   document.getElementById('hsub').textContent = s.area + ' · ' + s.shop_type;
-  var gal = s.photos && s.photos.length ? '<div class="gallery">' + s.photos.map(function(p){
+  var phs = (s.photos || []).slice(0, 6);
+  var gal = phs.length ? '<div class="gal6 n' + phs.length + '">' + phs.map(function(p){
       return '<a href="/api/shop-photos/' + p.id + '" target="_blank" rel="noopener"><img alt="' + E(s.name) + '" loading="lazy" src="/api/shop-photos/' + p.id + '"></a>';
     }).join('') + '</div>' : '<div class="gallery-empty">商家还没有上传照片</div>';
   var rating = s.rating_count ? (LH.starsHtml(s.rating_avg) + ' <b>' + s.rating_avg + '</b> <span>（' + s.rating_count + ' 条评价）</span>') : '<span>暂无评价，欢迎写第一条</span>';
@@ -123,6 +131,6 @@
   try { await loadReviews(); } catch(e){ document.getElementById('revlist').innerHTML = '<p class="tip">' + E(e.message) + '</p>'; }
 })();
 </script>
-<script src="/static/pwa.js?v=90" defer></script>
+<script src="/static/pwa.js?v=91" defer></script>
 </body>
 </html>

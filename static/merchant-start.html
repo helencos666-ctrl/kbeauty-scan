@@ -1,0 +1,36 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>我是商家 · 入驻并发布服务 · 旅韩助手</title>
+<meta name="description" content="商家入驻与发布服务：尚未入驻请先填写申请，已入驻可直接发布服务信息。">
+<meta name="theme-color" content="#146E68">
+<meta name="robots" content="noindex">
+<link rel="stylesheet" href="/static/pwa.css?v=91">
+<link rel="stylesheet" href="/static/community.css?v=91">
+</head>
+<body>
+<header>
+  <h1>我是商家 · 入驻并发布服务</h1>
+  <p>正在为你打开对应入口…</p>
+</header>
+<main>
+  <div class="card" id="box"><div class="loading">加载中…</div></div>
+</main>
+<script src="/static/community.js?v=91"></script>
+<script>
+(async function(){
+  var box = document.getElementById('box');
+  var me = null;
+  try { me = await LH.me(); } catch(e){ box.innerHTML = '<div class="empty">' + LH.esc(e.message) + '</div>'; return; }
+  if (me && me.user && me.user.merchant){
+    location.replace('/community/new?listing=1');
+    return;
+  }
+  location.replace('/partner?from=start');
+})();
+</script>
+<script src="/static/pwa.js?v=91" defer></script>
+</body>
+</html>

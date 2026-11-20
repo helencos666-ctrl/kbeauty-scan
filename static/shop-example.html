@@ -1,0 +1,80 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>示范案例 · 旅韩助手</title>
+<meta name="description" content="商家入驻填写格式示范，仅供参考，不是真实商家。">
+<meta name="robots" content="noindex,nofollow">
+<meta name="theme-color" content="#146E68">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<link rel="manifest" href="/manifest.webmanifest">
+<link rel="apple-touch-icon" href="/static/icons/apple-touch-icon.png?v=91">
+<link rel="icon" type="image/png" sizes="192x192" href="/static/icons/icon-192.png?v=91">
+<link rel="stylesheet" href="/static/pwa.css?v=91">
+<link rel="stylesheet" href="/static/community.css?v=91">
+<style>
+.ex-banner{background:#FFF4E5;border:1px solid #F0D2A8;color:#8A4B12;border-radius:14px;padding:12px 14px;font-size:14px;line-height:1.7;font-weight:700;margin:0 0 14px}
+.gal{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin:0 0 8px}
+.gal a{display:block;border-radius:12px;overflow:hidden;background:#E3EEEC;aspect-ratio:4/3}
+.gal img{width:100%;height:100%;object-fit:cover;display:block}
+.gal .cap{font-size:11px;color:#8a8f99;margin-top:4px;line-height:1.4}
+.slot{display:flex;flex-direction:column}
+.consult-off{background:#F7FBFA;border:1px dashed #C9D9D6;border-radius:14px;padding:14px;font-size:14px;line-height:1.7;color:#4A5560}
+</style>
+</head>
+<body>
+<header>
+  <p style="margin:0 0 6px"><a href="/shops" id="back">← 返回分类</a></p>
+  <h1 id="hname">示范案例</h1>
+  <p id="hsub">仅供参考，不是真实商家</p>
+</header>
+<main>
+  <div class="ex-banner" id="badge">示范案例（仅供参考，非真实商家）</div>
+  <div id="box"><div class="card">加载中…</div></div>
+  <p style="font-size:12px;color:#888;text-align:center;margin:10px 0 16px;line-height:1.7">示范案例没有评价、没有订单数字，也不接受咨询。<br><a href="/shops/join-guide" style="color:#2c7be5">入驻教程</a> · <a href="/terms" style="color:#2c7be5">用户协议</a></p>
+</main>
+<nav class="tabbar" aria-label="底部导航">
+  <a href="/" data-nav="home"><i>🏠</i>首页</a>
+  <a href="/community?tab=follow" data-nav="follow"><i>❤️</i>关注</a>
+  <a href="/community/new" data-nav="post" class="pub"><span class="plus">＋</span>发布</a>
+  <a href="/festival" data-nav="festival" class="fest"><span class="fest-ico">🎁<em>冬季</em></span>购物节</a>
+  <a href="/shops" data-nav="services" class="svc on" aria-current="page"><i>💼</i>商业服务</a>
+  <a href="/trips" data-nav="trips" class="loc"><i>🗓️</i>行程安排</a>
+  <a href="/me" data-nav="me" class="me"><i>👤</i>我的</a>
+</nav>
+<script src="/static/community.js?v=91"></script>
+<script>
+(async function(){
+  var m = location.pathname.match(/\/shops\/examples\/([a-z]+)/);
+  var cat = m ? m[1] : '';
+  var box = document.getElementById('box');
+  document.getElementById('back').href = cat ? ('/shops?cat=' + encodeURIComponent(cat)) : '/shops';
+  var r;
+  try { r = await LH.api('GET', '/api/shop-examples/' + encodeURIComponent(cat)); }
+  catch(e){ box.innerHTML = '<div class="card"><div class="empty">' + LH.esc(e.message) + '</div><a class="btn ghost block" href="/shops">返回商家页</a></div>'; return; }
+  var s = r.item;
+  document.title = s.badge + ' · ' + s.category_name + ' · 旅韩助手';
+  document.getElementById('hname').textContent = s.name;
+  document.getElementById('hsub').textContent = s.category_name + ' · ' + s.area;
+  document.getElementById('badge').textContent = s.badge;
+  var gal = '<div class="gal">' + (s.photos || []).map(function(p){
+    return '<div class="slot"><a href="' + LH.esc(p.src) + '" target="_blank" rel="noopener"><img alt="' + LH.esc(p.caption) + '" loading="lazy" src="' + LH.esc(p.src) + '"></a><div class="cap">' + LH.esc(p.caption) + '</div></div>';
+  }).join('') + '</div>';
+  box.innerHTML =
+    '<div class="card">' + gal +
+      '<div class="meta" style="margin:8px 0"><span class="tag ex">示范</span><span class="tag">' + LH.esc(s.category_name) + '</span><span>' + LH.esc(s.area) + '</span></div>' +
+      '<p style="margin:8px 0;line-height:1.7;white-space:pre-wrap">' + LH.esc(s.intro) + '</p>' +
+    '</div>' +
+    '<div class="card"><h2>服务内容（填写格式）</h2><p style="white-space:pre-wrap;margin:0;line-height:1.75">' + LH.esc(s.services) + '</p></div>' +
+    '<div class="card"><h2>价格（填写格式）</h2><p style="white-space:pre-wrap;margin:0;line-height:1.75">' + LH.esc(s.price) + '</p></div>' +
+    '<div class="card"><h2>时间</h2><p style="margin:0;line-height:1.75">' + LH.esc(s.hours) + '</p></div>' +
+    '<div class="card"><h2>联系方式</h2><div class="consult-off">' + LH.esc(s.consult_note) + '</div>' +
+      '<a class="btn primary block" style="margin-top:12px" href="' + LH.esc(s.apply_href) + '">按这个格式去填写入驻申请</a>' +
+      '<a class="btn ghost block" style="margin-top:8px" href="/shops/join-guide">查看入驻教程</a></div>';
+})();
+</script>
+<script src="/static/pwa.js?v=91" defer></script>
+</body>
+</html>

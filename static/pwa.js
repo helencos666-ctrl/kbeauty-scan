@@ -4,7 +4,7 @@
   /* 开业活动脚本：红标「我的」+ 首页每日弹层 */
   if (!document.querySelector('script[data-lh-opening]')) {
     var s = document.createElement('script');
-    s.src = '/static/opening-promos.js?v=90';
+    s.src = '/static/opening-promos.js?v=91';
     s.async = true;
     s.setAttribute('data-lh-opening', '1');
     document.head.appendChild(s);
@@ -94,13 +94,44 @@
       req.onerror = function(){ reject(req.error); };
     });
   }
+  async function fileToRecord(f){
+    if (!f) return null;
+    if (f.buf && f.buf.byteLength){
+      return {name: f.name || 'img.jpg', type: f.type || 'image/jpeg', buf: f.buf};
+    }
+    if (f.type && !/^image\//.test(f.type) && !/heic|heif|avif/i.test(f.type + ' ' + (f.name || ''))) return null;
+    var buf = null;
+    try { buf = await f.arrayBuffer(); } catch(e){ buf = null; }
+    if (!buf || buf.byteLength === 0) throw new Error('有图片读取失败，可能是 iCloud 原图未下载，请重试');
+    return {name: f.name || 'img.jpg', type: f.type || 'image/jpeg', buf: buf};
+  }
+  async function recordsToFiles(val){
+    var out = [], arr = Array.isArray(val) ? val : [];
+    for (var i = 0; i < arr.length; i++){
+      var rec = arr[i], buf = rec && rec.buf, name = (rec && rec.name) || 'img.jpg', type = (rec && rec.type) || 'image/jpeg';
+      if (rec && typeof Blob !== 'undefined' && rec instanceof Blob && !buf){
+        try { buf = await rec.arrayBuffer(); name = rec.name || name; type = rec.type || type; } catch(e){ buf = null; }
+      } else if (buf && buf.byteLength != null && !(buf instanceof ArrayBuffer) && buf.buffer){
+        buf = buf.buffer.slice(buf.byteOffset, buf.byteOffset + buf.byteLength);
+      }
+      if (!buf || buf.byteLength === 0) continue;
+      out.push(new File([buf], name, {type: type || 'image/jpeg'}));
+    }
+    return out;
+  }
   function stashComposeImages(fileList){
-    var arr = Array.prototype.slice.call(fileList || []).filter(function(f){ return f && (!f.type || /^image\//.test(f.type)); }).slice(0, 6);
-    return openComposeDB().then(function(db){
+    return Promise.resolve().then(async function(){
+      var recs = [], arr = Array.prototype.slice.call(fileList || []).slice(0, 6);
+      for (var i = 0; i < arr.length; i++){
+        var rec = await fileToRecord(arr[i]);
+        if (rec) recs.push(rec);
+      }
+      if (!recs.length && arr.length) throw new Error('有图片读取失败，可能是 iCloud 原图未下载，请重试');
+      var db = await openComposeDB();
       return new Promise(function(resolve, reject){
         var tx = db.transaction(COMPOSE_STORE, 'readwrite');
-        tx.objectStore(COMPOSE_STORE).put(arr, COMPOSE_KEY);
-        tx.oncomplete = function(){ try { db.close(); } catch(e){} resolve(arr); };
+        tx.objectStore(COMPOSE_STORE).put(recs, COMPOSE_KEY);
+        tx.oncomplete = function(){ try { db.close(); } catch(e){} resolve(recs); };
         tx.onerror = function(){ try { db.close(); } catch(e){} reject(tx.error); };
       });
     });
@@ -119,10 +150,11 @@
         g.onerror = function(){ resolve([]); };
         tx.oncomplete = function(){ try { db.close(); } catch(e){} };
       });
-    }).catch(function(){ return []; });
+    }).catch(function(){ return []; }).then(recordsToFiles);
   }
   window.lhStashComposeImages = stashComposeImages;
   window.lhTakeComposeImages = takeComposeImages;
+  window.lhComposeRecordsToFiles = recordsToFiles;
 
   function onComposePage(){
     var p = location.pathname;
@@ -135,14 +167,19 @@
     return v === '1' || v === 'yes' || v === 'true';
   }
   function goCompose(files){
-    var list = Array.prototype.slice.call(files || []).slice(0, 6);
-    if (onComposePage() && !onListingPage()){
-      window.dispatchEvent(new CustomEvent('lh-compose-files', {detail: list}));
-      return;
-    }
     var go = function(){ location.href = '/community/new'; };
-    if (!list.length){ go(); return; }
-    stashComposeImages(list).then(go).catch(go);
+    recordsToFiles(Array.prototype.slice.call(files || []).slice(0, 6)).then(function(list){
+      if (onComposePage() && !onListingPage()){
+        window.dispatchEvent(new CustomEvent('lh-compose-files', {detail: list}));
+        return;
+      }
+      if (!list.length){ go(); return; }
+      stashComposeImages(list).then(go).catch(function(e){
+        alert((e && e.message) || '有图片读取失败，可能是 iCloud 原图未下载，请重试');
+      });
+    }).catch(function(e){
+      alert((e && e.message) || '有图片读取失败，可能是 iCloud 原图未下载，请重试');
+    });
   }
 
   function ensurePubSheet(){
@@ -173,11 +210,26 @@
     document.body.appendChild(album);
     document.body.appendChild(camera);
     function onPicked(input){
-      var picked = Array.prototype.slice.call(input.files || []);
-      input.value = '';
-      if (!picked.length) return;
-      if (picked.length > 6) picked = picked.slice(0, 6);
-      goCompose(picked);
+      var raw = Array.prototype.slice.call(input.files || []);
+      (async function(){
+        var recs = [];
+        try {
+          for (var i = 0; i < raw.length && recs.length < 6; i++){
+            var rec = await fileToRecord(raw[i]);
+            if (rec) recs.push(rec);
+          }
+        } catch(e){
+          input.value = '';
+          alert((e && e.message) || '有图片读取失败，可能是 iCloud 原图未下载，请重试');
+          return;
+        }
+        input.value = '';
+        if (!recs.length){
+          if (raw.length) alert('有图片读取失败，可能是 iCloud 原图未下载，请重试');
+          return;
+        }
+        goCompose(recs);
+      })();
     }
     album.addEventListener('change', function(){ onPicked(album); });
     camera.addEventListener('change', function(){ onPicked(camera); });

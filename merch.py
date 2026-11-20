@@ -464,6 +464,11 @@ def _target_for(conn, kind, oid):
         return mid, "广告：" + r["title"]
     if kind == "platform":
         return None, "平台客服"
+    if kind == "provider":
+        r = q(conn, "SELECT user_id, name FROM c_providers WHERE id=%s AND status='approved'", (oid,), one=True)
+        if not r:
+            raise HTTPException(404, "商家不存在或未通过审核")
+        return r.get("user_id"), "商家：" + r["name"]
     raise HTTPException(400, "咨询对象不正确")
 
 

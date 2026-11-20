@@ -173,8 +173,14 @@ PAGES = {
     ),
     "/partner": (
         "商家/服务商入驻 · 旅韩助手",
-        "门店代订、接送机、中文应急协助与短时口译服务商入驻申请（中韩双语），审核通过后展示。",
+        "地陪向导、医美、美食代点、接送机、住宿、翻译等商家入驻申请，审核通过后在对应分类展示，访客通过站内咨询联系。",
         "商家入驻,服务商入驻,입점 신청,旅韩助手",
+        True,
+    ),
+    "/shops/join-guide": (
+        "商家入驻教程 · 旅韩助手",
+        "旅韩助手商家入驻步骤：看示范案例、填写申请、等待审核、通过后在对应分类展示，访客通过站内咨询联系。",
+        "商家入驻,入驻教程,旅韩助手",
         True,
     ),
     "/deals": (
@@ -303,6 +309,7 @@ FILE_PATHS = {
     "chicken.html": "/chicken",
     "chicken-join.html": "/chicken/join",
     "partner.html": "/partner",
+    "join-guide.html": "/shops/join-guide",
     "me.html": "/me",
     "deals.html": "/deals",
     "festival.html": "/festival",
@@ -352,7 +359,7 @@ SITEMAP_PATHS = [
     "/", "/attractions", "/food", "/shopping", "/tips", "/beauty", "/faq",
     "/community", "/community/boards", "/community/rate", "/community/friends",
     "/rules", "/member", "/shops", "/pay", "/tax-refund", "/visa", "/itineraries", "/privacy", "/terms", "/promo/rules",
-    "/services", "/partner", "/deals", "/festival", "/opening", "/places", "/trips",
+    "/services", "/partner", "/shops/join-guide", "/deals", "/festival", "/opening", "/places", "/trips",
 ]
 
 router = APIRouter()

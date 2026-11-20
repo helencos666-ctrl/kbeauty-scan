@@ -10,10 +10,10 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="旅韩助手">
 <link rel="manifest" href="/manifest.webmanifest">
-<link rel="apple-touch-icon" href="/static/icons/apple-touch-icon.png?v=90">
-<link rel="icon" type="image/png" sizes="192x192" href="/static/icons/icon-192.png?v=90">
-<link rel="stylesheet" href="/static/pwa.css?v=90">
-<link rel="stylesheet" href="/static/community.css?v=90">
+<link rel="apple-touch-icon" href="/static/icons/apple-touch-icon.png?v=91">
+<link rel="icon" type="image/png" sizes="192x192" href="/static/icons/icon-192.png?v=91">
+<link rel="stylesheet" href="/static/pwa.css?v=91">
+<link rel="stylesheet" href="/static/community.css?v=91">
 <style>#preview[hidden]{display:none!important}#spotBox[hidden]{display:none!important}body.compose .lh-toast{bottom:calc(72px + env(safe-area-inset-bottom))}.show-cats{gap:5px}.show-cats button{padding:6px 8px;box-sizing:border-box;white-space:nowrap}.spot-box{margin:2px 0 12px}.spot-box label.f{margin:8px 0 4px;font-size:13px}.spot-box .f.sm{padding:8px 10px;font-size:14px}.price-row{display:flex;align-items:center;gap:6px}.price-row .won{flex:none;color:var(--sub);font-weight:700}.price-row input{flex:1;min-width:0}</style>
 </head>
 <body class="compose">
@@ -125,7 +125,7 @@
   <a href="/?tab=more"><i>☰</i>全部</a>
   <a href="/me"><i>👤</i>我的</a>
 </nav>
-<script src="/static/community.js?v=90"></script>
+<script src="/static/community.js?v=91"></script>
 <script>
 var WARN = {visa: '签证问答仅限个人经验分享，禁止发布代办广告。', study: '留学打听仅限经验交流，禁止发布中介广告。',
   friends: '请勿在帖子里公开手机号、微信号、住址等隐私。想认识新朋友，也可以去“旅韩交友”发布交友资料。',
@@ -503,7 +503,21 @@ function scheduleDraft(){ clearTimeout(draftTimer); draftTimer = setTimeout(save
   el.addEventListener(id === 'agree' ? 'change' : 'input', function(){ updateCounts(); scheduleDraft(); });
 });
 document.getElementById('mcat').addEventListener('change', function(){ applyMcat(); syncMedNote(); scheduleDraft(); });
+async function recordsToFiles(val){
+  if (window.lhComposeRecordsToFiles) return window.lhComposeRecordsToFiles(val);
+  var out = [], arr = Array.isArray(val) ? val : [];
+  for (var i = 0; i < arr.length; i++){
+    var rec = arr[i], buf = rec && rec.buf, name = (rec && rec.name) || 'img.jpg', type = (rec && rec.type) || 'image/jpeg';
+    if (rec && typeof Blob !== 'undefined' && rec instanceof Blob && !buf){
+      try { buf = await rec.arrayBuffer(); name = rec.name || name; type = rec.type || type; } catch(e){ buf = null; }
+    }
+    if (!buf || buf.byteLength === 0) continue;
+    out.push(new File([buf], name, {type: type || 'image/jpeg'}));
+  }
+  return out;
+}
 function takeComposeImages(){
+  if (window.lhTakeComposeImages) return window.lhTakeComposeImages();
   return new Promise(function(resolve){
     try {
       var req = indexedDB.open('lh-compose-pending', 1);
@@ -520,18 +534,16 @@ function takeComposeImages(){
       };
       req.onerror = function(){ resolve([]); };
     } catch(e){ resolve([]); }
-  });
+  }).then(recordsToFiles);
 }
 async function loadPendingImages(){
   var incoming = [];
   try { incoming = await takeComposeImages(); } catch(e){ incoming = []; }
-  if ((!incoming || !incoming.length) && window.lhTakeComposeImages){
-    try { incoming = await window.lhTakeComposeImages(); } catch(e){ incoming = []; }
-  }
   if (!incoming || !incoming.length) return;
   for (var i = 0; i < incoming.length; i++){
     if (files.length >= 6){ LH.toast('最多 6 张图片'); break; }
-    files.push(await LH.compress(incoming[i]));
+    try { files.push(await LH.compress(incoming[i])); }
+    catch(e){ LH.toast((e && e.message) || '有图片读取失败，请重新选择'); }
   }
   drawThumbs();
 }
@@ -540,7 +552,8 @@ window.addEventListener('lh-compose-files', function(ev){
   (async function(){
     for (var i = 0; i < incoming.length; i++){
       if (files.length >= 6){ LH.toast('最多 6 张图片'); break; }
-      files.push(await LH.compress(incoming[i]));
+      try { files.push(await LH.compress(incoming[i])); }
+      catch(e){ LH.toast((e && e.message) || '有图片读取失败，请重新选择'); }
     }
     drawThumbs();
   })();
@@ -552,9 +565,26 @@ window.addEventListener('lh-compose-files', function(ev){
   if (!d.user){ gate.innerHTML = '<div class="empty">请先登录<br><br><a class="btn primary" href="/login?next=' + encodeURIComponent(next) + '">登录 / 注册</a></div>'; return; }
   var isMerchant = !!(d.user && (d.user.merchant || d.user.merchant_info));
   if (LISTING){
-    if (!isMerchant){ gate.innerHTML = '<div class="empty">开通商家会员后才能发布商家信息<br><br><a class="btn primary" href="/member#merchant">了解商家会员</a>　<a class="btn ghost" href="/partner">商家入驻</a></div>'; return; }
-  } else if (d.user.tier < 1){ gate.innerHTML = '<div class="empty">开通会员（¥' + d.prices.price_t1 + '）后即可发帖。商家信息请到「我的」页的「商家发布信息」发布。<br><br><a class="btn primary" href="/member">了解会员</a></div>'; return; }
+    if (!isMerchant){
+      var fromApply = (LH.qs('from') || '') === 'apply';
+      gate.innerHTML = '<div class="empty">' + (fromApply
+        ? '入驻申请已提交（审核通常 1–3 天）。要在这里发布服务信息，需要先开通商家会员。'
+        : '发布服务信息需要先入驻并开通商家会员。不会填可以先看教程和示范案例。') +
+        '<br><br><a class="btn primary" href="/shops/join-guide">看入驻教程</a>　<a class="btn ghost" href="/partner?from=compose">填写入驻申请</a><br><br><a href="/member#merchant">了解商家会员</a></div>';
+      return;
+    }
+  } else if (d.user.tier < 1){ gate.innerHTML = '<div class="empty">开通会员（¥' + d.prices.price_t1 + '）后即可发帖。商家信息请到「我的」页的「我是商家 · 入驻并发布服务」发布。<br><br><a class="btn primary" href="/member">了解会员</a></div>'; return; }
   gate.style.display = 'none'; document.getElementById('form').style.display = 'block';
+  if (LISTING){
+    var form = document.getElementById('form');
+    if (form && !document.getElementById('manageHint')){
+      var h = document.createElement('p');
+      h.id = 'manageHint';
+      h.className = 'tip';
+      h.innerHTML = '你已是商家，可以直接发布服务。也可在 <a href="/member#mine" style="color:#146E68">我的帖子</a> 里查看已发布的内容。';
+      form.insertBefore(h, form.firstChild);
+    }
+  }
   document.getElementById('send').disabled = false; document.getElementById('preview').disabled = false;
   if (!LISTING){
     document.getElementById('chanbox').style.display = 'none';
@@ -646,8 +676,19 @@ function drawThumbs(){
 }
 drawThumbs();
 document.getElementById('pick').onchange = async function(){
-  var picked = Array.from(this.files || []); this.value = '';
-  for (var f of picked){ if (files.length >= 6){ LH.toast('最多 6 张图片'); break; } files.push(await LH.compress(f)); }
+  var picked = Array.from(this.files || []);
+  var ok = [];
+  try {
+    for (var i = 0; i < picked.length; i++){
+      if (files.length + ok.length >= 6){ LH.toast('最多 6 张图片'); break; }
+      ok.push(await LH.compress(picked[i]));
+    }
+  } catch(e){
+    var msg = (e && e.message) || '有图片读取失败，可能是 iCloud 原图未下载，请重试';
+    LH.showErr(document.getElementById('err'), msg); LH.toast(msg);
+  }
+  this.value = '';
+  ok.forEach(function(f){ if (files.length < 6) files.push(f); });
   drawThumbs();
 };
 function setSending(on){
@@ -708,7 +749,22 @@ document.getElementById('send').onclick = async function(){
   if (MB[currentBoard()]){
     fd.append('tag', document.getElementById('tag').value); fd.append('offer', document.getElementById('offer').value); fd.append('valid_until', document.getElementById('valid').value);
   }
-  files.forEach(function(f){ fd.append('images', f, 'img.jpg'); });
+  var rebuilt = [], total = 0;
+  try {
+    for (var i = 0; i < files.length; i++){
+      var buf = await files[i].arrayBuffer();
+      if (!buf || buf.byteLength === 0) throw new Error('有图片读取失败，请删除后重新选择');
+      total += buf.byteLength;
+      rebuilt.push(new File([buf], 'img.jpg', {type: files[i].type || 'image/jpeg'}));
+    }
+  } catch(e){
+    LH.showErr(err, e.message || '有图片读取失败，请重新选择'); window.scrollTo(0, 0); return;
+  }
+  if (total >= 18 * 1024 * 1024){
+    LH.showErr(err, '图片总大小超过 18MB，请减少张数或换小一点的图'); window.scrollTo(0, 0); return;
+  }
+  files = rebuilt;
+  rebuilt.forEach(function(f){ fd.append('images', f, 'img.jpg'); });
   setSending(true);
   try {
     var r = await LH.api('POST', '/api/community/posts', fd);
@@ -716,9 +772,14 @@ document.getElementById('send').onclick = async function(){
     if (r.pending){ LH.toast(r.message || '已提交，等待审核', 'ok', 4000); }
     else { LH.toast('发布成功', 'ok', 2000); }
     setTimeout(function(){ location.href = '/community/post/' + r.id; }, r.pending ? 900 : 800);
-  } catch(e){ LH.showErr(err, e.message); LH.toast(e.message); setSending(false); window.scrollTo(0, 0); }
+  } catch(e){
+    var msg = e.message || '发布失败，请稍后重试';
+    if (e.status === 400 && /未到达/.test(msg)) msg = '上传内容未到达服务器，请刷新页面或重新选图后再试';
+    try { saveDraft(); } catch(x){}
+    LH.showErr(err, msg); LH.toast(msg); setSending(false); window.scrollTo(0, 0);
+  }
 };
 </script>
-<script src="/static/pwa.js?v=90" defer></script>
+<script src="/static/pwa.js?v=91" defer></script>
 </body>
 </html>

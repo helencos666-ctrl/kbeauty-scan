@@ -135,7 +135,7 @@ check("顶栏安全区只作用于 header.xbar",
       "env(safe-area-inset-top)" in xbar_css, xbar_css)
 check("main.home 单独微调上边距", bool(rule(css, "main.home")))
 
-check("community.html 使用 ?v=90", html.count("?v=90") >= 4 and "?v=81" not in html)
+check("community.html 使用 ?v=91", html.count("?v=91") >= 4 and "?v=81" not in html)
 check("未新增外链 http(s) 资源",
       "http://" not in html and "https://" not in html.replace("https://schema.org", ""))
 
@@ -186,7 +186,7 @@ check("瀑布流卡片可展示店名和区域", "wspot" in js_w and "spot_name"
 check("帖子详情可展示店名、区域和人均", "pspot" in post_h and "人均 ₩" in post_h and "spot_name" in post_h)
 check("商家发布走 listing 模式", "isListingMode" in newpost and "listing=1" in newpost and "CAT_TO_BOARD" in newpost and "MCAT_TPL" in newpost)
 me = read("me.html")
-check("我的页有商家发布信息入口", "商家发布信息" in me and "/community/new?listing=1" in me)
+check("我的页有合并后的商家入口", "我是商家 · 入驻并发布服务" in me and "/shops/start" in me)
 pwa_js = read("pwa.js")
 pwa_css = read("pwa.css")
 check("底栏+发布弹出操作表",

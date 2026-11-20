@@ -572,8 +572,9 @@ def db():
                         cur.execute(MIGRATE_RETENTION)
                         from visits import MIGRATE_VISITS
                         cur.execute(MIGRATE_VISITS)
-                        from providers import MIGRATE_PROVIDERS
+                        from providers import MIGRATE_PROVIDERS, MIGRATE_PROVIDER_PHOTOS
                         cur.execute(MIGRATE_PROVIDERS)
+                        cur.execute(MIGRATE_PROVIDER_PHOTOS)
                         from me import MIGRATE_ME
                         cur.execute(MIGRATE_ME)
                         from chat import MIGRATE_CHAT
@@ -1891,6 +1892,22 @@ async def api_new_post(req: Request, board: str = Form(""), title: str = Form(""
                        avg_price: str = Form(""),
                        images: list[UploadFile] = File(default=[])):
     csrf(req)
+    cl = req.headers.get("content-length")
+    ctype = (req.headers.get("content-type") or "").lower()
+    images = [f for f in (images or []) if f and f.filename]
+    empty_packet = (cl == "0") or (
+        (not ctype.startswith("multipart/form-data"))
+        and not ((board or "").strip() or (title or "").strip() or (body or "").strip() or images)
+    )
+    if empty_packet:
+        print("post_upload_empty cl=%s ctype=%s len_title=%d len_body=%d n_images=%d" % (
+            cl if cl is not None else "",
+            ctype.split(";")[0],
+            len(title or ""),
+            len(body or ""),
+            len(images),
+        ), flush=True)
+        raise HTTPException(400, "上传内容未到达服务器，请刷新页面或重新选图后再试")
     board = (board or "").strip()
     if board not in BOARDS:
         board = DAILY_BOARD
@@ -1901,7 +1918,6 @@ async def api_new_post(req: Request, board: str = Form(""), title: str = Form(""
     body = clean_text(body, 3000, "正文", (5 if daily else 10) if listing else 0)
     topics = clean_topics(topics)
     area, place = parse_area_place(place, area)
-    images = [f for f in (images or []) if f and f.filename]
     if not listing and not title and not body and not images:
         raise HTTPException(400, "请添加图片，或写标题或正文")
     show_cat = (show_cat or "").strip()
@@ -2837,6 +2853,8 @@ from chicken_merchant import router as _chicken_merchant_router   # noqa: E402
 router.include_router(_chicken_merchant_router)
 from providers import router as _providers_router   # noqa: E402
 router.include_router(_providers_router)
+from shop_examples import router as _shop_examples_router   # noqa: E402
+router.include_router(_shop_examples_router)
 from merch import router as _merch_router  # noqa: E402
 router.include_router(_merch_router)
 from retention import router as _retention_router  # noqa: E402

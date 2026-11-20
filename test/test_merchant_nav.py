@@ -36,8 +36,8 @@ check("找商家 inside #p-more", 'i>🏪</i>找商家' in more)
 check("home grid has no 找商家", "找商家" not in home and "🏪" not in home)
 check("全部功能 has 找商家/路线/翻译/常用韩语/识妆/汇率/美食",
       all(w in index for w in ["地铁·公交路线", "中韩翻译", "常用韩语", "拍照识妆", "汇率换算", "找商家", "韩国美食"]))
-check("我是商家 · 商家入驻 kept", "我是商家 · 商家入驻" in index and "我是商家 · 商家入驻" in me)
-check("商家入驻 is at bottom of #p-more", "我是商家 · 商家入驻" in more and more.rindex("我是商家 · 商家入驻") > more.rindex("常见问题"))
+check("我是商家入口已合并", "我是商家 · 入驻并发布服务" in index and "我是商家 · 入驻并发布服务" in me and "商家发布信息" not in me.split("<nav")[0])
+check("商家入口在 #p-more 底部", "我是商家 · 入驻并发布服务" in more and more.rindex("我是商家 · 入驻并发布服务") > more.rindex("常见问题") and 'href="/shops/start"' in more)
 
 # ---- 新首页模块 ----
 check("home 三大入口 路线/翻译/扫描识别", 'data-go="sub"' in home and 'data-go="card"' in home
@@ -51,7 +51,7 @@ check("home 美妆识别副标题用拍照", "拍照查成分" in coreblk and "�
 check("home 吃喝玩乐五格", "吃喝玩乐" in home and all(
     u in home for u in ["/food", "/food?cat=cafe", "/shopping", "/attractions", "/places?category=hotel"]))
 check("home 五格文案", all(w in home for w in [">美食<", ">咖啡<", ">购物<", ">景点<", ">酒店<"]))
-check("home 广告轮播四张", all("/static/home-ads/ad-%d.jpg?v=90" % i in home for i in (1, 2, 3, 4)) and "蓝憬通讯" in home and 'data-ad="lanjing"' in home
+check("home 广告轮播四张", all("/static/home-ads/ad-%d.jpg?v=91" % i in home for i in (1, 2, 3, 4)) and "蓝憬通讯" in home and 'data-ad="lanjing"' in home
       and 'class="ads' in home and "adsDots" in home)
 check("home 无附近推荐板块", "附近推荐" not in home and "nearBlk" not in index and "按距离" not in home)
 check("home 吃喝玩乐瀑布流紧跟广告", "playBlk" in home and "playGrid" in home

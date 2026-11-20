@@ -173,7 +173,7 @@
   window.providersAdmin = async function(){
     var box = $('t-providers');
     if (!$('pvList')){
-      box.innerHTML = '<div class="card"><h2>服务商入驻申请</h2><p class="tip" style="margin-top:0">申请来自 /partner。联系人、电话、邮箱、KakaoTalk、执照号已加密保存，只在这里显示，请勿外传。通过后显示在 /services；拒绝/下架后不再公开。</p>' +
+      box.innerHTML = '<div class="card"><h2>服务商入驻申请</h2><p class="tip" style="margin-top:0">申请来自 /partner。联系人、电话、邮箱、KakaoTalk、执照号已加密保存，只在这里显示，请勿外传。通过后显示在 /shops 对应分类；拒绝/下架后不再公开。</p>' +
         '<div class="row" style="gap:8px"><select class="f" id="pvF" style="flex:1"><option value="pending">待审核</option><option value="approved">已通过</option><option value="rejected">已拒绝</option><option value="all">全部</option></select><button class="btn primary" id="pvR">刷新</button></div><div id="pvList" style="margin-top:10px"></div></div>';
       $('pvR').onclick = providersAdmin; $('pvF').onchange = providersAdmin;
     }
@@ -183,8 +183,8 @@
     $('pvList').innerHTML = d.items.length ? d.items.map(function(x){
       var ct = x.contact || {};
       return '<div class="cmt" style="display:block"><div class="who">#' + x.id + ' ' + E(x.name) + (x.name_ko ? ' / ' + E(x.name_ko) : '') + ' · <b>' + E(x.status_name) + '</b> · ' + E(x.category_name) + ' · ' + E(x.area) + ' · ' + E(x.time) + '</div>' +
-        '<div class="ct" style="white-space:pre-wrap;font-size:13px">' + (x.photo ? '<img src="' + x.photo + '" alt="" style="width:120px;border-radius:8px;float:right;margin-left:8px">' : '') +
-        '地址：' + E(x.address || '—') + '\n服务：' + E(x.services) + '\n价格：' + E(x.price) + '\n营业时间：' + E(x.hours) +
+        '<div class="ct" style="white-space:pre-wrap;font-size:13px">' + ((x.photos && x.photos.length) ? '<div style="display:flex;gap:6px;flex-wrap:wrap;margin:0 0 8px">' + x.photos.map(function(u){ return '<img src="' + u + '" alt="" style="width:88px;height:66px;object-fit:cover;border-radius:8px">'; }).join('') + '</div>' : (x.photo ? '<img src="' + x.photo + '" alt="" style="width:120px;border-radius:8px;float:right;margin-left:8px">' : '')) +
+        '地址：' + E(x.address || '—') + '\n服务：' + E(x.services) + '\n价格：' + E(x.price) + '\n营业时间：' + E(x.hours || '—') +
         '\n联系人：' + E(ct.name || '') + ' · 电话：' + E(ct.phone || '—') + ' · 邮箱：' + E(ct.email || '—') + ' · Kakao：' + E(ct.kakao || '—') +
         (x.license ? '\n执照/资质：' + E(x.license) : '') + (x.reject_reason ? '\n拒绝原因：' + E(x.reject_reason) : '') + '</div>' +
         '<div class="row" style="margin-top:6px;flex-wrap:wrap;clear:both">' +

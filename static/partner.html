@@ -10,10 +10,10 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="旅韩助手">
 <link rel="manifest" href="/manifest.webmanifest">
-<link rel="apple-touch-icon" href="/static/icons/apple-touch-icon.png?v=90">
-<link rel="icon" type="image/png" sizes="192x192" href="/static/icons/icon-192.png?v=90">
-<link rel="stylesheet" href="/static/pwa.css?v=90">
-<link rel="stylesheet" href="/static/community.css?v=90">
+<link rel="apple-touch-icon" href="/static/icons/apple-touch-icon.png?v=91">
+<link rel="icon" type="image/png" sizes="192x192" href="/static/icons/icon-192.png?v=91">
+<link rel="stylesheet" href="/static/pwa.css?v=91">
+<link rel="stylesheet" href="/static/community.css?v=91">
 <style>
 .ko{color:#8a8f99;font-size:12px;font-weight:400;margin-left:4px}
 .hp{position:absolute;left:-9999px;width:1px;height:1px;overflow:hidden}
@@ -23,12 +23,14 @@
 .no{background:#fff5f5;border-radius:12px;padding:10px 12px;font-size:13px;line-height:1.7;color:#a33}
 .terms{font-size:13px;line-height:1.75;color:#555}
 .terms li{margin-bottom:4px}
+.phprev img{width:72px;height:72px;object-fit:cover;border-radius:10px;background:#E3EEEC}
 </style>
 </head>
 <body>
 <header>
   <h1>🤝 商家/服务商入驻 <span class="ko" style="color:#fff;opacity:.85">입점 신청</span></h1>
-  <p>提交资料 → 平台审核 → 通过后在「商家」页展示 · 신청 → 심사 → 승인 후 게시</p>
+  <p>提交资料 → 平台审核 → 通过后在对应分类展示，访客通过站内咨询联系</p>
+  <p style="margin:8px 0 0"><a class="btn ghost" href="/shops/join-guide" style="display:inline-block">先看入驻教程（3 步）</a>　<a href="/shops" style="color:#fff;opacity:.9">看示范案例</a></p>
 </header>
 <main>
   <div class="err" id="err" style="display:none"></div>
@@ -36,7 +38,7 @@
   <div class="card">
     <h2>可入驻的服务 <span class="ko">입점 가능 업종</span></h2>
     <div id="catinfo" class="terms"></div>
-    <div class="no"><b>不接受 · 받지 않는 업종：</b>医美/皮肤科/医院中介（성형·피부과·병원 알선），代办签证（비자 대행），打包一日游（패키지 일일투어），加价代抢票（웃돈 티켓팅 대행）。</div>
+    <div class="no"><b>不接受：</b>医美/医院中介或陪诊、代办签证、打包一日游、加价代抢票。医美分类仅限合法医疗机构自行入驻，须填写资质。</div>
   </div>
   <div class="card" id="formcard">
     <h2>入驻申请 <span class="ko">입점 신청서</span></h2>
@@ -45,14 +47,15 @@
     <label class="f">店名/服务名称（中文）<span class="ko">상호명(중국어)</span></label><input class="f" id="f_name" maxlength="40" placeholder="例如：弘大某某写真馆">
     <label class="f">韩文店名（选填）<span class="ko">상호명(한국어, 선택)</span></label><input class="f" id="f_name_ko" maxlength="60" lang="ko">
     <label class="f">区域 <span class="ko">지역</span></label><select class="f" id="f_area"></select>
-    <label class="f">地址（门店必填）<span class="ko">주소(매장 필수)</span></label><input class="f" id="f_addr" maxlength="120" placeholder="韩文道路名地址 · 도로명 주소">
-    <label class="f">服务内容 <span class="ko">서비스 내용</span></label><textarea class="f" id="f_services" rows="4" maxlength="600" placeholder="提供什么服务、适合什么客人、注意事项 · 제공 서비스, 유의사항"></textarea>
-    <label class="f">价格 <span class="ko">가격</span></label><textarea class="f" id="f_price" rows="2" maxlength="300" placeholder="例如：餐厅代订手续费 10,000韩元/次 · 예: 예약 대행 수수료 1회 10,000원"></textarea>
-    <label class="f">营业时间 <span class="ko">영업시간</span></label><input class="f" id="f_hours" maxlength="80" placeholder="例如：每天 10:00–20:00 · 매일 10:00–20:00">
+    <label class="f">地址<span class="ko">주소</span> <span id="addrReq" class="ko">住宿和美食代点请填写</span></label><input class="f" id="f_addr" maxlength="120" placeholder="韩文道路名地址，没有门店可留空">
+    <label class="f">服务内容 <span class="ko">서비스 내용</span></label><textarea class="f" id="f_services" rows="4" maxlength="600" placeholder="分点写：提供什么服务、适合谁、不包含什么。不要写电话或微信。"></textarea>
+    <p class="tip" id="exLink" style="margin:4px 0 10px"></p>
+    <label class="f">价格 <span class="ko">가격</span></label><textarea class="f" id="f_price" rows="2" maxlength="300" placeholder="例如：半日陪同 请填写价格（韩元）；加项如何计费"></textarea>
+    <label class="f">营业时间（选填）<span class="ko">영업시간(선택)</span></label><input class="f" id="f_hours" maxlength="80" placeholder="例如：每天 10:00–20:00">
     <div id="licbox" style="display:none">
-      <label class="f">营业执照号/营运资质（接送机必填）<span class="ko">사업자등록번호·운송 자격(필수)</span></label>
-      <input class="f" id="f_license" maxlength="80" autocomplete="off" placeholder="如：사업자등록번호、여객자동차운송사업 면허 등">
-      <p class="tip" style="margin-top:4px">接送机仅限单程交通服务（机场↔酒店），须持有合法营运资质；不接受包车游览。</p>
+      <label class="f" id="liclab">营业执照号 / 营运资质（必填）</label>
+      <input class="f" id="f_license" maxlength="80" autocomplete="off" placeholder="如：사업자등록번호，或相应营运许可编号">
+      <p class="tip" id="lictip" style="margin-top:4px">接送机、租车须有合法营运资质；医美仅限合法医疗机构自行入驻。</p>
     </div>
     <h3 style="font-size:15px;margin:16px 0 4px">联系方式（加密保存，仅管理员审核时可见）<span class="ko">연락처(암호화 보관, 관리자만 열람)</span></h3>
     <label class="f">联系人 <span class="ko">담당자</span></label><input class="f" id="f_cname" maxlength="30" autocomplete="name">
@@ -60,7 +63,7 @@
     <label class="f">邮箱 <span class="ko">이메일</span></label><input class="f" id="f_email" maxlength="120" inputmode="email" autocomplete="email">
     <label class="f">KakaoTalk ID</label><input class="f" id="f_kakao" maxlength="40" autocomplete="off">
     <p class="tip" style="margin-top:4px">三项至少填一项。· 셋 중 하나 이상 입력해 주세요.</p>
-    <label class="f">门店/服务照片（选填）<span class="ko">사진(선택)</span></label><input type="file" id="f_photo" accept="image/jpeg,image/png,image/webp">
+    <label class="f">店铺展示照片（最多 6 张，选填）<span class="ko">사진(최대 6장, 선택)</span></label><input type="file" id="f_photos" accept="image/jpeg,image/png,image/webp" multiple><p class="tip" id="phn" style="margin-top:4px">建议上传门头/形象、服务场景和价目，最多 6 张。不要放二维码或联系方式。</p><div id="phprev" style="display:flex;flex-wrap:wrap;gap:8px;margin-top:8px"></div>
     <div class="hp" aria-hidden="true"><label>Website<input id="f_website" tabindex="-1" autocomplete="off"></label></div>
     <details style="margin-top:14px" open><summary style="cursor:pointer;font-weight:700;font-size:14px">入驻须知 · 입점 안내</summary>
       <ul class="terms">
@@ -87,37 +90,85 @@
   <a href="/?tab=more"><i>☰</i>全部</a>
   <a href="/me"><i>👤</i>我的</a>
 </nav>
-<script src="/static/community.js?v=90"></script>
+<script src="/static/community.js?v=91"></script>
 <script>
 (async function(){
   var $ = function(id){ return document.getElementById(id); };
   var err = $('err'), ok = $('ok');
   function show(el, t){ el.textContent = t || ''; el.style.display = t ? 'block' : 'none'; if (t) window.scrollTo(0, 0); }
+  var me = null;
+  try { me = await LH.me(); } catch(e){}
+  if (me && me.user && me.user.merchant && (LH.qs('apply') !== '1')){
+    location.replace('/community/new?listing=1');
+    return;
+  }
   var meta;
   try { meta = await LH.api('GET', '/api/providers/meta'); } catch(e){ show(err, e.message); return; }
   var T0 = meta.t;
+  var licenseCats = meta.license_cats || ['airport','clinic','car'];
+  var addressCats = meta.address_cats || ['hotel','food'];
+  var pre = (LH.qs('cat') || '').trim();
   $('catinfo').innerHTML = '<ol style="padding-left:18px;margin:0">' + meta.cats.map(function(c){ return '<li><b>' + LH.esc(c.name) + '</b> <span class="ko">' + LH.esc(c.name_ko) + '</span><br>' + LH.esc(c.desc) + '</li>'; }).join('') + '</ol>';
-  $('f_cat').innerHTML = meta.cats.map(function(c, i){ return '<label><input type="radio" name="cat" value="' + c.key + '"' + (i === 0 ? ' checked' : '') + '><span><b>' + LH.esc(c.name) + '</b><span class="ko" style="margin:0">' + LH.esc(c.name_ko) + '</span></span></label>'; }).join('');
+  $('f_cat').innerHTML = meta.cats.map(function(c, i){
+    var chk = (pre && c.key === pre) || (!pre && i === 0);
+    return '<label><input type="radio" name="cat" value="' + c.key + '"' + (chk ? ' checked' : '') + '><span><b>' + LH.esc(c.name) + '</b><span class="ko" style="margin:0">' + LH.esc(c.name_ko) + '</span></span></label>';
+  }).join('');
   $('f_area').innerHTML = meta.areas.map(function(a){ return '<option>' + LH.esc(a) + '</option>'; }).join('');
   function cat(){ var r = document.querySelector('input[name=cat]:checked'); return r ? r.value : ''; }
-  function syncCat(){ $('licbox').style.display = cat() === 'transfer' ? 'block' : 'none'; }
+  function syncCat(){
+    var c = cat();
+    var needLic = licenseCats.indexOf(c) >= 0;
+    $('licbox').style.display = needLic ? 'block' : 'none';
+    $('addrReq').textContent = addressCats.indexOf(c) >= 0 ? '（此类请填写地址）' : '（没有门店可留空）';
+    var tips = {airport:'接送机仅限单程交通（机场↔酒店），须有合法营运资质，不接受包车游览。', car:'租车须有合法营运资质。', clinic:'医美仅限合法医疗机构自行入驻，请填写执照或诊疗资质；不接受中介或陪诊。'};
+    $('lictip').textContent = tips[c] || '请填写合法经营资质。';
+    var ex = $('exLink');
+    ex.innerHTML = '不确定怎么写？先看「<a href="/shops/examples/' + encodeURIComponent(c) + '" style="color:#146E68">本分类示范案例（仅供参考，非真实商家）</a>」。';
+  }
   document.querySelectorAll('input[name=cat]').forEach(function(r){ r.onchange = syncCat; }); syncCat();
   if (!meta.open){ show(err, '入驻申请暂未开放，请稍后再来。'); $('fsend').disabled = true; }
+  if (!me || !me.user){
+    var hint = document.createElement('p');
+    hint.className = 'tip';
+    hint.innerHTML = '建议<a href="/login?next=' + encodeURIComponent('/partner' + location.search) + '" style="color:#146E68">先登录</a>，方便审核后直接发布服务。不登录也可以提交申请。';
+    $('formcard').insertBefore(hint, $('formcard').querySelector('label'));
+  }
+  var phInput = $('f_photos');
+  function syncPhotos(){
+    var files = Array.prototype.slice.call(phInput.files || [], 0, 6);
+    $('phn').textContent = files.length ? ('已选 ' + files.length + ' 张（最多 6 张）') : '建议上传门头/形象、服务场景和价目，最多 6 张。不要放二维码或联系方式。';
+    var prev = $('phprev'); prev.innerHTML = '';
+    files.forEach(function(f){
+      var img = document.createElement('img');
+      img.alt = '预览';
+      img.src = URL.createObjectURL(f);
+      prev.appendChild(img);
+    });
+  }
+  phInput.onchange = function(){
+    if (this.files && this.files.length > 6){ show(err, '最多上传 6 张照片，已自动保留前 6 张'); }
+    syncPhotos();
+  };
   $('fsend').onclick = async function(){
     show(err, ''); show(ok, '');
-    if (!$('f_agree').checked){ show(err, '请先勾选同意入驻须知 · 동의에 체크해 주세요'); return; }
+    if (!$('f_agree').checked){ show(err, '请先勾选同意入驻须知'); return; }
     if (!$('f_phone').value.trim() && !$('f_email').value.trim() && !$('f_kakao').value.trim()){ show(err, '电话、邮箱、KakaoTalk ID 至少填一项'); return; }
     var fd = new FormData();
     fd.append('category', cat());
     [['name','f_name'],['name_ko','f_name_ko'],['area','f_area'],['address','f_addr'],['services','f_services'],['price','f_price'],['hours','f_hours'],['license','f_license'],['contact_name','f_cname'],['phone','f_phone'],['email','f_email'],['kakao','f_kakao'],['website','f_website']].forEach(function(p){ fd.append(p[0], $(p[1]).value); });
     fd.append('agree', '1'); fd.append('t', String(T0));
-    var ph = $('f_photo').files[0];
-    if (ph) fd.append('photo', await LH.compress(ph), 'photo.jpg');
-    var b = this; b.disabled = true; b.textContent = '提交中… · 제출 중…';
+    var files = Array.prototype.slice.call(phInput.files || [], 0, 6);
+    for (var i=0;i<files.length;i++){
+      var c = await LH.compress(files[i]);
+      fd.append('photos', c, 'photo'+i+'.jpg');
+    }
+    var b = this; b.disabled = true; b.textContent = '提交中…';
     try {
       var r = await LH.api('POST', '/api/providers/apply', fd);
-      $('formcard').innerHTML = '<h2>✅ 已提交 · 제출 완료</h2><p class="tip">' + LH.esc(r.message) + '</p><a class="btn primary block" href="/shops">去商家页看看</a>';
+      var next = r.next || '/community/new?listing=1&from=apply';
+      $('formcard').innerHTML = '<h2>✅ 已提交</h2><p class="tip">' + LH.esc(r.message) + '</p><a class="btn primary block" href="' + next + '">接下来：发布你的服务</a><a class="btn ghost block" href="/shops" style="margin-top:8px">先去商家页看看</a>';
       show(ok, r.message);
+      setTimeout(function(){ location.href = next; }, 600);
     } catch(e){ show(err, e.message); b.disabled = false; b.textContent = '提交申请 · 신청하기'; }
   };
 })();

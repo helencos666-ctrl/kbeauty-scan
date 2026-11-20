@@ -6,6 +6,7 @@ document.addEventListener('error', function(ev){
     t.style.display = 'none';
     if (t.parentNode && t.parentNode.classList) t.parentNode.classList.add('fb');
   }
+  if (t && t.tagName === 'IMG' && t.getAttribute('data-hideonerr') === '1') t.style.display = 'none';
 }, true);
 var LH = (function(){
   function esc(s){ return String(s == null ? '' : s).replace(/[&<>"']/g, function(c){ return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]; }); }
@@ -35,21 +36,48 @@ var LH = (function(){
   }
   function showErr(el, msg){ el.textContent = msg; el.style.display = msg ? 'block' : 'none'; }
   function qs(name){ return new URLSearchParams(location.search).get(name); }
-  // 浏览器端压缩：最长边 1600px，JPEG 0.82，减少上传流量（服务器还会再压一次）
+  // 浏览器端压缩：最长边 1600px，JPEG 0.82。必须永远返回全新的内存 File，不能把
+  // 相册 input / IndexedDB 里的原始句柄直接塞进 FormData（iOS WebKit 会发出空请求体）。
+  function isGifFile(file){ return /gif/i.test((file && file.type) || '') || /\.gif$/i.test((file && file.name) || ''); }
+  function isSimpleRaster(file){ return /image\/(jpeg|jpg|png|webp|gif|bmp)/i.test((file && file.type) || '') || /\.(jpe?g|png|webp|gif|bmp)$/i.test((file && file.name) || ''); }
+  async function asMemoryFile(file, name, type){
+    if (!file) throw new Error('图片读取失败，请重新选择');
+    var buf = file.buf || null;
+    if (!buf){
+      try { buf = await file.arrayBuffer(); } catch(e){ throw new Error('有图片读取失败，可能是 iCloud 原图未下载，请重试'); }
+    }
+    if (!buf || buf.byteLength === 0) throw new Error('有图片读取失败，可能是 iCloud 原图未下载，请重试');
+    return new File([buf], name || file.name || 'img.jpg', {type: type || file.type || 'image/jpeg'});
+  }
   function compress(file){
-    return new Promise(function(resolve){
-      if (!/^image\//.test(file.type) || /gif/.test(file.type)) return resolve(file);
-      var url = URL.createObjectURL(file), img = new Image();
-      img.onload = function(){
-        var max = 1600, w = img.naturalWidth, h = img.naturalHeight, k = Math.min(1, max / Math.max(w, h));
-        var c = document.createElement('canvas'); c.width = Math.round(w * k); c.height = Math.round(h * k);
-        c.getContext('2d').drawImage(img, 0, 0, c.width, c.height);
-        URL.revokeObjectURL(url);
-        c.toBlob(function(b){ resolve(b && b.size < file.size ? new File([b], 'img.jpg', {type: 'image/jpeg'}) : file); }, 'image/jpeg', 0.82);
-      };
-      img.onerror = function(){ URL.revokeObjectURL(url); resolve(file); };
-      img.src = url;
-    });
+    return (async function(){
+      var mem = await asMemoryFile(file);
+      if (isGifFile(mem)) return mem;
+      var forceJpeg = !isSimpleRaster(mem) || /heic|heif|avif|tiff/i.test((mem.type || '') + ' ' + (mem.name || ''));
+      return await new Promise(function(resolve, reject){
+        var url = URL.createObjectURL(mem), img = new Image();
+        img.onload = function(){
+          var max = 1600, w = img.naturalWidth, h = img.naturalHeight, k = Math.min(1, max / Math.max(w, h) || 1);
+          var c = document.createElement('canvas'); c.width = Math.max(1, Math.round(w * k)); c.height = Math.max(1, Math.round(h * k));
+          c.getContext('2d').drawImage(img, 0, 0, c.width, c.height);
+          URL.revokeObjectURL(url);
+          c.toBlob(function(b){
+            if (b && b.size){
+              if (forceJpeg || b.size < mem.size) return resolve(new File([b], 'img.jpg', {type: 'image/jpeg'}));
+            } else if (forceJpeg){
+              return reject(new Error('图片无法转换，请换 JPG 或 PNG 再试'));
+            }
+            asMemoryFile(mem, mem.name || 'img.jpg', mem.type).then(resolve, reject);
+          }, 'image/jpeg', 0.82);
+        };
+        img.onerror = function(){
+          URL.revokeObjectURL(url);
+          if (forceJpeg) return reject(new Error('图片无法识别，请换 JPG 或 PNG 再试'));
+          asMemoryFile(mem, mem.name || 'img.jpg', mem.type).then(resolve, reject);
+        };
+        img.src = url;
+      });
+    })();
   }
   async function userbar(el){
     // 顶部个人卡片已下线，相关入口统一由「我的」页提供。
@@ -274,7 +302,7 @@ var LH = (function(){
       var r = await api('GET', '/api/consult/unread'), n = r.n || 0;
       document.querySelectorAll('[data-consult-dot]').forEach(function(el){ el.textContent = n > 99 ? '99+' : n; el.style.display = n ? '' : 'none'; });
       if (_cn >= 0 && n > _cn && document.hidden && window.Notification && Notification.permission === 'granted' && !/^\/consult\/\d/.test(location.pathname)){
-        var opt = {body: '你有 ' + n + ' 条未读咨询消息', icon: '/static/icons/icon-192.png?v=90', tag: 'lh-consult', data: {url: '/consult'}};
+        var opt = {body: '你有 ' + n + ' 条未读咨询消息', icon: '/static/icons/icon-192.png?v=91', tag: 'lh-consult', data: {url: '/consult'}};
         try { var reg = navigator.serviceWorker && await navigator.serviceWorker.getRegistration(); if (reg) reg.showNotification('旅韩助手 · 站内咨询', opt); else new Notification('旅韩助手 · 站内咨询', opt); } catch(e){}
       }
       _cn = n;
@@ -412,7 +440,7 @@ var LH = (function(){
       });
     }
   }
-  return {prices: prices, esc: esc, api: api, me: me, badge: badge, showErr: showErr, qs: qs, compress: compress, userbar: userbar, report: report, toast: toast, relTime: relTime,
+  return {prices: prices, esc: esc, api: api, me: me, badge: badge, showErr: showErr, qs: qs, compress: compress, asMemoryFile: asMemoryFile, userbar: userbar, report: report, toast: toast, relTime: relTime,
           vb: vb, avatar: avatar, pickAvatar: pickAvatar, postItem: postItem, waterItem: waterItem, appendWater: appendWater, bindWaterLazy: bindWaterLazy, bizItem: bizItem, ubadges: ubadges, BADGES: BADGES, postFlags: postFlags, consultHref: consultHref, consultBtn: consultBtn, startConsultPoll: startConsultPoll, friendCard: friendCard, lockedPrompt: lockedPrompt, ANTISCAM: ANTISCAM, share: share,
           mapLinks: mapLinks, copyText: copyText, krwCny: krwCny, menuHtml: menuHtml, locHtml: locHtml, ratingText: ratingText, bindShopExtras: bindShopExtras, starsHtml: starsHtml, priceLine: priceLine};
 })();

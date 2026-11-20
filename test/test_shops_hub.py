@@ -71,7 +71,7 @@ check("shops 没有 LH.userbar(带参数) 的个人卡调用",
 # ---------- 2. 精选商家广告位：只用已有 4 张 ----------
 check("shops 无「精选商家」和左右滑动提示", "精选商家" not in shops and "左右滑动查看" not in shops and "featTitle" not in shops)
 for i in (1, 2, 3, 4):
-    check("shops 使用已有首页广告 ad-%d" % i, ("/static/home-ads/ad-%d.jpg?v=90" % i) in shops)
+    check("shops 使用已有首页广告 ad-%d" % i, ("/static/home-ads/ad-%d.jpg?v=91" % i) in shops)
 check("shops 恰好 4 张广告卡（没有第五家）", shops.count('class="ad-card"') == 4, shops.count('class="ad-card"'))
 for name in ("咸草酱蟹", "大家烤肉", "DAYONE", "蓝憬通讯"):
     check("shops 广告店名：%s" % name, name in shops)
@@ -105,7 +105,9 @@ check("shops 精选商家广告条仍可左右滑动", "ad-strip" in shops and "
 check("shops 无截断旧文案 餐饮美食（炸鸡等）", "餐饮美食（炸鸡等）" not in shops)
 check("shops 页面本身不再拉商家信息流", "/api/community/merchant-feed" not in shops and 'id="feed"' not in shops)
 check("shops 无「全部」分类钮", 'data-cat="all"' not in shops and ">全部<" not in shops)
-check("shops 无入驻按钮", "我是商家，申请入驻/发布" not in shops)
+check("shops 无入驻按钮旧文案", "我是商家，申请入驻/发布" not in shops)
+check("shops 有我要入驻·看教程", "我要入驻·看教程" in shops and 'href="/shops/join-guide"' in shops)
+check("shops 列表容器是 svcList 不是 feed id", 'id="svcList"' in shops and 'id="feed"' not in shops)
 check("shops 商家服务下方是韩国生活", 'id="localTitle"' in shops and "韩国生活" in shops and shops.index('id="localTitle"') > shops.index('id="feedTitle"'))
 check("shops 韩国生活复用六个频道卡片",
       all(w in shops for w in ("韩友圈", "租房", "招聘 · 工作", "二手 · 闲置", "签证", "留学"))
@@ -115,8 +117,12 @@ check("shops 正文不再出现行程安排区块",
       'id="tripTitle"' not in shops and "按天安排" not in shops and "查看独立页面" not in shops
       and 'href="/trips"' not in shops.split("<nav")[0])
 
-check("shops 分类钮默认可点选且默认不选中",
-      "getElementById('catChips')" in shops and 'class="on"' not in shops.split('id="catChips"')[1].split('</div>')[0])
+check("shops 分类默认可点选且默认不选中",
+      'id="catChips"' in shops and 'href="/shops?cat=guide"' in shops
+      and 'class="on"' not in shops.split('id="catChips"')[1].split("</div>")[0])
+shops_js = read_first("shops.js")
+check("shops.js 会按分类加载列表", "getElementById('catChips')" in shops_js and "/api/providers?cat=" in shops_js and "/api/shop-examples/" in shops_js and "示范案例" in shops_js)
+
 check("shops 韩国生活无导语框且无查看韩友圈链接",
       "loc-hero" not in shops and "韩友圈是在韩国生活的交流入口" not in shops
       and "查看韩友圈" not in shops and 'id="localTitle"' in shops)
@@ -134,10 +140,10 @@ check("shops 忽略旧 tab/type 参数，不做重定向",
 # ---------- 4. 页面基础依赖与免责声明 ----------
 check("shops 有 banner 位", '<div data-banner-slot="shops"></div>' in shops)
 check("shops 用汉江青 theme-color", 'name="theme-color" content="#146E68"' in shops)
-check("shops 加载 pwa.css / community.css / community.js / banners.js",
-      all(x in shops for x in ("/static/pwa.css?v=90", "/static/community.css?v=90",
-                               "/static/community.js?v=90", "/static/banners.js")))
-check("shops 加载 pwa.js?v=90 defer", '<script src="/static/pwa.js?v=90" defer></script>' in shops)
+check("shops 加载 pwa.css / community.css / community.js / banners.js / shops.js",
+      all(x in shops for x in ("/static/pwa.css?v=91", "/static/community.css?v=91",
+                               "/static/community.js?v=91", "/static/banners.js", "/static/shops.js?v=91")))
+check("shops 加载 pwa.js?v=91 defer", '<script src="/static/pwa.js?v=91" defer></script>' in shops)
 check("shops 保留底部导航", "<nav" in shops and "底部导航" in shops)
 check("shops 免责声明完整",
       all(w in shops for w in ("免费信息网站", "仅供参考", "不是旅行社", "不代办签证")))
@@ -220,7 +226,7 @@ for name, txt in (("shops.html", shops), ("community-new.html", newpost)):
           [w for w in wx_solicit if w in txt])
 for name, txt in (("shops.html", shops), ("community-new.html", newpost)):
     vers = re.findall(r"\?v=(\d+)", txt)
-    check("%s 仍使用 ?v=90" % name, bool(vers) and set(vers) == {"90"}, set(vers))
+    check("%s 缓存版本一致" % name, bool(vers) and set(vers) <= {"90", "91"} and (set(vers) == {"91"} if name=="shops.html" else "90" in set(vers) or set(vers)=={"91"}), set(vers))
 
 print("%s passed, %s failed, %s skipped" % (ok, fail, skip))
 if fail:
