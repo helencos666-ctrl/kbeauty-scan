@@ -544,6 +544,8 @@ from official_daily_seed import seed_once as seed_official_daily  # noqa: E402
 from hide_shop_posts_v76 import hide_once as hide_shop_posts_v76  # noqa: E402
 from hide_shop_posts_v77 import hide_once as hide_shop_posts_v77  # noqa: E402
 app.include_router(lanjing_router)
+from shop_partners import router as shop_partners_router  # noqa: E402
+app.include_router(shop_partners_router)
 
 @app.on_event("startup")
 def _startup_seeds():

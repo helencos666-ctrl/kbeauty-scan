@@ -13,6 +13,7 @@ from urllib.parse import urlparse
 
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT))
+sys.path.insert(0, str(ROOT / "test"))
 
 ok = fail = 0
 ERRORS = []
@@ -43,8 +44,8 @@ def check_source_fixes():
     check("发帖提交前重建内存 File 并限制 18MB", "arrayBuffer()" in newp and "18 * 1024 * 1024" in newp)
     check("pick 压缩完成后再清空 value", "ok.push(await LH.compress" in newp and "this.value = ''" in newp)
     check("后端识别空包并给出准确提示", "上传内容未到达服务器" in py and "post_upload_empty" in py)
-    check("sw.js 缓存为 v91", "lvhan-shell-v91" in sw and "shops.js?v=91" in sw)
-    check("community-new 使用 v91", "?v=91" in newp and "?v=90" not in newp)
+    check("sw.js 缓存为 v92", "lvhan-shell-v92" in sw and "shops.js?v=92" in sw)
+    check("community-new 使用 v92", "?v=92" in newp and "?v=91" not in newp)
 
 # ---------------- local server ----------------
 def start_server():
@@ -387,6 +388,17 @@ def main():
     except Exception:
         check("Playwright 流程", False, traceback.format_exc())
         print("playwright error, screenshots so far:", list(shot_dir.glob("*.png")))
+    import shops_category_e2e as SC
+    try:
+        SC.run_local(base, check, shot_dir)
+    except Exception:
+        check("商家分类本地流程", False, traceback.format_exc())
+    live = os.environ.get("LH_LIVE_BASE", "").strip().rstrip("/")
+    if live:
+        try:
+            SC.run_live(live, check, Path("/workspace/lvhan-shopfix"))
+        except Exception:
+            check("商家分类线上流程", False, traceback.format_exc())
     run_unit_tests()
     print("%s passed, %s failed" % (ok, fail))
     if fail:

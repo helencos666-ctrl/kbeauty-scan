@@ -10,10 +10,10 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="旅韩助手">
 <link rel="manifest" href="/manifest.webmanifest">
-<link rel="apple-touch-icon" href="/static/icons/apple-touch-icon.png?v=91">
-<link rel="icon" type="image/png" sizes="192x192" href="/static/icons/icon-192.png?v=91">
-<link rel="stylesheet" href="/static/pwa.css?v=91">
-<link rel="stylesheet" href="/static/community.css?v=91">
+<link rel="apple-touch-icon" href="/static/icons/apple-touch-icon.png?v=92">
+<link rel="icon" type="image/png" sizes="192x192" href="/static/icons/icon-192.png?v=92">
+<link rel="stylesheet" href="/static/pwa.css?v=92">
+<link rel="stylesheet" href="/static/community.css?v=92">
 <style>
 .sec{margin:0 0 18px}
 .sec-head{display:flex;align-items:baseline;justify-content:space-between;gap:10px;margin:4px 2px 10px}
@@ -59,6 +59,13 @@ button.icon-tile{width:100%}
 .join-cta{margin:4px 0 16px}
 .join-cta .partner-btn{text-align:center}
 #svcList[hidden]{display:none!important}
+.icon-tile{position:relative}
+.icon-tile .cnt{position:absolute;top:6px;right:6px;min-width:18px;height:18px;padding:0 5px;border-radius:999px;background:#146E68;color:#fff;font-size:11px;font-weight:800;line-height:18px;text-align:center;box-sizing:border-box}
+#svcList{scroll-margin-top:12px}
+.list-head{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:12px 14px;border-radius:14px;background:#EAF6F4;color:#0F5B56;font-size:14px}
+.list-head b{font-size:16px}
+.list-head button{flex:none;border:0;background:#fff;color:#146E68;border-radius:999px;padding:6px 12px;font-size:13px;font-weight:700;font-family:inherit}
+.sub-label{margin:6px 2px 0;font-size:12.5px;color:#8a8f99}
 </style>
 </head>
 <body>
@@ -71,19 +78,19 @@ button.icon-tile{width:100%}
   <section class="sec" aria-label="商家卡片">
     <div class="ad-strip" id="adStrip">
       <a class="ad-card" href="/food#hamcho-myeongdong">
-        <img src="/static/home-ads/ad-1.jpg?v=91" alt="咸草酱蟹：明洞酱蟹，点击查看" width="640" height="320" loading="lazy" draggable="false" data-hideonerr="1">
+        <img src="/static/home-ads/ad-1.jpg?v=92" alt="咸草酱蟹：明洞酱蟹，点击查看" width="640" height="320" loading="lazy" draggable="false" data-hideonerr="1">
         <span class="ad-cap"><b>咸草酱蟹</b><span>点击查看</span></span>
       </a>
       <a class="ad-card" href="/food#daega-myeongdong">
-        <img src="/static/home-ads/ad-2.jpg?v=91" alt="大家烤肉：明洞烤肉，点击查看" width="640" height="320" loading="lazy" draggable="false" data-hideonerr="1">
+        <img src="/static/home-ads/ad-2.jpg?v=92" alt="大家烤肉：明洞烤肉，点击查看" width="640" height="320" loading="lazy" draggable="false" data-hideonerr="1">
         <span class="ad-cap"><b>大家烤肉</b><span>点击查看</span></span>
       </a>
-      <a class="ad-card" href="/shops">
-        <img src="/static/home-ads/ad-3.jpg?v=91" alt="DAYONE：商业服务，点击查看" width="640" height="320" loading="lazy" draggable="false" data-hideonerr="1">
+      <a class="ad-card" href="/shops?cat=clinic">
+        <img src="/static/home-ads/ad-3.jpg?v=92" alt="DAYONE：商业服务，点击查看" width="640" height="320" loading="lazy" draggable="false" data-hideonerr="1">
         <span class="ad-cap"><b>DAYONE</b><span>点击查看</span></span>
       </a>
       <a class="ad-card" data-ad="lanjing" href="/ads/lanjing">
-        <img src="/static/home-ads/ad-4.jpg?v=91" alt="蓝憬通讯：推荐2位好友注册 免费领韩国手机卡" width="640" height="320" loading="lazy" draggable="false" data-hideonerr="1">
+        <img src="/static/home-ads/ad-4.jpg?v=92" alt="蓝憬通讯：推荐2位好友注册 免费领韩国手机卡" width="640" height="320" loading="lazy" draggable="false" data-hideonerr="1">
         <span class="ad-cap"><b>蓝憬通讯</b><span>推荐2位好友注册 免费领韩国手机卡</span></span>
       </a>
     </div>
@@ -105,11 +112,11 @@ button.icon-tile{width:100%}
       <a class="icon-tile" role="tab" href="/shops?cat=daigou" data-cat="daigou" aria-selected="false"><span class="ico">🛍️</span><b>代购</b></a>
       <a class="icon-tile" role="tab" href="/shops?cat=other" data-cat="other" aria-selected="false"><span class="ico">📌</span><b>其它</b></a>
     </div>
+    <div id="svcList" class="feed" hidden aria-live="polite"></div>
     <div class="join-cta">
       <a class="btn primary block partner-btn" href="/shops/join-guide">我要入驻·看教程</a>
       <p class="tip" style="text-align:center;margin:8px 0 0">不会填也没关系：每个分类都有示范案例，看完再申请。</p>
     </div>
-    <div id="svcList" class="feed" hidden aria-live="polite"></div>
 
   </section>
 
@@ -138,9 +145,9 @@ button.icon-tile{width:100%}
   <a href="/trips" data-nav="trips" class="loc"><i>🗓️</i>行程安排</a>
   <a href="/me" data-nav="me" class="me"><i>👤</i>我的</a>
 </nav>
-<script src="/static/community.js?v=91"></script>
+<script src="/static/community.js?v=92"></script>
 <script src="/static/banners.js"></script>
-<script src="/static/shops.js?v=91"></script>
-<script src="/static/pwa.js?v=91" defer></script>
+<script src="/static/shops.js?v=92"></script>
+<script src="/static/pwa.js?v=92" defer></script>
 </body>
 </html>

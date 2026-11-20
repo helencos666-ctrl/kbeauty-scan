@@ -71,13 +71,13 @@ check("shops 没有 LH.userbar(带参数) 的个人卡调用",
 # ---------- 2. 精选商家广告位：只用已有 4 张 ----------
 check("shops 无「精选商家」和左右滑动提示", "精选商家" not in shops and "左右滑动查看" not in shops and "featTitle" not in shops)
 for i in (1, 2, 3, 4):
-    check("shops 使用已有首页广告 ad-%d" % i, ("/static/home-ads/ad-%d.jpg?v=91" % i) in shops)
+    check("shops 使用已有首页广告 ad-%d" % i, ("/static/home-ads/ad-%d.jpg?v=92" % i) in shops)
 check("shops 恰好 4 张广告卡（没有第五家）", shops.count('class="ad-card"') == 4, shops.count('class="ad-card"'))
 for name in ("咸草酱蟹", "大家烤肉", "DAYONE", "蓝憬通讯"):
     check("shops 广告店名：%s" % name, name in shops)
 check("shops 咸草酱蟹链接", 'href="/food#hamcho-myeongdong"' in shops)
 check("shops 大家烤肉链接", 'href="/food#daega-myeongdong"' in shops)
-check("shops DAYONE 链接到 /shops", re.search(r'class="ad-card" href="/shops"', shops) is not None)
+check("shops DAYONE 链接到医美分类（不再指回本页）", re.search(r'class="ad-card" href="/shops\?cat=clinic"', shops) is not None)
 check("shops 蓝憬通讯链接与 data-ad", 'data-ad="lanjing"' in shops and 'href="/ads/lanjing"' in shops)
 check("shops 蓝憬通讯副标题", "推荐2位好友注册 免费领韩国手机卡" in shops)
 for fake in ("星巴克", "广藏市场", "明洞乐天", "第五家", "示例商家"):
@@ -121,7 +121,7 @@ check("shops 分类默认可点选且默认不选中",
       'id="catChips"' in shops and 'href="/shops?cat=guide"' in shops
       and 'class="on"' not in shops.split('id="catChips"')[1].split("</div>")[0])
 shops_js = read_first("shops.js")
-check("shops.js 会按分类加载列表", "getElementById('catChips')" in shops_js and "/api/providers?cat=" in shops_js and "/api/shop-examples/" in shops_js and "示范案例" in shops_js)
+check("shops.js 会按分类加载列表", "getElementById('catChips')" in shops_js and "/api/providers" in shops_js and "/api/community/merchant-feed" in shops_js and "/api/shops/partners" in shops_js and "/api/shop-examples/" in shops_js and "示范案例" in shops_js)
 
 check("shops 韩国生活无导语框且无查看韩友圈链接",
       "loc-hero" not in shops and "韩友圈是在韩国生活的交流入口" not in shops
@@ -141,9 +141,9 @@ check("shops 忽略旧 tab/type 参数，不做重定向",
 check("shops 有 banner 位", '<div data-banner-slot="shops"></div>' in shops)
 check("shops 用汉江青 theme-color", 'name="theme-color" content="#146E68"' in shops)
 check("shops 加载 pwa.css / community.css / community.js / banners.js / shops.js",
-      all(x in shops for x in ("/static/pwa.css?v=91", "/static/community.css?v=91",
-                               "/static/community.js?v=91", "/static/banners.js", "/static/shops.js?v=91")))
-check("shops 加载 pwa.js?v=91 defer", '<script src="/static/pwa.js?v=91" defer></script>' in shops)
+      all(x in shops for x in ("/static/pwa.css?v=92", "/static/community.css?v=92",
+                               "/static/community.js?v=92", "/static/banners.js", "/static/shops.js?v=92")))
+check("shops 加载 pwa.js?v=92 defer", '<script src="/static/pwa.js?v=92" defer></script>' in shops)
 check("shops 保留底部导航", "<nav" in shops and "底部导航" in shops)
 check("shops 免责声明完整",
       all(w in shops for w in ("免费信息网站", "仅供参考", "不是旅行社", "不代办签证")))
@@ -226,7 +226,7 @@ for name, txt in (("shops.html", shops), ("community-new.html", newpost)):
           [w for w in wx_solicit if w in txt])
 for name, txt in (("shops.html", shops), ("community-new.html", newpost)):
     vers = re.findall(r"\?v=(\d+)", txt)
-    check("%s 缓存版本一致" % name, bool(vers) and set(vers) <= {"90", "91"} and (set(vers) == {"91"} if name=="shops.html" else "90" in set(vers) or set(vers)=={"91"}), set(vers))
+    check("%s 缓存版本一致" % name, bool(vers) and set(vers) == {"92"}, set(vers))
 
 print("%s passed, %s failed, %s skipped" % (ok, fail, skip))
 if fail:

@@ -150,11 +150,12 @@ def ads_lanjing():
     try:
         from community import _db_url, db, q
         if not _db_url():
-            return RedirectResponse("/community", status_code=302)
+            return RedirectResponse("/shops/m/lanjing", status_code=302)
         with db() as conn:
             row = find_post(conn, q)
         if row:
             return RedirectResponse("/community/post/%s" % row["id"], status_code=302)
     except Exception:
         pass
-    return RedirectResponse("/community", status_code=302)
+    # 商家帖已下架时，跳到商家页「通讯电话卡」里的蓝憬通讯详情，而不是韩友圈首页
+    return RedirectResponse("/shops/m/lanjing", status_code=302)

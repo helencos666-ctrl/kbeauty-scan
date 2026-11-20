@@ -464,6 +464,9 @@ def _target_for(conn, kind, oid):
         return mid, "广告：" + r["title"]
     if kind == "platform":
         return None, "平台客服"
+    if kind == "partner":
+        from shop_partners import target as partner_target
+        return partner_target(conn, q, oid)
     if kind == "provider":
         r = q(conn, "SELECT user_id, name FROM c_providers WHERE id=%s AND status='approved'", (oid,), one=True)
         if not r:

@@ -31,10 +31,10 @@ seo = read("seo.py")
 lanjing = read("lanjing_seed.py")
 
 # ---------- Service Worker ----------
-check("sw.js CACHE is lvhan-shell-v91", "lvhan-shell-v91" in sw)
+check("sw.js CACHE is lvhan-shell-v92", "lvhan-shell-v92" in sw)
 check("sw.js 无旧缓存名 v63", "lvhan-shell-v63" not in sw)
-check("sw.js 使用 ?v=91", "?v=91" in sw)
-check("sw.js SHELL 含 pwa.js?v=91", "/static/pwa.js?v=91" in sw)
+check("sw.js 使用 ?v=92", "?v=92" in sw)
+check("sw.js SHELL 含 pwa.js?v=92", "/static/pwa.js?v=92" in sw)
 
 # 不应再把任意导航回退到首页文档
 fb = re.search(
@@ -99,11 +99,11 @@ check("trips/me 不用 javascript:history.back",
 # ---------- 路由无死循环迹象（静态） ----------
 check("seo 有 /trips 和 /shops 和 /community",
       all(s in seo for s in ('"/trips"', '"/shops"', '"/community"')))
-check("/ads/lanjing 只 302 到帖子或 /community，不回自己",
+check("/ads/lanjing 只 302 到帖子或蓝憬商家详情，不回自己",
       'AD_PATH = "/ads/lanjing"' in lanjing
       and 'RedirectResponse("/ads/lanjing"' not in lanjing
       and "RedirectResponse(\"/community/post/" in lanjing
-      and 'RedirectResponse("/community"' in lanjing)
+      and 'RedirectResponse("/shops/m/lanjing"' in lanjing)
 
 # ---------- 禁词 ----------
 for name, txt in (("sw.js", sw), ("pwa.js", pwa), ("index.html", index),

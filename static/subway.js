@@ -1,5 +1,5 @@
 /* 旅韩助手：首都圈地铁站内路线计算（纯前端，离线可用）
- * 数据：/static/subway.json?v=91，由 scripts/build_subway.py 生成
+ * 数据：/static/subway.json?v=92，由 scripts/build_subway.py 生成
  * 来源：© OpenStreetMap contributors（ODbL 1.0）线路与停靠顺序；Wikidata（CC0）中文站名补充。
  * 时间为按站间距离估算，票价按首尔交通公社公布的距离制规则估算（基本 1,550 韩元/10km，交通卡），均仅供参考。
  */
@@ -11,7 +11,7 @@ var LHSub = (function(){
   // 站距较长的近郊/机场线，平均车速较快
   var FAST = {'공항철도':1,'경의·중앙':1,'경춘':1,'수인·분당':1,'서해':1,'경강':1,'1':0};
   function load(){
-    if (!P) P = fetch('/static/subway.json?v=91').then(function(r){ if(!r.ok) throw new Error('load'); return r.json(); }).then(function(j){ D = prep(j); return D; });
+    if (!P) P = fetch('/static/subway.json?v=92').then(function(r){ if(!r.ok) throw new Error('load'); return r.json(); }).then(function(j){ D = prep(j); return D; });
     P.catch(function(){ P = null; });
     return P;
   }

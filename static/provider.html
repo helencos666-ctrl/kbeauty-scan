@@ -9,10 +9,10 @@
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <link rel="manifest" href="/manifest.webmanifest">
-<link rel="apple-touch-icon" href="/static/icons/apple-touch-icon.png?v=91">
-<link rel="icon" type="image/png" sizes="192x192" href="/static/icons/icon-192.png?v=91">
-<link rel="stylesheet" href="/static/pwa.css?v=91">
-<link rel="stylesheet" href="/static/community.css?v=91">
+<link rel="apple-touch-icon" href="/static/icons/apple-touch-icon.png?v=92">
+<link rel="icon" type="image/png" sizes="192x192" href="/static/icons/icon-192.png?v=92">
+<link rel="stylesheet" href="/static/pwa.css?v=92">
+<link rel="stylesheet" href="/static/community.css?v=92">
 <style>
 .gal{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin:0 0 10px}
 .gal a{display:block;border-radius:12px;overflow:hidden;background:#E3EEEC;aspect-ratio:4/3}
@@ -40,13 +40,14 @@
   <a href="/trips" data-nav="trips" class="loc"><i>🗓️</i>行程安排</a>
   <a href="/me" data-nav="me" class="me"><i>👤</i>我的</a>
 </nav>
-<script src="/static/community.js?v=91"></script>
+<script src="/static/community.js?v=92"></script>
 <script>
 (async function(){
   var m = location.pathname.match(/\/shops\/p\/(\d+)/), pid = m ? +m[1] : 0;
+  var mm = location.pathname.match(/\/shops\/m\/([a-z0-9\-]+)/), slug = mm ? mm[1] : '';
   var box = document.getElementById('box');
   var r;
-  try { r = await LH.api('GET', '/api/providers/' + pid); }
+  try { r = await LH.api('GET', slug ? ('/api/shops/partners/' + encodeURIComponent(slug)) : ('/api/providers/' + pid)); }
   catch(e){ box.innerHTML = '<div class="card"><div class="empty">' + LH.esc(e.message) + '</div><a class="btn ghost block" href="/shops">返回全部商家</a></div>'; document.getElementById('hsub').textContent = ''; return; }
   var s = r.item;
   document.getElementById('hname').textContent = s.name;
@@ -63,12 +64,13 @@
       '<div class="meta" style="margin-bottom:6px"><span class="tag">' + LH.esc(s.category_name || '') + '</span><span>' + LH.esc(s.area || '') + '</span></div>' +
       (s.services ? '<p style="margin:8px 0;line-height:1.7;white-space:pre-wrap">' + LH.esc(s.services) + '</p>' : '') +
     '</div>' +
-    '<div class="card">' + LH.consultBtn('provider', s.id, '立即咨询（站内沟通）') + '<div class="tip" style="margin:6px 0 0">所有咨询在站内完成，请勿添加站外联系方式。</div></div>' +
-    '<div class="card"><h2>价格</h2><p style="white-space:pre-wrap;margin:0;line-height:1.75">' + LH.esc(s.price || '暂未填写') + '</p></div>' +
+    (s.body ? '<div class="card"><h2>服务介绍</h2><p style="margin:0;line-height:1.75;white-space:pre-wrap">' + LH.esc(s.body) + '</p></div>' : '') +
+    '<div class="card">' + LH.consultBtn(s.consult_kind || 'provider', s.id, '立即咨询（站内沟通）') + '<div class="tip" style="margin:6px 0 0">所有咨询在站内完成，请勿添加站外联系方式。</div></div>' +
+    (slug ? '' : '<div class="card"><h2>价格</h2><p style="white-space:pre-wrap;margin:0;line-height:1.75">' + LH.esc(s.price || '暂未填写') + '</p></div>') +
     (s.hours ? '<div class="card"><h2>时间</h2><p style="margin:0">' + LH.esc(s.hours) + '</p></div>' : '') +
     (s.address ? '<div class="card"><h2>地址</h2><p style="margin:0">' + LH.esc(s.address) + '</p></div>' : '');
 })();
 </script>
-<script src="/static/pwa.js?v=91" defer></script>
+<script src="/static/pwa.js?v=92" defer></script>
 </body>
 </html>
