@@ -10,10 +10,10 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="旅韩助手">
 <link rel="manifest" href="/manifest.webmanifest">
-<link rel="apple-touch-icon" href="/static/icons/apple-touch-icon.png?v=92">
-<link rel="icon" type="image/png" sizes="192x192" href="/static/icons/icon-192.png?v=92">
-<link rel="stylesheet" href="/static/pwa.css?v=92">
-<link rel="stylesheet" href="/static/guide.css?v=92">
+<link rel="apple-touch-icon" href="/static/icons/apple-touch-icon.png?v=93">
+<link rel="icon" type="image/png" sizes="192x192" href="/static/icons/icon-192.png?v=93">
+<link rel="stylesheet" href="/static/pwa.css?v=93">
+<link rel="stylesheet" href="/static/guide.css?v=93">
 <style>
 :root{--primary:#146E68;--secondary:#3D8F88;--accent:#B85A12;--pink:var(--primary);--ink:#1A2330;--sub:#4A5560;--bg:#F3F7F6;--card:#fff;--line:#D5E4E1;--success:#1B7A45;--warning:#B45309}
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
@@ -54,6 +54,11 @@ nav a.on{color:var(--primary);font-weight:700}
 .empty{text-align:center;color:var(--sub);padding:28px 10px}
 .fanplace-banner{display:block;background:#fff;border-radius:14px;padding:12px 14px;margin:0 0 12px;box-shadow:0 2px 10px rgba(0,0,0,.06);color:#333;text-decoration:none;font-size:14px;font-weight:600}
 .fanplace-banner span{display:block;font-weight:400;color:#4A5560;font-size:12px;margin-top:2px}
+.place .cover{width:100%;border-radius:12px;margin:10px 0 0;max-height:240px;object-fit:cover;background:#E3EEEC;display:block}
+.gallery{display:flex;gap:8px;overflow-x:auto;margin-top:10px;padding-bottom:2px;-webkit-overflow-scrolling:touch}
+.gallery a{flex:none}
+.gallery img{height:100px;width:auto;max-width:180px;object-fit:cover;border-radius:10px;display:block;background:#E3EEEC}
+.photo-credit{font-size:11px;line-height:1.5;color:#8A94A0;margin:6px 0 0}
 </style>
 </head>
 <body>
@@ -102,7 +107,7 @@ nav a.on{color:var(--primary);font-weight:700}
   <a href="/?tab=more"><i>☰</i>全部</a>
   <a href="/me"><i>👤</i>我的</a>
 </nav>
-<script src="/static/pwa.js?v=92" defer></script>
+<script src="/static/pwa.js?v=93" defer></script>
 <script src="/static/maps.js"></script>
 <script>
 var STN={}; LHMap.stations().then(function(s){ STN=s; if(DATA.items&&DATA.items.length) render(); });
@@ -160,11 +165,20 @@ function render(){
     const go=it.station?`<a class="go" href="/?tab=sub&to=${encodeURIComponent(it.station)}">用地铁查到这里</a>`:'';
     const c=it.station&&STN[it.station]||null;
     const maps=LHMap.buttons(LHMap.naverSearch(it.name_ko||it.name_zh), LHMap.amapSearch(it.name_zh||it.name_ko, c));
+    const photos=(it.photos||[]).filter(Boolean);
+    const cover=it.cover||photos[0]||'';
+    const coverHtml=cover?`<img class="cover" alt="${esc(it.name_zh)}" src="${esc(cover)}" loading="lazy">`:'';
+    const rest=photos.filter(p=>p!==cover);
+    const gal=rest.length?`<div class="gallery">${rest.map(p=>`<a href="${esc(p)}" target="_blank" rel="noopener"><img alt="${esc(it.name_zh)}" loading="lazy" src="${esc(p)}"></a>`).join('')}</div>`:'';
+    const credit=it.photo_credit?`<p class="photo-credit">${esc(it.photo_credit)}</p>`:'';
     return `<article class="place">
       <div class="name-zh">${esc(it.name_zh)}</div>
       <div class="name-ko">${esc(it.name_ko)}</div>
       <div class="badges">${badges.join('')}</div>
+      ${coverHtml}
       <p class="desc">${esc(it.desc)}</p>
+      ${gal}
+      ${credit}
       <div class="meta">${rows.join('')}</div>
       ${maps}
       ${go}

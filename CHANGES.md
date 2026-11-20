@@ -1,3 +1,11 @@
+## 2026-11-21 江南内容日更：地点实景照片与官方帖（v93）
+
+- static/food.json、static/attractions.json、static/shopping-stores.json 新增江南一带 6 个条目（宣靖陵、岛山公园、新沙洞林荫道、Miltap 狎鸥亭本店、Cine de Chef、BOONTHESHOP 清潭），均按 VisitSeoul / VisitKorea 官方页核对，source_url / source_note 随条目记录。
+- 每个新条目带 1–4 张实景照片，来源为 Wikimedia Commons 的自由授权文件（CC0 / CC BY / CC BY-SA / 公有领域），已裁到 1280px 宽、JPEG 压缩到 300KB 以下；新增字段 photo_credit 标注作者与许可。新增 static/attraction-photos/ 目录。
+- 美食页、购物页在有 photo_credit 时于图下显示灰色小字来源；景点页新增可选的封面图、照片行与来源小字，没有 cover 的条目渲染不变。
+- 新增 scripts/gen_official_daily_images.py 的两张 11-21 卡片（江南医美咨询避雷、韩国过冬），新增 chat / 暖气片 / 水滴 / 雪花 / 羽绒服 图形。
+- 缓存参数改为 `?v=93`，Service Worker 缓存名改为 `lvhan-shell-v93`。
+
 ## 2026-11-20 商家分类点开就能看到已入驻商家（v92）
 
 - 根因：点分类后列表其实已加载，但列表放在 12 个分类磁贴和「我要入驻」按钮下面，手机一屏（390×844）里只看到磁贴变高亮，页面又整页刷新回到顶部，看起来像「点了打不开」。另外列表只读入驻申请表（c_providers），商家会员发布的服务帖和合作商家没有算进去，所以「琪琪在韩国」的炸鸡代点帖、蓝憬通讯都不出现。

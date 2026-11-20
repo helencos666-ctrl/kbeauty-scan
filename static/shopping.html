@@ -11,10 +11,10 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="旅韩助手">
 <link rel="manifest" href="/manifest.webmanifest">
-<link rel="apple-touch-icon" href="/static/icons/apple-touch-icon.png?v=92">
-<link rel="icon" type="image/png" sizes="192x192" href="/static/icons/icon-192.png?v=92">
-<link rel="stylesheet" href="/static/pwa.css?v=92">
-<link rel="stylesheet" href="/static/guide.css?v=92">
+<link rel="apple-touch-icon" href="/static/icons/apple-touch-icon.png?v=93">
+<link rel="icon" type="image/png" sizes="192x192" href="/static/icons/icon-192.png?v=93">
+<link rel="stylesheet" href="/static/pwa.css?v=93">
+<link rel="stylesheet" href="/static/guide.css?v=93">
 <style>
 :root{--primary:#146E68;--secondary:#3D8F88;--accent:#B85A12;--pink:var(--primary);--ink:#1A2330;--sub:#4A5560;--bg:#F3F7F6;--card:#fff;--line:#D5E4E1;--success:#1B7A45;--warning:#B45309}
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
@@ -57,6 +57,7 @@ nav a.on{color:var(--primary);font-weight:700}
 .gallery{display:flex;gap:8px;overflow-x:auto;margin-top:10px;padding-bottom:2px;-webkit-overflow-scrolling:touch}
 .gallery a{flex:none}
 .gallery img{height:100px;width:auto;max-width:180px;object-fit:cover;border-radius:10px;display:block;background:#E3EEEC}
+.photo-credit{font-size:11px;line-height:1.5;color:#8A94A0;margin:6px 0 0}
 .place{scroll-margin-top:12px}
 .place.hl{outline:2px solid var(--primary);outline-offset:2px}
 #stores{scroll-margin-top:12px}
@@ -187,7 +188,7 @@ nav a.on{color:var(--primary);font-weight:700}
   <a href="/me"><i>👤</i>我的</a>
 </nav>
 
-<script src="/static/pwa.js?v=92" defer></script>
+<script src="/static/pwa.js?v=93" defer></script>
 
 <script src="/static/maps.js"></script>
 <script>
@@ -236,6 +237,7 @@ function render(){
     const coverHtml=cover?`<img class="cover" alt="${esc(it.name_zh)}" src="${esc(cover)}" loading="lazy">`:'';
     const rest=photos.filter(p=>p!==cover);
     const gal=rest.length?`<div class="gallery">${rest.map(p=>`<a href="${esc(p)}" target="_blank" rel="noopener"><img alt="${esc(it.name_zh)}" loading="lazy" src="${esc(p)}"></a>`).join('')}</div>`:'';
+    const credit=it.photo_credit?`<p class="photo-credit">${esc(it.photo_credit)}</p>`:'';
     return `<article class="place" id="${esc(it.id)}">
       <div class="name-zh">${esc(it.name_zh)}</div>
       <div class="name-ko">${esc(it.name_ko)}</div>
@@ -243,6 +245,7 @@ function render(){
       ${coverHtml}
       <p class="desc">${esc(it.desc)}</p>
       ${gal}
+      ${credit}
       <div class="meta">${rows.join('')}</div>
       ${maps}
       ${go}

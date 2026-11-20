@@ -1,5 +1,5 @@
 {
-  "updated": "2026-11-20",
+  "updated": "2026-11-21",
   "title": "韩国免费景点指南",
   "disclaimer": "本页为公开资料整理的免费指南，不接入收费接口。开放时间、门票、交通和节庆日期可能调整，请以现场公示、官方网站和韩国旅游咨询热线 1330（有中文服务）为准。",
   "sources": [
@@ -2148,6 +2148,83 @@
       "station": "망원역",
       "hours": "VisitSeoul 写 24 小时开放、全年无休；以现场公示为准。",
       "fee": "免费"
+    },
+    {
+      "id": "seonjeongneung",
+      "name_zh": "宣靖陵（宣陵·靖陵）",
+      "name_ko": "선정릉",
+      "city": "seoul",
+      "city_zh": "首尔",
+      "area": "江南区 三成",
+      "category": "palace",
+      "desc": "江南中心的一片王陵和松林，由宣陵和靖陵组成，是史迹第199号，也属于联合国教科文组织世界遗产「朝鲜王陵」。宣陵是朝鲜第9代王成宗与继妃贞显王后的陵，靖陵是两人之子中宗的陵，三座圆形封坟散在草坪和松树之间，周围立着十二支石和文武士石。园内步道平缓，中午常有附近上班族进来散步，4月樱花和春天新绿时人更多。从宣陵站出口走过来只要几分钟，逛完可以顺路去COEX或宣靖陵站方向。",
+      "transport": "地铁2号线·水仁盆唐线宣陵站（선릉역）10号出口步行约5分钟；或地铁9号线·水仁盆唐线宣靖陵站（선정릉역）3号出口步行约13分钟。",
+      "tips": [
+        "周一部分园区休园，安排行程前先看管理所公告。",
+        "封坟周围不要踩草坪、不要越过石栏，拍照时留意提示牌。",
+        "园内补给点不多，夏天自带水；洗手间在入口和游客中心附近。"
+      ],
+      "station": "선릉역",
+      "hours": "VisitSeoul 写 3–10月 06:00–21:00，11–1月 06:30–17:30，2月 06:00–18:00，周一休园。",
+      "fee": "外国人 19–64岁 1,000韩元，10人以上团体 800韩元；免费对象与优惠以管理所公示为准。",
+      "cover": "/static/attraction-photos/seonjeongneung-cover.jpg",
+      "photos": [
+        "/static/attraction-photos/seonjeongneung-cover.jpg",
+        "/static/attraction-photos/seonjeongneung-tombs.jpg",
+        "/static/attraction-photos/seonjeongneung-panorama.jpg",
+        "/static/attraction-photos/seonjeongneung-neung.jpg"
+      ],
+      "photo_credit": "照片：Hahyejin / Wikimedia Commons / CC BY-SA 4.0；Isra Rulowsinsky / CC0；Republic of Korea / CC BY-SA 2.0；Steve46814 / CC BY-SA 3.0"
+    },
+    {
+      "id": "dosan-park",
+      "name_zh": "岛山公园",
+      "name_ko": "도산공원",
+      "city": "seoul",
+      "city_zh": "首尔",
+      "area": "江南区 新沙",
+      "category": "nature",
+      "desc": "为了纪念独立运动家岛山安昌浩而建的小公园，正门进去是他坐在椅子上的铜像，园内纪念馆陈列临时政府史料和《岛山日记》，可以用触摸屏翻看他的语录。园子不大，坡道和台阶都缓，绕一圈十几分钟，树荫下有长椅，适合逛街途中歇脚。四周是咖啡馆、画廊和品牌的旗舰店，往清潭、新沙方向走都能接上，每年3月10日前后有追思活动。",
+      "transport": "地铁3号线狎鸥亭站（압구정역）3号出口步行约12分钟，沿岛山大路45街走；也可从狎鸥亭罗德奥站方向步行过来。",
+      "tips": [
+        "纪念馆 1月1日和节日连休闭馆，进馆前看门口公告。",
+        "园内是纪念空间，说话放低音量，不要踩花坛。",
+        "周边咖啡店周末排队，平日下午人少一些。"
+      ],
+      "station": "압구정역",
+      "hours": "公园 24 小时开放；岛山安昌浩纪念馆每天 10:00–18:00（1月1日、节日连休休馆）。",
+      "fee": "免费",
+      "cover": "/static/attraction-photos/dosan-park-cover.jpg",
+      "photos": [
+        "/static/attraction-photos/dosan-park-cover.jpg",
+        "/static/attraction-photos/dosan-park-garden.jpg"
+      ],
+      "photo_credit": "照片：Daderot / Wikimedia Commons / CC0"
+    },
+    {
+      "id": "garosugil",
+      "name_zh": "新沙洞林荫道",
+      "name_ko": "신사동 가로수길",
+      "city": "seoul",
+      "city_zh": "首尔",
+      "area": "江南区 新沙",
+      "category": "landmark",
+      "desc": "新沙洞一条种满行道树的街道，从新沙站往狎鸥亭方向走，两侧是服装店、咖啡馆、画廊和餐厅，拐出去的小巷（세로수길）里也藏着不少小店。这一带从上世纪的画廊和设计工作室一路变到现在以品牌路面店为主，老店和新店混在一起，Apple 的林荫道店也在街上，玻璃外墙很好认。傍晚到夜里灯亮起来，很适合慢慢走，不买东西也可以只看看橱窗。",
+      "transport": "地铁3号线·新盆唐线新沙站（신사역）8号出口步行约6分钟；或地铁3号线狎鸥亭站（압구정역）4号出口步行过来。",
+      "tips": [
+        "主街人多，想安静逛可以拐进两侧的小巷。",
+        "店铺营业时间各不相同，多数上午11点以后开门。",
+        "周末和傍晚拍照的人多，过路口注意车辆。"
+      ],
+      "station": "신사역",
+      "hours": "街道全天开放；各店铺营业时间不同，以店门口公示为准。",
+      "fee": "免费",
+      "cover": "/static/attraction-photos/garosugil-cover.jpg",
+      "photos": [
+        "/static/attraction-photos/garosugil-cover.jpg",
+        "/static/attraction-photos/garosugil-street.jpg"
+      ],
+      "photo_credit": "照片：sellyourseoul / Wikimedia Commons / CC BY 2.0"
     }
   ]
 }

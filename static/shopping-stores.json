@@ -1,5 +1,5 @@
 {
-  "updated": "2026-11-20",
+  "updated": "2026-11-21",
   "title": "明洞逛街店铺",
   "disclaimer": "下列店铺根据实地照片和公开资料整理。营业时间、楼层和退税办理可能变化，请以店门口公示和店内说明为准。未核对到来源的退税信息不会写进介绍。",
   "categories": [
@@ -582,6 +582,35 @@
       "tax_refund": "按店内退税标识办理",
       "source_note": "查阅 2026-11-20。首尔市官方旅游网站 VisitSeoul 门店页：弘大入口站8号出口51米，地址杨花路162号（东桥洞，好人们大厦1–3层），每天 10:30–22:00，全年无休。",
       "source_url": "https://korean.visitseoul.net/shopping/%EC%B9%B4%EC%B9%B4%EC%98%A4%ED%94%84%EB%A0%8C%EC%A6%88-%ED%99%8D%EB%8C%80-%ED%94%8C%EB%9E%98%EA%B7%B8%EC%8B%AD-%EC%8A%A4%ED%86%A0%EC%96%B4/KOP027304"
+    },
+    {
+      "id": "boontheshop-cheongdam",
+      "name_zh": "BOONTHESHOP（清潭店）",
+      "name_ko": "분더샵 청담",
+      "city": "seoul",
+      "city_zh": "首尔",
+      "area": "江南区 清潭",
+      "area_id": "gangnam",
+      "category": "fashion",
+      "desc": "清潭洞的奢侈品牌买手店，2004年开业，2014年请建筑师 Peter Marino 重新设计，外观是整面的石材立面。店内除服装外还有美妆、珠宝、摆件和艺术品的陈列，楼层按主题分，常做品牌联名和展览。位置在狎鸥亭罗德奥站往清潭方向的坡道上，逛完可以顺着名品街继续走。店员可用韩、英、中、日接待。",
+      "transport": "地铁水仁盆唐线狎鸥亭罗德奥站（압구정로데오역）3号出口步行约4分钟。",
+      "tips": [
+        "楼层和品牌会调整，进店先拿一份馆内指引。",
+        "周边是住宅和坡道，停车位少，坐地铁更方便。",
+        "需要尺码或退税问题直接问店员，可用中文接待。"
+      ],
+      "station": "압구정로데오역",
+      "hours": "VisitSeoul 写每天 11:20–20:00。",
+      "address": "서울 강남구 압구정로60길 21 (청담동, 분더샵 청담A)",
+      "map_query": "분더샵 청담",
+      "tax_refund": "未核对到公开退税说明，请现场咨询",
+      "source_note": "查阅 2026-11-21。首尔市官方旅游网站 VisitSeoul 页面（2026-08-17 更新）：2004年开业的韩国首家名品买手店，2014年由建筑师 Peter Marino 改建设计，可用韩英中日接待；地址狎鸥亭路60街21号，水仁盆唐线狎鸥亭罗德奥站3号出口245米，每天 11:20–20:00。",
+      "source_url": "https://korean.visitseoul.net/shopping/%EB%B6%84%EB%8D%94%EC%83%B5%EC%B2%AD%EB%8B%B4/KOP020328",
+      "cover": "/static/shop-photos/boontheshop-cheongdam-cover.jpg",
+      "photos": [
+        "/static/shop-photos/boontheshop-cheongdam-cover.jpg"
+      ],
+      "photo_credit": "照片：Darren Nolan / Wikimedia Commons / CC BY-SA 2.0"
     }
   ]
 }

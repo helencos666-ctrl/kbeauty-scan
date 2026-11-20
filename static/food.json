@@ -1,5 +1,5 @@
 {
-  "updated": "2026-11-20",
+  "updated": "2026-11-21",
   "title": "韩国美食推荐",
   "disclaimer": "本页只收录公开资料中有记载、近期仍见诸米其林指南或官方/百科旅游介绍的餐厅与市场。营业状态、菜单和价格可能随时变化，请出发前用地图或电话再确认。米其林必比登是「性价比」标注，其符号并不等同本页的人均₩档；没有把握的人均价格已省略。信息可能变化，请出行前核实。餐厅已按游客常去的打卡区域归类，具体门牌以各条地址和地图为准；不在热门区域内、但资料可靠的店会放在「其他」。部分明洞门店根据实地招牌和公开地图资料补充收录。",
   "price_legend": [
@@ -2665,6 +2665,64 @@
       "map_query": "카페 꼼마 합정",
       "source_note": "查阅 2026-11-20。首尔市官方旅游网站 VisitSeoul 门店页（页面更新 2026-10-31）：文学村经营的合井洞书店咖啡，整面书墙、可读书；地址圃隐路49号，每天 10:00–22:00。",
       "source_url": "https://korean.visitseoul.net/restaurants/%EC%B9%B4%ED%8E%98-%EA%BC%BC%EB%A7%88-%ED%95%A9%EC%A0%95%EC%A0%90/KOP039840"
+    },
+    {
+      "id": "miltap-apgujeong",
+      "name_zh": "Miltap 蜜塔刨冰（狎鸥亭本店）",
+      "name_ko": "밀탑 압구정본점",
+      "city": "seoul",
+      "city_zh": "首尔",
+      "area": "江南区 狎鸥亭",
+      "area_id": "gangnam",
+      "category": "cafe",
+      "cuisine": "红豆刨冰 / 甜点",
+      "desc": "开在现代百货店狎鸥亭本店5层餐饮区里的红豆刨冰店，百货店开业时就在，做的是同一种「밀크팥빙수」：细冰上放熬好的红豆和两块年糕，甜度不高，味道接近早年的街边刨冰。菜单不复杂，除了红豆冰，还有加豆粉、水果或年糕的版本，份量适合两个人分。5层同一区还有韩餐和西餐，逛街或看完电影可以坐下来吃一碗再走。",
+      "transport": "地铁3号线狎鸥亭站（압구정역）6号出口经地下通道直达现代百货店，上到5层餐饮区。",
+      "tips": [
+        "百货店每月有不定期休馆日，出发前看一下官网公告。",
+        "刨冰融得快，上桌先吃；两个人点一份刚好。",
+        "5层餐饮区中午和周末人多，错开饭点更从容。"
+      ],
+      "station": "압구정역",
+      "hours": "随现代百货店狎鸥亭本店：百货 10:30–20:00（延长营业日至 20:30），5层餐饮区 11:00–22:00；以店内当日公示为准。",
+      "address": "서울 강남구 압구정로 165, 현대백화점 본점 5층 (압구정동)",
+      "map_query": "밀탑 압구정본점",
+      "source_note": "查阅 2026-11-21。韩国旅游发展局 VisitKorea 页面「밀탑(Meal top) 압구정본점」：位于现代百货店狎鸥亭本店5层餐饮区，百货店开业时入驻的红豆刨冰专门店；地址与百货店营业时间参考 VisitSeoul 现代百货店本店页（2026-07-06 更新）。",
+      "source_url": "https://korean.visitkorea.or.kr/detail/ms_detail.do?cotid=19561f75-075e-4d26-9bf6-9c006bda8c6d",
+      "cover": "/static/food-photos/miltap-apgujeong-cover.jpg",
+      "photos": [
+        "/static/food-photos/miltap-apgujeong-cover.jpg"
+      ],
+      "photo_credit": "照片：Wvdeuxvw / Wikimedia Commons / CC BY-SA 4.0"
+    },
+    {
+      "id": "cine-de-chef",
+      "name_zh": "Cine de Chef（狎鸥亭）",
+      "name_ko": "씨네 드 쉐프",
+      "city": "seoul",
+      "city_zh": "首尔",
+      "area": "江南区 狎鸥亭",
+      "area_id": "gangnam",
+      "category": "traditional",
+      "cuisine": "法式料理 / 影院餐厅",
+      "desc": "狎鸥亭 CGV 新馆地下一层的法式餐厅加影院，先吃饭再看电影的搭配做了很多年。一侧是餐桌和开放式厨房，另一侧是放映厅，A厅30席、B厅48席，座椅可以放平，配有地板音响；酒单有两百多种。楼上是 Cine Café 和 Cine Shop，等场次的时候可以坐一会儿。座位不多，官方页面写预约是必需的。",
+      "transport": "地铁3号线狎鸥亭站（압구정역）3号出口步行约3分钟，CGV新馆地下一层。",
+      "tips": [
+        "官方页面写预约是必需的，热门场次尽早订。",
+        "餐厅和放映厅在同一层，用餐时间要留够。",
+        "入口在 CGV 新馆一侧，按「CINÉ de CHEF」的字样找。"
+      ],
+      "station": "압구정역",
+      "hours": "VisitSeoul 写平日 11:30–16:00、17:30–20:30，周末和公休日 11:30–16:00、17:30–22:00，随电影场次变动；以店内当日公示为准。",
+      "address": "서울 강남구 압구정로30길 45, CGV신관 지하5층 (신사동)",
+      "map_query": "씨네 드 쉐프 압구정",
+      "source_note": "查阅 2026-11-21。首尔市官方旅游网站 VisitSeoul 页面（2025-09-28 更新）：狎鸥亭 CGV 新馆地下一层的法式餐厅兼影院，A厅30席、B厅48席，酒单两百余种，预约必需；地址狎鸥亭路30街45号，3号线狎鸥亭站3号出口193米。",
+      "source_url": "https://korean.visitseoul.net/area/%EC%94%A8%EB%84%A4-%EB%93%9C-%EC%89%90%ED%94%84/KOP001268",
+      "cover": "/static/food-photos/cine-de-chef-cover.jpg",
+      "photos": [
+        "/static/food-photos/cine-de-chef-cover.jpg"
+      ],
+      "photo_credit": "照片：Crossmr / Wikimedia Commons / CC BY-SA 3.0"
     }
   ],
   "areas": [

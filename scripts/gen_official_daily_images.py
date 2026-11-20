@@ -6,6 +6,7 @@ Pure PIL, no network, no external assets. Output: static/official-daily/*.jpg
 1080x1350 JPEG, soft gradient background, big Chinese title, 3-4 bullets with
 simple drawn shapes, small 旅韩助手 mark at the bottom. No QR codes, no URLs.
 """
+import math
 import os
 
 from PIL import Image, ImageDraw, ImageFont
@@ -73,6 +74,34 @@ CARDS = [
         "top": (250, 243, 233),
         "bottom": (240, 227, 231),
         "accent": (118, 62, 54),
+    },
+    {
+        "file": "2026-11-21-gangnam-clinic.jpg",
+        "kicker": "避雷 · 江南医美咨询",
+        "title": "江南医美咨询\n先问这四件事",
+        "bullets": [
+            ("coin", "中介抽成：总价里含什么"),
+            ("chat", "翻译陪同：按什么收费"),
+            ("doc", "项目与总价：写进书面"),
+            ("receipt", "退款复诊：先问清条款"),
+        ],
+        "top": (243, 240, 238),
+        "bottom": (226, 232, 240),
+        "accent": (88, 58, 92),
+    },
+    {
+        "file": "2026-11-21-korea-winter.jpg",
+        "kicker": "韩国生活 · 过冬",
+        "title": "在韩国过冬\n先备这几样",
+        "bullets": [
+            ("flame", "地暖：温控器别频繁关"),
+            ("droplet", "加湿：换水清洗通风"),
+            ("snow", "出行：薄冰上小步走"),
+            ("coat", "保暖：羽绒服与暖宝宝"),
+        ],
+        "top": (232, 241, 249),
+        "bottom": (236, 232, 224),
+        "accent": (44, 90, 112),
     },
 ]
 
@@ -244,6 +273,60 @@ def icon(d, kind, box, accent):
             d.rounded_rectangle([xx, y0 + w * .40, xx + w * .08, y1 - w * .26], radius=5, fill=accent)
         d.rounded_rectangle([x0 + w * .14, y1 - w * .24, x1 - w * .14, y1 - w * .14],
                             radius=6, fill=accent)
+    elif kind == "chat":
+        # 对话气泡
+        d.rounded_rectangle([x0 + w * .14, y0 + w * .18, x1 - w * .14, y1 - w * .34],
+                            radius=18, fill=(255, 255, 255), outline=accent, width=5)
+        d.polygon([(x0 + w * .28, y1 - w * .36), (x0 + w * .46, y1 - w * .36),
+                   (x0 + w * .26, y1 - w * .08)], fill=accent)
+        for i in range(3):
+            ox = x0 + w * .26 + i * w * .18
+            d.ellipse([ox, cy - w * .06, ox + w * .11, cy + w * .05], fill=pale)
+    elif kind == "flame":
+        # 暖气片（地暖常配的散热器）
+        d.rounded_rectangle([x0 + w * .14, y0 + w * .34, x1 - w * .14, y1 - w * .14],
+                            radius=10, fill=(255, 255, 255), outline=accent, width=5)
+        for i in range(4):
+            xx = x0 + w * .22 + i * w * .16
+            d.line([(xx, y0 + w * .40), (xx, y1 - w * .20)], fill=pale, width=6)
+        d.arc([cx - w * .28, y0 + w * .04, cx - w * .02, y0 + w * .32],
+              start=200, end=340, fill=accent, width=5)
+        d.arc([cx + w * .02, y0 + w * .04, cx + w * .28, y0 + w * .32],
+              start=200, end=340, fill=accent, width=5)
+    elif kind == "droplet":
+        # 水滴
+        d.ellipse([cx - w * .26, y0 + w * .38, cx + w * .26, y1 - w * .10],
+                  fill=pale, outline=accent, width=5)
+        d.polygon([(cx, y0 + w * .10), (cx + w * .22, y0 + w * .54),
+                   (cx - w * .22, y0 + w * .54)], fill=pale, outline=accent)
+        d.line([(cx - w * .12, y1 - w * .34), (cx - w * .14, y1 - w * .48)],
+               fill=(255, 255, 255), width=5)
+    elif kind == "snow":
+        # 雪花
+        for i in range(3):
+            ang = math.radians(90 + i * 60)
+            dx, dy = math.cos(ang), math.sin(ang)
+            d.line([(cx - dx * w * .40, cy - dy * w * .40), (cx + dx * w * .40, cy + dy * w * .40)],
+                   fill=accent, width=7)
+            for t in (.22, -.22):
+                bx, by = cx + dx * w * .40 * t, cy + dy * w * .40 * t
+                for s in (1, -1):
+                    ba = ang + s * math.radians(40)
+                    d.line([(bx, by), (bx + math.cos(ba) * w * .16, by + math.sin(ba) * w * .16)],
+                           fill=pale, width=5)
+        d.ellipse([cx - w * .05, cy - w * .05, cx + w * .05, cy + w * .05], fill=accent)
+    elif kind == "coat":
+        # 羽绒服
+        d.rounded_rectangle([x0 + w * .18, y0 + w * .26, x1 - w * .18, y1 - w * .10],
+                            radius=14, fill=(255, 255, 255), outline=accent, width=5)
+        d.rounded_rectangle([cx - w * .16, y0 + w * .12, cx + w * .16, y0 + w * .32],
+                            radius=9, fill=pale, outline=accent, width=4)
+        for i in range(3):
+            yy = y0 + w * .46 + i * w * .16
+            d.line([(x0 + w * .24, yy), (x1 - w * .24, yy)], fill=pale, width=5)
+        d.line([(cx, y0 + w * .34), (cx, y1 - w * .16)], fill=accent, width=4)
+        d.line([(cx - w * .16, y0 + w * .12), (cx - w * .06, y0 + w * .30)], fill=accent, width=5)
+        d.line([(cx + w * .16, y0 + w * .12), (cx + w * .06, y0 + w * .30)], fill=accent, width=5)
 
 
 def build(card):
