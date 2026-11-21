@@ -473,6 +473,11 @@ async def unhandled_exc(request, exc):
 @app.get("/healthz")
 def healthz(): return {"ok": True}
 
+@app.get("/api/site-flags")
+def site_flags():
+    from feature_flags import public_flags
+    return public_flags()
+
 @app.get("/")
 def index(): return html_file_response("index.html", "/")
 

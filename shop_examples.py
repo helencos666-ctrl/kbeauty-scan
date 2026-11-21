@@ -5,6 +5,7 @@ from fastapi import APIRouter, HTTPException
 from fastapi.responses import RedirectResponse
 
 from community import STATIC, _page
+from feature_flags import UNAVAILABLE_MSG, is_hidden_cat, unavailable_payload
 
 router = APIRouter()
 
@@ -124,17 +125,19 @@ EXAMPLES = {
 def _photos(cat: str):
     return [
         {
-            "src": f"/static/shop-examples/{cat}-{i}.jpg?v=93",
+            "src": f"/static/shop-examples/{cat}-{i}.jpg?v=94",
             "caption": PHOTO_CAPTIONS[i - 1],
         }
         for i in range(1, 7)
     ]
 
 
-def example_out(cat: str):
+def example_out(cat: str, *, allow_hidden=False):
     from providers import CANON_CATS, canon, cat_name
     key = canon(cat)
     if key not in EXAMPLES or key not in CANON_CATS:
+        return None
+    if not allow_hidden and is_hidden_cat(key):
         return None
     e = EXAMPLES[key]
     return {
@@ -160,15 +163,20 @@ def example_out(cat: str):
 def api_examples(cat: str = ""):
     from providers import CANON_CATS, canon
     if cat:
+        if is_hidden_cat(canon(cat) or cat):
+            return unavailable_payload(item=None)
         item = example_out(cat)
         if not item:
             raise HTTPException(404, "没有这个分类的示范案例")
         return {"item": item}
-    return {"items": [example_out(k) for k in CANON_CATS], "badge": EXAMPLE_BADGE}
+    return {"items": [example_out(k) for k in CANON_CATS if example_out(k)], "badge": EXAMPLE_BADGE}
 
 
 @router.get("/api/shop-examples/{cat}")
 def api_example_one(cat: str):
+    from providers import canon
+    if is_hidden_cat(canon(cat) or cat):
+        return unavailable_payload(item=None)
     item = example_out(cat)
     if not item:
         raise HTTPException(404, "没有这个分类的示范案例")
@@ -177,6 +185,11 @@ def api_example_one(cat: str):
 
 @router.get("/shops/examples/{cat}")
 def p_example(cat: str):
+    from providers import canon
+    if is_hidden_cat(canon(cat) or cat):
+        return _page("unavailable.html", "/shops/examples/%s" % (canon(cat) or cat),
+                     extra={"title": UNAVAILABLE_MSG + " · 旅韩助手",
+                            "description": UNAVAILABLE_MSG, "index": False})
     item = example_out(cat)
     if not item:
         raise HTTPException(404, "页面不存在")

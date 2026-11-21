@@ -10,10 +10,10 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="旅韩助手">
 <link rel="manifest" href="/manifest.webmanifest">
-<link rel="apple-touch-icon" href="/static/icons/apple-touch-icon.png?v=93">
-<link rel="icon" type="image/png" sizes="192x192" href="/static/icons/icon-192.png?v=93">
-<link rel="stylesheet" href="/static/pwa.css?v=93">
-<link rel="stylesheet" href="/static/community.css?v=93">
+<link rel="apple-touch-icon" href="/static/icons/apple-touch-icon.png?v=94">
+<link rel="icon" type="image/png" sizes="192x192" href="/static/icons/icon-192.png?v=94">
+<link rel="stylesheet" href="/static/pwa.css?v=94">
+<link rel="stylesheet" href="/static/community.css?v=94">
 <style>
 .ko{color:#8a8f99;font-size:12px;font-weight:400;margin-left:4px}
 .hp{position:absolute;left:-9999px;width:1px;height:1px;overflow:hidden}
@@ -38,7 +38,7 @@
   <div class="card">
     <h2>可入驻的服务 <span class="ko">입점 가능 업종</span></h2>
     <div id="catinfo" class="terms"></div>
-    <div class="no"><b>不接受：</b>医美/医院中介或陪诊、代办签证、打包一日游、加价代抢票。医美分类仅限合法医疗机构自行入驻，须填写资质。</div>
+    <div class="no"><b>不接受：</b>医美/医院中介或陪诊、代办签证、打包一日游、加价代抢票。<!-- feature:medical-aesthetic -->医美分类仅限合法医疗机构自行入驻，须填写资质。<!-- /feature:medical-aesthetic --></div>
   </div>
   <div class="card" id="formcard">
     <h2>入驻申请 <span class="ko">입점 신청서</span></h2>
@@ -90,7 +90,7 @@
   <a href="/?tab=more"><i>☰</i>全部</a>
   <a href="/me"><i>👤</i>我的</a>
 </nav>
-<script src="/static/community.js?v=93"></script>
+<script src="/static/community.js?v=94"></script>
 <script>
 (async function(){
   var $ = function(id){ return document.getElementById(id); };
@@ -108,6 +108,11 @@
   var licenseCats = meta.license_cats || ['airport','clinic','car'];
   var addressCats = meta.address_cats || ['hotel','food'];
   var pre = (LH.qs('cat') || '').trim();
+  var hiddenPre = pre && !(meta.cats || []).some(function(c){ return c.key === pre; });
+  if (hiddenPre){
+    show(err, (window.LH_FLAGS && LH_FLAGS.unavailable_detail) || (window.LH_FLAGS && LH_FLAGS.unavailable_message) || '该项目暂未开放');
+    pre = '';
+  }
   $('catinfo').innerHTML = '<ol style="padding-left:18px;margin:0">' + meta.cats.map(function(c){ return '<li><b>' + LH.esc(c.name) + '</b> <span class="ko">' + LH.esc(c.name_ko) + '</span><br>' + LH.esc(c.desc) + '</li>'; }).join('') + '</ol>';
   $('f_cat').innerHTML = meta.cats.map(function(c, i){
     var chk = (pre && c.key === pre) || (!pre && i === 0);

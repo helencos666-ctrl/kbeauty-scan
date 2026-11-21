@@ -7,6 +7,8 @@ import datetime, html, os, re
 from fastapi import APIRouter, HTTPException
 from fastapi.responses import HTMLResponse, Response
 
+from feature_flags import apply_public_html_flags, hide_medical_aesthetic, public_flags
+
 BASE = os.path.dirname(os.path.abspath(__file__))
 STATIC = os.path.join(BASE, "static")
 INDEXNOW_FILE = os.path.join(BASE, "indexnow.key")
@@ -395,6 +397,11 @@ def page_meta(url_path: str, extra=None):
     title = extra.get("title") or (base[0] if base else "旅韩助手｜韩国旅游攻略")
     desc = extra.get("description") or (base[1] if base else "旅韩助手：韩国旅游攻略、首尔自由行、韩国景点和韩友圈。")
     keys = extra.get("keywords") or (base[2] if base else "旅韩助手,韩国旅游攻略,首尔自由行,韩国景点,韩国交友")
+    if hide_medical_aesthetic() and "description" not in extra:
+        if path == "/shops":
+            desc = "旅韩助手商家页：按地陪向导、美食代点外卖、接送机、住宿、翻译、追星活动、租车、通讯电话卡、物流快递、代购等分类查看商家服务，在站内咨询联系商家。"
+        elif path == "/partner":
+            desc = "地陪向导、美食代点、接送机、住宿、翻译等商家入驻申请，审核通过后在对应分类展示，访客通过站内咨询联系。"
     indexable = extra["index"] if "index" in extra else (base[3] if base else not any(path.startswith(p) for p in NOINDEX_PREFIXES))
     if any(path.startswith(p) for p in NOINDEX_PREFIXES):
         indexable = False
@@ -489,6 +496,8 @@ def head_extra(url_path: str, extra=None) -> str:
     v = verification_tags()
     if v:
         parts.append(v)
+    import json
+    parts.append("<script>window.LH_FLAGS=" + json.dumps(public_flags(), ensure_ascii=False) + ";</script>")
     return "\n".join(parts)
 
 
@@ -562,6 +571,7 @@ def html_file_response(filename: str, url_path=None, extra=None, ssr_target=None
     with open(path, encoding="utf-8") as f:
         html_text = f.read()
     url_path = url_path or FILE_PATHS.get(filename, "/")
+    html_text = apply_public_html_flags(html_text, filename)
     html_text = inject_page(html_text, url_path, extra=extra, ssr_target=ssr_target, ssr_html=ssr_html)
     html_text = html_text.replace("{{PRIVACY_CONTACT}}", _esc(privacy_contact()))
     from security import new_nonce, add_nonce, csp

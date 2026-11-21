@@ -10,10 +10,10 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="旅韩助手">
 <link rel="manifest" href="/manifest.webmanifest">
-<link rel="apple-touch-icon" href="/static/icons/apple-touch-icon.png?v=93">
-<link rel="icon" type="image/png" sizes="192x192" href="/static/icons/icon-192.png?v=93">
-<link rel="stylesheet" href="/static/pwa.css?v=93">
-<link rel="stylesheet" href="/static/community.css?v=93">
+<link rel="apple-touch-icon" href="/static/icons/apple-touch-icon.png?v=94">
+<link rel="icon" type="image/png" sizes="192x192" href="/static/icons/icon-192.png?v=94">
+<link rel="stylesheet" href="/static/pwa.css?v=94">
+<link rel="stylesheet" href="/static/community.css?v=94">
 <style>#preview[hidden]{display:none!important}#spotBox[hidden]{display:none!important}body.compose .lh-toast{bottom:calc(72px + env(safe-area-inset-bottom))}.show-cats{gap:5px}.show-cats button{padding:6px 8px;box-sizing:border-box;white-space:nowrap}.spot-box{margin:2px 0 12px}.spot-box label.f{margin:8px 0 4px;font-size:13px}.spot-box .f.sm{padding:8px 10px;font-size:14px}.price-row{display:flex;align-items:center;gap:6px}.price-row .won{flex:none;color:var(--sub);font-weight:700}.price-row input{flex:1;min-width:0}</style>
 </head>
 <body class="compose">
@@ -43,7 +43,7 @@
       <select class="f" id="mcat">
         <option value="">不选择</option>
         <option value="guide">地陪向导</option>
-        <option value="clinic">医美</option>
+        <!-- feature:medical-aesthetic --><option value="clinic">医美</option><!-- /feature:medical-aesthetic -->
         <option value="food">美食代点外卖</option>
         <option value="airport">接送机</option>
         <option value="hotel">住宿</option>
@@ -55,7 +55,7 @@
         <option value="daigou">代购</option>
         <option value="other">其它</option>
       </select>
-      <div class="tip">商家发布先审后发；分类会显示在商家页的「商家发布」信息流里，选「医美」时请遵守下面的医疗内容规范。</div>
+      <div class="tip">商家发布先审后发；分类会显示在商家页的「商家发布」信息流里，<!-- feature:medical-aesthetic -->选「医美」时请遵守下面的医疗内容规范。<!-- /feature:medical-aesthetic --></div>
     </div>
     <div class="mednote" id="mednote" style="display:none"></div>
     <div class="tip" id="quota" style="display:none"></div>
@@ -125,7 +125,7 @@
   <a href="/?tab=more"><i>☰</i>全部</a>
   <a href="/me"><i>👤</i>我的</a>
 </nav>
-<script src="/static/community.js?v=93"></script>
+<script src="/static/community.js?v=94"></script>
 <script>
 var WARN = {visa: '签证问答仅限个人经验分享，禁止发布代办广告。', study: '留学打听仅限经验交流，禁止发布中介广告。',
   friends: '请勿在帖子里公开手机号、微信号、住址等隐私。想认识新朋友，也可以去“旅韩交友”发布交友资料。',
@@ -140,6 +140,20 @@ var WARN = {visa: '签证问答仅限个人经验分享，禁止发布代办广�
   logistics: '商家专区：请写清线路、计费方式、时效与清关说明，不得承运违禁品或协助逃避海关监管。',
 };
 var MB = {hotel: 1, car: 1, clinic: 1, agency: 1, daigou: 1, guide: 1, kpop: 1, logistics: 1}, ME = null;
+function lhFlags(){ return window.LH_FLAGS || {}; }
+function lhHiddenBoard(b){ return (lhFlags().hidden_boards || []).indexOf(b) >= 0; }
+function lhHiddenCat(c){ return (lhFlags().hidden_cats || []).indexOf(c) >= 0; }
+function applyHiddenFlags(){
+  (lhFlags().hidden_cats || []).forEach(function(c){
+    var opt = document.querySelector('#mcat option[value="'+c+'"]');
+    if (opt) opt.remove();
+  });
+  (lhFlags().hidden_boards || []).forEach(function(b){
+    var chip = document.querySelector('#chips [data-board="'+b+'"], #chips button[data-k="'+b+'"]');
+    if (chip) chip.remove();
+  });
+}
+
 var NORMAL_HINT = '普通频道里含酒店预订、租车包车、医美、微信号、代办等商业内容的帖子会先进入人工审核。';
 var files = [], SUBC = {}, MED = {}, MEDNOTE = '', lastTpl = '';
 
@@ -386,6 +400,10 @@ function syncMedNote(){
     '不得使用“保证效果”“无副作用”“100%”等承诺性用语。';
 }
 function applyBoard(val, fromDraft){
+  if (lhHiddenBoard(val)){
+    alert((lhFlags().unavailable_message) || '该项目暂未开放');
+    return;
+  }
   document.getElementById('board').value = val || '';
   document.querySelectorAll('#chips button[data-board]').forEach(function(b){
     b.classList.toggle('on', b.getAttribute('data-board') === val);
@@ -416,7 +434,7 @@ function renderChips(){
     var dis = (c.key === 'friends' && u && u.tier < 2);
     return '<button type="button" data-board="' + c.key + '"' + (dis ? ' disabled' : '') + '>' + (dis ? '旅韩交友（需高级会员）' : LH.esc(c.label)) + '</button>';
   }
-  el.innerHTML = CHANNELS.map(btn).join('');
+  el.innerHTML = CHANNELS.filter(function(c){ return !lhHiddenBoard(c.key); }).map(btn).join('');
   el.querySelectorAll('button[data-board]').forEach(function(b){
     b.onclick = function(){ if (b.disabled) return; applyBoard(b.getAttribute('data-board')); saveDraft(); };
   });
@@ -563,6 +581,16 @@ window.addEventListener('lh-compose-files', function(ev){
   var next = LISTING ? '/community/new?listing=1' : '/community/new';
   try { d = ME = await LH.me(); } catch(e){ gate.innerHTML = '<div class="empty">' + LH.esc(e.message) + '</div>'; return; }
   if (!d.user){ gate.innerHTML = '<div class="empty">请先登录<br><br><a class="btn primary" href="/login?next=' + encodeURIComponent(next) + '">登录 / 注册</a></div>'; return; }
+  applyHiddenFlags();
+  var wantBoard = (LH.qs('board') || '').trim();
+  var wantCat = (LH.qs('cat') || LH.qs('mcat') || '').trim();
+  if (lhHiddenBoard(wantBoard) || lhHiddenCat(wantCat)){
+    gate.innerHTML = '<div class="empty">' + LH.esc((lhFlags().unavailable_detail) || '该项目暂未开放') +
+      '<br><br><a class="btn primary" href="/shops">返回商家页</a></div>';
+    var form = document.getElementById('form');
+    if (form) form.style.display = 'none';
+    return;
+  }
   var isMerchant = !!(d.user && (d.user.merchant || d.user.merchant_info));
   if (LISTING){
     if (!isMerchant){
@@ -730,6 +758,9 @@ document.getElementById('send').onclick = async function(){
     document.getElementById('board').value = 'daily';
   }
   if (!currentBoard()){ LH.showErr(err, '请选择商家分类'); window.scrollTo(0, 0); return; }
+  if (lhHiddenBoard(currentBoard()) || lhHiddenCat((document.getElementById('mcat')||{}).value || '')){
+    LH.showErr(err, (lhFlags().unavailable_message) || '该项目暂未开放'); window.scrollTo(0, 0); return;
+  }
   var fd = new FormData();
   fd.append('board', currentBoard());
   fd.append('merchant_cat', (document.getElementById('mcat') || {}).value || '');
@@ -780,6 +811,6 @@ document.getElementById('send').onclick = async function(){
   }
 };
 </script>
-<script src="/static/pwa.js?v=93" defer></script>
+<script src="/static/pwa.js?v=94" defer></script>
 </body>
 </html>

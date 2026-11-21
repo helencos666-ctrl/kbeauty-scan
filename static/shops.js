@@ -16,6 +16,17 @@
   var title = document.getElementById('feedTitle');
   if (!box || !list || !window.LH) return;
   var seq = 0;
+  function flags(){ return window.LH_FLAGS || {}; }
+  function hiddenCat(c){ return (flags().hidden_cats || []).indexOf(c) >= 0; }
+  (flags().hidden_cats || []).forEach(function(c){
+    box.querySelectorAll('[data-cat="'+c+'"]').forEach(function(el){ el.remove(); });
+  });
+  var strip = document.getElementById('adStrip');
+  if (strip && hiddenCat('clinic')){
+    strip.querySelectorAll('a.ad-card').forEach(function(a){
+      if ((a.getAttribute('href') || '').indexOf('cat=clinic') >= 0) a.remove();
+    });
+  }
 
   function catFromUrl(){
     var c = (LH.qs('cat') || '').trim();
@@ -119,6 +130,14 @@
       return;
     }
     list.hidden = false;
+    if (hiddenCat(cat)){
+      if (title) title.textContent = flags().unavailable_message || '该项目暂未开放';
+      list.innerHTML = '<div class="empty-state"><p><b>' + LH.esc(flags().unavailable_message || '该项目暂未开放') + '</b><br>' +
+        LH.esc(flags().unavailable_detail || '') +
+        '</p><a class="btn primary" href="/shops">查看其他分类</a></div>';
+      if (opts.scroll) reveal();
+      return;
+    }
     if (title) title.textContent = CATS[cat] || '商家服务';
     list.innerHTML = '<div class="list-head"><span><b>' + LH.esc(CATS[cat]) + '</b></span></div><div class="loading">加载中…</div>';
     if (opts.scroll) reveal();

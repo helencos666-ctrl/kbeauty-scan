@@ -21,6 +21,7 @@ from community import (
     need_admin, need_user, process_image, q,
 )
 from contact_guard import guard_images, guard_medical, guard_text
+from feature_flags import UNAVAILABLE_MSG, hidden_boards, is_hidden_board, is_hidden_cat, is_hidden_post, public_flags
 
 router = APIRouter()
 
@@ -173,8 +174,10 @@ def link_target(conn, kind, lid, banner_id=None):
         r = q(conn, "SELECT id FROM c_chicken_shops WHERE id=%s AND active", (lid,), one=True)
         return "/chicken?shop=%d" % lid if r else None
     if kind == "post":
-        r = q(conn, "SELECT id FROM c_posts WHERE id=%s AND status='published' AND NOT deleted", (lid,), one=True)
-        return "/community/post/%d" % lid if r else None
+        r = q(conn, "SELECT id, board, merchant_cat FROM c_posts WHERE id=%s AND status='published' AND NOT deleted", (lid,), one=True)
+        if not r or is_hidden_post(r):
+            return None
+        return "/community/post/%d" % lid
     if kind == "consult":
         return "/consult/new?kind=banner&id=%d" % banner_id if banner_id else None
     return None
@@ -200,8 +203,12 @@ def _banner_out(r, admin=False):
 
 @router.get("/api/merch/meta")
 def api_merch_meta():
-    return {"subcats": {b: subcats(b) for b in SUBCATS}, "medical_boards": sorted(MEDICAL_BOARDS), "medical_note": MEDICAL_NOTE,
-            "merchant_boards": sorted(MERCHANT_BOARDS)}
+    hb = hidden_boards()
+    return {"subcats": {b: subcats(b) for b in SUBCATS if b not in hb},
+            "medical_boards": sorted(b for b in MEDICAL_BOARDS if b not in hb),
+            "medical_note": MEDICAL_NOTE,
+            "merchant_boards": sorted(b for b in MERCHANT_BOARDS if b not in hb),
+            "flags": public_flags()}
 
 
 @router.get("/api/banners")
@@ -432,11 +439,13 @@ def post_offers_consult(row):
 def _target_for(conn, kind, oid):
     """返回 (merchant_id or None=平台客服, ref_title)"""
     if kind == "post":
-        r = q(conn, """SELECT p.user_id, p.title, p.board, p.is_merchant,
+        r = q(conn, """SELECT p.user_id, p.title, p.board, p.is_merchant, p.merchant_cat,
                               (au.merchant_until IS NOT NULL AND au.merchant_until>now()) AS author_merchant
                        FROM c_posts p JOIN c_users au ON au.id=p.user_id
                        WHERE p.id=%s AND p.status='published' AND NOT p.deleted AND NOT au.is_banned""",
               (oid,), one=True)
+        if r and is_hidden_post(r):
+            raise HTTPException(400, UNAVAILABLE_MSG)
         if not r or not post_offers_consult(r):
             raise HTTPException(404, "活动不存在或已下架")
         label = "活动：" if r["board"] in MERCHANT_BOARDS else "帖子："
@@ -468,9 +477,11 @@ def _target_for(conn, kind, oid):
         from shop_partners import target as partner_target
         return partner_target(conn, q, oid)
     if kind == "provider":
-        r = q(conn, "SELECT user_id, name FROM c_providers WHERE id=%s AND status='approved'", (oid,), one=True)
+        r = q(conn, "SELECT user_id, name, category FROM c_providers WHERE id=%s AND status='approved'", (oid,), one=True)
         if not r:
             raise HTTPException(404, "商家不存在或未通过审核")
+        if is_hidden_cat(r.get("category")):
+            raise HTTPException(400, UNAVAILABLE_MSG)
         return r.get("user_id"), "商家：" + r["name"]
     raise HTTPException(400, "咨询对象不正确")
 

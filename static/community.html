@@ -10,10 +10,10 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="旅韩助手">
 <link rel="manifest" href="/manifest.webmanifest">
-<link rel="apple-touch-icon" href="/static/icons/apple-touch-icon.png?v=93">
-<link rel="icon" type="image/png" sizes="192x192" href="/static/icons/icon-192.png?v=93">
-<link rel="stylesheet" href="/static/pwa.css?v=93">
-<link rel="stylesheet" href="/static/community.css?v=93">
+<link rel="apple-touch-icon" href="/static/icons/apple-touch-icon.png?v=94">
+<link rel="icon" type="image/png" sizes="192x192" href="/static/icons/icon-192.png?v=94">
+<link rel="stylesheet" href="/static/pwa.css?v=94">
+<link rel="stylesheet" href="/static/community.css?v=94">
 </head>
 <body>
 <header class="xbar">
@@ -65,7 +65,7 @@
         <div class="stage-t"><span>3</span>找商家</div>
         <a class="topic" href="/community?board=hotel"><em>🛏️</em><span><b>住宿推荐</b><small>商家会员发布</small></span></a>
         <a class="topic" href="/community?board=car"><em>🚐</em><span><b>包车用车</b><small>商家会员发布</small></span></a>
-        <a class="topic" href="/community?board=clinic"><em>✨</em><span><b>皮肤管理·医美</b><small>仅限合法医疗机构</small></span></a>
+        <!-- feature:medical-aesthetic --><a class="topic" href="/community?board=clinic"><em>✨</em><span><b>皮肤管理·医美</b><small>仅限合法医疗机构</small></span></a><!-- /feature:medical-aesthetic -->
         <a class="topic" href="/community?board=agency"><em>🏫</em><span><b>留学机构</b><small>正规机构发布</small></span></a>
         <a class="topic" href="/community?board=daigou"><em>🛍️</em><span><b>代购商家</b><small>商家会员发布</small></span></a>
         <a class="topic" href="/community?board=guide"><em>🙋</em><span><b>地陪</b><small>商家会员发布</small></span></a>
@@ -95,7 +95,7 @@
     <ul class="rules">
       <li>只分享真实经历；骗钱、违法、黄赌、签证代办宣传、违法医疗广告一律删帖封号，已付费用不退。</li>
       <li>交友里只要谈到转账、借钱、投资、虚拟币，就是骗局信号，请马上举报。</li>
-      <li>住宿、包车用车、皮肤管理·医美、留学机构、代购、地陪、追星活动属于商家信息，开通商家会员后到「我的」页的「商家发布信息」发布；其他频道带商业内容的帖子会先审核。</li>
+      <li>住宿、包车用车<!-- feature:medical-aesthetic -->、皮肤管理·医美<!-- /feature:medical-aesthetic -->、留学机构、代购、地陪、追星活动属于商家信息，开通商家会员后到「我的」页的「商家发布信息」发布；其他频道带商业内容的帖子会先审核。</li>
       <li>签证和留学频道只交流个人经验，本站不办理任何签证或留学手续。</li>
     </ul>
     <a class="btn ghost block" href="/rules" style="margin-top:10px">阅读完整社区约定</a>
@@ -112,7 +112,7 @@
   <a href="/?tab=more"><i>☰</i>全部</a>
   <a href="/me"><i>👤</i>我的</a>
 </nav>
-<script src="/static/community.js?v=93"></script>
+<script src="/static/community.js?v=94"></script>
 <script src="/static/banners.js"></script>
 <script>
 var WARN = {
@@ -143,6 +143,9 @@ var CITY_BOX = [
   ['首尔',126.78,37.42,127.2,37.72]
 ];
 var board = LH.qs('board') || '', tab = LH.qs('tab') || 'discover', next = 0, fb = false, boards = {}, user = null;
+function lhFlags(){ return window.LH_FLAGS || {}; }
+function lhHiddenBoard(b){ return (lhFlags().hidden_boards || []).indexOf(b) >= 0; }
+
 var city = localStorage.getItem('lh_feed_city') || '首尔', geoTried = false;
 if (CITIES.indexOf(city) < 0) city = '首尔';
 var listEl = document.getElementById('list'), moreEl = document.getElementById('more');
@@ -183,6 +186,23 @@ document.querySelectorAll('#tabs button').forEach(function(b){
   b.onclick = function(){ setTab(b.dataset.t); };
 });
 function render(){
+  if (lhHiddenBoard(board)){
+    document.querySelectorAll('#tabs button').forEach(function(b){ b.className = ''; });
+    document.getElementById('homeBlocks').style.display = 'none';
+    var bh = document.getElementById('boardHead'), w = document.getElementById('bwarn');
+    if (w) w.style.display = 'none';
+    if (bh){
+      bh.style.display = 'block';
+      bh.innerHTML = '<div class="row"><b style="font-size:18px">' + LH.esc((lhFlags().unavailable_message) || '该项目暂未开放') + '</b></div>';
+    }
+    var sc = document.getElementById('subcats'); if (sc) sc.style.display = 'none';
+    var bb = document.getElementById('boardBanner'); if (bb){ bb.hidden = true; bb.innerHTML = ''; }
+    listEl.className = '';
+    listEl.innerHTML = '<div class="card empty">' + LH.esc(lhFlags().unavailable_detail || lhFlags().unavailable_message || '该项目暂未开放') +
+      '<br><br><a class="btn primary" href="/community">返回韩友圈</a></div>';
+    moreEl.style.display = 'none';
+    return;
+  }
   document.querySelectorAll('#tabs button').forEach(function(b){ b.className = (!board && b.dataset.t === tab) ? 'on' : ''; });
   var home = !board && tab === 'discover';
   document.getElementById('homeBlocks').style.display = 'none';
@@ -270,6 +290,12 @@ async function load(reset){
   if (reset){ next = 0; fb = false; listEl.className = ''; listEl.innerHTML = '<div class="loading">加载中…</div>'; }
   try {
     var d = await LH.api('GET', feedUrl());
+    if (d.unavailable){
+      listEl.className = '';
+      listEl.innerHTML = '<div class="card empty">' + LH.esc(d.detail || d.message || '该项目暂未开放') +
+        '<br><br><a class="btn primary" href="/community">返回韩友圈</a></div>';
+      moreEl.style.display = 'none'; return;
+    }
     if (d.tier_required){
       listEl.className = '';
       listEl.innerHTML = '<div class="card empty">旅韩交友需' + (d.login_required ? '登录并' : '') + '开通会员（¥<span data-p="price_t1">9.9</span>）后查看<br><br>' +
@@ -346,6 +372,6 @@ async function loadHome(){
   render();
 })();
 </script>
-<script src="/static/pwa.js?v=93" defer></script>
+<script src="/static/pwa.js?v=94" defer></script>
 </body>
 </html>

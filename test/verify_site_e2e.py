@@ -44,8 +44,8 @@ def check_source_fixes():
     check("发帖提交前重建内存 File 并限制 18MB", "arrayBuffer()" in newp and "18 * 1024 * 1024" in newp)
     check("pick 压缩完成后再清空 value", "ok.push(await LH.compress" in newp and "this.value = ''" in newp)
     check("后端识别空包并给出准确提示", "上传内容未到达服务器" in py and "post_upload_empty" in py)
-    check("sw.js 缓存为 v93", "lvhan-shell-v93" in sw and "shops.js?v=93" in sw)
-    check("community-new 使用 v93", "?v=93" in newp and "?v=91" not in newp)
+    check("sw.js 缓存为 v94", "lvhan-shell-v94" in sw and "shops.js?v=94" in sw)
+    check("community-new 使用 v94", "?v=94" in newp and "?v=91" not in newp)
 
 # ---------------- local server ----------------
 def start_server():
@@ -87,6 +87,7 @@ CORE_PATHS = [
     "/me", "/community", "/community/new", "/community/new?listing=1",
     "/trips", "/festival", "/member", "/login",
     "/shops/join-guide", "/shops/start", "/shops/examples/guide", "/shops?cat=guide",
+    "/shops/examples/clinic", "/community?board=clinic",
 ]
 
 def check_routes(base):
@@ -100,9 +101,19 @@ def check_routes(base):
             check("HTTP %s" % path, False, str(e))
     # APIs used by shops / examples
     r = httpx.get(base + "/api/shop-examples/clinic", timeout=10)
-    check("示范案例 API", r.status_code == 200 and r.json().get("item", {}).get("is_example") is True, r.text[:200])
+    check("医美示范案例 API 返回暂未开放", r.status_code == 200 and r.json().get("unavailable") is True and "暂未开放" in (r.json().get("message") or ""), r.text[:200])
+    r = httpx.get(base + "/api/shop-examples/guide", timeout=10)
+    check("地陪示范案例 API 正常", r.status_code == 200 and r.json().get("item", {}).get("is_example") is True, r.text[:200])
     r = httpx.get(base + "/api/providers/meta", timeout=10)
-    check("入驻分类为 12 个", r.status_code == 200 and len(r.json().get("cats") or []) == 12 and r.json().get("photo_max") == 6, r.text[:200])
+    cats = r.json().get("cats") or []
+    keys = [c.get("key") for c in cats]
+    check("入驻分类隐藏医美且其余正常", r.status_code == 200 and "clinic" not in keys and "guide" in keys and "food" in keys and r.json().get("photo_max") == 6 and len(cats) == 11, r.text[:200])
+    r = httpx.get(base + "/api/site-flags", timeout=10)
+    check("site-flags 默认隐藏医美", r.status_code == 200 and r.json().get("hide_medical_aesthetic") is True, r.text[:200])
+    r = httpx.get(base + "/api/providers?cat=clinic", timeout=10)
+    check("医美商家列表 API 返回暂未开放", r.status_code == 200 and r.json().get("unavailable") is True, r.text[:200])
+    r = httpx.get(base + "/shops/examples/clinic", timeout=10, follow_redirects=True)
+    check("医美示范页返回暂未开放", r.status_code == 200 and "暂未开放" in r.text, r.text[:200])
     r = httpx.post(base + "/api/community/posts", headers={"X-LH": "1"}, content=b"", timeout=10)
     check("空包发帖返回准确提示", r.status_code == 400 and "未到达服务器" in r.text, r.text[:200])
     r = httpx.post(base + "/api/community/posts", headers={"X-LH": "1", "Content-Type": "application/json"}, json={}, timeout=10)
@@ -213,16 +224,23 @@ def run_playwright(base, img_paths, shot_dir: Path):
         page.wait_for_timeout(400)
         page.screenshot(path=str(shot_dir / "shops.png"), full_page=True)
         check("商家页有我要入驻·看教程", page.locator("text=我要入驻·看教程").count() > 0)
-        page.click('a[data-cat="clinic"]')
-        page.wait_for_url("**/shops?cat=clinic", timeout=10000)
+        check("商家页分类入口不含医美", page.locator('#catChips [data-cat="clinic"]').count() == 0 and "医美" not in (page.locator("#catChips").inner_text() if page.locator("#catChips").count() else ""))
+        check("商家页其他分类仍在", page.locator('#catChips [data-cat="guide"]').count() == 1 and page.locator('#catChips [data-cat="food"]').count() == 1)
+        check("商家页轮播不再指向医美分类", page.locator('#adStrip a[href*="cat=clinic"]').count() == 0)
+        page.goto(base + "/shops?cat=clinic", wait_until="domcontentloaded", timeout=20000)
+        page.wait_for_timeout(400)
+        page.screenshot(path=str(shot_dir / "shops-clinic-hidden.png"), full_page=True)
+        check("直接打开医美分类显示暂未开放", "暂未开放" in page.locator("#svcList").inner_text(), page.locator("#svcList").inner_text()[:200])
+        page.click('a[data-cat="guide"]')
+        page.wait_for_url("**/shops?cat=guide", timeout=10000)
         page.wait_for_selector(".example-card, .ex-badge", timeout=12000)
         page.wait_for_timeout(300)
-        page.screenshot(path=str(shot_dir / "shops-clinic.png"), full_page=True)
+        page.screenshot(path=str(shot_dir / "shops-guide.png"), full_page=True)
         check("分类页出现示范案例标注", page.locator("text=示范案例（仅供参考，非真实商家）").count() > 0, page.content()[:400])
         page.click("text=查看示范")
         page.wait_for_url("**/shops/examples/**", timeout=10000)
         page.wait_for_timeout(500)
-        page.screenshot(path=str(shot_dir / "example-clinic.png"), full_page=True)
+        page.screenshot(path=str(shot_dir / "example-guide.png"), full_page=True)
         check("示范详情有 6 张示意照片", page.locator(".gal img").count() == 6)
         check("示范详情说明不能咨询", "示范案例不能咨询" in page.content() or "不能咨询" in page.content())
 

@@ -1,3 +1,10 @@
+## 2026-11-21 对外暂时隐藏医美项目（v94）
+
+- 用开关隐藏对外可见的「医美」入口：商家分类、示范案例、已入驻医美商家列表与详情、帖子频道/筛选、入驻申请选项、导航与相关 SEO 描述。后台管理端和数据库中的用户/商家数据全部保留，不删除。
+- 开关：代码常量 `HIDE_MEDICAL_AESTHETIC_DEFAULT`（在 `feature_flags.py`），也可设置环境变量 `HIDE_MEDICAL_AESTHETIC=true/false`。默认开启隐藏；要恢复展示，把环境变量设为 `false`（或改常量默认值）后重新部署即可。
+- 直接访问医美链接（如 `/shops?cat=clinic`、`/shops/p/{id}`、`/shops/examples/clinic`、`/community?board=clinic`）返回友好的「该项目暂未开放」，不会报错。
+- 缓存参数改为 `?v=94`，Service Worker 缓存名改为 `lvhan-shell-v94`。
+
 ## 2026-11-21 江南内容日更：地点实景照片与官方帖（v93）
 
 - static/food.json、static/attractions.json、static/shopping-stores.json 新增江南一带 6 个条目（宣靖陵、岛山公园、新沙洞林荫道、Miltap 狎鸥亭本店、Cine de Chef、BOONTHESHOP 清潭），均按 VisitSeoul / VisitKorea 官方页核对，source_url / source_note 随条目记录。

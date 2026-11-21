@@ -2,7 +2,7 @@
 
 run_local(base, check, shot_dir)：本地服务没有数据库，用 Playwright 拦截商家接口返回固定样例，
     只校验页面逻辑：点分类不整页刷新、列表出现在可视区域、卡片链接、空状态与入驻入口。
-run_live(base, check, shot_dir)：只读访问线上（不登录、不发帖、不写库），12 个分类逐个点开，
+run_live(base, check, shot_dir)：只读访问线上（不登录、不发帖、不写库），公开分类逐个点开，
     每个真实商家卡片都要能打开详情；并专门核对用户点名的 3 家已入驻商家。
 
     LH_LIVE_BASE=https://lvhanzhushou.com python test/verify_site_e2e.py
@@ -12,7 +12,9 @@ from __future__ import annotations
 import json
 import re
 
-CATS = ["guide", "clinic", "food", "airport", "hotel", "interp", "kpop", "car", "sim", "logistics", "daigou", "other"]
+ALL_CATS = ["guide", "clinic", "food", "airport", "hotel", "interp", "kpop", "car", "sim", "logistics", "daigou", "other"]
+HIDDEN_CATS = {"clinic"}
+CATS = [c for c in ALL_CATS if c not in HIDDEN_CATS]
 CAT_NAMES = {"guide": "地陪向导", "clinic": "医美", "food": "美食代点外卖", "airport": "接送机", "hotel": "住宿",
              "interp": "翻译", "kpop": "追星活动", "car": "租车", "sim": "通讯电话卡", "logistics": "物流快递",
              "daigou": "代购", "other": "其它"}
@@ -84,6 +86,7 @@ def run_local(base, check, shot_dir):
         errs = []
         page.on("pageerror", lambda e: errs.append(str(e)))
         page.goto(base + "/shops", wait_until="load", timeout=30000)
+        check("本地：商家页没有医美分类磁贴", page.locator('#catChips [data-cat="clinic"]').count() == 0)
         page.wait_for_function("() => document.querySelector('[data-cat=food] .cnt')", timeout=15000)
         cnt = page.evaluate("() => { const t = document.querySelector('[data-cat=food] .cnt'); return t ? t.textContent : ''; }")
         check("本地：美食分类角标显示已入驻 2 家（样例）", cnt == "2", cnt)
@@ -133,7 +136,15 @@ def run_live(base, check, shot_dir):
         page.goto(base + "/shops", wait_until="load", timeout=60000)
         page.wait_for_timeout(2500)
         ads = page.eval_on_selector_all("#adStrip a.ad-card", "els => els.map(e => e.href)")
-        check("线上：商家页 4 张轮播卡片", len(ads) == 4, ads)
+        check("线上：商家页轮播不含医美入口", all("cat=clinic" not in (h or "") for h in ads), ads)
+        check("线上：商家页轮播仍有 3 张公开卡片", len(ads) == 3, ads)
+        check("线上：商家页没有医美分类磁贴", page.locator('#catChips [data-cat="clinic"]').count() == 0)
+        page.goto(base + "/shops?cat=clinic", wait_until="load", timeout=60000)
+        page.wait_for_timeout(800)
+        check("线上：直接打开医美分类显示暂未开放", "暂未开放" in page.inner_text("body"))
+        page.goto(base + "/shops", wait_until="load", timeout=60000)
+        page.wait_for_timeout(1500)
+        ads = page.eval_on_selector_all("#adStrip a.ad-card", "els => els.map(e => e.href)")
         for h in ads:
             r = httpx.get(h, headers={"User-Agent": UA}, follow_redirects=True, timeout=30)
             final = str(r.url)

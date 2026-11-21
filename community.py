@@ -13,6 +13,8 @@ from fastapi import APIRouter, Request, Response, HTTPException, UploadFile, Fil
 from fastapi.responses import FileResponse, HTMLResponse
 from starlette.concurrency import run_in_threadpool
 from PIL import Image, ImageOps
+from feature_flags import (UNAVAILABLE_MSG, hidden_boards, hidden_cats, hide_medical_aesthetic,
+                            is_hidden_board, is_hidden_cat, is_hidden_post, public_flags, unavailable_payload)
 
 BASE = os.path.dirname(os.path.abspath(__file__))
 STATIC = os.path.join(BASE, "static")
@@ -889,6 +891,30 @@ def bot_default_avatar():
 def has_avatar_row(r):
     return bool(r.get("has_avatar") or r.get("is_bot") or r.get("avatar"))
 
+
+def exclude_hidden_posts_sql():
+    """追加到 c_posts p 的 WHERE，隐藏对外的医美帖（不删数据）。"""
+    parts, args = [], []
+    hb, hc = hidden_boards(), hidden_cats()
+    if hb:
+        parts.append("p.board <> ALL(%s)")
+        args.append(list(hb))
+    if hc:
+        parts.append("(COALESCE(p.merchant_cat,'') = '' OR p.merchant_cat <> ALL(%s))")
+        args.append(list(hc))
+    if not parts:
+        return "", []
+    return " AND " + " AND ".join(parts), args
+
+
+def public_board_map():
+    return {k: v for k, v in BOARDS.items() if not is_hidden_board(k)}
+
+
+def public_merchant_board_list():
+    return sorted(b for b in MERCHANT_BOARDS if not is_hidden_board(b))
+
+
 # ---------------- 页面 ----------------
 def _esc_html(s):
     return html_lib.escape("" if s is None else str(s))
@@ -905,10 +931,11 @@ def sitemap_public_posts(origin):
         return out
     try:
         with db() as conn:
+            hide_sql, hide_args = exclude_hidden_posts_sql()
             rows = q(conn, """SELECT p.id, p.created_at FROM c_posts p JOIN c_users au ON au.id=p.user_id
                               WHERE NOT p.deleted AND p.status='published' AND NOT au.is_banned
-                                AND p.board <> ALL(%s)
-                              ORDER BY p.id DESC LIMIT 2000""", (list(LOGIN_ONLY_BOARDS),))
+                                AND p.board <> ALL(%s)""" + hide_sql + """
+                              ORDER BY p.id DESC LIMIT 2000""", (list(LOGIN_ONLY_BOARDS), *hide_args))
         for r in rows:
             last = r["created_at"]
             if last and getattr(last, "tzinfo", None):
@@ -928,11 +955,12 @@ def p_community():
     if _db_url():
         try:
             with db() as conn:
+                hide_sql, hide_args = exclude_hidden_posts_sql()
                 rows = q(conn, """SELECT p.id, p.title, p.body, au.nickname FROM c_posts p
                                   JOIN c_users au ON au.id=p.user_id
                                   WHERE NOT p.deleted AND p.status='published' AND NOT au.is_banned
-                                    AND p.board <> ALL(%s)
-                                  ORDER BY p.id DESC LIMIT 20""", (list(LOGIN_ONLY_BOARDS),))
+                                    AND p.board <> ALL(%s)""" + hide_sql + """
+                                  ORDER BY p.id DESC LIMIT 20""", (list(LOGIN_ONLY_BOARDS), *hide_args))
             items = []
             for r in rows:
                 ex = (r["body"] or "").replace("\n", " ").strip()[:80]
@@ -950,7 +978,7 @@ def p_community():
 def p_new(): return _page("community-new.html", "/community/new")
 
 @router.get("/community/post/{pid}")
-def p_post(pid: str):
+def p_post(pid: str, req: Request):
     extra, ssr = None, ""
     try:
         n = int(pid) if re.fullmatch(r"\d{1,12}", pid or "") else 0
@@ -960,10 +988,16 @@ def p_post(pid: str):
     if n and _db_url():
         try:
             with db() as conn:
-                r = q(conn, """SELECT p.title, p.body, p.created_at, au.nickname
+                r = q(conn, """SELECT p.title, p.body, p.created_at, p.board, p.merchant_cat, p.user_id, au.nickname
                                FROM c_posts p JOIN c_users au ON au.id=p.user_id
                                WHERE p.id=%s AND NOT p.deleted AND p.status='published' AND NOT au.is_banned
                                  AND p.board <> ALL(%s)""", (n, list(LOGIN_ONLY_BOARDS)), one=True)
+                if r and is_hidden_post(r):
+                    u = current_user(conn, req)
+                    if not (u and u["id"] == r["user_id"]) and not is_admin(conn, req):
+                        return _page("unavailable.html", path,
+                                     extra={"title": UNAVAILABLE_MSG + " · 旅韩助手",
+                                            "description": UNAVAILABLE_MSG, "index": False})
             if r:
                 desc = (r["body"] or "").replace("\n", " ").strip()[:140]
                 dt = r["created_at"]
@@ -1028,7 +1062,7 @@ def api_me(req: Request):
         u = current_user(conn, req)
         st = get_settings(conn)
         if not u:
-            return {"user": None, "boards": BOARDS, "merchant_boards": sorted(MERCHANT_BOARDS), "prices": st}
+            return {"user": None, "boards": public_board_map(), "merchant_boards": public_merchant_board_list(), "prices": st, "flags": public_flags()}
         disp = 3 if u["merchant"] else u["tier"]
         unread = q(conn, """SELECT count(*) AS n FROM c_messages m WHERE m.recipient_id=%s AND m.read_at IS NULL AND NOT m.deleted
                             AND NOT EXISTS (SELECT 1 FROM c_blocks b WHERE b.blocker_id=%s AND b.blocked_id=m.sender_id)""",
@@ -1050,7 +1084,7 @@ def api_me(req: Request):
                          "has_avatar": bool(u.get("has_avatar")),
                          "points_name": pts["name"], "points_balance": pts["balance"],
                          "points_streak": pts["streak"], "coupon_available": pts["coupon_available"]},
-                "boards": BOARDS, "merchant_boards": sorted(MERCHANT_BOARDS), "prices": st}
+                "boards": public_board_map(), "merchant_boards": public_merchant_board_list(), "prices": st, "flags": public_flags()}
 
 @router.get("/api/community/prices")
 def api_prices():
@@ -1515,12 +1549,19 @@ def api_posts(req: Request, board: str = "", before: int = 0, limit_n: int = 20,
     limit_n = max(1, min(limit_n, 30))
     if board and board not in BOARDS:
         raise HTTPException(400, "频道不存在")
+    if is_hidden_board(board):
+        return unavailable_payload(posts=[], more=False, pinned=[])
     with db() as conn:
         u = current_user(conn, req)
         tier = u["tier"] if u else 0
         if board in LOGIN_ONLY_BOARDS and tier < 1:
             return {"posts": [], "login_required": not u, "tier_required": 1}
         cond, args = ["NOT p.deleted", "p.status='published'", "NOT au.is_banned"], []
+        hide_sql, hide_args = exclude_hidden_posts_sql()
+        if hide_sql:
+            # hide_sql 自带 AND，转成可拼进 cond 的片段
+            cond.append(hide_sql[5:])
+            args.extend(hide_args)
         if board:
             cond.append("p.board=%s"); args.append(board)
             if tag and re.fullmatch(r"[a-z]{2,12}", tag):
@@ -1601,7 +1642,16 @@ def api_feed(req: Request, tab: str = "recommend", boards: str = "", offset: int
         cond, args = ["NOT p.deleted", "p.status='published'", "NOT au.is_banned"], []
         if tier < 1:
             cond.append("p.board <> ALL(%s)"); args.append(list(LOGIN_ONLY_BOARDS))
+        hide_sql, hide_args = exclude_hidden_posts_sql()
+        if hide_sql:
+            cond.append(hide_sql[5:])
+            args.extend(hide_args)
         if bl:
+            if any(is_hidden_board(b) for b in bl) and all(is_hidden_board(b) for b in bl):
+                return unavailable_payload(posts=[], more=False, fallback=False, next=offset)
+            bl = [b for b in bl if not is_hidden_board(b)]
+            if not bl:
+                return {"posts": [], "more": False, "fallback": False, "next": offset}
             cond.append("p.board = ANY(%s)"); args.append(bl)
         if u:
             cond.append("NOT EXISTS (SELECT 1 FROM c_blocks b WHERE b.blocker_id=%s AND b.blocked_id=p.user_id)"); args.append(u["id"])
@@ -1703,7 +1753,8 @@ def api_boards(req: Request):
     """全部频道：分组 + 频道 + 当前用户已关注的频道（未配置数据库时也能返回分组）"""
     cats = [{"key": c["key"], "name": c["name"], "icon": c["icon"],
              "boards": [{"key": b, "name": BOARDS[b], "icon": BOARD_ICONS.get(b, "📌"), "desc": BOARD_DESCS.get(b, ""), "merchant": b in MERCHANT_BOARDS,
-                         "members_only": b in LOGIN_ONLY_BOARDS} for b in c["boards"]]} for c in BOARD_CATEGORIES]
+                         "members_only": b in LOGIN_ONLY_BOARDS} for b in c["boards"] if not is_hidden_board(b)]} for c in BOARD_CATEGORIES]
+    cats = [c for c in cats if c["boards"]]
     joined, counts = [], {}
     if _db_url():
         with db() as conn:
@@ -1723,6 +1774,8 @@ def api_board_join(req: Request, board: str):
     csrf(req)
     if board not in BOARDS:
         raise HTTPException(404, "频道不存在")
+    if is_hidden_board(board):
+        raise HTTPException(400, UNAVAILABLE_MSG)
     with db() as conn:
         u = need_user(conn, req)
         limit("bj:" + str(u["id"]), 60, 600)
@@ -1780,6 +1833,8 @@ def api_post(req: Request, pid: int):
                        WHERE p.id=%s AND NOT p.deleted AND NOT au.is_banned""", (pid,), one=True)
         if not r or (r["status"] != "published" and not (u and u["id"] == r["user_id"])):
             raise HTTPException(404, "帖子不存在或已删除")
+        if is_hidden_post(r) and not (u and u["id"] == r["user_id"]) and not is_admin(conn, req):
+            return unavailable_payload()
         if r["status"] == "published" and not (u and u["id"] == r["user_id"]):
             vk = "pv:%s:%d" % ((u or {}).get("id") or ip_of(req), pid)
             try:
@@ -1852,9 +1907,14 @@ def _merchant_cat_clause(cat):
 def api_merchant_feed(req: Request, cat: str = "", before: int = 0, limit_n: int = 20):
     limit_n = max(1, min(limit_n, 30))
     cat = (cat or "").strip()
+    if cat and cat != "all" and is_hidden_cat(cat):
+        return unavailable_payload(posts=[], has_more=False, cats=[{"key": "all", "name": "全部"}] + [{"key": k, "name": n} for k, n in MERCHANT_CATS if not is_hidden_cat(k)])
     if cat and cat != "all" and cat not in MERCHANT_CAT_KEYS:
         raise HTTPException(400, "分类不存在")
     extra, extra_args = _merchant_cat_clause(cat)
+    hide_sql, hide_args = exclude_hidden_posts_sql()
+    extra += hide_sql
+    extra_args = list(extra_args) + hide_args
     with db() as conn:
         u = current_user(conn, req)
         uid = u["id"] if u else None
@@ -1879,7 +1939,7 @@ def api_merchant_feed(req: Request, cat: str = "", before: int = 0, limit_n: int
         o["consult"] = (uid is None) or (uid != (r.get("user_id") or r.get("author_id")))
         o["mine"] = bool(uid and uid == (r.get("user_id") or r.get("author_id")))
         posts.append(o)
-    cats = [{"key": "all", "name": "全部"}] + [{"key": k, "name": n} for k, n in MERCHANT_CATS]
+    cats = [{"key": "all", "name": "全部"}] + [{"key": k, "name": n} for k, n in MERCHANT_CATS if not is_hidden_cat(k)]
     return {"posts": posts, "has_more": has_more, "cats": cats}
 
 
@@ -1913,6 +1973,8 @@ async def api_new_post(req: Request, board: str = Form(""), title: str = Form(""
         board = DAILY_BOARD
     daily = board == DAILY_BOARD
     cat = (merchant_cat or "").strip()
+    if is_hidden_board(board) or is_hidden_cat(cat):
+        raise HTTPException(400, UNAVAILABLE_MSG)
     listing = bool(cat) or board in MERCHANT_BOARDS
     title = clean_text(title, 40, "标题", (2 if daily else 4) if listing else 0)
     body = clean_text(body, 3000, "正文", (5 if daily else 10) if listing else 0)

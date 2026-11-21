@@ -24,6 +24,7 @@ from fastapi.responses import RedirectResponse
 from community import (MAX_IMG_BYTES, POST_IMG_FMTS, _open_image, _json, _page, _ts, csrf, current_user, db, ip_of, limit,
                        need_admin, q)
 from chicken_merchant import encrypt, decrypt, pii_ready
+from feature_flags import UNAVAILABLE_MSG, is_hidden_cat, public_flags, unavailable_payload
 
 router = APIRouter()
 
@@ -221,6 +222,10 @@ def p_provider(pid: int):
     try:
         with db() as conn:
             r = q(conn, "SELECT id, name, area, category, services FROM c_providers WHERE id=%s AND status='approved'", (pid,), one=True)
+        if r and is_hidden_cat(r.get("category")):
+            return _page("unavailable.html", "/shops/p/%d" % pid,
+                         extra={"title": UNAVAILABLE_MSG + " · 旅韩助手",
+                                "description": UNAVAILABLE_MSG, "index": False})
         if r:
             extra = {"title": "%s · %s · 旅韩助手" % (r["name"], cat_name(r["category"])),
                      "description": "%s（%s）%s" % (r["name"], r["area"], (r.get("services") or "")[:80]),
@@ -235,18 +240,24 @@ def p_provider(pid: int):
 def api_meta():
     cats = []
     for k in CANON_CATS:
+        if is_hidden_cat(k):
+            continue
         v = CATS[k]
         cats.append({"key": k, "name": v[0], "name_ko": v[1], "desc": v[2],
                      "license_required": k in LICENSE_CATS, "address_required": k in ADDRESS_CATS})
     return {"cats": cats, "areas": AREAS, "open": pii_ready(), "t": int(time.time()),
-            "photo_max": PHOTO_MAX, "license_cats": sorted(c for c in LICENSE_CATS if c in CANON_CATS),
-            "address_cats": sorted(c for c in ADDRESS_CATS if c in CANON_CATS)}
+            "photo_max": PHOTO_MAX,
+            "license_cats": sorted(c for c in LICENSE_CATS if c in CANON_CATS and not is_hidden_cat(c)),
+            "address_cats": sorted(c for c in ADDRESS_CATS if c in CANON_CATS and not is_hidden_cat(c)),
+            "flags": public_flags()}
 
 
 @router.get("/api/providers")
 def api_list(cat: str = ""):
     keys = None
     if cat:
+        if is_hidden_cat(canon(cat) or cat):
+            return unavailable_payload(items=[])
         if canon(cat) not in CANON_CATS and cat not in CATS:
             raise HTTPException(400, "类别不存在")
         keys = _cat_keys_for_filter(cat)
@@ -259,6 +270,8 @@ def api_list(cat: str = ""):
             rows = q(conn, """SELECT id, category, name, name_ko, area, address, services, price, hours, (photo IS NOT NULL) AS has_photo
                               FROM c_providers WHERE status='approved'
                               ORDER BY reviewed_at DESC NULLS LAST, id DESC LIMIT 200""")
+        if not cat:
+            rows = [r for r in rows if not is_hidden_cat(r.get("category"))]
         pmap = _load_photo_map(conn, [r["id"] for r in rows])
     return {"items": [_pub(r, pmap.get(r["id"]) or []) for r in rows]}
 
@@ -270,6 +283,8 @@ def api_detail(pid: int):
                        FROM c_providers WHERE id=%s AND status='approved'""", (pid,), one=True)
         if not r:
             raise HTTPException(404, "商家不存在或未通过审核")
+        if is_hidden_cat(r.get("category")):
+            return unavailable_payload(item=None)
         pmap = _load_photo_map(conn, [pid])
     return {"item": _pub(r, pmap.get(pid) or [])}
 
@@ -298,6 +313,9 @@ def api_mine(req: Request):
 @router.get("/api/providers/{pid:int}/photo")
 def api_photo(pid: int):
     with db() as conn:
+        meta = q(conn, "SELECT category FROM c_providers WHERE id=%s AND status='approved'", (pid,), one=True)
+        if meta and is_hidden_cat(meta.get("category")):
+            raise HTTPException(404, UNAVAILABLE_MSG)
         r = q(conn, "SELECT photo FROM c_providers WHERE id=%s AND status='approved' AND photo IS NOT NULL", (pid,), one=True)
         if not r:
             ph = q(conn, """SELECT p.data FROM c_provider_photos p
@@ -314,11 +332,13 @@ def api_photo(pid: int):
 @router.get("/api/providers/{pid:int}/photos/{phid:int}")
 def api_photo_one(pid: int, phid: int):
     with db() as conn:
-        r = q(conn, """SELECT p.data FROM c_provider_photos p
+        r = q(conn, """SELECT p.data, v.category FROM c_provider_photos p
                        JOIN c_providers v ON v.id=p.provider_id
                        WHERE p.id=%s AND p.provider_id=%s AND v.status='approved'""", (phid, pid), one=True)
     if not r:
         raise HTTPException(404, "没有照片")
+    if is_hidden_cat(r.get("category")):
+        raise HTTPException(404, UNAVAILABLE_MSG)
     return Response(bytes(r["data"]), media_type="image/jpeg", headers={"Cache-Control": "public, max-age=86400"})
 
 
@@ -373,6 +393,8 @@ async def api_apply(req: Request, category: str = Form(...), name: str = Form(..
     category = (category or "").strip()
     if category in CAT_ALIASES:
         category = canon(category)
+    if is_hidden_cat(category):
+        raise HTTPException(400, UNAVAILABLE_MSG)
     if category not in CANON_CATS:
         raise HTTPException(400, "请选择服务类别")
     if area not in AREAS:
