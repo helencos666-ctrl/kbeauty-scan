@@ -1,5 +1,5 @@
 {
-  "updated": "2026-11-21",
+  "updated": "2026-11-22",
   "title": "韩国免费景点指南",
   "disclaimer": "本页为公开资料整理的免费指南，不接入收费接口。开放时间、门票、交通和节庆日期可能调整，请以现场公示、官方网站和韩国旅游咨询热线 1330（有中文服务）为准。",
   "sources": [
@@ -2225,6 +2225,79 @@
         "/static/attraction-photos/garosugil-street.jpg"
       ],
       "photo_credit": "照片：sellyourseoul / Wikimedia Commons / CC BY 2.0"
+    },
+    {
+      "id": "yongduam",
+      "name_zh": "龙头岩",
+      "name_ko": "용두암",
+      "city": "jeju",
+      "city_zh": "济州",
+      "area": "济州市 龙潭",
+      "category": "landmark",
+      "desc": "济州机场东边的海岸岩，火山岩被海浪掏出一段像龙头的形状，因此得名。传说住在旁边龙渊里的龙想升天，被汉拿山神射落，僵在海上成了石头。看龙头形状的位置在西侧观景台，风浪大的日子浪打在岩上、水花溅起来更明显；岸边步道一直连到龙潭、道头方向的海岸公路，路边有不少咖啡店。离机场近，落地后或赶飞机前顺路来一趟比较合适。",
+      "transport": "从济州机场乘出租车约需十几分钟，或乘市内公交到龙潭一带步行；龙潭往道头方向的海岸公路也有公交经过。",
+      "tips": [
+        "海边岩石湿滑，按护栏和观景台的范围走，不要下到礁石上。",
+        "风大的日子浪会打上步道，注意衣物和相机。",
+        "露天景点不收门票，夜里也有灯光，但脚下要看清楚。"
+      ],
+      "hours": "全天开放；文化观光解说 10:00–17:00，需现场或电话预约，春节和中秋当天不运营。",
+      "fee": "免费（观景台参观免费，停车费现场确认）",
+      "cover": "/static/attraction-photos/yongduam-cover.jpg",
+      "photos": [
+        "/static/attraction-photos/yongduam-cover.jpg",
+        "/static/attraction-photos/yongduam-night.jpg"
+      ],
+      "photo_credit": "照片：안범진 / Wikimedia Commons / CC BY-SA 4.0；螺钉 / CC BY-SA 3.0"
+    },
+    {
+      "id": "jeju-stone-park",
+      "name_zh": "济州石文化公园",
+      "name_ko": "제주돌문화공원",
+      "city": "jeju",
+      "city_zh": "济州",
+      "area": "济州市 朝天",
+      "category": "hidden",
+      "desc": "以济州的石头和创世神话为主题的公园加博物馆。室内展馆陈列石墙、石磨、石像和火山岩标本，室外草地上立着成排的石塔、石人和石墙，还有按旧时村落复原的草屋。整个园区围绕「설문대할망（创造济州的女神）」和五百将军的传说布置，三条参观路线走完要大半天，山间风凉，夏天比市区舒服。位置在朝天邑南朝路一带，往东线或汉拿山时可以顺路。",
+      "transport": "在济州市朝天邑南朝路一带，从济州市区乘往朝天·교래方向的公交，或自驾前往；园区有停车场。",
+      "tips": [
+        "每周一休园，遇公休日则顺延到其后的非公休日。",
+        "园区多在户外，风大、路远，穿好走的鞋。",
+        "文化观光解说要提前一天电话预约，临时到园可以按导览图自己走。"
+      ],
+      "hours": "周二至周日 09:00–18:00，周一休园（周一为公休日时顺延到其后的非公休日）；1月1日、春节和中秋当天休园。",
+      "fee": "收费；票价与优惠以公园售票处和官网公示为准。",
+      "cover": "/static/attraction-photos/jeju-stone-park-cover.jpg",
+      "photos": [
+        "/static/attraction-photos/jeju-stone-park-cover.jpg",
+        "/static/attraction-photos/jeju-stone-park-menhir.jpg",
+        "/static/attraction-photos/jeju-stone-park-wall.jpg"
+      ],
+      "photo_credit": "照片：Bernard Gagnon / Wikimedia Commons / CC0"
+    },
+    {
+      "id": "soesokkak",
+      "name_zh": "牛沼河口",
+      "name_ko": "쇠소깍",
+      "city": "jeju",
+      "city_zh": "济州",
+      "area": "西归浦市 孝敦",
+      "category": "nature",
+      "desc": "孝敦川在这里汇入大海，淡水和海水相遇，在两侧岩壁和树林之间形成一段颜色偏深绿的水面。名字来自济州话，소 是水潭、깍 是尽头。沿步道往下走到码头，可以坐多人木筏（테우）或两人小木船在水上走一段；再往下是黑沙的하효海边，这里也是济州偶来 5 号和 6 号路线的连接点。夏天玩水的人多，秋冬水面安静，适合慢慢走一段步道。",
+      "transport": "从西归浦市区往孝敦方向，打车约需十几分钟，或乘市内公交在쇠소깍入口下车步行。",
+      "tips": [
+        "步道沿溪而建，雨后石阶湿滑，穿防滑鞋。",
+        "木筏和木船在码头现场买票，营业时间随天气调整。",
+        "这里过去是祈雨的地方，岩石和树林请不要攀爬刻画。"
+      ],
+      "hours": "步道全年可走；文化观光解说 10:00–17:00（春节、中秋当天不运营），需现场或电话预约。",
+      "fee": "未核对到官方门票价格；木筏、木船等体验另收费，以现场公示为准。",
+      "cover": "/static/attraction-photos/soesokkak-cover.jpg",
+      "photos": [
+        "/static/attraction-photos/soesokkak-cover.jpg",
+        "/static/attraction-photos/soesokkak-estuary.jpg"
+      ],
+      "photo_credit": "照片：Jocelyndurrey / Wikimedia Commons / CC BY-SA 4.0；골뱅이 / CC BY-SA 3.0"
     }
   ]
 }

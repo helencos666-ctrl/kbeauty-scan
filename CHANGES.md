@@ -1,3 +1,10 @@
+## 2026-11-22 济州岛内容日更：地点实景照片与官方帖
+
+- static/food.json、static/attractions.json 新增济州岛 6 个条目：西归浦每日偶来市场、西归浦乡土五日集市、O'Sulloc 绿茶博物馆、龙头岩、济州石文化公园、牛沼河口，均按济州旅游官方 VisitJeju 页面核对，source_url / source_note 随条目记录。
+- 每个新条目带 2–3 张实景照片，来源为 Wikimedia Commons 的自由授权文件（CC0 / CC BY-SA），裁到 1280px 宽、JPEG 压缩到 300KB 以下；沿用 photo_credit 字段标注作者与许可。本次没有新增界面，缓存参数与 Service Worker 缓存名保持 v94。
+- scripts/gen_official_daily_images.py 新增两张 11-22 卡片（留学生期末与寒假前清单、冬季线下聚会安全提醒），新增行李箱 / 时钟 / 机票 / 定位针 / 盾牌 图形；原有卡片输出不变。
+- official_daily.json 追加 2026-11-22 两条官方帖（board: study、group），official_daily_seed.py 的可发布频道加入 study、group。
+
 ## 2026-11-21 对外暂时隐藏医美项目（v94）
 
 - 用开关隐藏对外可见的「医美」入口：商家分类、示范案例、已入驻医美商家列表与详情、帖子频道/筛选、入驻申请选项、导航与相关 SEO 描述。后台管理端和数据库中的用户/商家数据全部保留，不删除。

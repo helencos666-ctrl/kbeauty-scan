@@ -1,5 +1,5 @@
 {
-  "updated": "2026-11-21",
+  "updated": "2026-11-22",
   "title": "韩国美食推荐",
   "disclaimer": "本页只收录公开资料中有记载、近期仍见诸米其林指南或官方/百科旅游介绍的餐厅与市场。营业状态、菜单和价格可能随时变化，请出发前用地图或电话再确认。米其林必比登是「性价比」标注，其符号并不等同本页的人均₩档；没有把握的人均价格已省略。信息可能变化，请出行前核实。餐厅已按游客常去的打卡区域归类，具体门牌以各条地址和地图为准；不在热门区域内、但资料可靠的店会放在「其他」。部分明洞门店根据实地招牌和公开地图资料补充收录。",
   "price_legend": [
@@ -2723,6 +2723,94 @@
         "/static/food-photos/cine-de-chef-cover.jpg"
       ],
       "photo_credit": "照片：Crossmr / Wikimedia Commons / CC BY-SA 3.0"
+    },
+    {
+      "id": "seogwipo-olle-market",
+      "name_zh": "西归浦每日偶来市场",
+      "name_ko": "서귀포매일올레시장",
+      "city": "jeju",
+      "city_zh": "济州",
+      "area": "西归浦市 中央路",
+      "area_id": "seogwipo",
+      "category": "street",
+      "cuisine": "市场小吃 / 特产",
+      "desc": "西归浦市区里的常设传统市场，棚顶下有两条主通道，两侧是水产、蔬果、橘子和伴手礼摊位，靠里的几排是现做的小吃摊，年糕、油炸小吃、海鲜和黑猪肉串都能找到。逛完往海边走十几分钟就是李仲燮街和西归浦港，正房瀑布也在步行范围内，适合排进西归浦市区那半天。",
+      "transport": "在西归浦市区内步行或乘市内公交到中央路一带；从济州机场方向过来，先坐机场巴士到西归浦市区再步行，具体线路以当地公交站牌为准。",
+      "tips": [
+        "市场全年开放，冬季大约 07:00–20:00，各摊位时间不同。",
+        "小吃摊有的只收现金或转账，买之前先看价牌。",
+        "海鲜和小菜要带上飞机或船，按承运方的保鲜规定打包。"
+      ],
+      "hours": "全年无休，冬季约 07:00–20:00（各店铺时间不同）；以现场公示为准。",
+      "address": "제주특별자치도 서귀포시 중앙로62번길 18",
+      "map_query": "서귀포매일올레시장",
+      "source_note": "查阅 2026-11-22。济州旅游官方 VisitJeju 页面（内容更新 2026-11-22）：西归浦市中心的常设传统市场，卖济州橘子、汉拿峰、옥돔、银带鱼、黑猪肉等；地址中央路62号街18，全年无休，冬季 07:00–20:00，各店铺时间不同，周边有李仲燮街、西归浦港和正房瀑布。",
+      "source_url": "https://www.visitjeju.net/kr/detail/view?contentsid=CONT_000000000500731",
+      "cover": "/static/food-photos/seogwipo-olle-market-cover.jpg",
+      "photos": [
+        "/static/food-photos/seogwipo-olle-market-cover.jpg",
+        "/static/food-photos/seogwipo-olle-market-entrance.jpg"
+      ],
+      "photo_credit": "照片：Seefooddiet / Wikimedia Commons / CC BY-SA 4.0"
+    },
+    {
+      "id": "seogwipo-oiljang",
+      "name_zh": "西归浦乡土五日集市",
+      "name_ko": "서귀포향토오일시장",
+      "city": "jeju",
+      "city_zh": "济州",
+      "area": "西归浦市 东烘洞",
+      "area_id": "seogwipo",
+      "category": "street",
+      "cuisine": "集市小吃 / 小菜",
+      "desc": "1995 年开市的五日集市，每月 4、9、14、19、24、29 日开市。棚顶下的通道里摆着小菜、干货、橘子、草药和日用杂货，靠里的熟食摊现煎绿豆饼（빙떡）、葱饼和肉饼，门口还有卖粥和面条的摊位。开市日才热闹，平日摊位少，排行程前先对一下日期。",
+      "transport": "在西归浦市区东烘洞一带，从西归浦市区打车或乘市内公交前往，具体线路看当地公交站牌。",
+      "tips": [
+        "开市日是每月 4、9、14、19、24、29 日，出发前对一下当月日期。",
+        "摊上多是现金交易，带点零钞更好买。",
+        "熟食现做现卖，带走的话注意保鲜。"
+      ],
+      "hours": "每月 4、9、14、19、24、29 日开市；平日摊位较少。",
+      "address": "제주특별자치도 서귀포시 중산간동로7894번길 18-5",
+      "map_query": "서귀포향토오일시장",
+      "source_note": "查阅 2026-11-22。济州旅游官方 VisitJeju 页面（内容更新 2026-11-22）：1995 年开市的西归浦乡土五日集市，集市日为每月 4、9、14、19、24、29 日；地址中山间东路7894号街18-5，电话 064-763-0965。",
+      "source_url": "https://www.visitjeju.net/kr/detail/view?contentsid=CONT_000000000500732",
+      "cover": "/static/food-photos/seogwipo-oiljang-cover.jpg",
+      "photos": [
+        "/static/food-photos/seogwipo-oiljang-cover.jpg",
+        "/static/food-photos/seogwipo-oiljang-stall.jpg",
+        "/static/food-photos/seogwipo-oiljang-banchan.jpg"
+      ],
+      "photo_credit": "照片：Grapesurgeon / Wikimedia Commons / CC BY-SA 4.0；Seefooddiet / CC BY-SA 4.0"
+    },
+    {
+      "id": "osulloc-tea-museum",
+      "name_zh": "O'Sulloc 绿茶博物馆（济州）",
+      "name_ko": "오설록 티 뮤지엄",
+      "city": "jeju",
+      "city_zh": "济州",
+      "area": "西归浦市 安德",
+      "area_id": "seogwipo",
+      "category": "cafe",
+      "cuisine": "绿茶甜点 / 茶饮",
+      "desc": "2001 年开馆的茶博物馆，主楼做成茶杯的样子，2023 年整修后从室内能看到外面的绿茶田和 곶자왈 林地。馆里讲茶的历史和制茶流程，茶焙房里可以看焙茶，茶屋卖绿茶冰淇淋、绿茶蛋糕卷和各类茶饮，室内座位靠窗。出门就是茶田步道，走一圈再回屋里喝茶刚好。位置在济州西部的安德面，和中文、山房山同一个方向。",
+      "transport": "在济州西部的安德面，从济州市区或西归浦市区乘往中文·安德方向的公交，在 O'Sulloc 附近下车，或自驾前往；园区有停车场。",
+      "tips": [
+        "全年开放，09:00–18:00，夏季延长到 19:00。",
+        "周末和假期茶屋要排队，开门后不久或傍晚人少一些。",
+        "茶田就在馆外，跟着指示牌走，别踩进茶垄里。"
+      ],
+      "hours": "全年无休 09:00–18:00，夏季至 19:00；以馆内公示为准。",
+      "address": "제주특별자치도 서귀포시 안덕면 신화역사로 15",
+      "map_query": "오설록 티뮤지엄",
+      "source_note": "查阅 2026-11-22。济州旅游官方 VisitJeju 页面（内容更新 2026-11-22）：2001 年 9 月开馆的茶博物馆，主楼以茶杯为设计母题，2023 年整修；设有茶焙房和茶屋，供绿茶冰淇淋、茶饮与茶点；地址西归浦市安德面新化历史路 15，全年无休 09:00–18:00（夏季至 19:00）。官网 osulloc.com。",
+      "source_url": "https://www.visitjeju.net/kr/detail/view?contentsid=CONT_000000000500457",
+      "cover": "/static/food-photos/osulloc-tea-museum-cover.jpg",
+      "photos": [
+        "/static/food-photos/osulloc-tea-museum-cover.jpg",
+        "/static/food-photos/osulloc-tea-museum-field.jpg"
+      ],
+      "photo_credit": "照片：Matt Kieffer / Wikimedia Commons / CC BY-SA 2.0；lumoplank / CC0"
     }
   ],
   "areas": [

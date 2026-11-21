@@ -103,6 +103,34 @@ CARDS = [
         "bottom": (236, 232, 224),
         "accent": (44, 90, 112),
     },
+    {
+        "file": "2026-11-22-student-winter-checklist.jpg",
+        "kicker": "留学 · 期末与寒假前",
+        "title": "期末与寒假前\n这几件事排上",
+        "bullets": [
+            ("card", "登录证：看居留期限，提前预约"),
+            ("suitcase", "退宿行李：当面确认、留底"),
+            ("clock", "打工时长：按许可上的条件"),
+            ("plane", "回国机票与退税：单据收好"),
+        ],
+        "top": (247, 244, 231),
+        "bottom": (229, 236, 232),
+        "accent": (74, 86, 52),
+    },
+    {
+        "file": "2026-11-22-seoul-meetup-safety.jpg",
+        "kicker": "提醒 · 冬季线下聚会",
+        "title": "冬天参加聚会\n先记这四条",
+        "bullets": [
+            ("pin", "地点：选公共场所，白天优先"),
+            ("phone", "结伴：告诉朋友，散场报平安"),
+            ("cup", "酒与钱：杯子看着，转账留记录"),
+            ("shield", "邀请：投资代购验证码都拒绝"),
+        ],
+        "top": (252, 239, 232),
+        "bottom": (238, 226, 232),
+        "accent": (132, 52, 72),
+    },
 ]
 
 
@@ -327,6 +355,52 @@ def icon(d, kind, box, accent):
         d.line([(cx, y0 + w * .34), (cx, y1 - w * .16)], fill=accent, width=4)
         d.line([(cx - w * .16, y0 + w * .12), (cx - w * .06, y0 + w * .30)], fill=accent, width=5)
         d.line([(cx + w * .16, y0 + w * .12), (cx + w * .06, y0 + w * .30)], fill=accent, width=5)
+    elif kind == "suitcase":
+        # 行李箱
+        d.rounded_rectangle([cx - w * .13, y0 + w * .10, cx + w * .13, y0 + w * .30],
+                            radius=6, fill=(255, 255, 255), outline=accent, width=5)
+        d.rounded_rectangle([x0 + w * .12, y0 + w * .28, x1 - w * .12, y1 - w * .18],
+                            radius=12, fill=(255, 255, 255), outline=accent, width=5)
+        d.line([(cx - w * .12, y0 + w * .34), (cx - w * .12, y1 - w * .24)], fill=pale, width=8)
+        d.line([(cx + w * .12, y0 + w * .34), (cx + w * .12, y1 - w * .24)], fill=pale, width=8)
+        for xx in (x0 + w * .24, x1 - w * .30):
+            d.ellipse([xx, y1 - w * .20, xx + w * .06, y1 - w * .14], fill=accent)
+    elif kind == "clock":
+        # 时钟
+        d.ellipse([cx - w * .34, cy - w * .34, cx + w * .34, cy + w * .34],
+                  fill=(255, 255, 255), outline=accent, width=6)
+        d.line([(cx, cy), (cx, cy - w * .20)], fill=accent, width=7)
+        d.line([(cx, cy), (cx + w * .18, cy + w * .10)], fill=accent, width=7)
+        for i in range(4):
+            ang = math.radians(90 * i)
+            d.line([(cx + math.cos(ang) * w * .26, cy + math.sin(ang) * w * .26),
+                    (cx + math.cos(ang) * w * .31, cy + math.sin(ang) * w * .31)], fill=pale, width=4)
+    elif kind == "plane":
+        # 机票（带缺口的登机牌）
+        d.rounded_rectangle([x0 + w * .10, y0 + w * .24, x1 - w * .10, y1 - w * .24],
+                            radius=8, fill=(255, 255, 255), outline=accent, width=5)
+        d.ellipse([cx - w * .30, cy - w * .07, cx - w * .16, cy + w * .07], fill=accent)
+        d.ellipse([cx + w * .16, cy - w * .07, cx + w * .30, cy + w * .07], fill=accent)
+        d.line([(cx, y0 + w * .30), (cx, y1 - w * .30)], fill=accent, width=4)
+        d.line([(x0 + w * .20, y0 + w * .40), (cx - w * .10, y0 + w * .40)], fill=pale, width=6)
+        d.line([(x0 + w * .20, y0 + w * .56), (cx - w * .10, y0 + w * .56)], fill=pale, width=6)
+        d.line([(cx + w * .10, y0 + w * .48), (x1 - w * .20, y0 + w * .48)], fill=pale, width=6)
+    elif kind == "pin":
+        # 地图定位针
+        d.ellipse([cx - w * .26, y0 + w * .12, cx + w * .26, y0 + w * .64],
+                  fill=pale, outline=accent, width=5)
+        d.polygon([(cx - w * .18, y0 + w * .52), (cx + w * .18, y0 + w * .52),
+                   (cx, y1 - w * .10)], fill=pale, outline=accent)
+        d.ellipse([cx - w * .10, y0 + w * .28, cx + w * .10, y0 + w * .48], fill=(255, 255, 255))
+        d.ellipse([cx - w * .05, y0 + w * .33, cx + w * .05, y0 + w * .43], fill=accent)
+    elif kind == "shield":
+        # 盾牌（拒绝/提醒）
+        d.polygon([(cx, y0 + w * .10), (x1 - w * .16, y0 + w * .26),
+                   (x1 - w * .22, y1 - w * .34), (cx, y1 - w * .08),
+                   (x0 + w * .22, y1 - w * .34), (x0 + w * .16, y0 + w * .26)],
+                  fill=(255, 255, 255), outline=accent, width=6)
+        d.line([(cx - w * .14, cy - w * .02), (cx - w * .02, cy + w * .10)], fill=accent, width=7)
+        d.line([(cx - w * .02, cy + w * .10), (cx + w * .16, cy - w * .16)], fill=accent, width=7)
 
 
 def build(card):

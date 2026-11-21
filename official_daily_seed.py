@@ -18,7 +18,7 @@ import os
 
 DATA_NAME = "official_daily.json"
 IMG_DIR = "official-daily"
-ALLOWED_BOARDS = {"pit", "news", "daily", "visa", "rent"}
+ALLOWED_BOARDS = {"pit", "news", "daily", "visa", "rent", "study", "group"}
 TITLE_MAX, BODY_MAX = 40, 3000
 KST = datetime.timezone(datetime.timedelta(hours=9))
 
