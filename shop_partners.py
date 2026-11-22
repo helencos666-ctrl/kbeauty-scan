@@ -22,7 +22,7 @@ PARTNERS = [
         "area": "韩国 · 持旅游签证的中国游客",
         "services": "韩国本地手机卡办理：推荐 2 位好友注册旅韩助手，可免费领取韩国手机卡。套餐内容以商家实际政策为准。",
         "body": LANJING_BODY,
-        "photos": ["/static/home-ads/ad-4.jpg?v=94", "/static/home-ads/" + LANJING_POSTER],
+        "photos": ["/static/home-ads/ad-4.jpg?v=95", "/static/home-ads/" + LANJING_POSTER],
         "author_nickname": LANJING_NICK,
     },
 ]

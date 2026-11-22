@@ -1,6 +1,6 @@
 /* 开业活动：读取 JSON 配置，控制「我的」红标、首页每日弹层和活动列表。 */
 (function(w){
-  var CFG_URL = '/static/opening-promos.json?v=94';
+  var CFG_URL = '/static/opening-promos.json?v=95';
   var cache = null, inflight = null;
 
   function kstDay(d){

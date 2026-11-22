@@ -27,7 +27,7 @@ _day = {"date": None, "count": defaultdict(int), "global": 0}
 
 from security import client_ip, SecurityMiddleware  # noqa: E402
 
-GLOBAL_KIND_DAY = {"scan": GLOBAL_DAY, "price": 300, "card": 600, "back": 600, "station": 600, "tts": 1500, "asr": 3000, "asrfix": 1500, "transit": 900, "place": 20000}
+GLOBAL_KIND_DAY = {"scan": GLOBAL_DAY, "price": 300, "card": 600, "back": 600, "station": 600, "tts": 1500, "asr": 3000, "asrfix": 1500, "photo": 400, "transit": 900, "place": 20000}
 
 def rate_limit(req: Request, kind: str, per_min=PER_MIN, per_day=PER_DAY):
     """按 IP 每分钟/每天限次 + 每种接口全站每日上限（防止换 IP 刷 AI 接口产生费用）。"""
@@ -306,6 +306,89 @@ async def subway(request: Request, image: UploadFile = File(...)):
         {"type": "image_url", "image_url": {"url": data_url}}]}])
     print(f"subway ok {time.time()-t:.1f}s tokens in={usage.get('prompt_tokens')} out={usage.get('completion_tokens')}", flush=True)
     return {"result": res}
+
+# ================= 拍照翻译（Papago 式：识别图片文字并逐段翻译） =================
+# 复用拍照识妆同一个视觉模型（chat），一次调用完成识字+翻译；照片只在内存处理，不落盘不入库。
+PHOTO_TR_PROMPT_KO2ZH = """你是在韩国陪中国游客的翻译。请识别图片里所有清晰可读的文字（主要是韩文，也包括英文、数字、价格），并逐段翻译成简体中文。图片可能是菜单、药盒/说明书、指示牌、商品标签、告示等。
+严格规则：
+1. 按图片里的阅读顺序，一行或一个完整短语为一段；菜单的菜名和价格放同一段。最多 40 段。
+2. src 逐字照抄图片原文（韩文就写韩文），不要改写、不要补全看不清的字；完全看不清的跳过。
+3. tr 是自然的简体中文译文；价格写成「12,000韩元」，数字、剂量、时间、单位、电话以外的编号原样保留。菜名可意译并保留常见叫法（如 김치찌개→泡菜汤）。
+4. 药品、用法用量只如实翻译原文，不添加建议，不编造。
+5. kind 填图片类型：菜单/药品/指示牌/商品/告示/其他。
+6. 没有可读文字时 has_text=false，blocks 为空，notes 说明原因（如太模糊、太暗）。
+只输出一个 JSON 对象：{"has_text":true,"kind":"菜单","blocks":[{"src":"원문","tr":"中文"}],"notes":"看不清或需要当面确认的地方，没有就空字符串"}"""
+
+PHOTO_TR_PROMPT_ZH2KO = """你是在韩国陪中国游客的翻译。请识别图片里所有清晰可读的中文文字（也包括数字、价格、英文），并逐段翻译成韩国人自然会说的礼貌韩语（해요체，标题/名词短语直接用名词形式）。图片可能是中文便条、行程单、菜单、药名、地址等。
+严格规则：
+1. 按阅读顺序，一行或一个完整短语为一段，最多 40 段。
+2. src 逐字照抄图片原文，不要改写、不要补全看不清的字；完全看不清的跳过。
+3. tr 只写韩文（한글），数字、价格、时间、单位原样保留；韩国地名用通行韩文写法。
+4. kind 填图片类型：菜单/药品/指示牌/商品/便条/其他。
+5. 没有可读文字时 has_text=false，blocks 为空，notes 说明原因。
+只输出一个 JSON 对象：{"has_text":true,"kind":"便条","blocks":[{"src":"中文原文","tr":"한국어"}],"notes":"看不清或需要当面确认的地方，没有就空字符串"}"""
+
+PHOTO_TR_MAX_SIDE = 1600
+_ptr_cache: "OrderedDict[str, dict]" = OrderedDict()   # 只缓存识别出的文字结果（不存照片），重复拍同一张不再调模型
+
+def prep_jpeg_ocr(raw: bytes) -> bytes:
+    """识字需要更清晰：最长边 1600，质量 82。只在内存里处理。"""
+    try:
+        im = Image.open(io.BytesIO(raw)); im.verify()
+        im = Image.open(io.BytesIO(raw))
+        im = ImageOps.exif_transpose(im).convert("RGB")
+    except Exception:
+        raise HTTPException(400, "图片无法识别，请换一张 JPG/PNG 照片")
+    if max(im.size) > PHOTO_TR_MAX_SIDE: im.thumbnail((PHOTO_TR_MAX_SIDE, PHOTO_TR_MAX_SIDE))
+    b = io.BytesIO(); im.save(b, "JPEG", quality=82)
+    return b.getvalue()
+
+def _ptr_clean(res, d: str) -> dict:
+    from translate import romanize, HANZI
+    res = res if isinstance(res, dict) else {}
+    blocks = []
+    for b in (res.get("blocks") or [])[:40]:
+        if not isinstance(b, dict): continue
+        src = re.sub(r"\s+", " ", str(b.get("src") or "")).strip()[:200]
+        tr = re.sub(r"\s+", " ", str(b.get("tr") or "")).strip()[:300]
+        if not src: continue
+        item = {"src": src, "tr": tr}
+        if d == "zh2ko" and tr and HANGUL.search(tr):
+            item["roman"] = romanize(tr)
+        blocks.append(item)
+    kind = str(res.get("kind") or "").strip()[:8]
+    notes = str(res.get("notes") or "").strip()[:200]
+    return {"has_text": bool(blocks), "kind": kind, "blocks": blocks, "notes": notes, "dir": d}
+
+@app.post("/api/photo-translate")
+async def photo_translate(request: Request, image: UploadFile = File(...)):
+    d = "zh2ko" if request.query_params.get("dir") == "zh2ko" else "ko2zh"
+    raw = await image.read(MAX_UPLOAD + 1)
+    if len(raw) > MAX_UPLOAD: raise HTTPException(413, "图片太大（最大 8MB）")
+    if len(raw) < 1000: raise HTTPException(400, "图片太小或为空")
+    jpg = prep_jpeg_ocr(raw)
+    del raw
+    key = d + ":" + hashlib.sha256(jpg).hexdigest()
+    with _scan_lock:
+        hit = _ptr_cache.get(key)
+        if hit is not None: _ptr_cache.move_to_end(key)
+    if hit is not None:
+        return dict(hit, cached=True)
+    rate_limit(request, "photo", per_min=4, per_day=40)
+    t = time.time()
+    data_url = "data:image/jpeg;base64," + base64.b64encode(jpg).decode()
+    del jpg
+    prompt = PHOTO_TR_PROMPT_ZH2KO if d == "zh2ko" else PHOTO_TR_PROMPT_KO2ZH
+    res, usage = await chat([{"role": "user", "content": [
+        {"type": "text", "text": prompt},
+        {"type": "image_url", "image_url": {"url": data_url}}]}], max_tokens=2500)
+    out = _ptr_clean(res, d)
+    print(f"photo-tr {d} ok {time.time()-t:.1f}s blocks={len(out['blocks'])} tokens in={usage.get('prompt_tokens')} out={usage.get('completion_tokens')}", flush=True)
+    if out["blocks"]:
+        with _scan_lock:
+            _ptr_cache[key] = out
+            while len(_ptr_cache) > 40: _ptr_cache.popitem(last=False)
+    return out
 
 # ================= 沟通卡 =================
 # 翻译实现见 translate.py（CF Workers AI 免费档；主模型 mistral-small，超时回退 m2m100）

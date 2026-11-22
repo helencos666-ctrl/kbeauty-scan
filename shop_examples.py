@@ -125,7 +125,7 @@ EXAMPLES = {
 def _photos(cat: str):
     return [
         {
-            "src": f"/static/shop-examples/{cat}-{i}.jpg?v=94",
+            "src": f"/static/shop-examples/{cat}-{i}.jpg?v=95",
             "caption": PHOTO_CAPTIONS[i - 1],
         }
         for i in range(1, 7)
