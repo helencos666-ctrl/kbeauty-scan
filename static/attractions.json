@@ -1,5 +1,5 @@
 {
-  "updated": "2026-11-22",
+  "updated": "2026-11-23",
   "title": "韩国免费景点指南",
   "disclaimer": "本页为公开资料整理的免费指南，不接入收费接口。开放时间、门票、交通和节庆日期可能调整，请以现场公示、官方网站和韩国旅游咨询热线 1330（有中文服务）为准。",
   "sources": [
@@ -2298,6 +2298,89 @@
         "/static/attraction-photos/soesokkak-estuary.jpg"
       ],
       "photo_credit": "照片：Jocelyndurrey / Wikimedia Commons / CC BY-SA 4.0；골뱅이 / CC BY-SA 3.0"
+    },
+    {
+      "id": "ttukseom-hangang-park",
+      "name_zh": "纛岛汉江公园",
+      "name_ko": "뚝섬한강공원",
+      "city": "seoul",
+      "city_zh": "首尔",
+      "area": "广津区 纛岛",
+      "category": "nature",
+      "desc": "汉江北岸的滨江公园，从圣水洞往江边走就到。沿江是大片草坪和自行车道，园内有足球场、篮球场、网球场、攀岩墙和 X-game 场地，夏天还能玩风帆和滑水。岸边一排便利店和洗手间，带上垫子、买点吃的就能坐一下午；白色支架撑起的「자벌레」造型建筑是园里的地标，傍晚沿江走能看到桥上的灯。江边风大，冬天体感比市区冷，出门前看一下当天的喷泉和雪橇场是否开放。",
+      "transport": "地铁 7 号线自阳站（자양역）2 号出口步行约 5 分钟到江边；从圣水站打车约 5 分钟，或沿圣水洞往江边步行 15–20 分钟。",
+      "tips": [
+        "江风大，冬天多带一件防风外套。",
+        "自行车道有速度，横穿前先看两边。",
+        "音乐喷泉按季节运行，场次以公园公告为准。"
+      ],
+      "station": "자양역",
+      "hours": "全天开放，免费；音乐喷泉、雪橇场等设施按季节运营。",
+      "fee": "免费",
+      "address": "서울 광진구 강변북로 139",
+      "map_query": "뚝섬한강공원",
+      "cover": "/static/attraction-photos/ttukseom-park-cover.jpg",
+      "photos": [
+        "/static/attraction-photos/ttukseom-park-cover.jpg",
+        "/static/attraction-photos/ttukseom-park-river.jpg",
+        "/static/attraction-photos/ttukseom-park-night.jpg"
+      ],
+      "photo_credit": "照片：Motoko C. K. / Wikimedia Commons / CC BY 4.0；Wikihyo / CC0；Real rism / CC BY-SA 4.0"
+    },
+    {
+      "id": "seongsu-shoes-street",
+      "name_zh": "圣水手工鞋街",
+      "name_ko": "성수 수제화거리",
+      "city": "seoul",
+      "city_zh": "首尔",
+      "area": "城东区 圣水",
+      "category": "landmark",
+      "desc": "圣水站旁的手工鞋一条街，设计、打版、生产和销售都在同一片街区里完成，全国手工鞋厂家有相当大的比例集中在这一带。沿街是作坊和店面，可以按脚型、用途定做皮鞋和靴子，做好通常要等一两周。入口的「성수수제화거리」牌子和巷子里留下的旧仓库砖墙都好认，逛完往연무장길方向走就是咖啡店和品牌店。",
+      "transport": "地铁 2 号线圣水站（성수역）1 号出口步行约 2 分钟，按「성수수제화거리」入口牌进入。",
+      "tips": [
+        "定做要留出制作时间，出发前先问清工期。",
+        "作坊门口常有工作台和材料，拍照前先看有没有挡路。",
+        "和圣水咖啡街是同一片区，可以安排在同一趟。"
+      ],
+      "station": "성수역",
+      "hours": "街区全天可走；各作坊营业时间不同，定做前先到店或电话确认。",
+      "fee": "免费（定做另计）",
+      "address": "서울 성동구 연무장7길 13-15",
+      "map_query": "성수수제화거리",
+      "cover": "/static/attraction-photos/seongsu-shoes-street-cover.jpg",
+      "photos": [
+        "/static/attraction-photos/seongsu-shoes-street-cover.jpg",
+        "/static/attraction-photos/seongsu-shoes-street-01.jpg",
+        "/static/attraction-photos/seongsu-shoes-street-02.jpg"
+      ],
+      "photo_credit": "照片：Hyoin (WMKR) / Wikimedia Commons / CC0；Aspere / CC0"
+    },
+    {
+      "id": "seongsu-alley",
+      "name_zh": "圣水洞巷弄",
+      "name_ko": "성수동 골목길",
+      "city": "seoul",
+      "city_zh": "首尔",
+      "area": "城东区 圣水",
+      "category": "hidden",
+      "desc": "圣水站往首尔林方向的住宅与厂区巷弄。修鞋、印刷、金属加工的老铺面还开着，隔壁就是新搬进来的工作室、买手店和小咖啡店，墙上常换涂鸦和海报。这里没有固定路线，从圣水站 2 号出口往首尔林方向随便拐几条巷子就能走上一小时；路口多、单行线多，按地图走比记路更省事。巷子里是居民和作坊的日常，拍照前先看看是不是人家门口。",
+      "transport": "地铁 2 号线圣水站（성수역）2 号出口，或水仁盆唐线首尔林站（서울숲역）往圣水方向步行；两条线之间步行约 15 分钟。",
+      "tips": [
+        "巷子里有居民和作坊，拍照前先征得同意。",
+        "不要在店门口和通道上久站，给送货的车留路。",
+        "夜里路灯不多，尽量结伴、走大路。"
+      ],
+      "station": "성수역",
+      "hours": "全天开放；沿街店铺营业时间各不相同。",
+      "fee": "免费",
+      "address": "서울 성동구 성수동1가·2가 일대",
+      "map_query": "성수동 골목길",
+      "cover": "/static/attraction-photos/seongsu-alley-cover.jpg",
+      "photos": [
+        "/static/attraction-photos/seongsu-alley-cover.jpg",
+        "/static/attraction-photos/seongsu-alley-industrial.jpg"
+      ],
+      "photo_credit": "照片：CartoonChess / Wikimedia Commons / CC BY-SA 4.0"
     }
   ]
 }

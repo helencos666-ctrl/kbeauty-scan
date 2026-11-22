@@ -1,3 +1,10 @@
+## 2026-11-23 圣水内容日更：地点实景照片与官方帖
+
+- static/food.json 新增圣水咖啡街（cafe），static/shopping-stores.json 新增延武场街（fashion），static/attractions.json 新增纛岛汉江公园、圣水手工鞋街、圣水洞巷弄，均按首尔旅游官方 VisitSeoul 页面核对，source_note / source_url 随条目记录。
+- 每个新条目带 2–3 张实景照片，来源为 Wikimedia Commons 的自由授权文件（CC0 / CC BY 4.0 / CC BY-SA 4.0 / CC BY 2.0），缩到 1280px 宽以内、JPEG 压缩到 300KB 以下；沿用 photo_credit 字段标注作者与许可。本次没有新增界面，缓存参数与 Service Worker 缓存名保持 v94。
+- scripts/gen_official_daily_images.py 新增两张 11-23 卡片（低价跟团游避坑、签证与打工核对清单），配色为赭红/淡蓝米与长春花蓝/浅青，原有卡片输出不变。
+- official_daily.json 追加 2026-11-23 两条官方帖（board: pit、study）。
+
 ## 2026-11-22 济州岛内容日更：地点实景照片与官方帖
 
 - static/food.json、static/attractions.json 新增济州岛 6 个条目：西归浦每日偶来市场、西归浦乡土五日集市、O'Sulloc 绿茶博物馆、龙头岩、济州石文化公园、牛沼河口，均按济州旅游官方 VisitJeju 页面核对，source_url / source_note 随条目记录。

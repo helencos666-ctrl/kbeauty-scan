@@ -1,5 +1,5 @@
 {
-  "updated": "2026-11-21",
+  "updated": "2026-11-23",
   "title": "明洞逛街店铺",
   "disclaimer": "下列店铺根据实地照片和公开资料整理。营业时间、楼层和退税办理可能变化，请以店门口公示和店内说明为准。未核对到来源的退税信息不会写进介绍。",
   "categories": [
@@ -611,6 +611,35 @@
         "/static/shop-photos/boontheshop-cheongdam-cover.jpg"
       ],
       "photo_credit": "照片：Darren Nolan / Wikimedia Commons / CC BY-SA 2.0"
+    },
+    {
+      "id": "yeonmujang-gil",
+      "name_zh": "延武场街（圣水时尚街区）",
+      "name_ko": "연무장길",
+      "city": "seoul",
+      "city_zh": "首尔",
+      "area": "城东区 圣水",
+      "area_id": "seongsu",
+      "category": "fashion",
+      "desc": "圣水站东侧的商业街，旧鞋厂和仓库改成品牌店、买手店、快闪空间和咖啡店，H&M 等门店就在街上，周末常有限定快闪和活动。街不算长，慢慢走一小时够；门牌和路口指示牌比导航好认，按号码找店更省事。想买东西、看橱窗或只是走走都合适。",
+      "transport": "地铁 2 号线圣水站（성수역）2、3 号出口步行 3–5 分钟进入연무장길。",
+      "tips": [
+        "快闪店和活动时间不固定，出发前看品牌公告。",
+        "周末人多，拍照避开店铺门口和通道。",
+        "部分店只收卡，买之前先确认付款方式。"
+      ],
+      "station": "성수역",
+      "hours": "街区全天开放；各店营业时间不同，多数 11:00 以后开门。",
+      "address": "서울 성동구 연무장길",
+      "map_query": "연무장길",
+      "cover": "/static/shop-photos/yeonmujang-gil-cover.jpg",
+      "photos": [
+        "/static/shop-photos/yeonmujang-gil-cover.jpg",
+        "/static/shop-photos/yeonmujang-gil-street.jpg",
+        "/static/shop-photos/yeonmujang-gil-hm.jpg"
+      ],
+      "source_note": "查阅 2026-11-23。VisitSeoul「Seongsu Hotspot One-Day Course」（更新 2026-09-16）把延武场街列为圣水购物的落脚点之一：旧鞋厂工业痕迹与现代品牌混合的多元文化街，聚集咖啡店、画廊、时尚店和品牌快闪；街上有 Dior Seongsu 等拍照点。",
+      "photo_credit": "照片：Tjwlgns / Wikimedia Commons / CC BY 4.0；Dr. Thomas Liptak / CC BY-SA 4.0"
     }
   ]
 }

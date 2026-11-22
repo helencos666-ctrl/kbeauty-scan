@@ -1,5 +1,5 @@
 {
-  "updated": "2026-11-22",
+  "updated": "2026-11-23",
   "title": "韩国美食推荐",
   "disclaimer": "本页只收录公开资料中有记载、近期仍见诸米其林指南或官方/百科旅游介绍的餐厅与市场。营业状态、菜单和价格可能随时变化，请出发前用地图或电话再确认。米其林必比登是「性价比」标注，其符号并不等同本页的人均₩档；没有把握的人均价格已省略。信息可能变化，请出行前核实。餐厅已按游客常去的打卡区域归类，具体门牌以各条地址和地图为准；不在热门区域内、但资料可靠的店会放在「其他」。部分明洞门店根据实地招牌和公开地图资料补充收录。",
   "price_legend": [
@@ -2811,6 +2811,35 @@
         "/static/food-photos/osulloc-tea-museum-field.jpg"
       ],
       "photo_credit": "照片：Matt Kieffer / Wikimedia Commons / CC BY-SA 2.0；lumoplank / CC0"
+    },
+    {
+      "id": "seongsu-cafe-street",
+      "name_zh": "圣水咖啡街",
+      "name_ko": "성수 카페거리",
+      "city": "seoul",
+      "city_zh": "首尔",
+      "area": "城东区 圣水",
+      "area_id": "seongsu",
+      "category": "cafe",
+      "cuisine": "咖啡 / 甜点",
+      "desc": "圣水站 1、2 号出口往연무장길一带的巷子里，旧厂房和仓库改成的大空间咖啡店、烘焙店和甜点店一间挨一间，多数保留水泥墙、铁门和挑高屋顶，座位间距也比一般连锁店宽。工作日午后相对安静，周末热门店要排队取号。这一带以咖啡、面包和甜点为主，想吃正餐要往主街或圣水站另一侧找餐厅。",
+      "transport": "地铁 2 号线圣水站（성수역）1、2 号出口出来，往연무장길方向步行 3–8 分钟；从首尔林站方向走过来约 10 分钟。",
+      "tips": [
+        "周末下午热门店要排队，开门后不久或傍晚人少一些。",
+        "部分店限时或有取号机，进店前先看门口说明。",
+        "以咖啡和面包为主，别按正餐餐厅去期待。"
+      ],
+      "hours": "各店营业时间不同，多在 10:00–22:00 之间；以店门口公示为准。",
+      "address": "서울 성동구 연무장길 일대",
+      "map_query": "성수 카페거리",
+      "source_note": "查阅 2026-11-23。VisitSeoul 手工鞋街页面（更新 2026-01-21）写明相邻的「Seongsu Cafe Street」由旧厂房改造，聚集咖啡店、画廊和作坊；VisitSeoul 圣水洞专题（更新 2026-08-14）也介绍了保留旧工厂外观的咖啡店。",
+      "source_url": "https://english.visitseoul.net/shopping/Seongsu-Handmade-Shoes-Street/ENP027649",
+      "cover": "/static/food-photos/seongsu-cafe-street-cover.jpg",
+      "photos": [
+        "/static/food-photos/seongsu-cafe-street-cover.jpg",
+        "/static/food-photos/seongsu-cafe-street-courtyard.jpg"
+      ],
+      "photo_credit": "照片：CartoonChess / Wikimedia Commons / CC BY-SA 4.0"
     }
   ],
   "areas": [
