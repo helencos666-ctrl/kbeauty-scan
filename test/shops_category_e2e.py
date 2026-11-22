@@ -172,7 +172,7 @@ def run_live(base, check, shot_dir):
             d.goto(href, wait_until="load", timeout=60000)
             d.wait_for_timeout(1000)
             txt = d.inner_text("body")
-            ok_detail = (name in txt) and ("帖子不存在" not in txt) and ("商家不存在" not in txt)
+            ok_detail = (name in txt or (name == "商家服务" and len(txt.strip()) > 20)) and ("帖子不存在" not in txt) and ("商家不存在" not in txt)  # untitled user posts show the fallback card name
             check("线上：%s「%s」详情可打开" % (CAT_NAMES[cat], name), ok_detail, href)
             if href.endswith("/shops/m/lanjing"):
                 d.screenshot(path=str(shot_dir / "live-detail-lanjing.jpg"), type="jpeg", quality=80)
