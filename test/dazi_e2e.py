@@ -63,6 +63,7 @@ def _api_checks(base, check, tag, live):
     check(f"[{tag}] options 类型词条", all(k in kinds for k in ["饭搭子·逛吃", "团签拼人", "拼房", "演唱会拼车", "包车拼车·接送机", "一日游拼团", "在韩搭子"]), kinds)
     check(f"[{tag}] options 城市+性别", [x["name"] for x in j.get("cities", [])] == ["首尔", "釜山", "济州岛", "其他"]
           and "仅限女生" in [x["name"] for x in j.get("genders", [])], j.get("cities"))
+    check(f"[{tag}] options 搭子发帖不要求会员（登录即可）", j.get("require_member") is False and j.get("daily_cap") == 5, (j.get("require_member"), j.get("daily_cap")))
     check(f"[{tag}] options 安全须知含公共场所/不转账/核实机票", any("公共场所" in t for t in j.get("safety_tips", []))
           and any("转账" in t for t in j.get("safety_tips", [])) and any("机票" in t for t in j.get("safety_tips", [])))
     for txt, bad in [("加我微信 abc12345 一起去", True), ("电话 010-1234-5678", True), ("V信：kimlove88", True),
@@ -74,7 +75,7 @@ def _api_checks(base, check, tag, live):
     # 分享不再加豆
     r = c.post("/api/points/event", json={"kind": "share", "target_type": "post", "target_id": "1"}, headers=H)
     check(f"[{tag}] 分享不再加豆（接口 awarded=0）", r.status_code == 200 and r.json().get("awarded") == 0 and "不再" in (r.json().get("reason") or ""), r.text[:200])
-    js = c.get("/static/community.js?v=96").text
+    js = c.get("/static/community.js?v=97").text
     check(f"[{tag}] 前端分享不再请求加豆", "kind: 'share'" not in js and "旅行豆 +" not in js)
     pts = c.get("/points").text
     check(f"[{tag}] 旅行豆说明不再写分享奖励", "分享奖励" not in pts and "分享同一条内容" not in pts and "签到、分享" not in pts)
@@ -97,8 +98,8 @@ def _api_checks(base, check, tag, live):
         r = c.get("/api/dazi/posts?city=xx")
         check(f"[{tag}] 非法城市 400", r.status_code == 400)
         r = c.post("/api/dazi/posts", data={"title": "测试标题", "body": "测试正文测试正文", "city": "seoul", "kind": "food",
-                                            "date_from": "2099-01-01"}, headers=H)
-        check(f"[{tag}] 未登录发帖被拒", r.status_code in (400, 401), r.status_code)
+                                            "date_from": __import__("datetime").date.today().isoformat()}, headers=H)
+        check(f"[{tag}] 未登录发帖被拒且引导登录（401 非会员提示）", r.status_code == 401, (r.status_code, r.text[:100]))
         r = c.post("/api/dazi/report", json={"post_id": 1, "reason": "其他"}, headers=H)
         check(f"[{tag}] 未登录举报被拒 401", r.status_code == 401, r.status_code)
         r = c.post("/api/chat/start", json={"post_id": 1}, headers=H)

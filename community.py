@@ -2023,6 +2023,8 @@ async def api_new_post(req: Request, board: str = Form(""), title: str = Form(""
     else:
         cat = None
     need_t = post_tier(board)
+    if board == "group" and getattr(req.state, "dazi_tier", None) is not None:
+        need_t = req.state.dazi_tier      # 搭子区入口：见 dazi.DAZI_REQUIRE_MEMBER（默认登录即可发）
     tier_msg = "开通高级会员（¥{t2}）后才能在旅韩交友发帖" if need_t >= 2 else "开通会员（¥{t1}）后即可发帖"
     if len(images) > MAX_IMAGES:
         raise HTTPException(400, f"最多 {MAX_IMAGES} 张图片")

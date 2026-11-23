@@ -4,7 +4,7 @@
   /* 开业活动脚本：红标「我的」+ 首页每日弹层 */
   if (!document.querySelector('script[data-lh-opening]')) {
     var s = document.createElement('script');
-    s.src = '/static/opening-promos.js?v=96';
+    s.src = '/static/opening-promos.js?v=97';
     s.async = true;
     s.setAttribute('data-lh-opening', '1');
     document.head.appendChild(s);

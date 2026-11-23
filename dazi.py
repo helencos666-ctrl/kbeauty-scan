@@ -18,6 +18,17 @@ from community import (
 
 router = APIRouter()
 BOARD = "group"
+# 搭子区个人帖发帖门槛开关：默认 false = 登录即可发（不要求会员）。
+# 以后人多了要改回会员：在 Render 环境变量里设 DAZI_REQUIRE_MEMBER=true 重启即可（或把下面默认值改成 "true"）。
+# 只影响搭子区发帖；评论、点赞等以及其他板块的会员规则不变。
+def dazi_require_member() -> bool:
+    import os
+    return (os.environ.get("DAZI_REQUIRE_MEMBER", "false").strip().lower() in ("1", "true", "yes", "on"))
+
+def dazi_post_tier() -> int:
+    return 1 if dazi_require_member() else 0
+
+DAZI_DAILY_CAP = 5      # 每人每天（韩国时间）最多发 5 条搭子帖，防刷
 KST = datetime.timezone(datetime.timedelta(hours=9))
 
 # 词条全部取自小红书/抖音真实说法（见调研样本），键名存库不要改
@@ -150,7 +161,8 @@ def api_options():
             "kinds": [{"key": k, "name": n} for k, n in KINDS],
             "genders": [{"key": k, "name": n} for k, n in GENDERS],
             "hot_words": HOT_WORDS, "safety_tips": SAFETY_TIPS, "notice": NOTICE,
-            "report_reasons": REPORT_REASONS}
+            "report_reasons": REPORT_REASONS, "require_member": dazi_require_member(),
+            "daily_cap": DAZI_DAILY_CAP}
 
 
 @router.post("/api/dazi/check")
@@ -282,6 +294,13 @@ async def api_new(req: Request, title: str = Form(""), body: str = Form(""), cit
         pn = int(ps)
     with db() as conn:
         u = need_user(conn, req)
+        if u.get("buddy_banned_until") and u["buddy_banned_until"] > datetime.datetime.now(datetime.timezone.utc):
+            raise HTTPException(403, "你的搭子功能暂时被限制，如有疑问请联系管理员")
+        nd = q(conn, """SELECT count(*) AS n FROM c_posts WHERE user_id=%s AND board=%s
+                        AND (timezone('Asia/Seoul', created_at))::date = (timezone('Asia/Seoul', now()))::date""",
+               (u["id"], BOARD), one=True)["n"]
+        if nd >= DAZI_DAILY_CAP:
+            raise HTTPException(429, f"每天最多发 {DAZI_DAILY_CAP} 条找搭子，明天再来吧")
         hits = contact_hits(title, body)
         if hits:
             from contact_guard import _log_separately
@@ -299,6 +318,7 @@ async def api_new(req: Request, title: str = Form(""), body: str = Form(""), cit
             guard_images(conn, u["id"], "搭子区图片", raws,
                          msg="公开帖子里请勿放二维码，联系请走站内私信。")
     from community import api_new_post
+    req.state.dazi_tier = dazi_post_tier()     # 只对搭子区入口生效
     res = await api_new_post(req, board=BOARD, title=title, body=body, tag="", offer="", valid_until="",
                              merchant_cat="", topics="", area={"seoul": "首尔", "busan": "釜山", "jeju": "济州"}.get(city, ""),
                              place="", show_cat="", spot_name="", spot_area="", avg_price="", images=imgs)
