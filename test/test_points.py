@@ -86,7 +86,7 @@ def main():
         check("GET /api/points 200", r.status_code == 200, r.text)
         p = r.json()
         check("balance starts 0", p["balance"] == 0 and p["name"] == "旅行豆" and p["checked_in_today"] is False, p)
-        check("rules present", {x["kind"] for x in p["rules"]} == {"checkin", "share", "subway", "card", "profile", "post", "comment", "first_reply"}, p["rules"])
+        check("rules present", {x["kind"] for x in p["rules"]} == {"checkin", "subway", "card", "profile", "post", "comment", "first_reply"}, p["rules"])
         check("redeem catalog placeholder", all(x["status"] == "即将上线" for x in p["catalog"]) and len(p["catalog"]) >= 2, p["catalog"])
         check("coupon also in points", any(c["kind"] == "welcome_99" for c in p["coupons"]), p.get("coupons"))
 
@@ -106,17 +106,13 @@ def main():
         r = cli.post("/api/points/event", json={"kind": "profile"}, headers=H)
         check("profile without avatar rejected", r.status_code == 400, r.text)
 
-        # share cap and dedupe
-        r = cli.post("/api/points/event", json={"kind": "share", "target_type": "post", "target_id": "11"}, headers=H)
-        check("share post +5", r.status_code == 200 and r.json()["awarded"] == 5, r.text)
-        r = cli.post("/api/points/event", json={"kind": "share", "target_type": "post", "target_id": "11"}, headers=H)
-        check("same post same day deduped", r.status_code == 200 and r.json()["awarded"] == 0 and "已经领过" in (r.json().get("reason") or ""), r.text)
-        r = cli.post("/api/points/event", json={"kind": "share", "target_type": "shop", "target_id": "21"}, headers=H)
-        check("share other item +5", r.status_code == 200 and r.json()["awarded"] == 5, r.text)
-        r = cli.post("/api/points/event", json={"kind": "share", "target_type": "merchant", "target_id": "m1"}, headers=H)
-        check("third share +5", r.status_code == 200 and r.json()["awarded"] == 5, r.text)
-        r = cli.post("/api/points/event", json={"kind": "share", "target_type": "shop", "target_id": "22"}, headers=H)
-        check("fourth share hits daily cap", r.status_code == 200 and r.json()["awarded"] == 0 and "3 次" in (r.json().get("reason") or ""), r.text)
+        # 分享不再加豆：不发放、不写流水、余额不变
+        bal0 = cli.get("/api/points").json()["balance"]
+        for tt, tid in (("post", "11"), ("shop", "21"), ("merchant", "m1"), ("shop", "22")):
+            r = cli.post("/api/points/event", json={"kind": "share", "target_type": tt, "target_id": tid}, headers=H)
+            check("share %s no award" % tt, r.status_code == 200 and r.json()["awarded"] == 0 and "不再" in (r.json().get("reason") or ""), r.text)
+        pj = cli.get("/api/points").json()
+        check("share leaves balance unchanged", pj["balance"] == bal0 and not any(h["kind"] == "share" for h in pj["history"]), pj["history"][:3])
 
         r = cli.post("/api/points/redeem", json={"id": "member_discount"}, headers=H)
         check("redeem still placeholder", r.status_code == 400 and "即将上线" in r.text, r.text)
@@ -170,7 +166,7 @@ def main():
         cps2 = cli2.get("/api/coupons").json()["coupons"]
         check("second user coupon once", r.status_code == 200 and len([c for c in cps2 if c["kind"]=="welcome_99"])==1, (r.status_code, cps2))
         check("points event unknown kind", cli2.post("/api/points/event", json={"kind": "hack"}, headers=H).status_code == 400)
-        check("share missing target", cli2.post("/api/points/event", json={"kind": "share"}, headers=H).status_code == 400)
+        check("share without target also no award", cli2.post("/api/points/event", json={"kind": "share"}, headers=H).json().get("awarded") == 0)
 
         # no secrets in new frontend
         for rel in ("static/points.html", "static/coupons.html", "static/shops.html", "static/community.js", "points.py"):

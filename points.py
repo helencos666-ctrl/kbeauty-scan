@@ -1,6 +1,7 @@
 """旅韩助手 · 旅行豆、新人券、推荐店铺（本地功能，不涉及真实支付）
 
-- 旅行豆：签到、分享、查地铁、用沟通卡、完善资料；兑换项仅占位
+- 旅行豆：签到、查地铁、用沟通卡、完善资料；兑换项仅占位
+- 分享不再发放旅行豆（微信规范把积分视为利益，分享给豆属诱导分享）；分享功能保留，历史记录与已发放的豆不动
 - 新人券：注册时发放一张立减 ¥9.9，仅展示，人工开通时由管理员核对抵扣
 - 推荐店铺：用户提交后待审核，通过后才公开，并通过后发放旅行豆
 密钥、数据库地址只从环境变量读取，不写入日志或前端。
@@ -24,7 +25,7 @@ WELCOME_STAFF = "人工开通会员时由管理员核对后抵扣，网站收款
 
 POINT_RULES = {
     "checkin": {"points": 10, "daily_cap": 1, "label": "每日签到"},
-    "share": {"points": 5, "daily_cap": 3, "label": "分享内容"},
+    "share": {"points": 0, "daily_cap": 0, "retired": True, "label": "分享内容"},   # 已停止发放，仅保留历史记录显示
     "subway": {"points": 2, "daily_cap": 5, "label": "查询地铁路线"},
     "card": {"points": 2, "daily_cap": 5, "label": "使用沟通卡"},
     "profile": {"points": 20, "daily_cap": 0, "once": True, "label": "完善资料"},
@@ -38,6 +39,7 @@ POINT_RULES = {
     "streak_bonus": {"points": 0, "daily_cap": 0, "label": "连续签到奖励"},
 }
 USER_EVENT_KINDS = ("share", "subway", "card", "profile")
+SHARE_NO_REWARD = "分享不再发放旅行豆，分享功能照常使用"
 SHARE_TARGET_TYPES = ("post", "shop", "merchant", "trip", "card", "subway", "chicken")
 
 REDEEM_CATALOG = [
@@ -265,7 +267,7 @@ def user_points_summary(conn, uid):
 def _rules_out(counts):
     out = []
     for kind, rule in POINT_RULES.items():
-        if kind in ("shop_approve", "fanplace_approve", "opening_bonus", "featured", "streak_bonus"):
+        if kind in ("shop_approve", "fanplace_approve", "opening_bonus", "featured", "streak_bonus") or rule.get("retired"):
             continue
         cap = rule.get("daily_cap") or 0
         used = counts.get(kind, 0)
@@ -283,6 +285,8 @@ def _rules_out(counts):
 
 def _award(conn, uid, kind, *, item_key=None, idempotency_key=None, note=None, require_profile=False):
     rule = POINT_RULES[kind]
+    if rule.get("retired"):
+        return {"ok": True, "awarded": 0, "reason": SHARE_NO_REWARD}
     day = kst_today()
     q(conn, "SELECT id FROM c_users WHERE id=%s FOR UPDATE", (uid,), one=True)
 
@@ -409,6 +413,8 @@ async def api_points_event(req: Request):
     kind = str(d.get("kind") or "").strip()
     if kind not in USER_EVENT_KINDS:
         raise HTTPException(400, "不支持的奖励类型")
+    if kind == "share":   # 分享不再加豆：不写流水，直接返回（旧版页面仍可能调用）
+        return {"ok": True, "awarded": 0, "reason": SHARE_NO_REWARD}
     idem = _clean_idem(d.get("idempotency_key"))
     item_key = _item_key(kind, d.get("target_type"), d.get("target_id") or d.get("item_id"))
     with db() as conn:

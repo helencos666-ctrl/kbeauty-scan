@@ -71,6 +71,13 @@ def _api_checks(base, check, tag, live):
         check(f"[{tag}] 联系方式过滤「{txt}」→{'拦截' if bad else '放行'}", r.status_code == 200 and (r.json().get("ok") is (not bad)), r.text[:200])
     r = c.post("/api/dazi/check", json={"text": "x"})
     check(f"[{tag}] check 无 X-LH 头被拒", r.status_code == 403)
+    # 分享不再加豆
+    r = c.post("/api/points/event", json={"kind": "share", "target_type": "post", "target_id": "1"}, headers=H)
+    check(f"[{tag}] 分享不再加豆（接口 awarded=0）", r.status_code == 200 and r.json().get("awarded") == 0 and "不再" in (r.json().get("reason") or ""), r.text[:200])
+    js = c.get("/static/community.js?v=96").text
+    check(f"[{tag}] 前端分享不再请求加豆", "kind: 'share'" not in js and "旅行豆 +" not in js)
+    pts = c.get("/points").text
+    check(f"[{tag}] 旅行豆说明不再写分享奖励", "分享奖励" not in pts and "分享同一条内容" not in pts and "签到、分享" not in pts)
     if live:
         for qs in ["", "?city=seoul", "?kind=food", "?tab=merchant", "?city=jeju&kind=day", "?gender=female", "?date=2026-12-01", "?kw=首尔搭子"]:
             r = c.get("/api/dazi/posts" + qs)
@@ -265,6 +272,25 @@ def run_live(base, check, shot_dir: Path):
         page.wait_for_timeout(1200)
         check("[线上] 发帖面板未登录提示登录", "登录" in page.inner_text("#composer"))
         page.screenshot(path=str(shot_dir / "线上-dazi-new.png"))
+        # 分享按钮保留，但点了不再请求加豆
+        reqs = []
+        page.on("request", lambda r: reqs.append(r.url) if "/api/points/event" in r.url else None)
+        ctx.grant_permissions(["clipboard-read", "clipboard-write"], origin=base)
+        pid = None
+        try:
+            import httpx
+            ps = httpx.get(base + "/api/dazi/posts", timeout=20).json().get("posts") or []
+            pid = ps[0]["id"] if ps else None
+        except Exception:
+            pass
+        if pid:
+            page.on("dialog", lambda d: d.dismiss())
+            page.goto(base + "/community/post/%s" % pid, wait_until="networkidle")
+            page.wait_for_selector("#share", timeout=15000)
+            check("[线上] 帖子分享按钮仍在", page.locator("#share").count() == 1)
+            page.evaluate("navigator.share = undefined")
+            page.click("#share"); page.wait_for_timeout(1500)
+            check("[线上] 点分享不再请求加豆", not reqs, reqs)
         check("[线上] 搭子页无脚本报错", not errs, errs[:3])
         browser.close()
 

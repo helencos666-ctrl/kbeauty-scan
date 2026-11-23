@@ -357,15 +357,7 @@ var LH = (function(){
         else { prompt('复制链接发给朋友', url); }
       } catch(e){ prompt('复制链接发给朋友', url); }
     }
-    if (opts.targetType && opts.targetId){
-      try {
-        var r = await api('POST', '/api/points/event', {kind: 'share', target_type: opts.targetType, target_id: String(opts.targetId)});
-        if (r && r.awarded) alert('分享成功，旅行豆 +' + r.awarded + '（余额 ' + r.balance + '）');
-        else if (r && r.reason) { /* 已达上限或已领过：不打断分享 */ }
-      } catch(e){
-        if (e.status !== 401) { /* 未登录不提示奖励 */ }
-      }
-    }
+    // 分享不再发放旅行豆（不再请求 /api/points/event），分享功能本身不变
     return {ok: true};
   }
   function mapLinks(address){
