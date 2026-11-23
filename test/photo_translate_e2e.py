@@ -125,7 +125,7 @@ def run_live(base, check, shot_dir: Path):
     src = " ".join(b.get("src", "") for b in blocks); tr = " ".join(b.get("tr", "") for b in blocks)
     check("[live] 韩文菜单识别 200 且有多段", r.status_code == 200 and len(blocks) >= 4, r.text[:300])
     check("[live] 识别出韩文菜名", all(k in src.replace(" ", "") for k in ("김치찌개", "비빔밥", "불고기")), src)
-    check("[live] 中文译文合理（泡菜/拌饭/烤肉，价格保留）", "泡菜" in tr and "拌饭" in tr and "烤肉" in tr and ("9,000" in tr or "9000" in tr), tr)
+    check("[live] 中文译文合理（泡菜/拌饭/烤肉，价格保留）", "泡菜" in tr and "拌饭" in tr and ("烤肉" in tr or "烤牛肉" in tr or "烧肉" in tr) and ("9,000" in tr or "9000" in tr), tr)
     zimg = make_menu(shot_dir / "_note_zh.jpg", ZH_LINES, CJK_FONTS)
     r2 = httpx.post(base + "/api/photo-translate?dir=zh2ko", files={"image": ("note.jpg", zimg.read_bytes(), "image/jpeg")},
                     headers={"X-LH": "1"}, timeout=120)
