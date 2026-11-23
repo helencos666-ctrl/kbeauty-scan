@@ -25,7 +25,7 @@ for f in ["static/dazi.html"]:
     s = open(os.path.join(ROOT, f), encoding="utf-8").read()
     check(f + " 无奋韩/外链", "奋韩" not in s and "cdn" not in s.lower())
     check(f + " 无 inline onclick", "onclick=" not in s)
-    check(f + " 使用 v97", "?v=97" in s and "?v=95" not in s)
+    check(f + " 使用 v98", "?v=98" in s and "?v=95" not in s)
 cp = open(os.path.join(ROOT, "community.py"), encoding="utf-8").read()
 check("社区发帖对找搭子频道做联系方式拦截", 'if board == "group":' in cp and "找搭子发帖" in cp)
 check("频道显示名改为找搭子（键名不变）", '"group": "找搭子"' in cp)
@@ -81,10 +81,51 @@ try:
     check("其他板块仍要求会员（tier=1）", r.status_code == 403 and seen[-1] == 1, (r.status_code, seen))
     r = cli.post("/api/community/posts", data={"board": "group", "title": "旧入口发结伴", "body": "从旧发帖页直接发到找搭子频道"}, headers=H)
     check("旧发帖页入口不受开关影响（仍 tier=1）", r.status_code == 403 and seen[-1] == 1, (r.status_code, seen))
+    # ---- 商家账号在搭子区发帖：按帖子自身归类（默认个人） ----
+    import contact_guard as CG
+    ins = []
+    def fake_cq(conn, sql, args=(), one=False):
+        if "INSERT INTO c_posts" in sql:
+            ins.append(args); return {"id": 999}
+        return {"n": 0}
+    orig2 = (C.q, C.get_settings, C.limit, CG.guard_text)
+    C.q = fake_cq; C.get_settings = lambda conn: {}; C.limit = lambda *a, **k: None
+    CG.guard_text = lambda *a, **k: None
+    MU = {"id": 14, "tier": 3, "merchant": True, "merchant_credits": 0, "buddy_banned_until": None}
+    C.need_tier = lambda conn, req, tier, msg=None: dict(MU)
+    D.need_user = lambda conn, req: dict(MU)
+    D.q = lambda conn, sql, args=(), one=False: {"n": 0}
+    try:
+        r = cli.post("/api/dazi/posts", data=form, headers=H)   # 不传 post_type = 默认个人
+        a0 = ins[-1] if ins else ()
+        check("商家账号发个人搭子帖：is_merchant=False、直接发布（出现在个人列表）",
+              r.status_code == 200 and a0[4] == "published" and a0[5] is False, (r.status_code, r.text[:120], a0[4:6]))
+        r = cli.post("/api/dazi/posts", data=dict(form, post_type="personal", body="12月首尔包车一日游，找人拼车分摊费用"), headers=H)
+        a0 = ins[-1]
+        check("商家账号个人帖仍走商业词审核", a0[4] == "pending" and a0[5] is False and "商业" in (a0[7] or ""), a0[4:8])
+        r = cli.post("/api/dazi/posts", data=dict(form, post_type="merchant"), headers=H)
+        a0 = ins[-1]
+        check("商家账号选商家服务：is_merchant=True 且先审后发", a0[4] == "pending" and a0[5] is True, a0[4:8])
+        n0 = len(ins)
+        r = cli.post("/api/dazi/posts", data=dict(form, body="加我微信 abc12345 一起吃饭"), headers=H)
+        check("商家账号个人帖仍过滤联系方式", r.status_code == 400 and len(ins) == n0, r.text[:100])
+        D.need_user = lambda conn, req: {"id": 5, "tier": 0, "merchant": False, "buddy_banned_until": None}
+        r = cli.post("/api/dazi/posts", data=dict(form, post_type="merchant"), headers=H)
+        check("普通用户不能选商家服务", r.status_code == 403 and "入驻商家" in r.text, r.text[:100])
+        r = cli.post("/api/dazi/posts", data=dict(form, post_type="xx"), headers=H)
+        check("非法发帖类型 400", r.status_code == 400)
+    finally:
+        C.q, C.get_settings, C.limit, CG.guard_text = orig2
 finally:
     D.db, D.need_user, D.q, C.db, C.need_tier = orig
     if saved_db is not None:
         os.environ["DATABASE_URL"] = saved_db
 
+ds = open(os.path.join(ROOT, "dazi.py"), encoding="utf-8").read()
+check("搭子区列表置顶优先", "COALESCE(p.pinned,FALSE) DESC" in ds)
+check("一次性修正：帖子 53 归个人、指南帖置顶（只改分类/置顶字段）", "post53_personal" in ds and "pin_dazi_guide" in ds
+      and "SET is_merchant=FALSE" in ds and "SET pinned=TRUE" in ds)
+dh = open(os.path.join(ROOT, "static/dazi.html"), encoding="utf-8").read()
+check("发帖页商家可选个人/商家，默认个人", 'data-val="personal">个人找搭子' in dh and "post_type" in dh and "ptype:'personal'" in dh)
 print("%d passed, %d failed" % (ok, fail))
 sys.exit(1 if fail else 0)

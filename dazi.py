@@ -81,7 +81,19 @@ CREATE TABLE IF NOT EXISTS c_dazi_meta (
   created_at TIMESTAMPTZ NOT NULL DEFAULT now()
 );
 CREATE INDEX IF NOT EXISTS c_dazi_meta_city_idx ON c_dazi_meta(city, kind);
+-- 一次性数据修正（每个 key 只执行一次，之后管理员手动改动不会被覆盖）
+CREATE TABLE IF NOT EXISTS c_dazi_once (k TEXT PRIMARY KEY, done_at TIMESTAMPTZ NOT NULL DEFAULT now());
+-- 帖子 53：商家账号发的个人找搭子帖，归为个人帖（只改分类字段，不动内容）
+WITH m AS (INSERT INTO c_dazi_once(k) VALUES ('post53_personal') ON CONFLICT DO NOTHING RETURNING k)
+UPDATE c_posts SET is_merchant=FALSE
+ WHERE id=53 AND board='group' AND title='12.1-12号一个人去首尔需要逛街和饭搭子' AND EXISTS (SELECT 1 FROM m);
+-- 官方《找搭子使用指南与见面安全须知》在搭子区置顶
+WITH m AS (INSERT INTO c_dazi_once(k) VALUES ('pin_dazi_guide') ON CONFLICT DO NOTHING RETURNING k)
+UPDATE c_posts SET pinned=TRUE, pinned_at=now()
+ WHERE board='group' AND title='找搭子使用指南与见面安全须知' AND NOT deleted
+   AND user_id IN (SELECT id FROM c_users WHERE COALESCE(is_official,FALSE)) AND EXISTS (SELECT 1 FROM m);
 """
+POST_TYPES = ("personal", "merchant")   # 帖子自身的类型：个人找搭子 / 商家服务
 
 # ---------------- 联系方式打码（展示兜底） ----------------
 _KEY = r"(?:微信|微心|威信|薇信|v信|vx|wx|weixin|wechat|qq|kakao(?:talk)?|line|电话|手机|tel|联系)"
@@ -239,7 +251,8 @@ def api_list(req: Request, tab: str = "personal", city: str = "", kind: str = ""
                  FROM c_posts p JOIN c_users au ON au.id=p.user_id
                  LEFT JOIN c_dazi_meta m ON m.post_id=p.id
                  WHERE {' AND '.join(cond)}
-                 ORDER BY is_expired ASC, COALESCE(au.is_official,FALSE) DESC, p.id DESC
+                 ORDER BY is_expired ASC, COALESCE(p.pinned,FALSE) DESC, p.pinned_at DESC NULLS LAST,
+                          COALESCE(au.is_official,FALSE) DESC, p.id DESC
                  OFFSET %s LIMIT %s""", (today, *args, offset, limit_n + 1))
     more = len(rows) > limit_n
     out = []
@@ -263,7 +276,7 @@ def api_list(req: Request, tab: str = "personal", city: str = "", kind: str = ""
 @router.post("/api/dazi/posts")
 async def api_new(req: Request, title: str = Form(""), body: str = Form(""), city: str = Form(""),
                   kind: str = Form(""), date_from: str = Form(""), date_to: str = Form(""),
-                  people: str = Form(""), gender: str = Form("any"),
+                  people: str = Form(""), gender: str = Form("any"), post_type: str = Form("personal"),
                   images: list[UploadFile] = File(default=[])):
     csrf(req)
     city = (city or "").strip(); kind = (kind or "").strip(); gender = (gender or "any").strip() or "any"
@@ -273,6 +286,9 @@ async def api_new(req: Request, title: str = Form(""), body: str = Form(""), cit
         raise HTTPException(400, "请选择搭子类型")
     if gender not in GENDER_D:
         raise HTTPException(400, "性别要求不对")
+    post_type = (post_type or "personal").strip() or "personal"
+    if post_type not in POST_TYPES:
+        raise HTTPException(400, "请选择发帖类型")
     title = clean_text(title, 40, "标题", 4)
     body = clean_text(body, 3000, "正文", 10)
     df = _parse_date(date_from, "开始日期")
@@ -296,6 +312,8 @@ async def api_new(req: Request, title: str = Form(""), body: str = Form(""), cit
         u = need_user(conn, req)
         if u.get("buddy_banned_until") and u["buddy_banned_until"] > datetime.datetime.now(datetime.timezone.utc):
             raise HTTPException(403, "你的搭子功能暂时被限制，如有疑问请联系管理员")
+        if post_type == "merchant" and not u.get("merchant"):
+            raise HTTPException(403, "「商家服务」仅限入驻商家发布；个人找搭子请选「个人找搭子」")
         nd = q(conn, """SELECT count(*) AS n FROM c_posts WHERE user_id=%s AND board=%s
                         AND (timezone('Asia/Seoul', created_at))::date = (timezone('Asia/Seoul', now()))::date""",
                (u["id"], BOARD), one=True)["n"]
@@ -319,6 +337,7 @@ async def api_new(req: Request, title: str = Form(""), body: str = Form(""), cit
                          msg="公开帖子里请勿放二维码，联系请走站内私信。")
     from community import api_new_post
     req.state.dazi_tier = dazi_post_tier()     # 只对搭子区入口生效
+    req.state.dazi_post_type = post_type       # 归类按帖子自身，不按账号
     res = await api_new_post(req, board=BOARD, title=title, body=body, tag="", offer="", valid_until="",
                              merchant_cat="", topics="", area={"seoul": "首尔", "busan": "釜山", "jeju": "济州"}.get(city, ""),
                              place="", show_cat="", spot_name="", spot_area="", avg_price="", images=imgs)

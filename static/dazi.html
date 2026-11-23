@@ -10,10 +10,10 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="旅韩助手">
 <link rel="manifest" href="/manifest.webmanifest">
-<link rel="apple-touch-icon" href="/static/icons/apple-touch-icon.png?v=97">
-<link rel="icon" type="image/png" sizes="192x192" href="/static/icons/icon-192.png?v=97">
-<link rel="stylesheet" href="/static/pwa.css?v=97">
-<link rel="stylesheet" href="/static/community.css?v=97">
+<link rel="apple-touch-icon" href="/static/icons/apple-touch-icon.png?v=98">
+<link rel="icon" type="image/png" sizes="192x192" href="/static/icons/icon-192.png?v=98">
+<link rel="stylesheet" href="/static/pwa.css?v=98">
+<link rel="stylesheet" href="/static/community.css?v=98">
 <style>
 [hidden]{display:none !important}
 body{margin:0;background:#fff;color:#1A2330;font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;font-size:15px;line-height:1.6;-webkit-text-size-adjust:100%}
@@ -111,6 +111,8 @@ select.f-in{background:#fff url("data:image/svg+xml;utf8,<svg xmlns='http://www.
 .cp-lab i{font-style:normal;color:#C0392B;font-weight:700;margin-left:2px}
 .cchips{display:flex;flex-wrap:wrap;gap:8px}
 .cchips .cchip{min-height:32px;display:inline-flex;align-items:center;border:1px solid #D5E4E1;background:#fff;border-radius:16px;padding:0 13px;font-family:inherit;font-size:13px;color:#1A2330;cursor:pointer;line-height:1}
+.cp-type-note{font-size:12px;color:#5B6B7A;margin-top:6px;line-height:1.5}
+.dz-tag.pin{background:#FFF1E6;color:#C2410C}
 .cchips .cchip.on{border-color:#146E68;background:#EAF6F4;color:#146E68;font-weight:700}
 textarea.f-in{min-height:120px;resize:vertical;line-height:1.6}
 .f-file{width:100%;font-size:13px;color:#4A5560;font-family:inherit;padding:6px 0}
@@ -187,6 +189,14 @@ textarea.f-in{min-height:120px;resize:vertical;line-height:1.6}
       <a class="cp-go" href="/login?next=/dazi/new">去登录</a>
     </div>
     <div id="cForm">
+      <div id="cTypeWrap" hidden>
+        <div class="cp-lab">发帖类型<i>*</i></div>
+        <div class="cchips" id="cpType" name="post_type" data-field="ptype">
+          <button type="button" class="cchip on" data-val="personal">个人找搭子</button>
+          <button type="button" class="cchip" data-val="merchant">商家服务（需审核）</button>
+        </div>
+        <div class="cp-type-note">你是入驻商家：自己出行找搭子选「个人找搭子」，发在个人列表；推广团签、包车等服务选「商家服务」。</div>
+      </div>
       <div class="cp-lab">城市<i>*</i></div>
       <div class="cchips" id="cpCity" name="city" data-field="city"></div>
       <div class="cp-lab">类型<i>*</i></div>
@@ -213,7 +223,7 @@ textarea.f-in{min-height:120px;resize:vertical;line-height:1.6}
   </div>
 </div>
 
-<script src="/static/community.js?v=97"></script>
+<script src="/static/community.js?v=98"></script>
 <script>
 (function(){
   'use strict';
@@ -245,7 +255,7 @@ textarea.f-in{min-height:120px;resize:vertical;line-height:1.6}
   var state = {tab:'personal', city:'', kind:'', date:'', gender:'', kw:'', offset:0};
   var me = null, optErr = '', hotSel = null, loading = false, seq = 0, kwTimer = null;
   var sheetPost = null, sheetUid = '';
-  var cp = {city:'', kind:'', gender:'any'};
+  var cp = {city:'', kind:'', gender:'any', ptype:'personal'};
   var cpImgs = [], cpPosting = false, checkTimer = null, checkSeq = 0;
 
   /* ---------- 小工具 ---------- */
@@ -339,6 +349,7 @@ textarea.f-in{min-height:120px;resize:vertical;line-height:1.6}
     $$('#cpCity .cchip').forEach(function(b){ b.classList.toggle('on', b.getAttribute('data-val') === cp.city); });
     $$('#cpKind .cchip').forEach(function(b){ b.classList.toggle('on', b.getAttribute('data-val') === cp.kind); });
     $$('#cpGender .cchip').forEach(function(b){ b.classList.toggle('on', b.getAttribute('data-val') === cp.gender); });
+    $$('#cpType .cchip').forEach(function(b){ b.classList.toggle('on', b.getAttribute('data-val') === cp.ptype); });
   }
 
   function onFilterChange(){
@@ -362,6 +373,7 @@ textarea.f-in{min-height:120px;resize:vertical;line-height:1.6}
     var d = p.dazi || {};
     var exp = expiredOf(p);
     var tags = '';
+    if (p.pinned) tags += '<span class="dz-tag pin">置顶</span>';
     if (p.is_biz) tags += '<span class="dz-tag biz">商家</span>';
     if (p.biz_verified) tags += '<span class="dz-tag ok">✔ 已认证</span>';
     if (p.author_official) tags += '<span class="dz-tag off">官方</span>';
@@ -584,6 +596,8 @@ textarea.f-in{min-height:120px;resize:vertical;line-height:1.6}
     var u = await ensureMe();
     $('#cLogin').hidden = !!u;
     $('#cForm').hidden = !u;
+    $('#cTypeWrap').hidden = !(u && u.merchant);   // 只有入驻商家才需要选；默认个人
+    if (!(u && u.merchant)) cp.ptype = 'personal';
     $('#cFrom').min = todayISO();
     $('#cTo').min = $('#cFrom').value || todayISO();
     syncAll();
@@ -655,16 +669,18 @@ textarea.f-in{min-height:120px;resize:vertical;line-height:1.6}
       fd.append('date_to', $('#cTo').value || '');
       fd.append('people', String($('#cPeople').value || '').trim());
       fd.append('gender', cp.gender || 'any');
+      fd.append('post_type', cp.ptype === 'merchant' ? 'merchant' : 'personal');
       fd.append('title', $('#cTitle').value.trim());
       fd.append('body', $('#cBody').value.trim());
       cpImgs.forEach(function(it){ fd.append('images', it.file, 'img.jpg'); });
+      var sentType = cp.ptype === 'merchant' ? 'merchant' : 'personal';
       var r = await LH.api('POST', '/api/dazi/posts', fd);
       if (r && r.pending) alert((r && r.message) || '已提交，等待管理员审核');
       else LH.toast('发布成功', 'ok');
       resetComposer();
       closeComposer();
       hotSel = null;
-      state.tab = 'personal';
+      state.tab = sentType;
       state.offset = 0;
       writeUrl();
       syncAll();
@@ -678,7 +694,7 @@ textarea.f-in{min-height:120px;resize:vertical;line-height:1.6}
     }
   }
   function resetComposer(){
-    cp.city = ''; cp.kind = ''; cp.gender = 'any';
+    cp.city = ''; cp.kind = ''; cp.gender = 'any'; cp.ptype = 'personal';
     $('#cFrom').value = ''; $('#cTo').value = ''; $('#cPeople').value = '';
     $('#cTitle').value = ''; $('#cBody').value = '';
     showWarn('');
@@ -814,8 +830,8 @@ textarea.f-in{min-height:120px;resize:vertical;line-height:1.6}
         var field = box ? box.getAttribute('data-field') : '';
         var val = chip.getAttribute('data-val') || '';
         if (!field) return;
-        if (field === 'gender'){
-          cp.gender = val;
+        if (field === 'gender' || field === 'ptype'){
+          cp[field] = val;
         } else {
           cp[field] = (cp[field] === val) ? '' : val;
         }
@@ -892,6 +908,6 @@ textarea.f-in{min-height:120px;resize:vertical;line-height:1.6}
   else init();
 })();
 </script>
-<script src="/static/pwa.js?v=97" defer></script>
+<script src="/static/pwa.js?v=98" defer></script>
 </body>
 </html>

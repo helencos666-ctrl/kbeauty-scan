@@ -75,7 +75,7 @@ def _api_checks(base, check, tag, live):
     # 分享不再加豆
     r = c.post("/api/points/event", json={"kind": "share", "target_type": "post", "target_id": "1"}, headers=H)
     check(f"[{tag}] 分享不再加豆（接口 awarded=0）", r.status_code == 200 and r.json().get("awarded") == 0 and "不再" in (r.json().get("reason") or ""), r.text[:200])
-    js = c.get("/static/community.js?v=97").text
+    js = c.get("/static/community.js?v=98").text
     check(f"[{tag}] 前端分享不再请求加豆", "kind: 'share'" not in js and "旅行豆 +" not in js)
     pts = c.get("/points").text
     check(f"[{tag}] 旅行豆说明不再写分享奖励", "分享奖励" not in pts and "分享同一条内容" not in pts and "签到、分享" not in pts)
@@ -93,6 +93,15 @@ def _api_checks(base, check, tag, live):
                 check(f"[{tag}] 列表不露出手机号", not re.search(r"01[0-9][-\s]?\d{3,4}[-\s]?\d{4}", blob))
                 exp = [p["expired"] for p in ps]
                 check(f"[{tag}] 过期帖沉底", exp == sorted(exp), exp)
+                check(f"[{tag}] 指南帖在搭子区置顶（第一条且 pinned）", bool(ps) and "找搭子使用指南" in ps[0].get("title", "") and ps[0].get("pinned") is True,
+                      [(p.get("id"), p.get("pinned")) for p in ps][:3])
+                # 商家账号发的个人搭子帖（线上帖子 53）出现在个人列表、不带商家标签
+                r53 = c.get("/api/community/posts/53")
+                if r53.status_code == 200 and (r53.json().get("post") or r53.json()).get("board") == "group":
+                    hit = [p for p in ps if p.get("id") == 53]
+                    check(f"[{tag}] 商家账号发个人搭子帖出现在个人列表（53）", bool(hit) and not hit[0].get("is_biz"), [p.get("id") for p in ps])
+                    rm = c.get("/api/dazi/posts?tab=merchant")
+                    check(f"[{tag}] 53 不在商家服务列表", rm.status_code == 200 and all(p.get("id") != 53 for p in rm.json()["posts"]))
                 check(f"[{tag}] 官方指南帖在列", any(p.get("author_official") and "找搭子使用指南" in p.get("title", "") for p in ps),
                       [p.get("title") for p in ps][:5])
         r = c.get("/api/dazi/posts?city=xx")

@@ -2076,9 +2076,13 @@ async def api_new_post(req: Request, board: str = Form(""), title: str = Form(""
             else:
                 raise HTTPException(403, f"本周期 {MERCHANT_QUOTA} 篇额度已用完（{mq['cycle_end']} 重置）。每增发 1 篇 ¥{st['price_extra']}，付款后联系管理员增加次数")
             status, note = "pending", "商家帖，先审后发"
-        elif u["merchant"]:
+        dazi_type = getattr(req.state, "dazi_post_type", None) if board == "group" else None
+        as_biz = bool(u["merchant"]) if dazi_type is None else (dazi_type == "merchant" and bool(u["merchant"]))
+        if listing:
+            pass
+        elif as_biz:
             status, note = "pending", "商家帖，先审后发"
-        elif not u["merchant"]:
+        else:   # 个人帖（含商家账号在搭子区选「个人找搭子」）：走商业词审核规则
             hits = is_commercial(title + "\n" + body)
             if hits:
                 status = "pending"
@@ -2090,7 +2094,7 @@ async def api_new_post(req: Request, board: str = Form(""), title: str = Form(""
             raise HTTPException(429, "今天发帖已达上限（20 篇）")
         row = q(conn, """INSERT INTO c_posts(user_id,board,title,body,status,is_merchant,quota_kind,review_note,tag,offer,valid_until,merchant_cat,topics,area,place,show_cat,spot_name,spot_area,avg_price)
                          VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s) RETURNING id""",
-                (u["id"], board, title, body, status, bool(u["merchant"]), quota_kind, note, *act, cat, topics or None, area or None, place or None, show_cat or None, spot_name or None, spot_area or None, avg_price_n), one=True)
+                (u["id"], board, title, body, status, bool(u["merchant"]) if listing else as_biz, quota_kind, note, *act, cat, topics or None, area or None, place or None, show_cat or None, spot_name or None, spot_area or None, avg_price_n), one=True)
         for i, (big, th, w, h) in enumerate(processed):
             q(conn, "INSERT INTO c_images(post_id,pos,data,thumb,width,height) VALUES (%s,%s,%s,%s,%s,%s)",
               (row["id"], i, big, th, w, h))
