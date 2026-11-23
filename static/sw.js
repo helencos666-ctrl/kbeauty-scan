@@ -1,5 +1,5 @@
 /* 旅韩助手 service worker: cache app shell, never cache API or POST. */
-const CACHE = 'lvhan-shell-v98';
+const CACHE = 'lvhan-shell-v99';
 const SHELL = [
   '/',
   '/attractions',
@@ -28,16 +28,16 @@ const SHELL = [
   '/static/tips.html',
   '/static/faq.html',
   '/static/beauty.html',
-  '/static/guide.css?v=98',
+  '/static/guide.css?v=99',
   '/static/maps.js',
   '/static/phrases.js',
   '/static/subway.js',
-  '/static/subway.json?v=98',
+  '/static/subway.json?v=99',
   '/static/stations.json',
-  '/static/community.css?v=98',
-  '/static/chat.css?v=98',
-  '/static/community.js?v=98',
-  '/static/shops.js?v=98',
+  '/static/community.css?v=99',
+  '/static/chat.css?v=99',
+  '/static/community.js?v=99',
+  '/static/shops.js?v=99',
   '/static/community.html',
   '/static/community-post.html',
   '/static/community-new.html',
@@ -51,6 +51,13 @@ const SHELL = [
   '/static/buddy-verify.html',
   '/static/messages.html',
   '/static/chat.html',
+  '/static/consult.html',
+  '/static/dazi.html',
+  '/static/me.html',
+  '/static/shops.html',
+  '/dazi',
+  '/me',
+  '/shops',
   '/places',
   '/places/new',
   '/trips',
@@ -59,31 +66,31 @@ const SHELL = [
   '/static/places.html',
   '/static/places-new.html',
   '/static/places-one.html',
-  '/static/places.css?v=98',
+  '/static/places.css?v=99',
   '/static/trips.html',
   '/static/festival.html',
   '/static/opening.html',
-  '/static/opening-promos.js?v=98',
-  '/static/opening-promos.json?v=98',
-  '/static/trip-presets.json?v=98',
-  '/static/home-ads/ad-1.jpg?v=98',
-  '/static/home-ads/ad-2.jpg?v=98',
-  '/static/home-ads/ad-3.jpg?v=98',
-  '/static/home-ads/ad-4.jpg?v=98',
+  '/static/opening-promos.js?v=99',
+  '/static/opening-promos.json?v=99',
+  '/static/trip-presets.json?v=99',
+  '/static/home-ads/ad-1.jpg?v=99',
+  '/static/home-ads/ad-2.jpg?v=99',
+  '/static/home-ads/ad-3.jpg?v=99',
+  '/static/home-ads/ad-4.jpg?v=99',
   '/static/rate.html',
   '/static/privacy.html',
   '/static/terms.html',
-  '/static/pwa.js?v=98',
-  '/static/splash.js?v=98',
+  '/static/pwa.js?v=99',
+  '/static/splash.js?v=99',
   '/static/banners.js',
-  '/static/pwa.css?v=98',
+  '/static/pwa.css?v=99',
   '/manifest.webmanifest',
   '/static/manifest.webmanifest',
-  '/static/icons/icon-192.png?v=98',
-  '/static/icons/icon-512.png?v=98',
-  '/static/icons/icon-192-maskable.png?v=98',
-  '/static/icons/icon-512-maskable.png?v=98',
-  '/static/icons/apple-touch-icon.png?v=98'
+  '/static/icons/icon-192.png?v=99',
+  '/static/icons/icon-512.png?v=99',
+  '/static/icons/icon-192-maskable.png?v=99',
+  '/static/icons/icon-512-maskable.png?v=99',
+  '/static/icons/apple-touch-icon.png?v=99'
 ];
 
 self.addEventListener('install', event => {
@@ -167,6 +174,39 @@ async function networkFirst(request) {
   }
 }
 
+// 页面切换提速（v99）：去过的页面先秒开缓存，再在后台取新版本更新缓存（stale-while-revalidate）。
+// 帖子详情 / 私信 / 咨询这类「同一个页面模板 + 不同 id」的地址，没去过的 id 也先用模板秒开，数据由页面脚本现拉。
+// 登录、支付、后台、跳转类地址不走这条，永远走网络。
+const NO_SWR = /^\/(admin|login|logout|pay|go\/|ads\/|api\/)/;
+const MAX_STALE_MS = 7 * 24 * 3600 * 1000;
+function templateFor(p) {
+  if (/^\/community\/post\/\d+$/.test(p)) return '/static/community-post.html';
+  if (/^\/community\/messages\/\d+$/.test(p)) return '/static/chat.html';
+  if (/^\/consult(\/new|\/\d+)?$/.test(p)) return '/static/consult.html';
+  if (/^\/dazi(\/new)?$/.test(p)) return '/static/dazi.html';
+  return null;
+}
+function tooOld(resp) {
+  const d = Date.parse(resp.headers.get('date') || '');
+  return !d || (Date.now() - d) > MAX_STALE_MS;
+}
+async function staleWhileRevalidate(event, request) {
+  const url = new URL(request.url);
+  if (NO_SWR.test(url.pathname)) return networkFirst(request);
+  const cache = await caches.open(CACHE);
+  let cached = await matchSamePath(cache, request, url);
+  if (!cached) {
+    const t = templateFor(url.pathname);
+    if (t) cached = await cache.match(t, { ignoreSearch: true });
+  }
+  if (!cached || tooOld(cached)) return networkFirst(request);
+  const fresh = fetch(request).then(r => {
+    if (r && r.ok && r.type === 'basic' && !r.redirected) return cache.put(request, r.clone());
+  }).catch(() => {});
+  event.waitUntil(fresh);
+  return cached;
+}
+
 async function cacheFirst(request) {
   const cache = await caches.open(CACHE);
   const cached = await cache.match(request, { ignoreSearch: true });
@@ -190,7 +230,7 @@ self.addEventListener('fetch', event => {
   if (url.pathname === '/admin' || url.searchParams.has('ref')) return; // admin and referral visits always hit the network
 
   if (isHtml(request, url)) {
-    event.respondWith(networkFirst(request));
+    event.respondWith(staleWhileRevalidate(event, request));
     return;
   }
   // App-shell assets (JSON, icons, JS, CSS, manifest)

@@ -596,8 +596,11 @@ def api_consult_thread(req: Request, tid: int, after: int = 0):
 
 
 @router.post("/api/consult/threads/{tid}/messages")
-async def api_consult_send(req: Request, tid: int, body: str = Form(""), image: UploadFile | None = File(default=None)):
+async def api_consult_send(req: Request, tid: int, body: str = Form(""), image: UploadFile | None = File(default=None),
+                           cid: str = Form("")):
     csrf(req)
+    from msg_dedup import norm_cid, cid_get, cid_put
+    cid = norm_cid(cid)
     body = (body or "").replace("\x00", "").strip()
     if len(body) > MSG_MAX:
         raise HTTPException(400, "消息太长（最多 %d 字）" % MSG_MAX)
@@ -610,6 +613,14 @@ async def api_consult_send(req: Request, tid: int, body: str = Form(""), image: 
         side = _side(t, u["id"]) if t else None
         if not side:
             raise HTTPException(404, "会话不存在")
+        prev = cid_get("consult", u["id"], cid)
+        if prev:
+            return prev
+        if body and not has_img and not cid:   # 旧客户端连点：几秒内同一内容只算一条
+            dup = q(conn, """SELECT id FROM c_consult_msgs WHERE thread_id=%s AND sender_id=%s AND body=%s AND img IS NULL
+                             AND created_at > now() - interval '5 seconds' ORDER BY id DESC LIMIT 1""", (tid, u["id"], body), one=True)
+            if dup:
+                return {"ok": True, "id": dup["id"], "dup": True}
         limit("cmsg:%d" % u["id"], 30, 600, "发送太频繁，请稍后再试")
         guard_text(conn, u["id"], "咨询消息", body)
     big = th = w = h = None
@@ -624,7 +635,9 @@ async def api_consult_send(req: Request, tid: int, body: str = Form(""), image: 
         other = "merch_unread" if side == "user" else "user_unread"
         q(conn, f"UPDATE c_consult_threads SET last_text=%s, last_at=now(), {other}={other}+1 WHERE id=%s",
           ((body or "[图片]")[:60], tid))
-    return {"ok": True, "id": r["id"]}
+    res = {"ok": True, "id": r["id"]}
+    cid_put("consult", u["id"], cid, dict(res, dup=True))
+    return res
 
 
 @router.get("/api/consult/img/{mid}")

@@ -161,6 +161,23 @@ start_background_download()
 app.middleware("http")(ref_middleware)
 app.middleware("http")(visit_middleware)
 
+
+async def static_cache_middleware(request, call_next):
+    """静态资源缓存（v99）：带 ?v= 版本号的 CSS/JS/图片一年不过期（换版本号即换新文件），其余静态文件 1 小时。
+    .html 页面仍是 no-cache（由页面渲染设置），不受影响。"""
+    resp = await call_next(request)
+    try:
+        p = request.url.path
+        if (p.startswith("/static/") and not p.endswith(".html") and resp.status_code == 200
+                and "cache-control" not in resp.headers):
+            resp.headers["Cache-Control"] = ("public, max-age=31536000, immutable" if request.query_params.get("v")
+                                             else "public, max-age=3600")
+    except Exception:
+        pass
+    return resp
+
+app.middleware("http")(static_cache_middleware)
+
 # 安全中间件（最外层之一）：安全头、https 跳转、写操作同源校验、请求体流式限长
 app.add_middleware(SecurityMiddleware, max_body=MAX_UPLOAD + 100_000,
                    big_paths={"/api/community/posts", "/api/admin/shop-photos"}, big_body=20 * 1024 * 1024)

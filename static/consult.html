@@ -10,10 +10,10 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="旅韩助手">
 <link rel="manifest" href="/manifest.webmanifest">
-<link rel="apple-touch-icon" href="/static/icons/apple-touch-icon.png?v=98">
-<link rel="icon" type="image/png" sizes="192x192" href="/static/icons/icon-192.png?v=98">
-<link rel="stylesheet" href="/static/pwa.css?v=98">
-<link rel="stylesheet" href="/static/community.css?v=98">
+<link rel="apple-touch-icon" href="/static/icons/apple-touch-icon.png?v=99">
+<link rel="icon" type="image/png" sizes="192x192" href="/static/icons/icon-192.png?v=99">
+<link rel="stylesheet" href="/static/pwa.css?v=99">
+<link rel="stylesheet" href="/static/community.css?v=99">
 <meta name="robots" content="noindex">
 <style>
 .ctabs{display:flex;gap:8px;margin:0 0 10px}.ctabs button{flex:1;border:1px solid var(--line);background:#fff;border-radius:12px;padding:9px;font-size:14px;color:inherit}
@@ -35,7 +35,7 @@
 </header>
 <main style="padding-bottom:80px">
   <div class="err" id="err"></div>
-  <div id="box"><div class="loading">加载中…</div></div>
+  <div id="box"><div class="skel" aria-busy="true" aria-label="加载中"><div class="skel-card"><i class="sk w60"></i><i class="sk w90"></i></div><div class="skel-card"><i class="sk w40"></i><i class="sk w60"></i></div></div></div>
 </main>
 <div class="sendbar" id="sb" style="display:none">
   <label class="pic" title="发送图片">🖼<input type="file" id="pic" accept="image/jpeg,image/png,image/webp" style="display:none"></label>
@@ -49,26 +49,32 @@
   <a href="/?tab=more"><i>☰</i>全部</a>
   <a href="/me"><i>👤</i>我的</a>
 </nav>
-<script src="/static/community.js?v=98"></script>
+<script src="/static/community.js?v=99"></script>
 <script>
 var E = LH.esc, box = document.getElementById('box'), err = document.getElementById('err');
 function loginLink(){ return '<div class="card empty">请先登录后再咨询<br><br><a class="btn primary" href="/login?next=' + encodeURIComponent(location.pathname + location.search) + '">登录 / 注册</a></div>'; }
 var path = location.pathname, m = path.match(/^\/consult\/(\d+)$/);
 (async function(){
+  // 新建咨询 / 会话页不再先等「我是谁」：接口本身会返回 401，省一次往返
+  if (path === '/consult/new'){ LH.startConsultPoll(); return start(); }
+  if (m){ LH.startConsultPoll(); return chat(+m[1]); }
   var me = null;
   try { me = await LH.me(); } catch(e){}
   if (!me || !me.user){ box.innerHTML = loginLink(); return; }
   LH.startConsultPoll();
-  if (path === '/consult/new') return start();
-  if (m) return chat(+m[1]);
   return list();
 })();
 
 async function start(){
   try {
     var r = await LH.api('POST', '/api/consult/start', {kind: LH.qs('kind') || '', id: +(LH.qs('id') || 0)});
-    location.replace('/consult/' + r.thread_id);
-  } catch(e){ box.innerHTML = '<div class="card empty">' + E(e.message) + '<br><br><a class="btn ghost" href="javascript:history.back()">返回</a></div>'; }
+    // 不再整页跳转：原地换地址并直接打开会话（返回键仍回到来源页）
+    try { history.replaceState(null, '', '/consult/' + r.thread_id); } catch(e){ location.replace('/consult/' + r.thread_id); return; }
+    return chat(r.thread_id);
+  } catch(e){
+    if (e.status === 401){ box.innerHTML = loginLink(); return; }
+    box.innerHTML = '<div class="card empty">' + E(e.message) + '<br><br><a class="btn ghost" href="javascript:history.back()">返回</a></div>';
+  }
 }
 
 var side = 'user';
@@ -101,7 +107,7 @@ function msgHtml(x){
 async function chat(id){
   tid = id;
   try { T = await LH.api('GET', '/api/consult/threads/' + tid); }
-  catch(e){ box.innerHTML = '<div class="card empty">' + E(e.message) + '<br><br><a class="btn ghost" href="/consult">全部咨询</a></div>'; return; }
+  catch(e){ if (e.status === 401){ box.innerHTML = loginLink(); return; } box.innerHTML = '<div class="card empty">' + E(e.message) + '<br><br><a class="btn ghost" href="/consult">全部咨询</a></div>'; return; }
   document.getElementById('h1').textContent = '💬 ' + T.name;
   document.getElementById('hsub').innerHTML = '<a href="/consult">‹ 全部咨询</a>' + (T.ref_href ? ' · <a href="' + E(T.ref_href) + '">查看' + E(T.ref.split('：')[0] || '详情') + '</a>' : '');
   box.innerHTML = '<div class="refbar">🔒 为保护双方权益，请在站内沟通，不要交换微信、电话或二维码；不要私下转账定金。</div><div class="msgs" id="msgs"></div>';
@@ -112,37 +118,59 @@ async function chat(id){
   window.scrollTo(0, document.body.scrollHeight);
   timer = setInterval(poll, 4000);
 }
-async function poll(){
-  if (document.hidden) return;
-  try {
-    var d = await LH.api('GET', '/api/consult/threads/' + tid + '?after=' + last);
-    if (d.messages.length){
-      var el = document.getElementById('msgs');
-      if (!last) el.innerHTML = '';
-      el.insertAdjacentHTML('beforeend', d.messages.map(msgHtml).join(''));
-      last = d.messages[d.messages.length - 1].id;
-      window.scrollTo(0, document.body.scrollHeight);
-    }
-  } catch(e){}
+var polling = null;
+function poll(force){
+  if (document.hidden && !force) return Promise.resolve();
+  if (polling) return polling;   // 同时只拉一次，避免同一条消息被画两遍
+  polling = (async function(){
+    try {
+      var d = await LH.api('GET', '/api/consult/threads/' + tid + '?after=' + last);
+      var fresh = (d.messages || []).filter(function(x){ return x.id > last; });
+      if (fresh.length){
+        var el = document.getElementById('msgs');
+        if (!last) el.innerHTML = '';
+        el.querySelectorAll('.pending').forEach(function(p){ el.appendChild(p); });
+        var pend = el.querySelector('.pending');
+        var html = fresh.map(msgHtml).join('');
+        if (pend) pend.insertAdjacentHTML('beforebegin', html); else el.insertAdjacentHTML('beforeend', html);
+        last = fresh[fresh.length - 1].id;
+        window.scrollTo(0, document.body.scrollHeight);
+      }
+    } catch(e){}
+    polling = null;
+  })();
+  return polling;
 }
+var sendingNow = false, lastFail = null;
 async function send(fd){
   LH.showErr(err, '');
-  try { await LH.api('POST', '/api/consult/threads/' + tid + '/messages', fd); await poll(); return true; }
+  try { await LH.api('POST', '/api/consult/threads/' + tid + '/messages', fd); if (polling) await polling; await poll(true); return true; }
   catch(e){ LH.showErr(err, e.message); window.scrollTo(0, 0); return false; }
 }
 document.getElementById('send').onclick = async function(){
-  var t = document.getElementById('txt').value.trim(); if (!t) return;
-  this.disabled = true;
-  var fd = new FormData(); fd.append('body', t);
-  if (await send(fd)) document.getElementById('txt').value = '';
-  this.disabled = false;
+  var ta = document.getElementById('txt'), btn = this;
+  var t = ta.value.trim(); if (!t || sendingNow) return;
+  sendingNow = true; btn.disabled = true; btn.classList.add('sending');
+  var cid = (lastFail && lastFail.t === t) ? lastFail.cid : LH.newCid();
+  ta.value = ''; try { ta.focus(); } catch(e){}
+  var el = document.getElementById('msgs'), emp = el && el.querySelector('.empty');
+  if (emp) emp.parentNode.removeChild(emp);
+  var tmp = document.createElement('div');
+  tmp.className = 'msg me pending'; tmp.innerHTML = E(t) + '<span class="mt">发送中…</span>';
+  if (el){ el.appendChild(tmp); window.scrollTo(0, document.body.scrollHeight); }
+  var fd = new FormData(); fd.append('body', t); fd.append('cid', cid);
+  var ok = await send(fd);
+  if (tmp.parentNode) tmp.parentNode.removeChild(tmp);
+  if (ok) lastFail = null; else { lastFail = {t: t, cid: cid}; if (!ta.value) ta.value = t; }
+  sendingNow = false; btn.disabled = false; btn.classList.remove('sending');
 };
+LH.keepFocus(document.getElementById('send'));
 document.getElementById('pic').onchange = async function(){
   var f = this.files[0]; this.value = ''; if (!f) return;
   var c = await LH.compress(f), fd = new FormData(); fd.append('body', ''); fd.append('image', c, 'img.jpg');
   await send(fd);
 };
 </script>
-<script src="/static/pwa.js?v=98" defer></script>
+<script src="/static/pwa.js?v=99" defer></script>
 </body>
 </html>

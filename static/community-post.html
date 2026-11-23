@@ -10,11 +10,11 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="旅韩助手">
 <link rel="manifest" href="/manifest.webmanifest">
-<link rel="apple-touch-icon" href="/static/icons/apple-touch-icon.png?v=98">
-<link rel="icon" type="image/png" sizes="192x192" href="/static/icons/icon-192.png?v=98">
-<link rel="stylesheet" href="/static/pwa.css?v=98">
-<link rel="stylesheet" href="/static/community.css?v=98">
-<link rel="stylesheet" href="/static/chat.css?v=98">
+<link rel="apple-touch-icon" href="/static/icons/apple-touch-icon.png?v=99">
+<link rel="icon" type="image/png" sizes="192x192" href="/static/icons/icon-192.png?v=99">
+<link rel="stylesheet" href="/static/pwa.css?v=99">
+<link rel="stylesheet" href="/static/community.css?v=99">
+<link rel="stylesheet" href="/static/chat.css?v=99">
 </head>
 <body class="post-page no-hero">
 <a class="pback" href="/community" aria-label="返回">‹</a>
@@ -22,7 +22,7 @@
   <div id="hero"></div>
   <div class="pwrap">
   <div id="warn"></div>
-  <div id="post"><div class="loading">加载中…</div></div>
+  <div id="post"><div class="skel" aria-busy="true" aria-label="加载中"><div class="skel-card"><i class="sk h w90"></i><i class="sk w40"></i><i class="sk w90"></i><i class="sk w90"></i><i class="sk w60"></i></div></div></div>
   <div id="cbox" style="display:none">
     <h2 id="ctitle">评论</h2>
     <div id="clist"></div>
@@ -48,7 +48,7 @@
   <a href="/?tab=more"><i>☰</i>全部</a>
   <a href="/me"><i>👤</i>我的</a>
 </nav>
-<script src="/static/community.js?v=98"></script>
+<script src="/static/community.js?v=99"></script>
 <script>
 var pid = parseInt(location.pathname.split('/').pop(), 10);
 var WARN = {visa: '⚠️ 本帖为网友个人签证经验，本站不提供签证代办。政策以韩国驻华使领馆、韩国签证申请中心和 K-ETA 官网为准。',
@@ -116,11 +116,26 @@ function goComments(){
   var c = document.getElementById('cbody'); if (c) try { c.focus(); } catch(e){}
 }
 var me = null, booted = false;
-async function load(){
-  if (!booted){ me = await LH.userbar(); booted = true; }
-  var box = document.getElementById('post'), p;
+// 从列表点进来时先把标题和摘要画出来（v99），接口回来再补全
+(function(){
   try {
-    p = await LH.api('GET', '/api/community/posts/' + pid);
+    var pk = JSON.parse(sessionStorage.getItem('lh_peek') || 'null');
+    if (!pk || pk.id !== pid || Date.now() - pk.t > 60000 || !pk.title) return;
+    document.getElementById('post').innerHTML = '<h1 class="ptitle">' + LH.esc(pk.title) + '</h1>' +
+      (pk.au ? '<div class="tip" style="margin:4px 0 10px">' + LH.esc(pk.au) + '</div>' : '') +
+      (pk.ex ? '<div class="body">' + LH.esc(pk.ex) + '</div>' : '') +
+      '<div class="skel" aria-busy="true"><i class="sk w90"></i><i class="sk w60"></i></div>';
+  } catch(e){}
+})();
+async function load(opts){
+  opts = opts || {};
+  var box = document.getElementById('post'), p;
+  // 登录状态和帖子内容同时请求（以前先等登录状态再拉帖子）
+  var meP = booted ? null : LH.userbar();
+  var postP = LH.api('GET', '/api/community/posts/' + pid);
+  if (meP){ try { me = await meP; } catch(e){ me = null; } booted = true; }
+  try {
+    p = await postP;
   } catch(e){
     box.innerHTML = '<div class="empty">' + LH.esc(e.message) + (e.status === 401 ? '<br><br><a class="btn primary" href="/login?next=' + encodeURIComponent(location.pathname) + '">登录 / 注册</a>' : (e.status === 403 ? '<br><br><a class="btn primary" href="/member">了解会员</a>' : '')) + '</div>';
     return;
@@ -131,6 +146,7 @@ async function load(){
       '<br><br><a class="btn primary" href="/community">返回韩友圈</a></div>';
     return;
   }
+  if (!opts.commentsOnly){
   document.title = (p.title || '帖子') + ' · 韩友圈';
   bindHero(p.images || []);
   document.getElementById('warn').innerHTML = (p.status === 'pending' ? '<div class="pending">⏳ 这篇帖子正在等待管理员审核，目前只有你自己能看到。' + (p.review_note ? '（' + LH.esc(p.review_note) + '）' : '') + '住宿、包车用车、医美等商业信息请开通商家会员后在商家专区发布。详见<a href="/rules#r3">社区约定</a>。</div>' : '') +
@@ -223,12 +239,14 @@ async function load(){
   var pm = document.getElementById('pmBtn');
   if (pm) pm.onclick = async function(){
     if (!me || !me.user){ needLogin(); return; }
-    pm.disabled = true;
+    pm.disabled = true; pm.textContent = '打开中…';
     try { var r = await LH.api('POST', '/api/chat/start', {post_id: pid}); location.href = '/community/messages/' + r.thread_id; }
-    catch(e){ alert(e.message); pm.disabled = false; }
+    catch(e){ alert(e.message); pm.disabled = false; pm.textContent = '✉️ 私聊'; }
   };
   var dp = document.getElementById('delp');
   if (dp) dp.onclick = async function(){ if (!confirm('确定删除这篇帖子？')) return; try { await LH.api('DELETE', '/api/community/posts/' + pid); location.href = '/community'; } catch(e){ alert(e.message); } };
+  }
+  syncBar(p);
   document.getElementById('cbox').style.display = 'block';
   var list = p.comment_list || [];
   document.getElementById('ctitle').textContent = '评论 ' + list.length;
@@ -263,7 +281,7 @@ async function load(){
   });
   cl.innerHTML = list.length ? html : '<div class="empty" style="padding:12px">还没有评论</div>';
   cl.querySelectorAll('[data-repc]').forEach(function(b){ b.onclick = function(){ LH.report('comment', +b.dataset.repc); }; });
-  cl.querySelectorAll('[data-delc]').forEach(function(b){ b.onclick = async function(){ if (!confirm('删除这条评论？')) return; try { await LH.api('DELETE', '/api/community/comments/' + b.dataset.delc); load(); } catch(e){ alert(e.message); } }; });
+  cl.querySelectorAll('[data-delc]').forEach(function(b){ b.onclick = async function(){ if (!confirm('删除这条评论？')) return; try { await LH.api('DELETE', '/api/community/comments/' + b.dataset.delc); load({commentsOnly: true}); } catch(e){ alert(e.message); } }; });
   var replyTo = null;
   function bindReplyBtns(){
     cl.querySelectorAll('[data-reply]').forEach(function(b){
@@ -291,17 +309,25 @@ async function load(){
     cf.innerHTML = '<div class="err" id="cerr"></div><div class="reply-tip" id="replyTip" hidden></div><textarea class="f" id="cbody" maxlength="500" style="min-height:80px" placeholder="友善发言，分享你的经验"></textarea>' +
       '<button class="btn primary block" id="csend" style="margin-top:8px">发表评论</button>';
     document.getElementById('csend').onclick = async function(){
-      var t = document.getElementById('cbody').value.trim(); if (!t) return;
-      this.disabled = true;
-      var payload = {body: t};
+      var btn = this, t = document.getElementById('cbody').value.trim(); if (!t || btn.disabled) return;
+      btn.disabled = true; btn.classList.add('sending'); btn.textContent = '发表中…';
+      var cid = (window.__cFail && window.__cFail.t === t) ? window.__cFail.cid : LH.newCid();
+      var payload = {body: t, cid: cid};
       if (replyTo && replyTo.id) payload.parent_id = replyTo.id;
-      try { await LH.api('POST', '/api/community/posts/' + pid + '/comments', payload); load(); }
-      catch(e){ LH.showErr(document.getElementById('cerr'), e.message); this.disabled = false; }
+      try {
+        await LH.api('POST', '/api/community/posts/' + pid + '/comments', payload);
+        window.__cFail = null;
+        await load({commentsOnly: true});   // 只刷新评论区，帖子和图片不重画、不闪
+      } catch(e){
+        window.__cFail = {t: t, cid: cid};
+        LH.showErr(document.getElementById('cerr'), e.message);
+        btn.disabled = false; btn.classList.remove('sending'); btn.textContent = '发表评论';
+      }
     };
   }
 }
 load();
 </script>
-<script src="/static/pwa.js?v=98" defer></script>
+<script src="/static/pwa.js?v=99" defer></script>
 </body>
 </html>

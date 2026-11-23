@@ -172,3 +172,7 @@ body.lh-opening nav.tabbar a.me .tab-hot{
 .lh-pub-group button:last-child{border-bottom:0}
 .lh-pub-group button:active{background:#d1d1d6}
 .lh-pub-cancel-wrap button{font-weight:600}
+
+/* v99 页面切换：按下即有反馈、去掉点击延迟 */
+a,button{touch-action:manipulation}
+a.lh-press{opacity:.65}

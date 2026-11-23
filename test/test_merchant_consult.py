@@ -34,8 +34,8 @@ def static_checks():
     check("post page 不在咨询帖调用 chat/start", True)  # 私聊按钮只在 !p.consult 时渲染，pmBtn 处理仍保留给普通帖
     check("consult 未登录引导登录并带回跳", "login?next=" in consult and "location.pathname + location.search" in consult)
     check("我的页面有咨询入口", 'href="/consult"' in me and "consultDot" in me)
-    check("sw.js CACHE 为 lvhan-shell-v98", "lvhan-shell-v98" in sw)
-    check("community-post.html 使用 ?v=98", "?v=98" in post and "?v=65" not in post)
+    check("sw.js CACHE 为 lvhan-shell-v99", "lvhan-shell-v99" in sw)
+    check("community-post.html 使用 ?v=99", "?v=99" in post and "?v=65" not in post)
     # 弹窗文案只应在按钮存在时出现；前端商家帖不再走私聊
     check("私聊处理仍保留给普通帖", "POST', '/api/chat/start'" in post)
 

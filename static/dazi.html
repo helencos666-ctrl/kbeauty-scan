@@ -10,10 +10,10 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="旅韩助手">
 <link rel="manifest" href="/manifest.webmanifest">
-<link rel="apple-touch-icon" href="/static/icons/apple-touch-icon.png?v=98">
-<link rel="icon" type="image/png" sizes="192x192" href="/static/icons/icon-192.png?v=98">
-<link rel="stylesheet" href="/static/pwa.css?v=98">
-<link rel="stylesheet" href="/static/community.css?v=98">
+<link rel="apple-touch-icon" href="/static/icons/apple-touch-icon.png?v=99">
+<link rel="icon" type="image/png" sizes="192x192" href="/static/icons/icon-192.png?v=99">
+<link rel="stylesheet" href="/static/pwa.css?v=99">
+<link rel="stylesheet" href="/static/community.css?v=99">
 <style>
 [hidden]{display:none !important}
 body{margin:0;background:#fff;color:#1A2330;font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;font-size:15px;line-height:1.6;-webkit-text-size-adjust:100%}
@@ -223,7 +223,7 @@ textarea.f-in{min-height:120px;resize:vertical;line-height:1.6}
   </div>
 </div>
 
-<script src="/static/community.js?v=98"></script>
+<script src="/static/community.js?v=99"></script>
 <script>
 (function(){
   'use strict';
@@ -422,7 +422,7 @@ textarea.f-in{min-height:120px;resize:vertical;line-height:1.6}
     var list = $('#list');
     if (reset){
       state.offset = 0;
-      list.innerHTML = '<div class="loading">加载中…</div>';
+      list.innerHTML = LH.skel(3);
       $('#moreBtn').hidden = true;
     }
     var q = new URLSearchParams();
@@ -474,6 +474,38 @@ textarea.f-in{min-height:120px;resize:vertical;line-height:1.6}
     state.offset = isNaN(nx) ? state.offset + posts.length : nx;
     $('#moreBtn').hidden = !d.more;
   }
+
+  /* ---------- 返回时恢复列表和滚动位置（v99） ----------
+     进帖子详情/私信前把当前列表、页码、滚动位置存进 sessionStorage；后退回来直接画出来并滚回原处，不重新加载、不跳回顶部。 */
+  var LKEY = 'lh_dazi_list_v1';
+  function saveList(){
+    try {
+      var list = $('#list');
+      if (!list || !list.querySelector('.dz-card')) return;
+      sessionStorage.setItem(LKEY, JSON.stringify({q: location.search, path: location.pathname, html: list.innerHTML,
+        offset: state.offset, more: !$('#moreBtn').hidden, y: window.scrollY, t: Date.now()}));
+    } catch(e){}
+  }
+  function restoreList(){
+    try {
+      var nav = (performance.getEntriesByType && performance.getEntriesByType('navigation')[0]) || {};
+      var back = nav.type === 'back_forward' || sessionStorage.getItem('lh_back') === '1';
+      sessionStorage.removeItem('lh_back');
+      if (!back) return false;
+      var c = JSON.parse(sessionStorage.getItem(LKEY) || 'null');
+      if (!c || c.q !== location.search || c.path !== location.pathname || Date.now() - c.t > 30 * 60 * 1000) return false;
+      $('#list').innerHTML = c.html;
+      state.offset = c.offset || 0;
+      $('#moreBtn').hidden = !c.more;
+      var y = c.y || 0;
+      window.scrollTo(0, y);
+      requestAnimationFrame(function(){ window.scrollTo(0, y); setTimeout(function(){ if (Math.abs(window.scrollY - y) > 40) window.scrollTo(0, y); }, 60); });
+      return true;
+    } catch(e){ return false; }
+  }
+  try { if ('scrollRestoration' in history) history.scrollRestoration = 'manual'; } catch(e){}
+  window.addEventListener('pagehide', saveList);
+  document.addEventListener('visibilitychange', function(){ if (document.hidden) saveList(); });
 
   /* ---------- 私信 / 拉黑 / 举报 ---------- */
   async function ensureMe(){
@@ -793,6 +825,7 @@ textarea.f-in{min-height:120px;resize:vertical;line-height:1.6}
     $('#list').addEventListener('click', function(ev){
       var t = ev.target;
       if (!t || !t.closest) return;
+      if (t.closest('a.dz-card') && !t.closest('button')) saveList();
       var goM = t.closest('[data-go-merchant]');
       if (goM){ ev.preventDefault(); setTab('merchant'); return; }
       var empty = t.closest('#emptyNew');
@@ -884,8 +917,10 @@ textarea.f-in{min-height:120px;resize:vertical;line-height:1.6}
     renderFilters();
     buildComposerChips();
     syncAll();
-    var d = null;
-    try { d = await LH.me(); me = (d && d.user) || null; } catch(e){ me = null; }
+    // 列表、登录状态、选项三个请求同时发（以前是一个等一个）；后退回来时直接用缓存的列表
+    var restored = restoreList();
+    var listP = restored ? Promise.resolve() : load(true);
+    var meP = LH.me().then(function(d){ me = (d && d.user) || null; }, function(){ me = null; });
     try {
       var o = await LH.api('GET', '/api/dazi/options');
       if (o && typeof o === 'object'){
@@ -900,7 +935,8 @@ textarea.f-in{min-height:120px;resize:vertical;line-height:1.6}
     renderFilters();
     buildComposerChips();
     syncAll();
-    await load(true);
+    await meP;
+    await listP;
     if (location.pathname.replace(/\/+$/, '') === '/dazi/new') openComposer();
   }
 
@@ -908,6 +944,6 @@ textarea.f-in{min-height:120px;resize:vertical;line-height:1.6}
   else init();
 })();
 </script>
-<script src="/static/pwa.js?v=98" defer></script>
+<script src="/static/pwa.js?v=99" defer></script>
 </body>
 </html>

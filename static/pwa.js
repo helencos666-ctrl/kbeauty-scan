@@ -4,7 +4,7 @@
   /* 开业活动脚本：红标「我的」+ 首页每日弹层 */
   if (!document.querySelector('script[data-lh-opening]')) {
     var s = document.createElement('script');
-    s.src = '/static/opening-promos.js?v=98';
+    s.src = '/static/opening-promos.js?v=99';
     s.async = true;
     s.setAttribute('data-lh-opening', '1');
     document.head.appendChild(s);
@@ -80,9 +80,61 @@
     try {
       same = !!(document.referrer && (new URL(document.referrer)).origin === location.origin);
     } catch (e) {}
+    try { sessionStorage.setItem('lh_back', '1'); } catch (e) {}
     if (same && history.length > 1) history.back();
     else location.href = fallback;
   };
+
+  /* ===== 页面切换流畅度（v99） ===== */
+
+  // 1) 页面左上角「‹ 返回」：站内来的就真正后退（列表从缓存/原位置恢复），不再整页打开新列表、跳回顶部。
+  //    添加到主屏幕（standalone）没有浏览器返回键，主要靠这个按钮返回。
+  document.addEventListener('click', function(e){
+    var a = e.target && e.target.closest && e.target.closest('a.pback, .chhd a.back, a[data-back]');
+    if (!a || e.defaultPrevented || e.metaKey || e.ctrlKey) return;
+    var same = false;
+    try { same = !!(document.referrer && (new URL(document.referrer)).origin === location.origin); } catch (x) {}
+    if (same && history.length > 1) {
+      e.preventDefault();
+      try { sessionStorage.setItem('lh_back', '1'); } catch (x) {}
+      history.back();
+    }
+  }, true);
+
+  // 2) 手指一按下站内链接就提前请求页面（交给 Service Worker 缓存），松手跳转时通常已经到了。
+  var warmed = {}, nWarm = 0;
+  function warm(a){
+    if (!a || !a.href || nWarm > 12) return;
+    var u;
+    try { u = new URL(a.href, location.href); } catch (x) { return; }
+    if (u.origin !== location.origin || u.pathname === location.pathname && u.search === location.search) return;
+    if (/^\/(api|admin|login|logout|pay|go)\b/.test(u.pathname) || a.target === '_blank' || a.hasAttribute('download')) return;
+    if (navigator.connection && navigator.connection.saveData) return;
+    var key = u.pathname + u.search;
+    if (warmed[key]) return;
+    warmed[key] = 1; nWarm++;
+    try { fetch(key, {credentials: 'same-origin', headers: {'Accept': 'text/html', 'X-LH-Prefetch': '1'}}).catch(function(){}); } catch (x) {}
+  }
+  function onPress(e){
+    var a = e.target && e.target.closest && e.target.closest('a[href]');
+    if (!a) return;
+    a.classList.add('lh-press');
+    setTimeout(function(){ a.classList.remove('lh-press'); }, 600);
+    warm(a);
+  }
+  document.addEventListener('touchstart', onPress, {passive: true, capture: true});
+  document.addEventListener('mouseover', function(e){
+    var a = e.target && e.target.closest && e.target.closest('a[href]');
+    if (a) warm(a);
+  }, {passive: true});
+
+  // 3) 主屏幕 App 常驻后台好几天：切回前台时检查一次新版本，避免一直停在旧版。
+  var lastUpd = 0;
+  document.addEventListener('visibilitychange', function(){
+    if (document.hidden || !navigator.serviceWorker || Date.now() - lastUpd < 30 * 60 * 1000) return;
+    lastUpd = Date.now();
+    navigator.serviceWorker.getRegistration().then(function(r){ if (r) r.update(); }).catch(function(){});
+  });
 
 
   var COMPOSE_DB = 'lh-compose-pending', COMPOSE_STORE = 'files', COMPOSE_KEY = 'images';
@@ -329,7 +381,8 @@
 
   function refreshNav(){
     var sh = document.getElementById('openPromoSheet');
-    if (!sh || sh.hidden) document.body.classList.remove('lh-overlay-open');
+    // 页面自己的弹层（如搭子发帖面板）开着时不要摘掉，否则底部导航会盖住「发布」按钮
+    if ((!sh || sh.hidden) && !document.querySelector('[role="dialog"].open, [role="dialog"][aria-hidden="false"]')) document.body.classList.remove('lh-overlay-open');
     normalizeTabbar();
     if (window.LHOpening && LHOpening.paintMeTab) {
       LHOpening.load().then(function(cfg){ if (cfg) LHOpening.paintMeTab(cfg); });
@@ -359,7 +412,11 @@
     d.hidden = false;
     d.textContent = n > 99 ? '99+' : String(n);
   }
-  function loadMeBadge(){
+  var badgeAt = 0;
+  function loadMeBadge(e){
+    // 首次加载和 pageshow 会各触发一次：3 秒内只请求一次（bfcache 恢复时仍会刷新）
+    if (!(e && e.persisted) && Date.now() - badgeAt < 3000) return;
+    badgeAt = Date.now();
     try {
       fetch('/api/me/summary', {credentials: 'same-origin', headers: {'X-LH': '1'}}).then(function(r){
         return r.json();

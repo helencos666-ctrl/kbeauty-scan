@@ -1,6 +1,6 @@
 /* 开业活动：读取 JSON 配置，控制「我的」红标、首页每日弹层和活动列表。 */
 (function(w){
-  var CFG_URL = '/static/opening-promos.json?v=98';
+  var CFG_URL = '/static/opening-promos.json?v=99';
   var cache = null, inflight = null;
 
   function kstDay(d){
@@ -128,6 +128,8 @@
       if (t) t.textContent = cfg.popup_title || cfg.title || '开业活动';
       renderList(document.getElementById('opSheetList'), cfg, true);
       sheet.hidden = false;
+      // 弹出即记为今天已看过：点了里面的链接或直接离开，回到首页也不再重复弹
+      try { localStorage.setItem(key, kstDay()); } catch (e) {}
       document.body.classList.add('lh-overlay-open');
     })();
   }

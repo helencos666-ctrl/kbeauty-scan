@@ -44,8 +44,8 @@ def check_source_fixes():
     check("发帖提交前重建内存 File 并限制 18MB", "arrayBuffer()" in newp and "18 * 1024 * 1024" in newp)
     check("pick 压缩完成后再清空 value", "ok.push(await LH.compress" in newp and "this.value = ''" in newp)
     check("后端识别空包并给出准确提示", "上传内容未到达服务器" in py and "post_upload_empty" in py)
-    check("sw.js 缓存为 v98", "lvhan-shell-v98" in sw and "shops.js?v=98" in sw)
-    check("community-new 使用 v98", "?v=98" in newp and "?v=91" not in newp)
+    check("sw.js 缓存为 v99", "lvhan-shell-v99" in sw and "shops.js?v=99" in sw)
+    check("community-new 使用 v99", "?v=99" in newp and "?v=91" not in newp)
 
 # ---------------- local server ----------------
 def start_server():
@@ -421,6 +421,11 @@ def main():
         DZ.run_local(base, check, Path("/workspace/lvhan-buddy"))
     except Exception:
         check("找搭子本地流程", False, traceback.format_exc())
+    import smooth_e2e as SM
+    try:
+        SM.run_local(base, check, Path("/workspace/lvhan-perf"))
+    except Exception:
+        check("流畅度本地流程", False, traceback.format_exc())
     live = os.environ.get("LH_LIVE_BASE", "").strip().rstrip("/")
     if live:
         try:
@@ -431,6 +436,10 @@ def main():
             PT.run_live(live, check, Path("/workspace/lvhan-photo-tr"))
         except Exception:
             check("拍照翻译线上流程", False, traceback.format_exc())
+        try:
+            SM.run_live(live, check)
+        except Exception:
+            check("流畅度线上检查", False, traceback.format_exc())
         try:
             SC.run_live(live, check, Path("/workspace/lvhan-shopfix"))
         except Exception:

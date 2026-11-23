@@ -274,12 +274,24 @@ async def api_send(req: Request, tid: int):
     csrf(req)
     d = await _json(req)
     body = clean_text(d.get("body"), MSG_MAX, "消息")
+    from msg_dedup import norm_cid, cid_get, cid_put
+    cid = norm_cid(d.get("cid"))
     with db() as conn:
         u = need_user(conn, req)
+        prev = cid_get("chat", u["id"], cid)
+        if prev:
+            return prev
         th = _thread(conn, tid, u["id"])
         other = _check_send(conn, u, th)
+        if not cid:   # 旧客户端连点：几秒内同一内容只算一条
+            dup = q(conn, """SELECT id FROM c_messages WHERE thread_id=%s AND sender_id=%s AND kind='msg' AND body=%s AND img IS NULL
+                             AND created_at > now() - interval '5 seconds' ORDER BY id DESC LIMIT 1""", (tid, u["id"], body), one=True)
+            if dup:
+                return {"ok": True, "id": dup["id"], "warning": None, "dup": True}
         mid, hits = _send(conn, tid, u["id"], other, body, kind="msg")
-    return {"ok": True, "id": mid, "warning": _warning(hits)}
+    res = {"ok": True, "id": mid, "warning": _warning(hits)}
+    cid_put("chat", u["id"], cid, dict(res, dup=True))
+    return res
 
 
 @router.post("/api/chat/threads/{tid}/images")

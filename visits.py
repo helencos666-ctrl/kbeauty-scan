@@ -196,6 +196,8 @@ async def visit_middleware(request: Request, call_next):
     resp = await call_next(request)
     try:
         ua = request.headers.get("user-agent") or ""
+        if request.headers.get("x-lh-prefetch"):   # 按下链接时的提前请求，不算一次浏览
+            return resp
         if is_bot(ua) or not _is_html_page(request, resp):
             return resp
         await run_in_threadpool(_log_visit, request)

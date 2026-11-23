@@ -1113,7 +1113,7 @@ def api_avatar(uid: int):
     data = bytes(r["avatar"]) if r["avatar"] else (bot_default_avatar() if r["is_bot"] else None)
     if not data:
         raise HTTPException(404, "没有头像")
-    return Response(data, media_type="image/jpeg", headers={"Cache-Control": "public, max-age=120"})
+    return Response(data, media_type="image/jpeg", headers={"Cache-Control": "public, max-age=3600, stale-while-revalidate=86400"})
 
 @router.post("/api/community/avatar")
 async def api_set_avatar(req: Request, image: UploadFile = File(...)):
@@ -2174,6 +2174,15 @@ async def api_comment(req: Request, pid: int):
             if not pr:
                 raise HTTPException(400, "要回复的评论不存在")
             parent_id = pr.get("parent_id") or pr["id"]
+        from msg_dedup import norm_cid, cid_get, cid_put
+        ccid = norm_cid(d.get("cid"))
+        prev = cid_get("comment", u["id"], ccid)
+        if prev:
+            return prev
+        dup = q(conn, """SELECT id FROM c_comments WHERE post_id=%s AND user_id=%s AND body=%s AND NOT deleted
+                         AND created_at > now() - interval '10 seconds' ORDER BY id DESC LIMIT 1""", (pid, u["id"], body), one=True)
+        if dup:   # 连点同一条评论：只算一次
+            return {"ok": True, "id": dup["id"], "dup": True}
         limit("cm:" + str(u["id"]), 10, 300, "评论太频繁，请稍后再试")
         r = q(conn, "INSERT INTO c_comments(post_id,user_id,body,parent_id) VALUES (%s,%s,%s,%s) RETURNING id",
               (pid, u["id"], body, parent_id), one=True)
@@ -2183,6 +2192,7 @@ async def api_comment(req: Request, pid: int):
         want_ai = comment_wants_ai(body, u["id"], p["user_id"])
     if want_ai:
         schedule_ai_reply("comment", pid, u["id"], body)
+    cid_put("comment", u["id"], ccid, {"ok": True, "id": r["id"], "dup": True})
     return {"ok": True, "id": r["id"]}
 
 @router.delete("/api/community/comments/{cid}")

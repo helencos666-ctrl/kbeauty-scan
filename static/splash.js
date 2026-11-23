@@ -4,6 +4,12 @@
   try {
     if (location.pathname !== '/' || new URLSearchParams(location.search).get('tab')) return;
     if (navigator.webdriver && !/splash=1/.test(location.search)) return;
+    // 只在「打开 App/网站」时出现一次：站内点回首页、后退回首页都不再挡 3 秒
+    var nav = (performance.getEntriesByType && performance.getEntriesByType('navigation')[0]) || {};
+    if (nav.type === 'back_forward' || nav.type === 'reload') return;
+    if (document.referrer && new URL(document.referrer).origin === location.origin) return;
+    if (sessionStorage.getItem('lh_splash_seen')) return;
+    sessionStorage.setItem('lh_splash_seen', '1');
   } catch(e){ return; }
 
   function safe(fn){
@@ -53,7 +59,7 @@
       el.innerHTML = '<div class="sp-ad" role="link" tabindex="0"></div>' +
         (d.label ? '<span class="sp-lbl">广告</span>' : '') +
         '<button type="button" class="sp-skip"><b>3</b>s 跳过</button>' +
-        '<div class="sp-strip"><img src="/static/icons/icon-192.png?v=98" alt=""><b>旅韩助手<span>地铁 · 翻译 · 吃喝玩买</span></b></div>';
+        '<div class="sp-strip"><img src="/static/icons/icon-192.png?v=99" alt=""><b>旅韩助手<span>地铁 · 翻译 · 吃喝玩买</span></b></div>';
       el.querySelector('.sp-ad').style.backgroundImage = 'url("' + d.img + '")';
       document.body.appendChild(el);
       document.documentElement.classList.add('sp-on');
@@ -97,9 +103,9 @@
 
   /* ---------- 2. 品牌开屏（后台未开启或接口失败） ---------- */
   var BRAND = [
-    {webp: '/static/splash/splash-1.webp?v=98', jpg: '/static/splash/splash-1.jpg?v=98', bg: '#144254'},
-    {webp: '/static/splash/splash-2.webp?v=98', jpg: '/static/splash/splash-2.jpg?v=98', bg: '#1E4A5E'},
-    {webp: '/static/splash/splash-3.webp?v=98', jpg: '/static/splash/splash-3.jpg?v=98', bg: '#236C6A'}
+    {webp: '/static/splash/splash-1.webp?v=99', jpg: '/static/splash/splash-1.jpg?v=99', bg: '#144254'},
+    {webp: '/static/splash/splash-2.webp?v=99', jpg: '/static/splash/splash-2.jpg?v=99', bg: '#1E4A5E'},
+    {webp: '/static/splash/splash-3.webp?v=99', jpg: '/static/splash/splash-3.jpg?v=99', bg: '#236C6A'}
   ];
 
   var showBrand = safe(function(){

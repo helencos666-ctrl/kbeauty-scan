@@ -293,6 +293,23 @@ var LH = (function(){
     bindWaterLazy(listEl);
   }
   function bizItem(p){ return postItem(p); }
+  // 发送防重：每条消息一个客户端 id，失败重试同一内容时复用，服务器据此只落库一次
+  function newCid(){ return Date.now().toString(36) + Math.random().toString(36).slice(2, 10); }
+  // 点「发送」不让输入框失焦（键盘不收起）
+  function keepFocus(btn){ if (btn) btn.addEventListener('mousedown', function(e){ e.preventDefault(); }); }
+  // 骨架屏（代替白屏「加载中…」）
+  function skel(n){ var h = ''; for (var i = 0; i < (n || 3); i++) h += '<div class="skel-card"><i class="sk w60"></i><i class="sk w90"></i><i class="sk w40"></i></div>'; return '<div class="skel" aria-busy="true" aria-label="加载中">' + h + '</div>'; }
+  // 点列表里的帖子时，先记下标题/摘要/作者，详情页打开瞬间就能先画出来，不再白屏等接口
+  try {
+    document.addEventListener('click', function(e){
+      var a = e.target && e.target.closest && e.target.closest('a[href^="/community/post/"]');
+      if (!a || (e.target.closest('button') && a.contains(e.target.closest('button')))) return;
+      var m = a.getAttribute('href').match(/^\/community\/post\/(\d+)/); if (!m) return;
+      var pick = function(sel){ var el = a.querySelector(sel); return el ? (el.textContent || '').trim().slice(0, 300) : ''; };
+      sessionStorage.setItem('lh_peek', JSON.stringify({id: +m[1], t: Date.now(),
+        title: pick('.dz-title, h3, .t, .title, b'), ex: pick('.dz-ex, .ex, p'), au: pick('.dz-nick, .au, .who')}));
+    }, true);
+  } catch(e){}
   function consultHref(kind, id){ return '/consult/new?kind=' + encodeURIComponent(kind) + '&id=' + encodeURIComponent(id); }
   function consultBtn(kind, id, label){ return '<a class="btn primary block consult-btn" href="' + consultHref(kind, id) + '">💬 ' + esc(label || '立即咨询') + '</a>'; }
   // 站内咨询未读提醒：页面角标 + （已授权时）系统通知
@@ -302,7 +319,7 @@ var LH = (function(){
       var r = await api('GET', '/api/consult/unread'), n = r.n || 0;
       document.querySelectorAll('[data-consult-dot]').forEach(function(el){ el.textContent = n > 99 ? '99+' : n; el.style.display = n ? '' : 'none'; });
       if (_cn >= 0 && n > _cn && document.hidden && window.Notification && Notification.permission === 'granted' && !/^\/consult\/\d/.test(location.pathname)){
-        var opt = {body: '你有 ' + n + ' 条未读咨询消息', icon: '/static/icons/icon-192.png?v=98', tag: 'lh-consult', data: {url: '/consult'}};
+        var opt = {body: '你有 ' + n + ' 条未读咨询消息', icon: '/static/icons/icon-192.png?v=99', tag: 'lh-consult', data: {url: '/consult'}};
         try { var reg = navigator.serviceWorker && await navigator.serviceWorker.getRegistration(); if (reg) reg.showNotification('旅韩助手 · 站内咨询', opt); else new Notification('旅韩助手 · 站内咨询', opt); } catch(e){}
       }
       _cn = n;
@@ -433,6 +450,6 @@ var LH = (function(){
     }
   }
   return {prices: prices, esc: esc, api: api, me: me, badge: badge, showErr: showErr, qs: qs, compress: compress, asMemoryFile: asMemoryFile, userbar: userbar, report: report, toast: toast, relTime: relTime,
-          vb: vb, avatar: avatar, pickAvatar: pickAvatar, postItem: postItem, waterItem: waterItem, appendWater: appendWater, bindWaterLazy: bindWaterLazy, bizItem: bizItem, ubadges: ubadges, BADGES: BADGES, postFlags: postFlags, consultHref: consultHref, consultBtn: consultBtn, startConsultPoll: startConsultPoll, friendCard: friendCard, lockedPrompt: lockedPrompt, ANTISCAM: ANTISCAM, share: share,
+          vb: vb, avatar: avatar, pickAvatar: pickAvatar, postItem: postItem, waterItem: waterItem, appendWater: appendWater, bindWaterLazy: bindWaterLazy, bizItem: bizItem, ubadges: ubadges, BADGES: BADGES, postFlags: postFlags, consultHref: consultHref, consultBtn: consultBtn, newCid: newCid, keepFocus: keepFocus, skel: skel, startConsultPoll: startConsultPoll, friendCard: friendCard, lockedPrompt: lockedPrompt, ANTISCAM: ANTISCAM, share: share,
           mapLinks: mapLinks, copyText: copyText, krwCny: krwCny, menuHtml: menuHtml, locHtml: locHtml, ratingText: ratingText, bindShopExtras: bindShopExtras, starsHtml: starsHtml, priceLine: priceLine};
 })();
