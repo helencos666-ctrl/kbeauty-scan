@@ -4,20 +4,21 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <title>韩友圈 · 旅韩助手</title>
-<meta name="description" content="旅韩助手韩友圈：去韩国前问问走过的人。踩坑避雷、结伴同行、签证问答、留学打听、租房找房和旅韩交友。">
+<meta name="description" content="旅韩助手韩友圈：去韩国前问问走过的人。踩坑避雷、找搭子、签证问答、留学打听、租房找房和旅韩交友。">
 <meta name="theme-color" content="#146E68">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="旅韩助手">
 <link rel="manifest" href="/manifest.webmanifest">
-<link rel="apple-touch-icon" href="/static/icons/apple-touch-icon.png?v=95">
-<link rel="icon" type="image/png" sizes="192x192" href="/static/icons/icon-192.png?v=95">
-<link rel="stylesheet" href="/static/pwa.css?v=95">
-<link rel="stylesheet" href="/static/community.css?v=95">
+<link rel="apple-touch-icon" href="/static/icons/apple-touch-icon.png?v=96">
+<link rel="icon" type="image/png" sizes="192x192" href="/static/icons/icon-192.png?v=96">
+<link rel="stylesheet" href="/static/pwa.css?v=96">
+<link rel="stylesheet" href="/static/community.css?v=96">
 </head>
 <body>
 <header class="xbar">
   <div class="xtabs" id="tabs" role="tablist">
+    <a class="xt-dazi" href="/dazi">找搭子</a>
     <button type="button" data-t="follow">关注</button>
     <button type="button" data-t="discover">发现</button>
     <button type="button" data-t="area">同城</button>
@@ -49,7 +50,7 @@
         <div class="stage-t"><span>1</span>出发前</div>
         <a class="topic" href="/community?board=visa"><em>🛂</em><span><b>签证问答</b><small>K-ETA、各类签证的个人经验</small></span></a>
         <a class="topic" href="/community?board=study"><em>🎓</em><span><b>留学打听</b><small>语学院、大学和生活费</small></span></a>
-        <a class="topic" href="/community?board=group"><em>🧳</em><span><b>结伴同行</b><small>找人一起逛、拼车、AA</small></span></a>
+        <a class="topic" href="/dazi"><em>🙋</em><span><b>找搭子</b><small>首尔搭子·饭搭子·团签拼人·拼房</small></span></a>
       </div>
       <div class="stage">
         <div class="stage-t"><span>2</span>在韩国</div>
@@ -112,7 +113,7 @@
   <a href="/?tab=more"><i>☰</i>全部</a>
   <a href="/me"><i>👤</i>我的</a>
 </nav>
-<script src="/static/community.js?v=95"></script>
+<script src="/static/community.js?v=96"></script>
 <script src="/static/banners.js"></script>
 <script>
 var WARN = {
@@ -186,6 +187,7 @@ document.querySelectorAll('#tabs button').forEach(function(b){
   b.onclick = function(){ setTab(b.dataset.t); };
 });
 function render(){
+  if (board === 'group'){ location.replace('/dazi'); return; }
   if (lhHiddenBoard(board)){
     document.querySelectorAll('#tabs button').forEach(function(b){ b.className = ''; });
     document.getElementById('homeBlocks').style.display = 'none';
@@ -372,6 +374,6 @@ async function loadHome(){
   render();
 })();
 </script>
-<script src="/static/pwa.js?v=95" defer></script>
+<script src="/static/pwa.js?v=96" defer></script>
 </body>
 </html>

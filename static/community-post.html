@@ -10,11 +10,11 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="旅韩助手">
 <link rel="manifest" href="/manifest.webmanifest">
-<link rel="apple-touch-icon" href="/static/icons/apple-touch-icon.png?v=95">
-<link rel="icon" type="image/png" sizes="192x192" href="/static/icons/icon-192.png?v=95">
-<link rel="stylesheet" href="/static/pwa.css?v=95">
-<link rel="stylesheet" href="/static/community.css?v=95">
-<link rel="stylesheet" href="/static/chat.css?v=95">
+<link rel="apple-touch-icon" href="/static/icons/apple-touch-icon.png?v=96">
+<link rel="icon" type="image/png" sizes="192x192" href="/static/icons/icon-192.png?v=96">
+<link rel="stylesheet" href="/static/pwa.css?v=96">
+<link rel="stylesheet" href="/static/community.css?v=96">
+<link rel="stylesheet" href="/static/chat.css?v=96">
 </head>
 <body class="post-page no-hero">
 <a class="pback" href="/community" aria-label="返回">‹</a>
@@ -48,7 +48,7 @@
   <a href="/?tab=more"><i>☰</i>全部</a>
   <a href="/me"><i>👤</i>我的</a>
 </nav>
-<script src="/static/community.js?v=95"></script>
+<script src="/static/community.js?v=96"></script>
 <script>
 var pid = parseInt(location.pathname.split('/').pop(), 10);
 var WARN = {visa: '⚠️ 本帖为网友个人签证经验，本站不提供签证代办。政策以韩国驻华使领馆、韩国签证申请中心和 K-ETA 官网为准。',
@@ -156,10 +156,21 @@ async function load(){
     var priceTxt = (p.avg_price != null && p.avg_price !== '') ? ('<span class="pprice"> · 人均 ₩' + Number(p.avg_price).toLocaleString('en-US') + '</span>') : '';
     spotHtml = '<div class="pspot">' + LH.esc(p.spot_name) + (p.spot_area ? ' · ' + LH.esc(p.spot_area) : '') + priceTxt + '</div>';
   }
+  function daziHtml(p){
+    if (p.board !== 'group') return '';
+    var d = p.dazi, h = '<div class="dz-info" style="margin:8px 0 10px;padding:10px 12px;border-radius:12px;background:#F3F8F7;font-size:13.5px;line-height:1.7">';
+    if (d){
+      var md = function(s){ var a = String(s || '').split('-'); return a.length === 3 ? (+a[1]) + '/' + (+a[2]) : s; };
+      h += '<div><b>🙋 ' + LH.esc(d.kind_name) + '</b> · 📍 ' + LH.esc(d.city_name) + (d.date_from ? ' · 📅 ' + md(d.date_from) + (d.date_to && d.date_to !== d.date_from ? '–' + md(d.date_to) : '') : '') + (d.people ? ' · 👥 ' + d.people + '人' : '') + (d.gender && d.gender !== 'any' ? ' · ' + LH.esc(d.gender_name) : '') + (d.expired ? ' · <span style="color:#c62828">已过期</span>' : '') + '</div>';
+    }
+    h += '<div style="color:#8a5300;margin-top:4px">🛡 公共场所见面 · 不提前转账 · 团签先核实机票 · 只用站内私信联系</div>' +
+         '<a href="/dazi" style="color:#146E68;font-size:12.5px">← 去搭子区看更多找搭子</a></div>';
+    return h;
+  }
   box.innerHTML =
     '<div class="meta" style="margin-top:0">' + LH.postFlags(p) + (p.merchant ? '<span class="tag biz">商家</span>' : '') + '<span class="tag">' + LH.esc(p.board_name) + '</span>' + (p.tag_name ? '<span class="tag">' + LH.esc(p.tag_name) + '</span>' : '') + '<span>' + LH.esc(p.time) + '</span>' + (p.merchant || p.views ? '<span>👁 ' + (p.views || 0) + '</span>' : '') + '</div>' +
     (p.title ? '<h1 class="ptitle">' + (p.tag_name ? '<span style="color:#146E68">[' + LH.esc(p.tag_name) + ']</span> ' : '') + LH.esc(p.title) + '</h1>' : '') +
-    spotHtml +
+    spotHtml + daziHtml(p) +
     '<div class="author-row"><a class="avlink" href="/community/u/' + p.author_id + '">' + LH.avatar(p.author_id, p.author, p.has_avatar, 'lg') + '</a><div class="who-txt"><div><a href="/community/u/' + p.author_id + '" style="color:inherit;text-decoration:none">' + LH.esc(p.author) + '</a>' + LH.badge(p.author_tier) + LH.vb(p.author_verified) + LH.ubadges(p.author_badges, p.author_official, 4) + '</div>' +
     (p.mine ? '' : '<div class="pm-acts">' +
       '<button class="jbtn' + (p.following ? ' on' : '') + '" id="fol" style="padding:2px 10px;font-size:12px">' + (p.following ? '已关注' : '＋ 关注') + '</button>' +
@@ -171,7 +182,7 @@ async function load(){
     (p.medical_note ? '<div class="mednote">⚠️ ' + LH.esc(p.medical_note) + '</div>' : '') +
     (p.consult ? LH.consultBtn('post', p.id, '立即咨询（站内沟通）') : '') +
     '<div class="row" style="margin-top:14px;justify-content:space-between"><span class="row" style="gap:8px"><button class="btn sm ghost" type="button" id="share">分享</button></span>' +
-    '<span class="row">' + (p.mine ? '<button class="linkbtn" id="delp">删除</button>' : '') + '<button class="linkbtn" id="repp">🚩 举报</button></span></div>';
+    '<span class="row">' + (p.mine ? '<button class="linkbtn" id="delp">删除</button>' : '') + (!p.mine && p.board === 'group' ? '<button class="linkbtn" id="blkp">🚫 拉黑</button>' : '') + '<button class="linkbtn" id="repp">🚩 举报</button></span></div>';
   syncBar(p);
   document.getElementById('like').onclick = async function(){
     if (!me || !me.user){ needLogin(); return; }
@@ -189,7 +200,21 @@ async function load(){
     goComments();
   };
   document.getElementById('share').onclick = function(){ LH.share({title: p.title, text: '来自旅韩助手韩友圈', url: location.origin + '/community/post/' + pid, targetType: 'post', targetId: pid}); };
-  document.getElementById('repp').onclick = function(){ LH.report('post', pid); };
+  document.getElementById('repp').onclick = async function(){
+    if (p.board !== 'group'){ LH.report('post', pid); return; }
+    if (!me || !me.user){ needLogin(); return; }
+    var R = ['中介伪装搭子/广告引流', '诈骗或索要钱财', '团签/拼房纠纷', '骚扰或不当言论', '虚假信息', '其他'];
+    var n = prompt('举报理由（填数字）：\n' + R.map(function(r, i){ return (i + 1) + '. ' + r; }).join('\n'));
+    if (!n) return;
+    var reason = R[(+n || 0) - 1]; if (!reason){ alert('请填 1-' + R.length + ' 的数字'); return; }
+    try { var r = await LH.api('POST', '/api/dazi/report', {post_id: pid, reason: reason}); alert(r.message || '已收到举报'); } catch(e){ alert(e.message); }
+  };
+  var blk = document.getElementById('blkp');
+  if (blk) blk.onclick = async function(){
+    if (!me || !me.user){ needLogin(); return; }
+    if (!confirm('拉黑后不再看到 TA 的搭子帖，TA 也无法私信你。确定吗？')) return;
+    try { var r = await LH.api('POST', '/api/friends/block/' + p.author_id, {}); alert(r.blocked ? '已拉黑' : '已解除拉黑'); } catch(e){ alert(e.message); }
+  };
   var fol = document.getElementById('fol');
   if (fol) fol.onclick = async function(){
     if (!me || !me.user){ needLogin(); return; }
@@ -277,6 +302,6 @@ async function load(){
 }
 load();
 </script>
-<script src="/static/pwa.js?v=95" defer></script>
+<script src="/static/pwa.js?v=96" defer></script>
 </body>
 </html>

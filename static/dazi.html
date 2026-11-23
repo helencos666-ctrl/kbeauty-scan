@@ -1,0 +1,897 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>找搭子｜首尔搭子·韩国旅游搭子·饭搭子·团签拼人·拼房 · 旅韩助手</title>
+<meta name="description" content="韩国旅游找搭子：首尔搭子、釜山搭子、济州岛搭子，饭搭子逛吃、三人团签二缺一、拼房、演唱会拼车、包车拼车接送机、一日游拼团。站内私信联系，更安全。">
+<meta name="theme-color" content="#146E68">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="旅韩助手">
+<link rel="manifest" href="/manifest.webmanifest">
+<link rel="apple-touch-icon" href="/static/icons/apple-touch-icon.png?v=96">
+<link rel="icon" type="image/png" sizes="192x192" href="/static/icons/icon-192.png?v=96">
+<link rel="stylesheet" href="/static/pwa.css?v=96">
+<link rel="stylesheet" href="/static/community.css?v=96">
+<style>
+[hidden]{display:none !important}
+body{margin:0;background:#fff;color:#1A2330;font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;font-size:15px;line-height:1.6;-webkit-text-size-adjust:100%}
+a{color:#146E68;text-decoration:none}
+.wrap{max-width:560px;margin:0 auto;padding:0 12px calc(26px + env(safe-area-inset-bottom))}
+/* 顶部 */
+.dz-head{color:#1A2330;border-radius:0;box-shadow:none;display:flex;align-items:center;gap:10px;padding:calc(10px + env(safe-area-inset-top)) 0 8px;position:sticky;top:0;background:#fff;z-index:20}
+.dz-back{flex:none;width:34px;height:34px;border-radius:50%;background:#EAF6F4;color:#146E68;font-size:24px;line-height:1;display:flex;align-items:center;justify-content:center;text-decoration:none;font-weight:700}
+.hd-t{flex:1;min-width:0}
+.hd-t h1{margin:0;font-size:19px;font-weight:800;line-height:1.25}
+.hd-t p{margin:2px 0 0;font-size:12px;color:#6b7a86;line-height:1.4}
+.newbtn{flex:none;min-height:34px;padding:0 13px;border:0;border-radius:18px;background:#146E68;color:#fff;font-family:inherit;font-size:14px;font-weight:700;cursor:pointer}
+/* 安全横幅 */
+.safebar{background:#FFF6EC;border:1px solid #F6E0C6;border-radius:12px;padding:9px 11px;font-size:12.5px;line-height:1.55;color:#8a5300;cursor:pointer;display:flex;gap:6px;align-items:flex-start}
+.safebar b{font-weight:700}
+.safetips{margin-top:8px;background:#FFFBF5;border:1px solid #F6E0C6;border-radius:12px;padding:10px 12px;font-size:12.5px;line-height:1.7;color:#6b5a3f}
+.safetips ul{margin:0;padding-left:18px}
+.safetips li{margin:0 0 5px}
+.safetips .notice{margin:6px 0 0;color:#8a5300;font-weight:600}
+/* 大标签 */
+.dz-tabs{display:flex;gap:8px;margin:12px 0 0}
+.dz-tabs button{flex:1;min-height:40px;border:0;border-radius:12px;background:#E3EEEC;color:#4A5560;font-family:inherit;font-size:15px;font-weight:600;cursor:pointer;padding:0 6px}
+.dz-tabs button.on{background:#146E68;color:#fff;font-weight:700}
+.tabnote{margin:6px 2px 8px;font-size:12px;color:#6b7a86;line-height:1.5;min-height:18px}
+/* 胶囊行 */
+.prow{display:flex;flex-wrap:nowrap;align-items:center;gap:8px;overflow-x:auto;overflow-y:hidden;padding:2px 1px 6px;scrollbar-width:none;-ms-overflow-style:none;-webkit-overflow-scrolling:touch}
+.prow::-webkit-scrollbar{display:none;width:0;height:0}
+.prow button{flex:0 0 auto;display:inline-flex;align-items:center;justify-content:center;height:32px;min-height:32px;max-height:32px;border:1px solid #D5E4E1;background:#fff;border-radius:16px;padding:0 13px;font-family:inherit;font-size:13px;line-height:1;color:#1A2330;white-space:nowrap;cursor:pointer}
+.prow button.on{border-color:#146E68;background:#EAF6F4;color:#146E68;font-weight:700}
+.prow.hot button{border-color:#F0D6B8;background:#FFF8F0;color:#8a5300}
+.prow.hot button.on{border-color:#B85A12;background:#FDEFE0;color:#8a3f0d;font-weight:700}
+.dz-filters{margin:6px 0 4px}
+.f-lab{font-size:12px;color:#6b7a86;margin:4px 2px 2px}
+.dz-frow{display:flex;gap:8px;margin:6px 0}
+.dz-frow > *{flex:1;min-width:0}
+.f-in{width:100%;min-height:38px;border:1px solid #D5E4E1;border-radius:10px;background:#fff;color:#1A2330;font-family:inherit;font-size:14px;padding:8px 10px;box-sizing:border-box;-webkit-appearance:none;appearance:none}
+select.f-in{background:#fff url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='10' height='6'><path d='M0 0l5 6 5-6z' fill='%236b7a86'/></svg>") no-repeat right 10px center;padding-right:26px}
+#fKw{margin:6px 0 2px}
+/* 列表 */
+.dz-card{display:block;position:relative;background:#fff;border:1px solid #E7F0EE;border-radius:14px;padding:11px 12px 9px;margin-bottom:10px;color:inherit;text-decoration:none;box-shadow:0 2px 8px rgba(20,110,104,.05)}
+.dz-card.exp{opacity:.55}
+.dz-tags{display:flex;flex-wrap:wrap;gap:5px;margin-bottom:6px}
+.dz-tag{font-size:11px;line-height:18px;padding:0 7px;border-radius:9px;background:#EAF6F4;color:#146E68;white-space:nowrap}
+.dz-tag.biz{background:#e3f2fd;color:#1565c0;font-weight:700}
+.dz-tag.ok{background:#e8f7ee;color:#1B7A45;font-weight:700}
+.dz-tag.off{background:#e8f4ff;color:#2c7be5;font-weight:700}
+.dz-tag.fem{background:#FDE8F0;color:#C2427C;font-weight:700}
+.dz-tag.male{background:#E7F0FB;color:#2A5FA8;font-weight:700}
+.dz-tag.exp{background:#F1F1F1;color:#777}
+.dz-main{display:flex;gap:10px;align-items:flex-start}
+.dz-txt{flex:1;min-width:0}
+.dz-title{margin:0;font-size:15.5px;font-weight:700;line-height:1.45;word-break:break-word;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.dz-date{margin-top:4px;font-size:12.5px;font-weight:600;color:#146E68;line-height:1.5}
+.dz-ex{margin:4px 0 0;font-size:13px;color:#6b7a86;line-height:1.5;word-break:break-word;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.dz-cover{flex:none;width:72px;height:72px;border-radius:10px;object-fit:cover;background:#E3EEEC;display:block}
+.dz-foot{display:flex;align-items:center;gap:8px;margin-top:9px;padding-top:8px;border-top:1px solid #F2F7F6}
+.dz-au{display:flex;align-items:center;gap:6px;flex:1;min-width:0;font-size:12.5px;color:#4A5560;overflow:hidden}
+.dz-au .av-sm{width:26px;height:26px;font-size:12px}
+.dz-nick{max-width:8em;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-weight:600;color:#1A2330}
+.dz-time{flex:none;color:#8d9aa5}
+.dz-acts{display:flex;gap:6px;flex:none}
+.dz-msg,.dz-more{min-height:32px;border-radius:16px;font-family:inherit;font-size:13px;cursor:pointer;background:#fff;border:1px solid #146E68;color:#146E68;padding:0 12px}
+.dz-more{width:34px;min-width:34px;padding:0;border-color:#D5E4E1;color:#4A5560;font-weight:700;letter-spacing:0;font-size:12px}
+.dz-tip{background:#EAF6F4;border-radius:12px;padding:8px 11px;font-size:12.5px;color:#146E68;margin-bottom:10px;line-height:1.6}
+.empty{text-align:center;padding:28px 10px;color:#4A5560;font-size:14px;line-height:1.8}
+.loading{text-align:center;padding:26px 10px;color:#6b7a86;font-size:14px}
+.more-btn{display:block;width:100%;min-height:40px;margin:2px 0 12px;border:1px solid #D5E4E1;border-radius:12px;background:#F7FBFA;color:#146E68;font-family:inherit;font-size:14px;font-weight:600;cursor:pointer}
+.footnote{margin:14px 2px 6px;font-size:12px;color:#8d9aa5;line-height:1.7}
+.footnote a{color:#146E68;text-decoration:underline}
+/* 底部操作面板 */
+#sheet{position:fixed;inset:0;z-index:70;display:none}
+#sheet.open{display:block}
+.sheet-mask{position:absolute;inset:0;background:rgba(26,35,48,.45)}
+.sheet-card{position:absolute;left:0;right:0;bottom:0;max-width:560px;margin:0 auto;background:#fff;border-radius:16px 16px 0 0;padding:8px 14px calc(14px + env(safe-area-inset-bottom));max-height:86vh;overflow:auto;box-sizing:border-box}
+.sheet-act{display:block;width:100%;min-height:46px;border:0;border-radius:12px;background:#fff;font-family:inherit;font-size:15px;color:#1A2330;cursor:pointer;text-align:center;padding:0 10px}
+.sheet-act + .sheet-act{margin-top:4px}
+.sheet-act.cancel{color:#6b7a86;background:#F4F7F6;font-weight:600;margin-top:10px}
+.sheet-act.go{background:#146E68;color:#fff;font-weight:700;margin-top:6px}
+.sheet-t{margin:8px 0 8px;font-size:16px;font-weight:700}
+.rp{display:flex;align-items:center;gap:8px;padding:9px 2px;font-size:14px;border-bottom:1px solid #F2F7F6;cursor:pointer}
+.rp input{width:18px;height:18px;accent-color:#146E68;flex:none;margin:0}
+#rpNote{width:100%;min-height:70px;box-sizing:border-box;border:1px solid #D5E4E1;border-radius:10px;padding:9px 10px;font-family:inherit;font-size:14px;margin-top:10px;resize:vertical;background:#fff;color:#1A2330}
+.rp-err{font-size:12.5px;color:#C0392B;min-height:18px;margin-top:6px}
+/* 发帖面板 */
+#composer{position:fixed;inset:0;z-index:60;background:#fff;display:none;overflow-y:auto;-webkit-overflow-scrolling:touch}
+#composer.open{display:block}
+.cp-in{max-width:560px;margin:0 auto;padding:calc(8px + env(safe-area-inset-top)) 14px calc(30px + env(safe-area-inset-bottom))}
+.cp-head{display:flex;align-items:center;gap:10px;padding:2px 0 8px;position:sticky;top:0;background:#fff;z-index:2}
+.cp-x{flex:none;min-height:34px;border:0;border-radius:17px;background:#EAF6F4;color:#146E68;font-family:inherit;font-size:14px;font-weight:700;padding:0 13px;cursor:pointer}
+.cp-head h2{margin:0;font-size:17px;font-weight:800;flex:1;min-width:0}
+.cp-safe{background:#F6F8F8;border-radius:12px;padding:9px 11px;font-size:12px;line-height:1.65;color:#6b7a86;margin-bottom:12px}
+.cp-safe b{display:block;color:#4A5560;font-size:12.5px;margin-bottom:2px}
+.cp-safe .nt{margin:5px 0 0;color:#8a5300}
+.cp-lab{font-size:13px;font-weight:700;color:#1A2330;margin:14px 0 6px}
+.cp-lab i{font-style:normal;color:#C0392B;font-weight:700;margin-left:2px}
+.cchips{display:flex;flex-wrap:wrap;gap:8px}
+.cchips .cchip{min-height:32px;display:inline-flex;align-items:center;border:1px solid #D5E4E1;background:#fff;border-radius:16px;padding:0 13px;font-family:inherit;font-size:13px;color:#1A2330;cursor:pointer;line-height:1}
+.cchips .cchip.on{border-color:#146E68;background:#EAF6F4;color:#146E68;font-weight:700}
+textarea.f-in{min-height:120px;resize:vertical;line-height:1.6}
+.f-file{width:100%;font-size:13px;color:#4A5560;font-family:inherit;padding:6px 0}
+.cps{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:8px}
+.cps .tile{position:relative;width:100%;aspect-ratio:1;border-radius:12px;overflow:hidden;background:#E3EEEC}
+.cps .tile img{width:100%;height:100%;object-fit:cover;display:block}
+.cps .tile button{position:absolute;top:4px;right:4px;width:24px;height:24px;border-radius:50%;border:0;background:rgba(26,35,48,.72);color:#fff;font-size:14px;line-height:24px;padding:0;cursor:pointer}
+.cp-warn{background:#FFF6EC;border:1px solid #F6E0C6;border-radius:12px;padding:9px 11px;font-size:12.5px;line-height:1.65;color:#8a5300;margin-top:12px}
+.cp-err{background:#FDF0EE;border:1px solid #F5CFC9;border-radius:12px;padding:9px 11px;font-size:12.5px;line-height:1.65;color:#C0392B;margin-top:12px}
+.cp-err a{color:#146E68;text-decoration:underline}
+.cp-submit{display:block;width:100%;min-height:46px;margin-top:16px;border:0;border-radius:14px;background:#146E68;color:#fff;font-family:inherit;font-size:16px;font-weight:700;cursor:pointer}
+.cp-submit:disabled{opacity:.6}
+.cp-login{text-align:center;padding:40px 10px}
+.cp-login p{font-size:15px;color:#4A5560;margin:0 0 14px}
+.cp-login .cp-go{display:inline-block;min-height:44px;line-height:44px;padding:0 26px;border-radius:22px;background:#146E68;color:#fff;font-weight:700;text-decoration:none;font-size:15px}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header class="dz-head">
+    <a href="/community" class="dz-back" aria-label="返回韩友圈">‹</a>
+    <div class="hd-t">
+      <h1>找搭子</h1>
+      <p>首尔搭子 · 韩国旅游搭子 · 结伴出行</p>
+    </div>
+    <button type="button" id="newBtn" class="newbtn">＋ 发帖</button>
+  </header>
+
+  <div id="safeBar" class="safebar" role="button" tabindex="0" aria-expanded="false" aria-controls="safeTips">
+    <b>🛡</b><span>公共场所见面 · 不提前转账 · 团签先核实机票 · 站内私信联系</span>
+  </div>
+  <div id="safeTips" class="safetips" hidden></div>
+
+  <div id="tabs" class="dz-tabs">
+    <button type="button" data-tab="personal" class="on">找搭子</button>
+    <button type="button" data-tab="merchant">商家服务</button>
+  </div>
+  <p id="tabNote" class="tabnote">个人发布，优先展示</p>
+
+  <div id="hotWords" class="prow hot"></div>
+
+  <div id="filters" class="dz-filters">
+    <div class="f-lab">城市</div>
+    <div id="fCity" class="prow"></div>
+    <div class="f-lab">类型</div>
+    <div id="fKind" class="prow"></div>
+    <div class="dz-frow">
+      <input type="date" id="fDate" class="f-in" aria-label="出发日期">
+      <select id="fGender" class="f-in" aria-label="性别要求"></select>
+    </div>
+    <input id="fKw" class="f-in" type="search" placeholder="搜：首尔搭子 / 三人团签" aria-label="关键词搜索">
+  </div>
+
+  <div id="list"></div>
+  <button type="button" id="moreBtn" class="more-btn" hidden>加载更多</button>
+
+  <p class="footnote">本区仅限结伴出游；商家/中介信息统一标注「商家」。遇到诈骗请保留聊天记录，点举报并报警 112。<br><a href="/rules">社区规则</a></p>
+</div>
+
+<div id="sheet" aria-hidden="true" role="dialog" aria-label="帖子操作">
+  <div class="sheet-mask" data-act="cancel"></div>
+  <div class="sheet-card" id="sheetBody"></div>
+</div>
+
+<div id="composer" aria-hidden="true" role="dialog" aria-label="发帖">
+  <div class="cp-in">
+    <div class="cp-head">
+      <button type="button" id="cClose" class="cp-x">‹ 关闭</button>
+      <h2>发一条找搭子</h2>
+    </div>
+    <div class="cp-safe" id="cSafe"></div>
+    <div id="cLogin" class="cp-login" hidden>
+      <p>登录后才能发帖</p>
+      <a class="cp-go" href="/login?next=/dazi/new">去登录</a>
+    </div>
+    <div id="cForm">
+      <div class="cp-lab">城市<i>*</i></div>
+      <div class="cchips" id="cpCity" name="city" data-field="city"></div>
+      <div class="cp-lab">类型<i>*</i></div>
+      <div class="cchips" id="cpKind" name="kind" data-field="kind"></div>
+      <div class="cp-lab">开始日期<i>*</i></div>
+      <input type="date" id="cFrom" class="f-in">
+      <div class="cp-lab">结束日期（选填）</div>
+      <input type="date" id="cTo" class="f-in">
+      <div class="cp-lab">人数（选填）</div>
+      <input type="number" id="cPeople" class="f-in" min="1" max="20" inputmode="numeric" placeholder="几个人，如 3">
+      <div class="cp-lab">性别要求</div>
+      <div class="cchips" id="cpGender" name="gender" data-field="gender"></div>
+      <div class="cp-lab">标题<i>*</i></div>
+      <input id="cTitle" class="f-in" maxlength="40" placeholder="如：12月首尔饭搭子 / 三人团签二缺一">
+      <div class="cp-lab">正文<i>*</i></div>
+      <textarea id="cBody" class="f-in" maxlength="3000" placeholder="行程、想去哪、预算、AA 方式……不要留微信电话，大家会私信你"></textarea>
+      <div id="cWarn" class="cp-warn" hidden></div>
+      <div class="cp-lab">图片（选填，上限 6 张）</div>
+      <input type="file" id="cImgs" class="f-file" accept="image/*" multiple>
+      <div class="cps" id="cPreviews"></div>
+      <div id="cErr" class="cp-err" hidden></div>
+      <button type="button" id="cSubmit" class="cp-submit">发布</button>
+    </div>
+  </div>
+</div>
+
+<script src="/static/community.js?v=96"></script>
+<script>
+(function(){
+  'use strict';
+
+  var $ = function(sel, root){ return (root || document).querySelector(sel); };
+  var $$ = function(sel, root){ return Array.prototype.slice.call((root || document).querySelectorAll(sel)); };
+
+  var FALLBACK = {
+    cities: [{key:'seoul', name:'首尔'}, {key:'busan', name:'釜山'}, {key:'jeju', name:'济州岛'}, {key:'other', name:'其他'}],
+    kinds: [{key:'food', name:'饭搭子·逛吃'}, {key:'visa', name:'团签拼人'}, {key:'room', name:'拼房'},
+            {key:'concert', name:'演唱会拼车'}, {key:'car', name:'包车拼车·接送机'}, {key:'day', name:'一日游拼团'},
+            {key:'local', name:'在韩搭子'}, {key:'other', name:'其他'}],
+    genders: [{key:'any', name:'不限'}, {key:'female', name:'仅限女生'}, {key:'male', name:'仅限男生'}],
+    hot_words: [],
+    safety_tips: [
+      '初次见面约在地铁站、商场、咖啡店等人多的公共场所，告诉家人朋友你的行程。',
+      '不提前转账、不交定金；拼房、拼车、拼门票建议见面当场各付各的。',
+      '团签拼人先核实对方机票行程和身份，签证请走正规旅行社。'
+    ],
+    notice: '仅限结伴出游，不是交友/约会平台；禁止色情、诈骗和金钱往来。',
+    report_reasons: ['中介伪装搭子/广告引流', '诈骗或索要钱财', '骚扰或不当言论', '虚假信息', '其他']
+  };
+
+  var opts = {
+    cities: FALLBACK.cities.slice(), kinds: FALLBACK.kinds.slice(), genders: FALLBACK.genders.slice(),
+    hot_words: [], safety_tips: FALLBACK.safety_tips.slice(), notice: FALLBACK.notice,
+    report_reasons: FALLBACK.report_reasons.slice()
+  };
+  var state = {tab:'personal', city:'', kind:'', date:'', gender:'', kw:'', offset:0};
+  var me = null, optErr = '', hotSel = null, loading = false, seq = 0, kwTimer = null;
+  var sheetPost = null, sheetUid = '';
+  var cp = {city:'', kind:'', gender:'any'};
+  var cpImgs = [], cpPosting = false, checkTimer = null, checkSeq = 0;
+
+  /* ---------- 小工具 ---------- */
+  function esc(s){ return LH.esc(s); }
+  function fmtMD(s){
+    var m = String(s == null ? '' : s).match(/^(\d{4})-(\d{2})-(\d{2})/);
+    return m ? (m[2] + '/' + m[3]) : String(s == null ? '' : s);
+  }
+  function todayISO(){
+    var d = new Date();
+    var p = function(n){ return (n < 10 ? '0' : '') + n; };
+    return d.getFullYear() + '-' + p(d.getMonth() + 1) + '-' + p(d.getDate());
+  }
+  function showErrBox(el, msg, linkMember){
+    if (!el) return;
+    if (!msg){ el.hidden = true; el.textContent = ''; return; }
+    el.hidden = false;
+    el.textContent = msg;
+    if (linkMember){
+      el.appendChild(document.createTextNode(' '));
+      var a = document.createElement('a');
+      a.href = '/member';
+      a.textContent = '去了解会员';
+      el.appendChild(a);
+    }
+  }
+
+  /* ---------- URL ---------- */
+  function readUrl(){
+    var q = new URLSearchParams(location.search);
+    state.tab = q.get('tab') === 'merchant' ? 'merchant' : 'personal';
+    state.city = q.get('city') || '';
+    state.kind = q.get('kind') || '';
+    state.date = q.get('date') || '';
+    state.gender = q.get('gender') || '';
+    state.kw = q.get('kw') || '';
+  }
+  function writeUrl(){
+    var q = new URLSearchParams();
+    q.set('tab', state.tab);
+    q.set('city', state.city || '');
+    q.set('kind', state.kind || '');
+    q.set('date', state.date || '');
+    q.set('gender', state.gender || '');
+    q.set('kw', state.kw || '');
+    var s = q.toString();
+    try { history.replaceState(null, '', location.pathname + (s ? '?' + s : '')); } catch(e){}
+  }
+
+  /* ---------- 渲染筛选与胶囊 ---------- */
+  function pill(val, name, field){
+    return '<button type="button" data-field="' + field + '" data-val="' + esc(val) + '">' + esc(name) + '</button>';
+  }
+  function renderFilters(){
+    var city = [pill('', '全部', 'city')];
+    (opts.cities || []).forEach(function(c){ city.push(pill(c.key, c.name, 'city')); });
+    $('#fCity').innerHTML = city.join('');
+
+    var kind = [pill('', '全部', 'kind')];
+    (opts.kinds || []).forEach(function(k){ kind.push(pill(k.key, k.name, 'kind')); });
+    $('#fKind').innerHTML = kind.join('');
+
+    var gs = ['<option value="">性别要求：全部</option>'];
+    (opts.genders || []).forEach(function(g){ gs.push('<option value="' + esc(g.key) + '">' + esc(g.name) + '</option>'); });
+    $('#fGender').innerHTML = gs.join('');
+
+    var hw = (opts.hot_words || []).map(function(w, i){
+      return '<button type="button" data-idx="' + i + '">' + esc(w.w) + '</button>';
+    }).join('');
+    $('#hotWords').innerHTML = hw;
+    $('#hotWords').hidden = !hw;
+
+    var tipHtml = '<ul>' + (opts.safety_tips || []).map(function(t){ return '<li>' + esc(t) + '</li>'; }).join('') + '</ul>';
+    $('#safeTips').innerHTML = tipHtml + (opts.notice ? '<p class="notice">' + esc(opts.notice) + '</p>' : '');
+
+    var ct = (opts.safety_tips || []).slice(0, 3).map(function(t){ return '<div>· ' + esc(t) + '</div>'; }).join('');
+    $('#cSafe').innerHTML = '<b>安全提醒</b>' + ct + (opts.notice ? '<p class="nt">' + esc(opts.notice) + '</p>' : '');
+  }
+
+  function syncAll(){
+    $$('#tabs button').forEach(function(b){ b.classList.toggle('on', b.getAttribute('data-tab') === state.tab); });
+    $('#tabNote').textContent = state.tab === 'merchant'
+      ? '中介/商家发布的团签、包车、地陪等服务，已认证商家带✔'
+      : '个人发布，优先展示';
+    $$('#fCity button').forEach(function(b){ b.classList.toggle('on', (b.getAttribute('data-val') || '') === (state.city || '')); });
+    $$('#fKind button').forEach(function(b){ b.classList.toggle('on', (b.getAttribute('data-val') || '') === (state.kind || '')); });
+    var dEl = $('#fDate'); if (dEl.value !== (state.date || '')) dEl.value = state.date || '';
+    var gEl = $('#fGender'); if (gEl.value !== (state.gender || '')) gEl.value = state.gender || '';
+    var kEl = $('#fKw'); if (kEl.value !== (state.kw || '')) kEl.value = state.kw || '';
+    $$('#hotWords button').forEach(function(b){ b.classList.toggle('on', hotSel !== null && +b.getAttribute('data-idx') === hotSel); });
+    $$('#cpCity .cchip').forEach(function(b){ b.classList.toggle('on', b.getAttribute('data-val') === cp.city); });
+    $$('#cpKind .cchip').forEach(function(b){ b.classList.toggle('on', b.getAttribute('data-val') === cp.kind); });
+    $$('#cpGender .cchip').forEach(function(b){ b.classList.toggle('on', b.getAttribute('data-val') === cp.gender); });
+  }
+
+  function onFilterChange(){
+    state.offset = 0;
+    writeUrl();
+    syncAll();
+    load(true);
+  }
+
+  function setTab(tab){
+    state.tab = tab === 'merchant' ? 'merchant' : 'personal';
+    hotSel = null;
+    onFilterChange();
+    window.scrollTo(0, 0);
+  }
+
+  /* ---------- 列表 ---------- */
+  function expiredOf(p){ return !!(p.expired || (p.dazi && p.dazi.expired)); }
+
+  function cardHtml(p){
+    var d = p.dazi || {};
+    var exp = expiredOf(p);
+    var tags = '';
+    if (p.is_biz) tags += '<span class="dz-tag biz">商家</span>';
+    if (p.biz_verified) tags += '<span class="dz-tag ok">✔ 已认证</span>';
+    if (p.author_official) tags += '<span class="dz-tag off">官方</span>';
+    if (d.kind_name) tags += '<span class="dz-tag">' + esc(d.kind_name) + '</span>';
+    if (d.city_name) tags += '<span class="dz-tag">' + esc(d.city_name) + '</span>';
+    if (d.gender === 'female') tags += '<span class="dz-tag fem">' + esc(d.gender_name || '仅限女生') + '</span>';
+    else if (d.gender === 'male') tags += '<span class="dz-tag male">' + esc(d.gender_name || '仅限男生') + '</span>';
+    if (exp) tags += '<span class="dz-tag exp">已过期</span>';
+
+    var dateLine = '';
+    if (d.date_from || d.date_to){
+      var txt = '📅 ' + (d.date_from ? fmtMD(d.date_from) : '');
+      if (d.date_to) txt += '–' + fmtMD(d.date_to);
+      if (d.people) txt += ' · 👥 ' + d.people + '人';
+      dateLine = '<div class="dz-date">' + esc(txt) + '</div>';
+    } else if (d.people){
+      dateLine = '<div class="dz-date">👥 ' + esc(d.people) + '人</div>';
+    }
+
+    var cover = p.cover
+      ? '<img class="dz-cover" loading="lazy" decoding="async" alt="" data-hideonerr="1" src="/api/community/img/' + encodeURIComponent(p.cover) + '?t=1">'
+      : '';
+
+    return '<a class="dz-card' + (exp ? ' exp' : '') + '" href="/community/post/' + encodeURIComponent(p.id) + '" data-id="' + esc(p.id) + '" data-uid="' + esc(p.author_id) + '">' +
+      (tags ? '<div class="dz-tags">' + tags + '</div>' : '') +
+      '<div class="dz-main"><div class="dz-txt">' +
+        '<h3 class="dz-title">' + esc(p.title || '') + '</h3>' +
+        dateLine +
+        (p.excerpt ? '<p class="dz-ex">' + esc(p.excerpt) + '</p>' : '') +
+      '</div>' + cover + '</div>' +
+      '<div class="dz-foot">' +
+        '<span class="dz-au">' + LH.avatar(p.author_id, p.author, p.has_avatar, 'sm') +
+          '<span class="dz-nick">' + esc(p.author || '匿名') + '</span>' +
+          '<span class="dz-time">' + esc(LH.relTime(p.time)) + '</span></span>' +
+        '<span class="dz-acts">' +
+          '<button type="button" class="dz-msg" data-id="' + esc(p.id) + '" data-biz="' + (p.is_biz ? '1' : '0') + '">' + (p.is_biz ? '咨询' : '私信') + '</button>' +
+          '<button type="button" class="dz-more" data-id="' + esc(p.id) + '" data-uid="' + esc(p.author_id) + '">···</button>' +
+        '</span>' +
+      '</div></a>';
+  }
+
+  async function load(reset){
+    if (loading && !reset) return;
+    loading = true;
+    var my = ++seq;
+    var list = $('#list');
+    if (reset){
+      state.offset = 0;
+      list.innerHTML = '<div class="loading">加载中…</div>';
+      $('#moreBtn').hidden = true;
+    }
+    var q = new URLSearchParams();
+    q.set('tab', state.tab);
+    q.set('city', state.city || '');
+    q.set('kind', state.kind || '');
+    q.set('date', state.date || '');
+    q.set('gender', state.gender || '');
+    q.set('kw', state.kw || '');
+    q.set('offset', String(state.offset || 0));
+    q.set('limit_n', '20');
+    try {
+      var d = await LH.api('GET', '/api/dazi/posts?' + q.toString());
+      if (my !== seq) return;
+      renderList(d || {}, reset);
+    } catch(e){
+      if (my !== seq) return;
+      var msg = (e && e.message) || optErr || '加载失败，请稍后重试';
+      if (reset){
+        list.innerHTML = '<div class="empty">' + esc(msg) + '</div>';
+      } else {
+        LH.toast(msg);
+      }
+      $('#moreBtn').hidden = true;
+    } finally {
+      if (my === seq) loading = false;
+    }
+  }
+
+  function renderList(d, reset){
+    var posts = d.posts || [];
+    var list = $('#list');
+    if (reset){
+      var html = '';
+      if (state.tab === 'personal'){
+        html += '<div class="dz-tip">想找中介办团签/包车/地陪？看看 <a href="#" data-go-merchant>商家服务</a></div>';
+      }
+      if (!posts.length){
+        html += '<div class="empty">还没有符合条件的帖子，<a href="#" id="emptyNew">发第一条找搭子</a></div>';
+        list.innerHTML = html;
+        $('#moreBtn').hidden = true;
+        return;
+      }
+      list.innerHTML = html + posts.map(cardHtml).join('');
+    } else if (posts.length){
+      list.insertAdjacentHTML('beforeend', posts.map(cardHtml).join(''));
+    }
+    var nx = (d.next_offset === 0 || d.next_offset) ? +d.next_offset : (state.offset + posts.length);
+    state.offset = isNaN(nx) ? state.offset + posts.length : nx;
+    $('#moreBtn').hidden = !d.more;
+  }
+
+  /* ---------- 私信 / 拉黑 / 举报 ---------- */
+  async function ensureMe(){
+    if (me) return me;
+    try { var d = await LH.me(); me = (d && d.user) || null; } catch(e){ me = null; }
+    return me;
+  }
+  function loginNext(){
+    return '/login?next=' + encodeURIComponent('/dazi');
+  }
+
+  async function startChat(id, isBiz){
+    var u = await ensureMe();
+    if (!u){ location.href = loginNext(); return; }
+    if (isBiz){ location.href = '/consult/new?kind=post&id=' + encodeURIComponent(id); return; }
+    try {
+      var r = await LH.api('POST', '/api/chat/start', {post_id: +id});
+      if (r && r.thread_id) location.href = '/community/messages/' + encodeURIComponent(r.thread_id);
+      else LH.toast('私信创建失败，请稍后再试');
+    } catch(e){ alert(e.message); }
+  }
+
+  function openSheet(id, uid){
+    sheetPost = id;
+    sheetUid = uid || '';
+    $('#sheetBody').innerHTML =
+      '<button type="button" class="sheet-act" data-act="report">🚩 举报</button>' +
+      '<button type="button" class="sheet-act" data-act="block">🚫 拉黑这个人</button>' +
+      '<button type="button" class="sheet-act cancel" data-act="cancel">取消</button>';
+    $('#sheet').classList.add('open');
+    $('#sheet').setAttribute('aria-hidden', 'false');
+    document.body.classList.add('lh-overlay-open');
+  }
+  function closeSheet(){
+    $('#sheet').classList.remove('open');
+    $('#sheet').setAttribute('aria-hidden', 'true');
+    if (!$('#composer').classList.contains('open')) document.body.classList.remove('lh-overlay-open');
+    $('#sheetBody').innerHTML = '';
+  }
+  function renderReport(){
+    var reasons = opts.report_reasons || [];
+    var h = '<h3 class="sheet-t">举报这条帖子</h3>';
+    reasons.forEach(function(r, i){
+      h += '<label class="rp"><input type="radio" name="rp" value="' + esc(r) + '"' + (i === 0 ? ' checked' : '') + '><span>' + esc(r) + '</span></label>';
+    });
+    h += '<textarea id="rpNote" maxlength="200" placeholder="补充说明（选填，200字以内）"></textarea>';
+    h += '<div class="rp-err" id="rpErr"></div>';
+    h += '<button type="button" class="sheet-act go" data-act="rp-submit">提交举报</button>';
+    h += '<button type="button" class="sheet-act cancel" data-act="back">返回</button>';
+    $('#sheetBody').innerHTML = h;
+  }
+  async function submitReport(){
+    var u = await ensureMe();
+    if (!u){ location.href = '/login?next=' + encodeURIComponent(location.pathname + location.search); return; }
+    var box = $('#sheetBody');
+    var sel = box.querySelector('input[name="rp"]:checked');
+    var errEl = $('#rpErr', box);
+    if (!sel){ if (errEl) errEl.textContent = '请选择举报原因'; return; }
+    var note = ($('#rpNote', box) || {}).value || '';
+    try {
+      var r = await LH.api('POST', '/api/dazi/report', {post_id: sheetPost, reason: sel.value, note: String(note).slice(0, 200)});
+      LH.toast((r && r.message) || '已收到举报，管理员会尽快处理', 'ok');
+      closeSheet();
+    } catch(e){
+      if (errEl) errEl.textContent = e.message; else alert(e.message);
+    }
+  }
+  function removeCardsByUid(uid){
+    $$('.dz-card').forEach(function(c){
+      if (String(c.getAttribute('data-uid')) === String(uid)) c.parentNode.removeChild(c);
+    });
+  }
+  async function doBlock(uid){
+    var u = await ensureMe();
+    if (!u){ location.href = '/login?next=' + encodeURIComponent(location.pathname + location.search); return; }
+    if (!uid){ LH.toast('找不到这个用户'); return; }
+    if (!confirm('拉黑后不再显示 TA 的帖子，确定拉黑？')) return;
+    try {
+      var r = await LH.api('POST', '/api/friends/block/' + encodeURIComponent(uid), {});
+      if (r && r.blocked){
+        LH.toast('已拉黑，不再显示 TA 的帖子', 'ok');
+        removeCardsByUid(uid);
+      } else {
+        LH.toast((r && r.message) || '已拉黑');
+      }
+      closeSheet();
+    } catch(e){ alert(e.message); }
+  }
+
+  /* ---------- 发帖 ---------- */
+  function buildChips(sel, list){
+    $(sel).innerHTML = (list || []).map(function(x){
+      return '<button type="button" class="cchip" data-val="' + esc(x.key) + '">' + esc(x.name) + '</button>';
+    }).join('');
+  }
+  function buildComposerChips(){
+    buildChips('#cpCity', opts.cities);
+    buildChips('#cpKind', opts.kinds);
+    buildChips('#cpGender', opts.genders);
+    syncAll();
+  }
+  function renderPreviews(){
+    var box = $('#cPreviews');
+    box.innerHTML = cpImgs.map(function(it, i){
+      return '<div class="tile"><img src="' + esc(it.url) + '" alt="图片预览"><button type="button" class="del" data-i="' + i + '" aria-label="删除这张图">✕</button></div>';
+    }).join('');
+    var inp = $('#cImgs');
+    if (inp) inp.disabled = cpImgs.length >= 6;
+  }
+  function clearImgs(){
+    cpImgs.forEach(function(it){ try { URL.revokeObjectURL(it.url); } catch(e){} });
+    cpImgs = [];
+    renderPreviews();
+  }
+  async function openComposer(){
+    $('#composer').classList.add('open');
+    $('#composer').setAttribute('aria-hidden', 'false');
+    document.body.style.overflow = 'hidden';
+    document.body.classList.add('lh-overlay-open');
+    var u = await ensureMe();
+    $('#cLogin').hidden = !!u;
+    $('#cForm').hidden = !u;
+    $('#cFrom').min = todayISO();
+    $('#cTo').min = $('#cFrom').value || todayISO();
+    syncAll();
+    window.scrollTo(0, 0);
+    $('#composer').scrollTop = 0;
+  }
+  function closeComposer(){
+    $('#composer').classList.remove('open');
+    $('#composer').setAttribute('aria-hidden', 'true');
+    document.body.style.overflow = '';
+    document.body.classList.remove('lh-overlay-open');
+  }
+  function showWarn(msg){
+    var el = $('#cWarn');
+    if (!msg){ el.hidden = true; el.textContent = ''; return; }
+    el.hidden = false;
+    el.textContent = msg;
+  }
+  async function runCheck(){
+    var title = $('#cTitle').value.trim();
+    var body = $('#cBody').value.trim();
+    var text = title + '\n' + body;
+    if (text.replace(/\s/g, '').length < 4){ showWarn(''); return; }
+    var my = ++checkSeq;
+    try {
+      var r = await LH.api('POST', '/api/dazi/check', {text: text});
+      if (my !== checkSeq) return;
+      if (r && r.ok === false){
+        var hits = (r.hits || []).join('、');
+        showWarn('检测到站外联系方式' + (hits ? '（' + hits + '）' : '') + '，发布会被拦截，请删掉，大家会通过站内私信找你');
+      } else {
+        showWarn('');
+      }
+    } catch(e){ /* 检测失败不打扰用户 */ }
+  }
+  function scheduleCheck(){
+    clearTimeout(checkTimer);
+    checkTimer = setTimeout(runCheck, 600);
+  }
+  function cpValidate(){
+    if (!cp.city) return '请选择城市';
+    if (!cp.kind) return '请选择类型';
+    var from = $('#cFrom').value;
+    if (!from) return '请选择开始日期';
+    var to = $('#cTo').value;
+    if (to && from && to < from) return '结束日期不能早于开始日期';
+    var ppl = String($('#cPeople').value || '').trim();
+    if (ppl){ var n = Number(ppl); if (!(n >= 1 && n <= 20)) return '人数请填 1-20 之间的数字'; }
+    var title = $('#cTitle').value.trim();
+    if (title.length < 4 || title.length > 40) return '标题请填 4-40 个字';
+    var body = $('#cBody').value.trim();
+    if (body.length < 10 || body.length > 3000) return '正文请填 10-3000 个字';
+    return '';
+  }
+  async function submitComposer(){
+    if (cpPosting) return;
+    showErrBox($('#cErr'), '');
+    var bad = cpValidate();
+    if (bad){ showErrBox($('#cErr'), bad); return; }
+    var btn = $('#cSubmit');
+    cpPosting = true;
+    btn.disabled = true;
+    btn.textContent = '发布中…';
+    try {
+      var fd = new FormData();
+      fd.append('city', cp.city);
+      fd.append('kind', cp.kind);
+      fd.append('date_from', $('#cFrom').value);
+      fd.append('date_to', $('#cTo').value || '');
+      fd.append('people', String($('#cPeople').value || '').trim());
+      fd.append('gender', cp.gender || 'any');
+      fd.append('title', $('#cTitle').value.trim());
+      fd.append('body', $('#cBody').value.trim());
+      cpImgs.forEach(function(it){ fd.append('images', it.file, 'img.jpg'); });
+      var r = await LH.api('POST', '/api/dazi/posts', fd);
+      if (r && r.pending) alert((r && r.message) || '已提交，等待管理员审核');
+      else LH.toast('发布成功', 'ok');
+      resetComposer();
+      closeComposer();
+      hotSel = null;
+      state.tab = 'personal';
+      state.offset = 0;
+      writeUrl();
+      syncAll();
+      load(true);
+    } catch(e){
+      showErrBox($('#cErr'), e.message || '发布失败，请稍后再试', e && e.status === 403);
+    } finally {
+      cpPosting = false;
+      btn.disabled = false;
+      btn.textContent = '发布';
+    }
+  }
+  function resetComposer(){
+    cp.city = ''; cp.kind = ''; cp.gender = 'any';
+    $('#cFrom').value = ''; $('#cTo').value = ''; $('#cPeople').value = '';
+    $('#cTitle').value = ''; $('#cBody').value = '';
+    showWarn('');
+    showErrBox($('#cErr'), '');
+    clearImgs();
+    syncAll();
+  }
+
+  /* ---------- 事件绑定 ---------- */
+  function bind(){
+    $('#newBtn').addEventListener('click', openComposer);
+
+    $('#safeBar').addEventListener('click', function(){
+      var box = $('#safeTips');
+      box.hidden = !box.hidden;
+      this.setAttribute('aria-expanded', box.hidden ? 'false' : 'true');
+    });
+    $('#safeBar').addEventListener('keydown', function(ev){
+      if (ev.key === 'Enter' || ev.key === ' '){ ev.preventDefault(); this.click(); }
+    });
+
+    $('#tabs').addEventListener('click', function(ev){
+      var b = ev.target.closest('button[data-tab]');
+      if (!b) return;
+      var tab = b.getAttribute('data-tab');
+      if (tab === state.tab){ onFilterChange(); return; }
+      setTab(tab);
+    });
+
+    $('#hotWords').addEventListener('click', function(ev){
+      var b = ev.target.closest('button[data-idx]');
+      if (!b) return;
+      var idx = +b.getAttribute('data-idx');
+      var hw = (opts.hot_words || [])[idx];
+      if (!hw) return;
+      if (hotSel === idx){
+        hotSel = null;
+        state.city = ''; state.kind = ''; state.gender = ''; state.kw = '';
+      } else {
+        hotSel = idx;
+        state.city = hw.city || '';
+        state.kind = hw.kind || '';
+        state.gender = hw.gender || '';
+        state.kw = hw.w || '';
+      }
+      state.offset = 0;
+      writeUrl();
+      syncAll();
+      load(true);
+    });
+
+    $('#fCity').addEventListener('click', function(ev){
+      var b = ev.target.closest('button[data-val]');
+      if (!b) return;
+      state.city = b.getAttribute('data-val') || '';
+      hotSel = null;
+      onFilterChange();
+    });
+    $('#fKind').addEventListener('click', function(ev){
+      var b = ev.target.closest('button[data-val]');
+      if (!b) return;
+      state.kind = b.getAttribute('data-val') || '';
+      hotSel = null;
+      onFilterChange();
+    });
+    $('#fDate').addEventListener('change', function(){
+      state.date = this.value || '';
+      hotSel = null;
+      onFilterChange();
+    });
+    $('#fGender').addEventListener('change', function(){
+      state.gender = this.value || '';
+      hotSel = null;
+      onFilterChange();
+    });
+    function applyKw(){
+      var v = $('#fKw').value.trim();
+      if (v === state.kw) return;
+      state.kw = v;
+      hotSel = null;
+      onFilterChange();
+    }
+    $('#fKw').addEventListener('input', function(){
+      clearTimeout(kwTimer);
+      kwTimer = setTimeout(applyKw, 400);
+    });
+    $('#fKw').addEventListener('keydown', function(ev){
+      if (ev.key === 'Enter'){ ev.preventDefault(); clearTimeout(kwTimer); applyKw(); }
+    });
+
+    $('#moreBtn').addEventListener('click', function(){
+      if (loading) return;
+      load(false);
+    });
+
+    $('#list').addEventListener('click', function(ev){
+      var t = ev.target;
+      if (!t || !t.closest) return;
+      var goM = t.closest('[data-go-merchant]');
+      if (goM){ ev.preventDefault(); setTab('merchant'); return; }
+      var empty = t.closest('#emptyNew');
+      if (empty){ ev.preventDefault(); openComposer(); return; }
+      var msg = t.closest('.dz-msg');
+      if (msg){
+        ev.preventDefault(); ev.stopPropagation();
+        startChat(msg.getAttribute('data-id'), msg.getAttribute('data-biz') === '1');
+        return;
+      }
+      var more = t.closest('.dz-more');
+      if (more){
+        ev.preventDefault(); ev.stopPropagation();
+        openSheet(more.getAttribute('data-id'), more.getAttribute('data-uid'));
+        return;
+      }
+    });
+
+    $('#sheet').addEventListener('click', function(ev){
+      var b = ev.target.closest('[data-act]');
+      if (!b) return;
+      var act = b.getAttribute('data-act');
+      if (act === 'cancel' || act === 'back'){ closeSheet(); return; }
+      if (act === 'report'){ renderReport(); return; }
+      if (act === 'block'){ doBlock(sheetUid); return; }
+      if (act === 'rp-submit'){ submitReport(); return; }
+    });
+
+    $('#composer').addEventListener('click', function(ev){
+      var t = ev.target;
+      if (!t || !t.closest) return;
+      var chip = t.closest('.cchip');
+      if (chip){
+        var box = chip.closest('.cchips');
+        var field = box ? box.getAttribute('data-field') : '';
+        var val = chip.getAttribute('data-val') || '';
+        if (!field) return;
+        if (field === 'gender'){
+          cp.gender = val;
+        } else {
+          cp[field] = (cp[field] === val) ? '' : val;
+        }
+        syncAll();
+        return;
+      }
+      var del = t.closest('#cPreviews .del');
+      if (del){
+        var i = +del.getAttribute('data-i');
+        var it = cpImgs[i];
+        if (it){ try { URL.revokeObjectURL(it.url); } catch(e){} }
+        cpImgs.splice(i, 1);
+        renderPreviews();
+      }
+    });
+
+    $('#cClose').addEventListener('click', closeComposer);
+    $('#cImgs').addEventListener('change', async function(){
+      var files = Array.prototype.slice.call(this.files || []);
+      this.value = '';
+      for (var i = 0; i < files.length; i++){
+        if (cpImgs.length >= 6){ LH.toast('图片上限 6 张'); break; }
+        try {
+          var f = await LH.compress(files[i]);
+          cpImgs.push({file: f, url: URL.createObjectURL(f)});
+        } catch(e){ LH.toast(e.message || '有图片处理失败，请重试'); }
+      }
+      renderPreviews();
+    });
+    $('#cTitle').addEventListener('input', scheduleCheck);
+    $('#cBody').addEventListener('input', scheduleCheck);
+    $('#cFrom').addEventListener('change', function(){
+      $('#cTo').min = this.value || todayISO();
+      if ($('#cTo').value && this.value && $('#cTo').value < this.value) $('#cTo').value = '';
+      showErrBox($('#cErr'), '');
+    });
+    $('#cSubmit').addEventListener('click', submitComposer);
+
+    document.addEventListener('keydown', function(ev){
+      if (ev.key !== 'Escape') return;
+      if ($('#sheet').classList.contains('open')) closeSheet();
+      else if ($('#composer').classList.contains('open')) closeComposer();
+    });
+  }
+
+  /* ---------- 启动 ---------- */
+  async function init(){
+    readUrl();
+    bind();
+    renderFilters();
+    buildComposerChips();
+    syncAll();
+    var d = null;
+    try { d = await LH.me(); me = (d && d.user) || null; } catch(e){ me = null; }
+    try {
+      var o = await LH.api('GET', '/api/dazi/options');
+      if (o && typeof o === 'object'){
+        ['cities', 'kinds', 'genders', 'hot_words', 'safety_tips', 'report_reasons'].forEach(function(k){
+          if (Array.isArray(o[k]) && o[k].length) opts[k] = o[k];
+        });
+        if (typeof o.notice === 'string' && o.notice) opts.notice = o.notice;
+      }
+    } catch(e){
+      optErr = e.message || '';
+    }
+    renderFilters();
+    buildComposerChips();
+    syncAll();
+    await load(true);
+    if (location.pathname.replace(/\/+$/, '') === '/dazi/new') openComposer();
+  }
+
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', init);
+  else init();
+})();
+</script>
+<script src="/static/pwa.js?v=96" defer></script>
+</body>
+</html>

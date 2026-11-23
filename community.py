@@ -21,7 +21,7 @@ STATIC = os.path.join(BASE, "static")
 
 BOARDS = {   # 键名（pit/group/...）已存库，不要改；只改右边显示名
     "pit": "踩坑避雷",
-    "group": "结伴同行",
+    "group": "找搭子",
     "visa": "签证问答",
     "study": "留学打听",
     "friends": "旅韩交友",
@@ -50,7 +50,7 @@ BOARD_CATEGORIES = [
 BOARD_ICONS = {"pit": "🚧", "group": "🧳", "news": "📣", "visa": "🛂", "study": "🎓", "rent": "🔑", "used": "♻️",
                "jobs": "💼", "friends": "💗", "hotel": "🛏️", "car": "🚐", "clinic": "✨",
                "agency": "🏫", "daigou": "🛍️", "guide": "🙋", "kpop": "🎤", "logistics": "📦", "daily": "🌸"}
-BOARD_DESCS = {"pit": "换钱、打车、购物被坑的真实经历", "group": "找人一起逛、一起拼车、AA 出行", "news": "天气、交通、闭馆等出行变化",
+BOARD_DESCS = {"pit": "换钱、打车、购物被坑的真实经历", "group": "首尔搭子、饭搭子、团签拼人、拼房、演唱会拼车", "news": "天气、交通、闭馆等出行变化",
                "visa": "各类签证、K-ETA 的个人经验", "study": "语学院、大学、生活费怎么选", "rent": "看房、合同、押金经验",
                "used": "回国前转让、二手好物", "jobs": "合法打工与求职信息", "friends": "认识新朋友、找搭子、语言交换",
                "hotel": "商家发布的住宿信息", "car": "商家发布的包车、租车信息", "clinic": "合法医疗机构发布的皮肤管理信息",
@@ -583,6 +583,8 @@ def db():
                         cur.execute(MIGRATE_CHAT)
                         from fanplaces import MIGRATE_FANPLACES
                         cur.execute(MIGRATE_FANPLACES)
+                        from dazi import MIGRATE_DAZI
+                        cur.execute(MIGRATE_DAZI)
                     ensure_bot(conn)
                     from chicken import ensure_chicken_shops
                     ensure_chicken_shops(conn)
@@ -1864,6 +1866,15 @@ def api_post(req: Request, pid: int):
     if place:
         o["place"] = place
     o["author_id"] = r["user_id"]
+    if r["board"] == "group":   # 找搭子：老帖里的联系方式展示时打码，并附搭子信息
+        from dazi import mask_contacts, get_meta, meta_out
+        o["title"] = mask_contacts(o.get("title") or "")
+        o["body"] = mask_contacts(o.get("body") or "")
+        try:
+            with db() as c2:
+                o["dazi"] = meta_out(get_meta(c2, r["id"]))
+        except Exception:
+            o["dazi"] = None
     o["author_verified"] = bool(r["verified"])
     o["following"] = following
     o["images"] = [{"id": i["id"], "w": i["width"], "h": i["height"]} for i in imgs]
@@ -2020,6 +2031,10 @@ async def api_new_post(req: Request, board: str = Form(""), title: str = Form(""
         u0 = need_tier(conn, req, need_t, tier_msg)
         if cat and not u0["merchant"]:
             raise HTTPException(400, "开通商家后才能选择商家分类")
+        if board == "group":   # 找搭子：公开帖一律不许留站外联系方式
+            from contact_guard import guard_text
+            guard_text(conn, u0["id"], "找搭子发帖", title, body,
+                       msg="公开帖子里请勿留微信、QQ、电话、二维码，想联系的人会通过站内私信找你。")
         if board in MERCHANT_BOARDS or cat:
             from merch import clean_activity, MEDICAL_BOARDS
             from contact_guard import guard_text, guard_medical

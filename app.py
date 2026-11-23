@@ -146,6 +146,8 @@ from community import router as community_router, ref_middleware
 from seo import router as seo_router, html_file_response
 from visits import visit_middleware
 app.include_router(community_router)
+from dazi import router as dazi_router  # noqa: E402
+app.include_router(dazi_router)
 app.include_router(seo_router)
 from asr import router as asr_router, start_background_download  # noqa: E402
 app.include_router(asr_router)

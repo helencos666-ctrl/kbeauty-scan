@@ -401,3 +401,8 @@ body.upage main{padding:48px 0 96px}
 .cmt .creply{font-size:12px;color:var(--primary);background:none;border:0;padding:0;margin-left:8px;font-family:inherit;cursor:pointer}
 .reply-tip{font-size:12px;color:var(--sub);margin:0 0 6px}
 .avlink{display:inline-flex;text-decoration:none;color:inherit}
+
+/* v96 找搭子：社区顶部第一个标签（链接到 /dazi） */
+.xtabs{gap:40px}
+.xtabs a.xt-dazi{flex:none;font-size:17px;color:#146E68;font-weight:700;padding:8px 0 11px;line-height:1.2;white-space:nowrap;text-decoration:none;position:relative}
+.xtabs a.xt-dazi::before{content:"";position:absolute;right:-7px;top:6px;width:6px;height:6px;border-radius:50%;background:#FF2442}

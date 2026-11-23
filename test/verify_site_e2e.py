@@ -44,8 +44,8 @@ def check_source_fixes():
     check("发帖提交前重建内存 File 并限制 18MB", "arrayBuffer()" in newp and "18 * 1024 * 1024" in newp)
     check("pick 压缩完成后再清空 value", "ok.push(await LH.compress" in newp and "this.value = ''" in newp)
     check("后端识别空包并给出准确提示", "上传内容未到达服务器" in py and "post_upload_empty" in py)
-    check("sw.js 缓存为 v94", "lvhan-shell-v95" in sw and "shops.js?v=95" in sw)
-    check("community-new 使用 v94", "?v=95" in newp and "?v=91" not in newp)
+    check("sw.js 缓存为 v96", "lvhan-shell-v96" in sw and "shops.js?v=96" in sw)
+    check("community-new 使用 v96", "?v=96" in newp and "?v=91" not in newp)
 
 # ---------------- local server ----------------
 def start_server():
@@ -416,8 +416,17 @@ def main():
         PT.run_local(base, check, Path("/workspace/lvhan-photo-tr"))
     except Exception:
         check("拍照翻译本地流程", False, traceback.format_exc())
+    import dazi_e2e as DZ
+    try:
+        DZ.run_local(base, check, Path("/workspace/lvhan-buddy"))
+    except Exception:
+        check("找搭子本地流程", False, traceback.format_exc())
     live = os.environ.get("LH_LIVE_BASE", "").strip().rstrip("/")
     if live:
+        try:
+            DZ.run_live(live, check, Path("/workspace/lvhan-buddy"))
+        except Exception:
+            check("找搭子线上流程", False, traceback.format_exc())
         try:
             PT.run_live(live, check, Path("/workspace/lvhan-photo-tr"))
         except Exception:

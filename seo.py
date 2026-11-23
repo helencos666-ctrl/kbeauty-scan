@@ -61,7 +61,7 @@ PAGES = {
     ),
     "/community": (
         "韩友圈｜韩国旅游经验与韩国交友 · 旅韩助手",
-        "旅韩助手韩友圈：去韩国前问问走过的人。踩坑避雷、结伴同行、签证问答、留学打听、租房找房和韩国交友。",
+        "旅韩助手韩友圈：去韩国前问问走过的人。踩坑避雷、找搭子、签证问答、留学打听、租房找房和韩国交友。",
         "韩国交友,韩国旅游攻略,韩友圈,旅韩助手",
         True,
     ),
@@ -70,6 +70,18 @@ PAGES = {
         "按主题浏览韩友圈频道：踩坑避雷、结伴同行、签证问答、留学打听、租房找房、韩国交友和出行提醒。",
         "韩国旅游攻略,韩国交友,韩友圈,旅韩助手",
         True,
+    ),
+    "/dazi": (
+        "找搭子｜首尔搭子·韩国旅游搭子·饭搭子·团签拼人·拼房 · 旅韩助手",
+        "韩国旅游找搭子：首尔搭子、釜山搭子、济州岛搭子，饭搭子逛吃、三人团签二缺一、拼房、演唱会拼车、包车拼车接送机、一日游拼团，在韩搭子也能找。按城市日期筛选，站内私信联系，不留微信电话更安全。",
+        "首尔搭子,韩国旅游搭子,找搭子,饭搭子,团签拼人,拼房,演唱会拼车,济州岛搭子,釜山搭子,在韩搭子",
+        True,
+    ),
+    "/dazi/new": (
+        "发布找搭子 · 旅韩助手",
+        "发一条找搭子：选城市、日期、人数和类型，站内私信联系。",
+        "找搭子,首尔搭子",
+        False,
     ),
     "/community/friends": (
         "韩国交友｜旅韩交友与找搭子 · 旅韩助手",
@@ -295,6 +307,7 @@ FILE_PATHS = {
     "faq.html": "/faq",
     "community.html": "/community",
     "community-boards.html": "/community/boards",
+    "dazi.html": "/dazi",
     "community-new.html": "/community/new",
     "community-post.html": "/community/post",
     "login.html": "/login",
@@ -359,7 +372,7 @@ NOINDEX_PREFIXES = (
 
 SITEMAP_PATHS = [
     "/", "/attractions", "/food", "/shopping", "/tips", "/beauty", "/faq",
-    "/community", "/community/boards", "/community/rate", "/community/friends",
+    "/community", "/dazi", "/community/boards", "/community/rate", "/community/friends",
     "/rules", "/member", "/shops", "/pay", "/tax-refund", "/visa", "/itineraries", "/privacy", "/terms", "/promo/rules",
     "/services", "/partner", "/shops/join-guide", "/deals", "/festival", "/opening", "/places", "/trips",
 ]

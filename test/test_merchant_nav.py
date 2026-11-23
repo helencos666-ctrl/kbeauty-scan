@@ -49,9 +49,9 @@ check("home 扫描识别卡保留原有跳转", 'href="/?tab=cos" data-go="cos"'
       and 'href="/scan"' not in index)
 check("home 美妆识别副标题用拍照", "拍照查成分" in coreblk and "美妆拍照识别" not in coreblk and "扫码" not in index)
 check("home 吃喝玩乐五格", "吃喝玩乐" in home and all(
-    u in home for u in ["/food", "/food?cat=cafe", "/shopping", "/attractions", "/places?category=hotel"]))
-check("home 五格文案", all(w in home for w in [">美食<", ">咖啡<", ">购物<", ">景点<", ">酒店<"]))
-check("home 广告轮播四张", all("/static/home-ads/ad-%d.jpg?v=95" % i in home for i in (1, 2, 3, 4)) and "蓝憬通讯" in home and 'data-ad="lanjing"' in home
+    u in home for u in ["/food", "/dazi", "/shopping", "/attractions", "/places?category=hotel"]))
+check("home 五格文案", all(w in home for w in [">美食<", ">找搭子<", ">购物<", ">景点<", ">酒店<"]))
+check("home 广告轮播四张", all("/static/home-ads/ad-%d.jpg?v=96" % i in home for i in (1, 2, 3, 4)) and "蓝憬通讯" in home and 'data-ad="lanjing"' in home
       and 'class="ads' in home and "adsDots" in home)
 check("home 无附近推荐板块", "附近推荐" not in home and "nearBlk" not in index and "按距离" not in home)
 check("home 吃喝玩乐瀑布流紧跟广告", "playBlk" in home and "playGrid" in home
