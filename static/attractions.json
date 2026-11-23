@@ -1,5 +1,5 @@
 {
-  "updated": "2026-11-23",
+  "updated": "2026-11-24",
   "title": "韩国免费景点指南",
   "disclaimer": "本页为公开资料整理的免费指南，不接入收费接口。开放时间、门票、交通和节庆日期可能调整，请以现场公示、官方网站和韩国旅游咨询热线 1330（有中文服务）为准。",
   "sources": [
@@ -2381,6 +2381,59 @@
         "/static/attraction-photos/seongsu-alley-industrial.jpg"
       ],
       "photo_credit": "照片：CartoonChess / Wikimedia Commons / CC BY-SA 4.0"
+    },
+    {
+      "id": "haeundae-blueline-park",
+      "name_zh": "海云台蓝线公园",
+      "name_ko": "해운대블루라인파크",
+      "city": "busan",
+      "city_zh": "釜山",
+      "area": "海云台区",
+      "category": "landmark",
+      "desc": "把旧东海南部线铁路改成海边观光线路的公园，从尾浦经青沙浦到松亭，一边是海、一边是松林。运行海边列车和天空胶囊两种车厢，天空胶囊走尾浦—青沙浦段，座位分时段出售。中途可在青沙浦站下车，去看达里石瞭望台和月光隧道，再坐列车回到尾浦。旺季票比较紧，出发前先看官方余票再安排时间。",
+      "transport": "地铁 2 号线中洞站（중동역）或海云台站转公交至尾浦站；天空胶囊与海边列车的乘车点在尾浦站。",
+      "tips": [
+        "天空胶囊分时段售票，旺季提前在官方渠道看余票。",
+        "海边风大、日晒强，排队时注意保暖或防晒。",
+        "列车与胶囊是两种票价，买票前先确认要坐哪一种。"
+      ],
+      "station": "중동역",
+      "hours": "运行时间随季节调整，以官方公告为准。",
+      "fee": "收费（列车与胶囊票价不同，以官方票价为准）",
+      "address": "부산 해운대구 달맞이길62번길 13",
+      "map_query": "해운대블루라인파크",
+      "cover": "/static/attraction-photos/haeundae-blueline-park-cover.jpg",
+      "photos": [
+        "/static/attraction-photos/haeundae-blueline-park-cover.jpg"
+      ],
+      "photo_credit": "照片：VN.NguyenDucDuy / Wikimedia Commons / CC BY-SA 4.0"
+    },
+    {
+      "id": "busan-citizens-park",
+      "name_zh": "釜山市民公园",
+      "name_ko": "부산시민공원",
+      "city": "busan",
+      "city_zh": "釜山",
+      "area": "釜山镇区",
+      "category": "nature",
+      "desc": "釜山镇区市中心的大公园，前身是美军基地，2014 年改成公园向市民开放。园内有草坪广场、池塘、喷泉、历史馆、咖啡店和儿童游乐区，步道平缓，推婴儿车或轮椅都好走。防弹少年团 V 在这里拍过照，粉丝会来找同款位置。春天有樱花，夏天树荫多，平日傍晚本地人散步、跑步的居多。",
+      "transport": "地铁 1 号线釜田站（부전역）或西面站步行约 15–20 分钟，也可坐公交到公园入口；公园面积大，按入口方向选下车站。",
+      "tips": [
+        "公园很大，先看入口地图再决定走哪一片。",
+        "草坪上有活动时人多，随身物品自己看好。",
+        "傍晚本地人遛狗、跑步多，骑车道不要步行占道。"
+      ],
+      "station": "부전역",
+      "hours": "公园全天开放；历史馆等设施另有开放时间。",
+      "fee": "免费",
+      "address": "부산 부산진구 시민공원로 73",
+      "map_query": "부산시민공원",
+      "cover": "/static/attraction-photos/busan-citizens-park-cover.jpg",
+      "photos": [
+        "/static/attraction-photos/busan-citizens-park-cover.jpg",
+        "/static/attraction-photos/busan-citizens-park-tower.jpg"
+      ],
+      "photo_credit": "照片：Vichycombo / Wikimedia Commons / CC BY-SA 4.0"
     }
   ]
 }

@@ -1,3 +1,10 @@
+## 2026-11-24 釜山内容日更：地点实景照片与官方帖
+
+- static/food.json 新增富平市场（易拉罐市场）、海云台市场（street）与海理团路（cafe）；static/attractions.json 新增海云台蓝线公园、釜山市民公园；static/shopping-stores.json 新增新世界百货 Centum City 店（fashion，area_id: centum）。均按韩国旅游发展局 VisitKorea 官方页面核对，source_url / source_note 随条目记录。
+- 每个新条目带 1–3 张实景照片，来源为 Wikimedia Commons 的自由授权文件（CC BY-SA 3.0 / 4.0），缩到 1280px 宽以内、JPEG 压缩到 300KB 以下；沿用 photo_credit 字段标注作者与许可。本次没有新增界面，缓存参数与 Service Worker 缓存名保持不变。
+- scripts/gen_official_daily_images.py 新增两张 11-24 卡片（团体免签与签证类型区分、旺季出行安排），配色为砂粉/浅蓝灰与浅葱绿/米杏，原有卡片输出不变。
+- official_daily.json 追加 2026-11-24 两条官方帖（board: pit、daily）。
+
 ## 2026-11-23 中韩翻译新增「拍照翻译」（v95）
 
 - 中韩翻译页「按住说话」正下方新增「📷 拍照翻译」按钮，点开可选「拍照」（后置相机，capture=environment）或「从相册选」，面板里可切换方向，默认「识别韩文→中文」。韩→中识别韩文（菜单、药盒、指示牌、商品标签）并逐段翻成中文；中→韩识别图中中文并翻成韩文（附发音）。

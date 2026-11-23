@@ -1,5 +1,5 @@
 {
-  "updated": "2026-11-23",
+  "updated": "2026-11-24",
   "title": "韩国美食推荐",
   "disclaimer": "本页只收录公开资料中有记载、近期仍见诸米其林指南或官方/百科旅游介绍的餐厅与市场。营业状态、菜单和价格可能随时变化，请出发前用地图或电话再确认。米其林必比登是「性价比」标注，其符号并不等同本页的人均₩档；没有把握的人均价格已省略。信息可能变化，请出行前核实。餐厅已按游客常去的打卡区域归类，具体门牌以各条地址和地图为准；不在热门区域内、但资料可靠的店会放在「其他」。部分明洞门店根据实地招牌和公开地图资料补充收录。",
   "price_legend": [
@@ -2840,6 +2840,103 @@
         "/static/food-photos/seongsu-cafe-street-courtyard.jpg"
       ],
       "photo_credit": "照片：CartoonChess / Wikimedia Commons / CC BY-SA 4.0"
+    },
+    {
+      "id": "bupyeong-market",
+      "name_zh": "富平市场（易拉罐市场）",
+      "name_ko": "부평시장(깡통시장)",
+      "city": "busan",
+      "city_zh": "釜山",
+      "area": "中区 富平洞",
+      "category": "street",
+      "cuisine": "市场小吃 / 夜市",
+      "desc": "南浦洞旁边的棚顶市场，白天多是洋酒、服装、饰品和日用杂货的店面，傍晚以后市场里和旁边的长廊摆出小吃摊，形成夜市。鱼饼、炒年糕、烤串和几国风味的小摊集中在一条通道上，入口和十字路口常有小型表演。名字里的「易拉罐」来自战争年代这里罐头进口多的旧称，现在仍能看出老市场的样子。通道窄、摊位多，边走边吃比找座位更常见。",
+      "transport": "地铁 1 号线札嘎其站（자갈치역）或南浦站（남포역）出站，步行约 5 分钟进入富平洞市场街；夜市从富平 1 街一带开始。",
+      "tips": [
+        "夜市傍晚才开始，白天来看到的是店铺和菜摊。",
+        "摊位多收现金或用交通卡，买之前先问价。",
+        "通道窄，背包往前背，别在路口停下拍照。"
+      ],
+      "station": "자갈치역",
+      "price": "₩",
+      "tags": [
+        "chinese_fav"
+      ],
+      "area_id": "nampo",
+      "hours": "店铺各不同；夜市约 19:30–23:30，以现场公告为准。",
+      "address": "부산 중구 부평1길 48",
+      "map_query": "부평깡통시장",
+      "source_note": "查阅 2026-11-24。VisitKorea 中文页「富平市场(易拉罐市场)」写明市场位于富平洞、夜市设在市场与附近长廊、营业时间 19:30–23:30，并给出地址与咨询电话。",
+      "source_url": "https://chinese.visitkorea.or.kr/svc/contents/contentsView.do?vcontsId=73410",
+      "cover": "/static/food-photos/bupyeong-market-cover.jpg",
+      "photos": [
+        "/static/food-photos/bupyeong-market-cover.jpg",
+        "/static/food-photos/bupyeong-market-night.jpg"
+      ],
+      "photo_credit": "照片：Christophe95 / Wikimedia Commons / CC BY-SA 4.0"
+    },
+    {
+      "id": "haeundae-market",
+      "name_zh": "海云台市场",
+      "name_ko": "부산 해운대시장",
+      "city": "busan",
+      "city_zh": "釜山",
+      "area": "海云台区 中洞",
+      "category": "street",
+      "cuisine": "市场小吃 / 干货水产",
+      "desc": "海云台海水浴场后面的传统市场，主街两侧是干货、水果、蔬菜、水产和日用杂货的摊位，中间夹着紫菜包饭、炒年糕、鱼饼等小吃店。市场里的巷子有烤盲鳗一条街，傍晚开始冒烟，是本地人和游客都会来吃的一顿。从海边走过来约十分钟，逛完可以直接回沙滩或去地铁站。",
+      "transport": "地铁 2 号线海云台站（해운대역）3 号出口步行约 5 分钟；从海水浴场沿主街走过来约 10 分钟。",
+      "tips": [
+        "小吃摊多在白天到傍晚营业，烤盲鳗一条街晚上热闹。",
+        "买干货和水产先问价，按重量算清再装袋。",
+        "市场通道有推车和送货车辆，靠边行走。"
+      ],
+      "station": "해운대역",
+      "price": "₩",
+      "tags": [
+        "chinese_fav"
+      ],
+      "area_id": "haeundae",
+      "hours": "约 09:00–22:00，各店铺不同。",
+      "address": "부산 해운대구 중동1로 42-16",
+      "map_query": "해운대시장",
+      "source_note": "查阅 2026-11-24。VisitKorea 中文页「釜山海云台市场」介绍市场靠近海水浴场、主营蔬菜肉类水产与小吃的干货杂货，并写明营业时间 09:00–22:00（各店不同）和地址。",
+      "source_url": "https://chinese.visitkorea.or.kr/svc/contents/contentsView.do?vcontsId=77593",
+      "cover": "/static/food-photos/haeundae-market-cover.jpg",
+      "photos": [
+        "/static/food-photos/haeundae-market-cover.jpg",
+        "/static/food-photos/haeundae-market-alley.jpg",
+        "/static/food-photos/haeundae-market-driedfish.jpg"
+      ],
+      "photo_credit": "照片：HappyMidnight / Wikimedia Commons / CC BY-SA 3.0；Altostratus / CC BY-SA 3.0；Junho Jung / CC BY-SA 3.0"
+    },
+    {
+      "id": "haeridan-gil",
+      "name_zh": "海理团路（海云台咖啡小巷）",
+      "name_ko": "해리단길",
+      "city": "busan",
+      "city_zh": "釜山",
+      "area": "海云台区 佑洞",
+      "category": "cafe",
+      "cuisine": "咖啡 / 甜点",
+      "desc": "旧海云台站后面铁路边的一片窄巷，老房子改成咖啡店、餐厅、服装店和杂货铺，店面都不大，换店也快。巷子从海云台站 4 号出口的招牌开始，往海边方向慢慢散开，走完一小时左右。这里适合安排在海云台沙滩前后：先找家咖啡店坐一会儿，再穿巷子去海边。周末下午人多，工作日上午相对安静。",
+      "transport": "地铁 2 号线海云台站（해운대역）4 号出口出来即可看到海理团路招牌，步行 1–2 分钟进入巷子。",
+      "tips": [
+        "巷子窄且有住家，拍照不要堵在门口和通道。",
+        "各店休息日不同，出发前看店门口的营业牌。",
+        "带大件行李可先在地铁站附近的寄存处放下再逛。"
+      ],
+      "station": "해운대역",
+      "hours": "各店不同，多数 10:00 以后开门，部分店营业到 22:00 左右。",
+      "address": "부산 해운대구 우동 517-14 일대",
+      "map_query": "해리단길",
+      "source_note": "查阅 2026-11-24。VisitKorea 中文页「釜山海理团路」写明街区从旧海云台站后面的铁路开始，老房子改成的咖啡厅、餐厅与服装店、精品店聚集，并提示从海云台站 4 号出口进入。",
+      "source_url": "https://chinese.visitkorea.or.kr/svc/contents/contentsView.do?vcontsId=248798",
+      "cover": "/static/food-photos/haeridan-gil-cover.jpg",
+      "photos": [
+        "/static/food-photos/haeridan-gil-cover.jpg"
+      ],
+      "photo_credit": "照片：T21235t / Wikimedia Commons / CC BY-SA 4.0"
     }
   ],
   "areas": [

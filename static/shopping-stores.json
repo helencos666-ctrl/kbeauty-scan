@@ -1,5 +1,5 @@
 {
-  "updated": "2026-11-23",
+  "updated": "2026-11-24",
   "title": "明洞逛街店铺",
   "disclaimer": "下列店铺根据实地照片和公开资料整理。营业时间、楼层和退税办理可能变化，请以店门口公示和店内说明为准。未核对到来源的退税信息不会写进介绍。",
   "categories": [
@@ -640,6 +640,35 @@
       ],
       "source_note": "查阅 2026-11-23。VisitSeoul「Seongsu Hotspot One-Day Course」（更新 2026-09-16）把延武场街列为圣水购物的落脚点之一：旧鞋厂工业痕迹与现代品牌混合的多元文化街，聚集咖啡店、画廊、时尚店和品牌快闪；街上有 Dior Seongsu 等拍照点。",
       "photo_credit": "照片：Tjwlgns / Wikimedia Commons / CC BY 4.0；Dr. Thomas Liptak / CC BY-SA 4.0"
+    },
+    {
+      "id": "shinsegae-centum-city",
+      "name_zh": "新世界百货 Centum City 店",
+      "name_ko": "신세계백화점 센텀시티점",
+      "city": "busan",
+      "city_zh": "釜山",
+      "area": "海云台区 Centum City",
+      "area_id": "centum",
+      "category": "fashion",
+      "desc": "海云台 Centum City 一带的大型百货，与 BEXCO、电影殿堂在同一条街上。地下是超市和餐饮，地上几层是服饰、美妆和生活用品，楼里还有 Spa Land 汗蒸，逛完可以顺路安排半天。国际品牌和退税柜台集中在店内，遇到活动时中庭会有展售。周末和打折季人多，工作日白天相对好逛。",
+      "transport": "地铁 2 号线 Centum City 站（센텀시티역）与百货地下入口相连，出站不用上地面。",
+      "tips": [
+        "营业时间约 10:30–20:00，餐厅和超市可能不同。",
+        "退税带好护照，办理方式和地点以店内指示为准。",
+        "周末下午人多，想安静逛街可以选工作日上午。"
+      ],
+      "station": "센텀시티역",
+      "hours": "10:30–20:00；春节、中秋当日休息，以店内公告为准。",
+      "address": "부산 해운대구 센텀남대로 35",
+      "map_query": "신세계백화점 센텀시티점",
+      "tax_refund": "VisitKorea 资料写明可即时退税或事后退税",
+      "cover": "/static/shop-photos/shinsegae-centum-city-cover.jpg",
+      "photos": [
+        "/static/shop-photos/shinsegae-centum-city-cover.jpg"
+      ],
+      "source_note": "查阅 2026-11-24。VisitKorea 页面「Shinsegae Department Store Centum City Branch」列出地址、营业时间 10:30–20:00、春节与中秋休息及退税说明。",
+      "source_url": "https://chinese.visitkorea.or.kr/svc/contents/contentsView.do?vcontsId=141140",
+      "photo_credit": "照片：Modamoda / Wikimedia Commons / CC BY-SA 3.0"
     }
   ]
 }
