@@ -97,7 +97,7 @@ def _api_checks(base, check, tag, live):
                       [p.get("title") for p in ps][:5])
         r = c.get("/api/dazi/posts?city=xx")
         check(f"[{tag}] 非法城市 400", r.status_code == 400)
-        r = c.post("/api/dazi/posts", data={"title": "测试标题", "body": "测试正文测试正文", "city": "seoul", "kind": "food",
+        r = c.post("/api/dazi/posts", data={"title": "测试标题", "body": "测试正文测试正文，周末一起逛吃", "city": "seoul", "kind": "food",
                                             "date_from": __import__("datetime").date.today().isoformat()}, headers=H)
         check(f"[{tag}] 未登录发帖被拒且引导登录（401 非会员提示）", r.status_code == 401, (r.status_code, r.text[:100]))
         r = c.post("/api/dazi/report", json={"post_id": 1, "reason": "其他"}, headers=H)
