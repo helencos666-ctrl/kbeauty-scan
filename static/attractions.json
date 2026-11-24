@@ -1,5 +1,5 @@
 {
-  "updated": "2026-11-24",
+  "updated": "2026-11-25",
   "title": "韩国免费景点指南",
   "disclaimer": "本页为公开资料整理的免费指南，不接入收费接口。开放时间、门票、交通和节庆日期可能调整，请以现场公示、官方网站和韩国旅游咨询热线 1330（有中文服务）为准。",
   "sources": [
@@ -2434,6 +2434,85 @@
         "/static/attraction-photos/busan-citizens-park-tower.jpg"
       ],
       "photo_credit": "照片：Vichycombo / Wikimedia Commons / CC BY-SA 4.0"
+    },
+    {
+      "id": "sungnyemun",
+      "name_zh": "崇礼门（南大门）",
+      "name_ko": "숭례문",
+      "city": "seoul",
+      "city_zh": "首尔",
+      "area": "中区 南大门路",
+      "category": "landmark",
+      "desc": "朝鲜太祖年间建成的都城正门，是都城四面门中位于南侧的一座，所以也叫南大门。石造基座上是两层木结构门楼，牌匾竖写「崇礼门」，1962 年被指定为国宝第1号。2008 年火灾后经过复原，2013 年重新开放。现在城门周围是草坪和步道，可以绕一圈看虹霓门和城墙基址，旁边有说明牌讲复原过程和建筑结构。就在南大门市场和会贤站旁边，逛街前后顺路看很方便。",
+      "transport": "地铁4号线会贤站（회현역）步行约3分钟；从市厅站（시청역）方向也可步行到达。",
+      "tips": [
+        "城门开放时间到傍晚，冬季关门更早。",
+        "周一不开放，安排行程前先看日期。",
+        "广场风大，冬天别停留太久。"
+      ],
+      "station": "회현역",
+      "hours": "09:00–18:00；12–2 月 09:00–17:30；周一休，以现场公告为准。",
+      "fee": "免费",
+      "address": "서울 중구 세종대로 40 (남대문로4가)",
+      "map_query": "숭례문",
+      "cover": "/static/attraction-photos/sungnyemun-cover.jpg",
+      "photos": [
+        "/static/attraction-photos/sungnyemun-cover.jpg",
+        "/static/attraction-photos/sungnyemun-wall.jpg"
+      ],
+      "photo_credit": "照片：Bernard Gagnon、Gary Todd / Wikimedia Commons / CC0"
+    },
+    {
+      "id": "myeongdong-theater",
+      "name_zh": "明洞艺术剧场",
+      "name_ko": "명동예술극장",
+      "city": "seoul",
+      "city_zh": "首尔",
+      "area": "中区 明洞",
+      "category": "landmark",
+      "desc": "明洞主街上的话剧专用剧场，前身是 1934 年建的明洞国立剧场，2009 年按原来的外墙复原后重新开放，内部换成新的舞台和 588 个座位。转角是圆弧形立面，门口挂着当季演出的海报，路过很容易认出来。这里上演传统话剧、实验剧、无言剧和音乐剧，也办戏剧节和公演艺术节。看演出要提前查排期和购票；不看演出，在外面看看这栋老建筑也值得。",
+      "transport": "地铁4号线明洞站（명동역）出站沿明洞主街步行约3分钟，剧场在明洞路35号。",
+      "tips": [
+        "演出表和票价以剧场公告及售票处为准。",
+        "开演后入场可能受限，按票面时间提前到。",
+        "门口海报和台阶是拍照点，别挡住通道。"
+      ],
+      "station": "명동역",
+      "hours": "依演出安排，售票处与开演时间以剧场公告为准。",
+      "fee": "依演出票价，以剧场公告为准",
+      "address": "서울 중구 명동길 35 (명동1가)",
+      "map_query": "명동예술극장",
+      "cover": "/static/attraction-photos/myeongdong-theater-cover.jpg",
+      "photos": [
+        "/static/attraction-photos/myeongdong-theater-cover.jpg"
+      ],
+      "photo_credit": "照片：Exj / Wikimedia Commons / CC BY-SA 4.0"
+    },
+    {
+      "id": "bok-money-museum",
+      "name_zh": "韩国银行货币博物馆",
+      "name_ko": "한국은행 화폐박물관",
+      "city": "seoul",
+      "city_zh": "首尔",
+      "area": "中区 南大门路",
+      "category": "landmark",
+      "desc": "韩国银行旧主楼里的货币博物馆，石造建筑带圆顶，就在南大门十字路口旁。馆内一、二楼按年代陈列从古代钱币到现在的韩元、纪念币和外国货币，展品三千多件，也有互动展区和讲解资料。参观免费，冬天天冷或下雨时适合进来避一避，顺便了解韩元的历史。看完可以走到旁边的崇礼门和南大门市场。",
+      "transport": "地铁4号线会贤站（회현역）7号出口步行约5分钟；从南大门市场步行也可到达。",
+      "tips": [
+        "周一、春节和中秋假期闭馆，出发前先确认。",
+        "16:40 停止入场，下午来别太晚。",
+        "馆内安静，参观时把手机调成静音。"
+      ],
+      "station": "회현역",
+      "hours": "10:00–17:00（16:40 停止入场）；周一、春节与中秋假期、公休日闭馆，以官方公告为准。",
+      "fee": "免费",
+      "address": "서울 중구 남대문로 39",
+      "map_query": "한국은행 화폐박물관",
+      "cover": "/static/attraction-photos/bok-money-museum-cover.jpg",
+      "photos": [
+        "/static/attraction-photos/bok-money-museum-cover.jpg"
+      ],
+      "photo_credit": "照片：Sean Young (@assanges) / Wikimedia Commons / CC BY 4.0"
     }
   ]
 }

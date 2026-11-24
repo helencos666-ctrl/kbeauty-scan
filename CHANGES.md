@@ -1,3 +1,10 @@
+## 2026-11-25 明洞内容日更：地点实景照片与官方帖
+
+- static/food.json 新增南大门市场美食街（刀切面胡同，street）与太极堂（cafe）；static/attractions.json 新增崇礼门、明洞艺术剧场、韩国银行货币博物馆；static/shopping-stores.json 新增新世界百货店总店（fashion，area_id: myeongdong）。食店按 VisitKorea / VisitSeoul 官方中文页面核对，source_url / source_note 随条目记录。
+- 每个新条目带 1–2 张实景照片，来源为 Wikimedia Commons 的自由授权文件（CC0 / CC BY 3.0 / CC BY 4.0 / CC BY-SA 3.0 / CC BY-SA 4.0），缩到 1280px 宽以内、JPEG 压缩到 300KB 以下；沿用 photo_credit 字段标注作者与许可。本次没有新增界面，缓存参数与 Service Worker 缓存名保持不变。
+- scripts/gen_official_daily_images.py 新增两张 11-25 卡片（首尔入冬自由行、在韩租房过冬），配色为雾蓝/浅灰与米杏/浅橄榄，原有 12 张卡片输出不变。
+- official_daily.json 追加 2026-11-25 两条官方帖（board: daily、study）。
+
 ## 2026-11-24 釜山内容日更：地点实景照片与官方帖
 
 - static/food.json 新增富平市场（易拉罐市场）、海云台市场（street）与海理团路（cafe）；static/attractions.json 新增海云台蓝线公园、釜山市民公园；static/shopping-stores.json 新增新世界百货 Centum City 店（fashion，area_id: centum）。均按韩国旅游发展局 VisitKorea 官方页面核对，source_url / source_note 随条目记录。

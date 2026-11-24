@@ -1,5 +1,5 @@
 {
-  "updated": "2026-11-24",
+  "updated": "2026-11-25",
   "title": "韩国美食推荐",
   "disclaimer": "本页只收录公开资料中有记载、近期仍见诸米其林指南或官方/百科旅游介绍的餐厅与市场。营业状态、菜单和价格可能随时变化，请出发前用地图或电话再确认。米其林必比登是「性价比」标注，其符号并不等同本页的人均₩档；没有把握的人均价格已省略。信息可能变化，请出行前核实。餐厅已按游客常去的打卡区域归类，具体门牌以各条地址和地图为准；不在热门区域内、但资料可靠的店会放在「其他」。部分明洞门店根据实地招牌和公开地图资料补充收录。",
   "price_legend": [
@@ -2937,6 +2937,68 @@
         "/static/food-photos/haeridan-gil-cover.jpg"
       ],
       "photo_credit": "照片：T21235t / Wikimedia Commons / CC BY-SA 4.0"
+    },
+    {
+      "id": "namdaemun-kalguksu-alley",
+      "name_zh": "南大门市场美食街（刀切面胡同）",
+      "name_ko": "남대문시장 먹자골목(칼국수 골목)",
+      "city": "seoul",
+      "city_zh": "首尔",
+      "area": "中区 南大门市场",
+      "category": "street",
+      "cuisine": "刀切面 / 大麦饭",
+      "desc": "南大门市场里的一条窄巷，从会贤站5号出口对面的「新世界眼镜店」旁边的透明塑料门进去，两侧是卖刀切面和大麦饭的小店，桌子挨着摆，饭点常要等位。菜单简单：刀切面、大麦饭、冷面，点一份会配上几样小菜，辛奇给得足。店面旧、通道窄，价格不高，适合逛市场时坐下来吃一顿。入口不显眼，初次来容易走过。",
+      "transport": "地铁4号线会贤站（회현역）5号出口出来，对面新世界眼镜店旁的透明门进入；从明洞步行过来也不远。",
+      "tips": [
+        "入口是眼镜店旁的透明塑料门，不太显眼，按门牌找。",
+        "饭点和周末常排队，错开中午和傍晚更从容。",
+        "通道窄、桌面小，行李多时先放在一旁再坐下。"
+      ],
+      "station": "회현역",
+      "price": "₩",
+      "tags": [
+        "chinese_fav"
+      ],
+      "area_id": "myeongdong",
+      "hours": "各店营业时间不同，白天到晚间多数时段都有营业，以店门口公示为准。",
+      "address": "서울 중구 남대문시장4길 42-1",
+      "map_query": "남대문시장 먹자골목 칼국수골목",
+      "source_note": "查阅 2026-11-25。VisitKorea 中文页「南大门市场美食街(刀切面一条街)」写明从会贤站5号出口新世界眼镜店旁的入口进入、主打刀切面与大麦饭、店面窄小且饭点需要排队，并给出地址与咨询电话。",
+      "source_url": "https://chinese.visitkorea.or.kr/svc/contents/contentsView.do?vcontsId=183513",
+      "cover": "/static/food-photos/namdaemun-kalguksu-cover.jpg",
+      "photos": [
+        "/static/food-photos/namdaemun-kalguksu-cover.jpg"
+      ],
+      "photo_credit": "照片：Sakaori / Wikimedia Commons / CC BY-SA 3.0"
+    },
+    {
+      "id": "taegeukdang",
+      "name_zh": "太极堂（奖忠洞本店）",
+      "name_ko": "태극당",
+      "city": "seoul",
+      "city_zh": "首尔",
+      "area": "中区 奖忠洞",
+      "category": "cafe",
+      "cuisine": "面包 / 咖啡甜点",
+      "desc": "1946 年开业的面包店，在奖忠洞东国大学一带，店名和木槿花标志来自创办时的想法，几十年一直在同一栋楼里做面包。一层是卖场，玻璃柜里摆着面包、蛋糕和莫纳卡（모나카）冰淇淋饼，店内也有座位可以坐下来吃。老式吊灯和木饰面还留着，来买面包的附近居民和专程来的人都不少。想歇脚，点一份莫纳卡或面包配饮料就行。",
+      "transport": "地铁3号线东大入口站（동대입구역）2号出口出来即到，步行约1分钟。",
+      "tips": [
+        "莫纳卡是冰淇淋夹心饼，天气热时化得快，买了尽快吃。",
+        "节假日营业时间会调整，中秋当天提前关门。",
+        "店内座位不多，外带的人多，避开下午高峰更从容。"
+      ],
+      "station": "동대입구역",
+      "hours": "08:00–21:00；中秋当天 08:00–19:00，以店内公告为准。",
+      "address": "서울 중구 동호로24길 7",
+      "map_query": "태극당 본점",
+      "source_note": "查阅 2026-11-25。VisitSeoul 中文页「太极堂」（2026-09-28 更新）写明 1946 年开业、招牌莫纳卡、营业时间 08:00–21:00（中秋至 19:00）、地址东湖路24街7号，地铁3号线东大入口站2号出口旁。",
+      "source_url": "https://chinese.visitseoul.net/attractions/%E5%A4%AA%E6%9E%81%E5%A0%82/CNP026194",
+      "cover": "/static/food-photos/taegeukdang-cover.jpg",
+      "photos": [
+        "/static/food-photos/taegeukdang-cover.jpg",
+        "/static/food-photos/taegeukdang-interior.jpg"
+      ],
+      "photo_credit": "照片：오모군 / Wikimedia Commons / CC BY 3.0（门面）；Seefooddiet / Wikimedia Commons / CC BY-SA 4.0（店内）"
     }
   ],
   "areas": [

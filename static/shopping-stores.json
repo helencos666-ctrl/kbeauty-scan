@@ -1,5 +1,5 @@
 {
-  "updated": "2026-11-24",
+  "updated": "2026-11-25",
   "title": "明洞逛街店铺",
   "disclaimer": "下列店铺根据实地照片和公开资料整理。营业时间、楼层和退税办理可能变化，请以店门口公示和店内说明为准。未核对到来源的退税信息不会写进介绍。",
   "categories": [
@@ -669,6 +669,35 @@
       "source_note": "查阅 2026-11-24。VisitKorea 页面「Shinsegae Department Store Centum City Branch」列出地址、营业时间 10:30–20:00、春节与中秋休息及退税说明。",
       "source_url": "https://chinese.visitkorea.or.kr/svc/contents/contentsView.do?vcontsId=141140",
       "photo_credit": "照片：Modamoda / Wikimedia Commons / CC BY-SA 3.0"
+    },
+    {
+      "id": "shinsegae-myeongdong",
+      "name_zh": "新世界百货店总店",
+      "name_ko": "신세계백화점 본점",
+      "city": "seoul",
+      "city_zh": "首尔",
+      "area": "中区 小公洞",
+      "area_id": "myeongdong",
+      "category": "fashion",
+      "desc": "明洞与南大门市场之间的大型百货。1930 年代这里是三越百货京城分店的旧址，本馆保留了那栋石造老楼的外观，旁边是新馆。楼里从名品、化妆品到生活用品都有，地下和楼上分布着餐厅与食品卖场，逛累了可以就近吃饭。离会贤站很近，和南大门市场、崇礼门可以排在同一条线上；圣诞季本馆外墙会做灯饰。",
+      "transport": "地铁4号线会贤站（회현역）7号出口步行约2分钟。",
+      "tips": [
+        "本馆和新馆楼层不连贯，先看馆内导览。",
+        "周五至周日营业时间比平日稍长，餐厅时间另算。",
+        "节假日前先看官网的营业与休息安排。"
+      ],
+      "station": "회현역",
+      "hours": "周一至周四 10:30–20:00；周五至周日 10:30–20:30；美食街 11:00–21:30，以店内公告为准。",
+      "address": "서울 중구 소공로 63 (충무로1가)",
+      "map_query": "신세계백화점 본점",
+      "tax_refund": "未核对到公开退税说明，请现场咨询",
+      "cover": "/static/shop-photos/shinsegae-myeongdong-cover.jpg",
+      "photos": [
+        "/static/shop-photos/shinsegae-myeongdong-cover.jpg"
+      ],
+      "source_note": "查阅 2026-11-25。VisitSeoul 中文页「新世界百货店总店」（2026-02-05 更新）写明位置在明洞与南大门市场之间、由旧三越百货京城分店建筑而来、营业时间与美食街时间、地址小公路63号，会贤站7号出口；VisitKorea 中文页地址与简介一致。",
+      "source_url": "https://chinese.visitseoul.net/citycenter/%E6%96%B0%E4%B8%96%E7%95%8C%E7%99%BE%E8%B4%A7%E5%BA%97%E6%80%BB%E5%BA%97/CNP017598",
+      "photo_credit": "照片：Minseong Kim / Wikimedia Commons / CC BY-SA 4.0"
     }
   ]
 }
