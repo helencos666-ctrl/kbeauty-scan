@@ -1,3 +1,7 @@
+## 2026-11-25 官方帖：韩国免签真相
+
+- official_daily.json 追加 1 条官方帖（board: visa），配图 static/official-daily/2026-11-25-china-visa-free-truth.jpg。未改站点代码。
+
 ## 2026-11-25 明洞内容日更：地点实景照片与官方帖
 
 - static/food.json 新增南大门市场美食街（刀切面胡同，street）与太极堂（cafe）；static/attractions.json 新增崇礼门、明洞艺术剧场、韩国银行货币博物馆；static/shopping-stores.json 新增新世界百货店总店（fashion，area_id: myeongdong）。食店按 VisitKorea / VisitSeoul 官方中文页面核对，source_url / source_note 随条目记录。
