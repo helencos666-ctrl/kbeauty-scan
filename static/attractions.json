@@ -1,5 +1,5 @@
 {
-  "updated": "2026-11-25",
+  "updated": "2026-11-26",
   "title": "韩国免费景点指南",
   "disclaimer": "本页为公开资料整理的免费指南，不接入收费接口。开放时间、门票、交通和节庆日期可能调整，请以现场公示、官方网站和韩国旅游咨询热线 1330（有中文服务）为准。",
   "sources": [
@@ -2513,6 +2513,114 @@
         "/static/attraction-photos/bok-money-museum-cover.jpg"
       ],
       "photo_credit": "照片：Sean Young (@assanges) / Wikimedia Commons / CC BY 4.0"
+    },
+    {
+      "id": "seonyudo-park",
+      "name_zh": "仙游岛公园",
+      "name_ko": "선유도공원",
+      "city": "seoul",
+      "city_zh": "首尔",
+      "area": "永登浦区 仙游岛（合井·望远 对岸）",
+      "category": "nature",
+      "desc": "汉江上的小岛，原来是净水厂，厂房和沉淀池留下来改成了公园，水池、步道和旧混凝土结构混在一起。上岛先过仙游桥，岛上有水生植物园、时间庭院、首尔设计画廊和几处公共艺术，绕一圈不算长，适合慢慢走。江风大、树荫多，傍晚看夕阳和桥上的灯都不错。",
+      "transport": "地铁9号线仙游岛站（선유도역）3号出口步行约10分钟，走仙游桥上岛。",
+      "tips": [
+        "公园 06:00–24:00 开放；展馆另外有时间，周一闭馆。",
+        "岛上补给点不多，进岛前先买水。",
+        "江边风大，冬天多带一件外套。"
+      ],
+      "station": "선유도역",
+      "hours": "公园 06:00–24:00；展馆周二至周日 09:00–18:00（冬季至 17:00），周一闭馆。",
+      "fee": "免费",
+      "address": "서울 영등포구 선유로 343",
+      "map_query": "선유도공원",
+      "cover": "/static/attraction-photos/seonyudo-park-cover.jpg",
+      "photos": [
+        "/static/attraction-photos/seonyudo-park-cover.jpg",
+        "/static/attraction-photos/seonyudo-park-basin.jpg"
+      ],
+      "photo_credit": "照片：travel oriented、Jeon Han（korea.net）/ Wikimedia Commons / CC BY-SA 2.0"
+    },
+    {
+      "id": "oil-tank-culture-park",
+      "name_zh": "文化储备基地",
+      "name_ko": "문화비축기지",
+      "city": "seoul",
+      "city_zh": "首尔",
+      "area": "麻浦区 上岩",
+      "category": "landmark",
+      "desc": "上岩世界杯公园旁边，原来是麻浦石油储备基地，五个大油罐和周边的混凝土结构保留下来，罐体里改成剧场、展厅和多功能空间，户外是草地和步道。罐内空间很高，站在中间能看到原来的混凝土墙和天窗；周末常有展览和市集，具体看当周公告。",
+      "transport": "地铁6号线世界杯体育场站（월드컵경기장역）2号出口步行约10分钟。",
+      "tips": [
+        "罐内展馆 10:00–18:00，周一（大罐）闭馆。",
+        "户外园区全天开放，夜里灯不多，结伴走。",
+        "和天空公园在同一片，可以连着走。"
+      ],
+      "station": "월드컵경기장역",
+      "hours": "园区全天开放；罐内空间 10:00–18:00，周一（大罐）闭馆。",
+      "fee": "免费",
+      "address": "서울 마포구 증산로 87 (성산동)",
+      "map_query": "문화비축기지",
+      "cover": "/static/attraction-photos/oil-tank-culture-park-cover.jpg",
+      "photos": [
+        "/static/attraction-photos/oil-tank-culture-park-cover.jpg",
+        "/static/attraction-photos/oil-tank-culture-park-tank3.jpg"
+      ],
+      "photo_credit": "照片：Mvcervi、베르니사주 / Wikimedia Commons / CC BY-SA 4.0、CC BY 4.0"
+    },
+    {
+      "id": "jeoldusan-shrine",
+      "name_zh": "切头山殉教圣地",
+      "name_ko": "절두산 순교성지",
+      "city": "seoul",
+      "city_zh": "首尔",
+      "area": "麻浦区 合井",
+      "category": "landmark",
+      "desc": "合井洞汉江边的天主教堂区和殉教圣地，1866 年丙寅迫害的历史现场，如今是殉教者墓地、巡礼圣堂和韩国天主教殉教者博物馆所在的园区。入口有圣金大建神父的铜像，园内有石碑、雕像和展望台，可以看汉江和对岸。博物馆陈列教会文献和遗物，气氛安静，适合慢慢看。",
+      "transport": "地铁2号线、6号线合井站（합정역）7号出口步行约500米，往汉江方向。",
+      "tips": [
+        "09:30–17:00 开放，周一、1月1日与春节中秋当天休。",
+        "这里是宗教场所，衣着和音量都放低一些。",
+        "10 人以上团体要提前两周预约。"
+      ],
+      "station": "합정역",
+      "hours": "每天 09:30–17:00；周一、1月1日、春节与中秋当天休。",
+      "fee": "免费",
+      "address": "서울 마포구 토정로 6",
+      "map_query": "절두산 순교성지",
+      "cover": "/static/attraction-photos/jeoldusan-shrine-cover.jpg",
+      "photos": [
+        "/static/attraction-photos/jeoldusan-shrine-cover.jpg",
+        "/static/attraction-photos/jeoldusan-shrine-stele.jpg"
+      ],
+      "photo_credit": "照片：Hijin6908、Eggmoon / Wikimedia Commons / CC BY-SA 3.0"
+    },
+    {
+      "id": "seoul-battleship-park",
+      "name_zh": "首尔舰公园",
+      "name_ko": "서울함공원",
+      "city": "seoul",
+      "city_zh": "首尔",
+      "area": "麻浦区 望远",
+      "category": "nature",
+      "desc": "望远洞汉江边的舰艇公园，把退役的舰艇停在江边开放参观：约 1900 吨的护卫舰「首尔舰」、高速艇和潜艇，可以上舰看甲板、炮位和舱室，部分区域改成展览。舰上通道窄、台阶多，走一圈要留点时间；旁边就是汉江步道，看完可以顺着江边走。",
+      "transport": "地铁6号线望远站（망원역）1号出口换乘麻浦09路公交，到汉江公园入口站下车步行；也可以从望远汉江公园走过去。",
+      "tips": [
+        "冬季 10:00–18:00，闭馆前 30 分钟停止入场。",
+        "周一、1月1日与春节中秋当天休。",
+        "舰内台阶陡，穿好走的鞋，大件行李寄放在入口。"
+      ],
+      "station": "망원역",
+      "hours": "冬季（11–2月）10:00–18:00；夏季延长，闭馆前 30 分钟停止入场。",
+      "fee": "需门票（成人、青少年、儿童分档），以现场公示为准。",
+      "address": "서울 마포구 마포나루길 407 (망원동)",
+      "map_query": "서울함공원",
+      "cover": "/static/attraction-photos/seoul-battleship-park-cover.jpg",
+      "photos": [
+        "/static/attraction-photos/seoul-battleship-park-cover.jpg",
+        "/static/attraction-photos/seoul-battleship-park-sign.jpg"
+      ],
+      "photo_credit": "照片：Mztourist / Wikimedia Commons / CC BY-SA 4.0"
     }
   ]
 }

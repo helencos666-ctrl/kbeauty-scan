@@ -1,5 +1,5 @@
 {
-  "updated": "2026-11-25",
+  "updated": "2026-11-26",
   "title": "韩国美食推荐",
   "disclaimer": "本页只收录公开资料中有记载、近期仍见诸米其林指南或官方/百科旅游介绍的餐厅与市场。营业状态、菜单和价格可能随时变化，请出发前用地图或电话再确认。米其林必比登是「性价比」标注，其符号并不等同本页的人均₩档；没有把握的人均价格已省略。信息可能变化，请出行前核实。餐厅已按游客常去的打卡区域归类，具体门牌以各条地址和地图为准；不在热门区域内、但资料可靠的店会放在「其他」。部分明洞门店根据实地招牌和公开地图资料补充收录。",
   "price_legend": [
@@ -2999,6 +2999,34 @@
         "/static/food-photos/taegeukdang-interior.jpg"
       ],
       "photo_credit": "照片：오모군 / Wikimedia Commons / CC BY 3.0（门面）；Seefooddiet / Wikimedia Commons / CC BY-SA 4.0（店内）"
+    },
+    {
+      "id": "dongmu-bapsang",
+      "name_zh": "东慕饭桌（合井）",
+      "name_ko": "동무밥상",
+      "city": "seoul",
+      "city_zh": "首尔",
+      "area": "麻浦区 合井",
+      "category": "traditional",
+      "cuisine": "平壤冷面 / 北方（이북）料理",
+      "desc": "合井站往杨花津方向的小巷里，一家做平壤冷面的店。主厨出身平壤玉流馆，菜单围着北方做法转：平壤冷面、鸭肉面（오리국수），还有牛肉凉拌一类的菜。冷面用荞麦面，汤清而偏淡，配梨片、黄瓜丝、鸡蛋和牛肉片，桌上另给小菜。店里座位不多，装修朴素，饭点常要等一下。",
+      "transport": "地铁2号线、6号线合井站（합정역）出站后往杨花津路方向步行，按양화진길 10找；巷口不太显眼，注意路边门牌。",
+      "tips": [
+        "周一休息，出发前先确认当天是否营业。",
+        "15:00–17:00 是休息时间，避开这段更省事。",
+        "冷面口味偏清淡，习惯重口的可以另点凉拌菜。"
+      ],
+      "station": "합정역",
+      "hours": "11:30 起营业，15:00–17:00 休息，周一休；节假日安排以店门口公示为准。",
+      "address": "서울 마포구 양화진길 10 (합정동)",
+      "map_query": "동무밥상",
+      "source_note": "查阅 2026-11-26。VisitKorea「열린관광」页面写明：由平壤玉流馆出身的厨师经营，做平壤冷面、鸭肉面与牛肉凉拌等北方料理，地址为麻浦区杨花津路 10；营业时间与休息日以店门口公示为准。",
+      "source_url": "https://korean.visitkorea.or.kr/detail/ms_detail.do?cotid=5b65b79f-d3fa-4d19-a76b-2656106788cc",
+      "cover": "/static/food-photos/dongmu-bapsang-cover.jpg",
+      "photos": [
+        "/static/food-photos/dongmu-bapsang-cover.jpg"
+      ],
+      "photo_credit": "照片：Kim Sunjoo（韩国文化体育观光部 korea.net）/ Wikimedia Commons / CC BY-SA 2.0"
     }
   ],
   "areas": [

@@ -1,5 +1,5 @@
 {
-  "updated": "2026-11-25",
+  "updated": "2026-11-26",
   "title": "明洞逛街店铺",
   "disclaimer": "下列店铺根据实地照片和公开资料整理。营业时间、楼层和退税办理可能变化，请以店门口公示和店内说明为准。未核对到来源的退税信息不会写进介绍。",
   "categories": [
@@ -698,6 +698,34 @@
       "source_note": "查阅 2026-11-25。VisitSeoul 中文页「新世界百货店总店」（2026-02-05 更新）写明位置在明洞与南大门市场之间、由旧三越百货京城分店建筑而来、营业时间与美食街时间、地址小公路63号，会贤站7号出口；VisitKorea 中文页地址与简介一致。",
       "source_url": "https://chinese.visitseoul.net/citycenter/%E6%96%B0%E4%B8%96%E7%95%8C%E7%99%BE%E8%B4%A7%E5%BA%97%E6%80%BB%E5%BA%97/CNP017598",
       "photo_credit": "照片：Minseong Kim / Wikimedia Commons / CC BY-SA 4.0"
+    },
+    {
+      "id": "mangnidan-gil",
+      "name_zh": "望远团路（망리단길）",
+      "name_ko": "망리단길",
+      "city": "seoul",
+      "city_zh": "首尔",
+      "area": "麻浦区 望远",
+      "area_id": "hongdae",
+      "category": "fashion",
+      "desc": "望远洞的一条小巷街区，从望远站往汉江方向走进去。名字由「望远」和梨泰院「经理团路」拼起来，街上多是咖啡店、甜品店、小物店和几家餐馆，店面都不大，不少是旧住宅改的。工作日下午安静，周末人多；往南走到尽头就是望远汉江公园，可以接着去江边。",
+      "transport": "地铁6号线望远站（망원역）2号出口出来，往포은로、望远汉江公园方向步行即进入街区。",
+      "tips": [
+        "巷子窄、旁边是住宅，晚上说话放低音量。",
+        "各家店休息日不同，想去某一家先看门口营业牌。",
+        "周末下午人多，拉行李箱不好走。"
+      ],
+      "station": "망원역",
+      "hours": "街区全天可走；各店营业时间不同，以店门口公示为准。",
+      "address": "서울 마포구 포은로 일대 (망원동)",
+      "map_query": "망리단길",
+      "source_note": "查阅 2026-11-26。VisitSeoul 英文页「Mangridan-gil」把它列在购物·街区类，写明位于麻浦区포은로一带（望远洞 403-7）、望远站2号出口约 490 米，街上以咖啡店、甜品店、小物店与餐馆为主；VisitKorea 英文页「Mangnidan Street」同样介绍店种与名字由来。",
+      "source_url": "https://english.visitseoul.net/shopping/Mangridangil/ENP041785",
+      "cover": "/static/shop-photos/mangnidan-gil-cover.jpg",
+      "photos": [
+        "/static/shop-photos/mangnidan-gil-cover.jpg"
+      ],
+      "photo_credit": "照片：Lee Bumsu（韩国观光公社）/ Wikimedia Commons / KOGL 第1类"
     }
   ]
 }
