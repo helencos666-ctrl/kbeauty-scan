@@ -1,3 +1,10 @@
+## 2026-11-27 江南·瑞草内容日更：地点实景照片与官方帖
+
+- static/attractions.json 新增良才川、献仁陵、梅轩市民之林；static/shopping-stores.json 新增 COEX Mall（area_id: gangnam）与清潭洞名品街（fashion，area_id: gangnam）。地点按 VisitSeoul 官方英文页核对，shopping 条目的 source_url 与 source_note 随条目记录（attractions 的 schema 无 source_url，来源记在内容日志）。
+- 每个新条目带 2 张实景照片，来源为 Wikimedia Commons 的自由授权文件（CC0 / CC BY-SA 2.0 / CC BY-SA 3.0 / CC BY-SA 4.0），缩到 1280px 宽以内、JPEG 压缩到 300KB 以下；沿用 photo_credit 字段标注作者与许可。本次没有新增界面，缓存参数与 Service Worker 缓存名保持不变。
+- scripts/gen_official_daily_images.py 新增两张 11-27 卡片（江南冬夜光影路线、团体免签延长），配色为浅玫/冰蓝与淡薄荷/暖米，原有 18 张卡片输出不变。
+- official_daily.json 追加 2026-11-27 两条官方帖（board: daily、visa）。
+
 ## 2026-11-26 弘大·麻浦内容日更：地点实景照片与官方帖
 
 - static/food.json 新增东慕饭桌（合井，traditional）；static/attractions.json 新增仙游岛公园、文化储备基地、切头山殉教圣地、首尔舰公园；static/shopping-stores.json 新增望远团路（망리단길，fashion，area_id: hongdae）。地点按 VisitSeoul / VisitKorea 官方页面核对，food / shopping 条目的 source_url 与 source_note 随条目记录（attractions 的 schema 无 source_url，来源记在内容日志）。

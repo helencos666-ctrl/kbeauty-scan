@@ -1,5 +1,5 @@
 {
-  "updated": "2026-11-26",
+  "updated": "2026-11-27",
   "title": "韩国免费景点指南",
   "disclaimer": "本页为公开资料整理的免费指南，不接入收费接口。开放时间、门票、交通和节庆日期可能调整，请以现场公示、官方网站和韩国旅游咨询热线 1330（有中文服务）为准。",
   "sources": [
@@ -2621,6 +2621,87 @@
         "/static/attraction-photos/seoul-battleship-park-sign.jpg"
       ],
       "photo_credit": "照片：Mztourist / Wikimedia Commons / CC BY-SA 4.0"
+    },
+    {
+      "id": "yangjaecheon",
+      "name_zh": "良才川",
+      "name_ko": "양재천",
+      "city": "seoul",
+      "city_zh": "首尔",
+      "area": "瑞草区 良才（江南一带边界）",
+      "category": "nature",
+      "desc": "从江南、瑞草一带穿过的汉江支流，两岸修了步道和自行车道，沿河是树带和草坡，走一段就能看到水鸟。水流不深，夏天有亲水段，秋天芦苇和树叶变色，从道谷站或良才站附近都能下到河边，走累了随时回到路面坐地铁。适合晨跑、散步，也适合带孩子消磨半天。",
+      "transport": "地铁3号线、水仁盆唐线道谷站（도곡역）3号出口步行约560米下到河边；也可从3号线良才站（양재역）一带进入。",
+      "tips": [
+        "步道和自行车道分开，走的时候靠边，变道先回头看一眼。",
+        "夏天下过大雨水位会上涨，别下到亲水区。",
+        "冬天清晨背阴处有薄冰，鞋底选有纹路的。"
+      ],
+      "station": "도곡역",
+      "hours": "全天开放。",
+      "fee": "免费",
+      "address": "서울 서초구 양재천 일대 (도곡동)",
+      "map_query": "양재천",
+      "cover": "/static/attraction-photos/yangjaecheon-cover.jpg",
+      "photos": [
+        "/static/attraction-photos/yangjaecheon-cover.jpg",
+        "/static/attraction-photos/yangjaecheon-herons.jpg"
+      ],
+      "photo_credit": "照片：韩国文化体育观光部 korea.net（Republic of Korea）、Jeon Han / Wikimedia Commons / CC BY-SA 2.0"
+    },
+    {
+      "id": "heonilleung",
+      "name_zh": "献仁陵",
+      "name_ko": "헌인릉",
+      "city": "seoul",
+      "city_zh": "首尔",
+      "area": "瑞草区 良才",
+      "category": "palace",
+      "desc": "良才洞的朝鲜王陵群，献陵葬着太宗与元敬王后，仁陵葬着纯祖与纯元王后，两组陵寝合称献仁陵，列入联合国教科文组织世界遗产。入口进去是草坡和松林，神道两侧的石人石兽保存得比较完整，园内路平缓，慢慢走一圈一个多小时，能看到朝鲜前期和后期的陵制差别。",
+      "transport": "地铁3号线良才站（양재역）7号出口，在良才站·瑞草文化会馆公交站换乘 440、741、452 路，到献仁陵入口一带下车；从良才站打车过去也不远。",
+      "tips": [
+        "周一休园，节假日安排以官网公告为准。",
+        "11月至1月开放到17:30，闭园前留出往外走的时间。",
+        "陵丘和石像是文物保护范围，走铺好的路，不要踩上去。"
+      ],
+      "station": "양재역",
+      "hours": "2–5月、9–10月 09:00–18:00；6–8月 09:00–18:30；11–1月 09:00–17:30；周一休园。",
+      "fee": "成人 1,000 韩元（以现场公示为准）",
+      "address": "서울 서초구 헌인릉길 36-10",
+      "map_query": "헌인릉",
+      "cover": "/static/attraction-photos/heonilleung-cover.jpg",
+      "photos": [
+        "/static/attraction-photos/heonilleung-cover.jpg",
+        "/static/attraction-photos/heonilleung-illeung.jpg"
+      ],
+      "photo_credit": "照片：Tombus20032000、Noh Mun Duek / Wikimedia Commons / CC BY-SA 4.0"
+    },
+    {
+      "id": "maeheon-forest",
+      "name_zh": "梅轩市民之林",
+      "name_ko": "매헌시민의숲",
+      "city": "seoul",
+      "city_zh": "首尔",
+      "area": "瑞草区 良才",
+      "category": "nature",
+      "desc": "良才收费站旁的市民公园，1986年为亚运会和奥运会整治周边环境时建成，园里树密、草地开阔，还有喷泉广场、散步道和球场。园内有梅轩尹奉吉义士的纪念设施，春天樱花、秋天红叶都值得走一趟，门票免费，附近居民常来散步和运动。",
+      "transport": "新盆唐线良才市民之森站（양재시민의숲역）5号出口步行约500米。",
+      "tips": [
+        "园区24小时开放，夜里灯不多，结伴走。",
+        "草坪有活动时人多，注意脚下和随身物品。",
+        "和良才川步道相连，可以顺路走一段。"
+      ],
+      "station": "양재시민의숲역",
+      "hours": "全天开放。",
+      "fee": "免费",
+      "address": "서울 서초구 매헌로 99",
+      "map_query": "매헌시민의숲",
+      "cover": "/static/attraction-photos/maeheon-forest-cover.jpg",
+      "photos": [
+        "/static/attraction-photos/maeheon-forest-cover.jpg",
+        "/static/attraction-photos/maeheon-forest-path.jpg"
+      ],
+      "photo_credit": "照片：Piotrus / Wikimedia Commons / CC BY-SA 3.0"
     }
   ]
 }

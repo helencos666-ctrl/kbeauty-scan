@@ -1,5 +1,5 @@
 {
-  "updated": "2026-11-26",
+  "updated": "2026-11-27",
   "title": "明洞逛街店铺",
   "disclaimer": "下列店铺根据实地照片和公开资料整理。营业时间、楼层和退税办理可能变化，请以店门口公示和店内说明为准。未核对到来源的退税信息不会写进介绍。",
   "categories": [
@@ -726,6 +726,66 @@
         "/static/shop-photos/mangnidan-gil-cover.jpg"
       ],
       "photo_credit": "照片：Lee Bumsu（韩国观光公社）/ Wikimedia Commons / KOGL 第1类"
+    },
+    {
+      "id": "coex-mall",
+      "name_zh": "COEX Mall（星空 COEX 购物中心）",
+      "name_ko": "코엑스몰",
+      "city": "seoul",
+      "city_zh": "首尔",
+      "area": "江南区 三成",
+      "area_id": "gangnam",
+      "category": "fashion",
+      "desc": "三成站旁的大型地下商场，和 COEX 会展中心、现代百货贸易中心店、Parnas Mall 连成一片，服饰、美妆、书店、影院、水族馆都在里面，下雨或太冷太热时很好用。星空图书馆在商场中间，逛累了可以坐下来歇脚。面积大，先看指示牌定好方向再走，免得来回绕。",
+      "transport": "地铁2号线三成站（삼성역）6号出口直连；9号线奉恩寺站（봉은사역）7号出口也可进入。",
+      "tips": [
+        "各店营业时间不同，出发前先看想去的店。",
+        "周末下午人多，吃饭避开正点。",
+        "地下通道多，记好出口编号，约人见面定在图书馆或广场。"
+      ],
+      "station": "삼성역",
+      "hours": "每天开放，各店营业时间不同。",
+      "address": "서울 강남구 영동대로 513",
+      "map_query": "코엑스몰",
+      "tax_refund": "部分店铺可退税，结账时问店员（以店内公示为准）",
+      "source_note": "查阅 2026-11-27。首尔市官方旅游网站 VisitSeoul 英文页「COEX Mall」（2026-11-20 更新）：亚洲规模的地下购物中心，服饰、餐饮、Megabox 影院、泡菜博物馆与水族馆等集中在此；地址江南区永东大路513号，2号线三成站6号出口、9号线奉恩寺站7号出口，全年开放、各店时间不同。",
+      "source_url": "https://english.visitseoul.net/shopping/COEX-Mall/ENP000268",
+      "cover": "/static/shop-photos/coex-mall-cover.jpg",
+      "photos": [
+        "/static/shop-photos/coex-mall-cover.jpg",
+        "/static/shop-photos/coex-mall-hall.jpg"
+      ],
+      "photo_credit": "照片：Striker9498 / Wikimedia Commons / CC0"
+    },
+    {
+      "id": "cheongdam-fashion-street",
+      "name_zh": "清潭洞名品街",
+      "name_ko": "청담동 명품거리",
+      "city": "seoul",
+      "city_zh": "首尔",
+      "area": "江南区 清潭",
+      "area_id": "gangnam",
+      "category": "fashion",
+      "desc": "狎鸥亭罗德奥站往清潭方向的一片街区，主路两侧是名牌旗舰店和设计师店，巷子里藏着画廊、咖啡店和餐厅。店面和橱窗都不小，逛起来以看为主，年末前后会有灯饰和橱窗布置。和狎鸥亭罗德奥街、岛山公园离得近，可以连成一段慢慢走。",
+      "transport": "水仁盆唐线狎鸥亭罗德奥站（압구정로데오역）2号出口步行约490米。",
+      "tips": [
+        "各店营业时间不同，多数上午晚些开门。",
+        "拍橱窗或店内陈列前先问店员。",
+        "周边是住宅区，晚上说话放低音量。"
+      ],
+      "station": "압구정로데오역",
+      "hours": "每天开放，各店营业时间不同。",
+      "address": "서울 강남구 청담동 일대",
+      "map_query": "청담동 명품거리",
+      "tax_refund": "标有退税标志的店铺可办理，具体问店员",
+      "source_note": "查阅 2026-11-27。首尔市官方旅游网站 VisitSeoul 英文页「Cheongdamdong Fashion Street」（2026-11-21 更新）：清潭一带聚集路易威登、普拉达、卡地亚、巴宝莉等品牌与设计师店，许多店铺内设餐厅和咖啡店；地址江南区清潭洞，水仁盆唐线狎鸥亭罗德奥站2号出口约491米，每天开放、各店时间不同。",
+      "source_url": "https://english.visitseoul.net/shopping/Cheongdam-dong-Fashion-Celebrity-Street-Gangnam/ENP001307",
+      "cover": "/static/shop-photos/cheongdam-fashion-street-cover.jpg",
+      "photos": [
+        "/static/shop-photos/cheongdam-fashion-street-cover.jpg",
+        "/static/shop-photos/cheongdam-fashion-street-crossing.jpg"
+      ],
+      "photo_credit": "照片：Michaela den、Cyberdoomslayer / Wikimedia Commons / CC BY-SA 3.0、CC BY-SA 4.0"
     }
   ]
 }
