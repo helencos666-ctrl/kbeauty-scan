@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <title>汇率换算 · 旅韩助手</title>
-<meta name="description" content="人民币与韩元汇率换算，参考汇率由管理员手动更新。">
+<meta name="description" content="人民币与韩元汇率换算，参考汇率每天自动更新（欧洲央行参考价）。">
 <meta name="theme-color" content="#146E68">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
@@ -31,7 +31,7 @@
   <div class="card">
     <h2>💡 换钱小贴士</h2>
     <ul class="rules">
-      <li>参考汇率由管理员手动更新，仅供估算；实际以银行、换钱所或支付软件当时的汇率为准。</li>
+      <li>参考汇率每天自动取自欧洲央行（ECB）参考价，仅供估算；实际以银行、换钱所或支付软件当时的汇率为准，换钱所的买入/卖出价会与参考价有差距。</li>
       <li>明洞等正规换钱所看清“买入/卖出价”，当面点清现金。</li>
       <li>不要通过社区网友私下换汇或转账，这是常见诈骗方式。</li>
     </ul>
@@ -57,8 +57,9 @@ document.getElementById('quick').innerHTML = [1000, 5000, 10000, 50000, 100000].
   [100, 500, 1000].map(function(v){ return '<button data-c="' + v + '">¥' + v + '</button>'; }).join('');
 document.querySelectorAll('#quick button').forEach(function(b){ b.onclick = function(){
   if (b.dataset.k){ krw.value = b.dataset.k; krw.oninput(); } else { cny.value = b.dataset.c; cny.oninput(); } }; });
-LH.api('GET', '/api/community/rate').then(function(d){ rate = d.cny_krw; show(); }).catch(show);
-function show(){ document.getElementById('rinfo').textContent = '参考汇率：1 人民币 ≈ ' + rate + ' 韩元；1000 韩元 ≈ ' + fmt(1000 / rate, 2) + ' 人民币（管理员手动设置）'; if (cny.value) cny.oninput(); }
+var rsrc = '（参考值）';
+LH.api('GET', '/api/community/rate').then(function(d){ if (d.market && d.market.cny_krw){ rate = d.market.cny_krw; rsrc = '（' + d.market.source + '，' + (d.market.date || '') + '）'; } else { rate = d.cny_krw; rsrc = '（管理员手动设置）'; } show(); }).catch(show);
+function show(){ document.getElementById('rinfo').textContent = '参考汇率：1 人民币 ≈ ' + rate + ' 韩元；1000 韩元 ≈ ' + fmt(1000 / rate, 2) + ' 人民币' + rsrc; if (cny.value) cny.oninput(); }
 </script>
 <script src="/static/pwa.js?v=99" defer></script>
 </body>

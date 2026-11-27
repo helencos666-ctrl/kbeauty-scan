@@ -654,13 +654,70 @@ app.include_router(lanjing_router)
 from shop_partners import router as shop_partners_router  # noqa: E402
 app.include_router(shop_partners_router)
 
+from daily_brief import router as daily_brief_router  # noqa: E402
+app.include_router(daily_brief_router)
+_BOOT_T = time.time()
+_SEED_STATE = {"done": False, "error": None}
+
+def _run_startup_seeds():
+    """一次性数据种子（均幂等）。放到后台线程里跑，不阻塞端口监听，冷启动更快；
+    任何一步失败只记录异常类型，不影响网站其它功能。"""
+    for fn in (seed_lanjing, hide_shop_posts_v76, hide_shop_posts_v77, seed_guides, seed_official_daily):
+        try:
+            fn()
+        except Exception as e:  # noqa: BLE001
+            _SEED_STATE["error"] = type(e).__name__
+            print("startup seed error", getattr(fn, "__module__", "?"), type(e).__name__, flush=True)
+    _SEED_STATE["done"] = True
+
 @app.on_event("startup")
 def _startup_seeds():
-    seed_lanjing()
-    hide_shop_posts_v76()
-    hide_shop_posts_v77()
-    seed_guides()
-    seed_official_daily()
+    if not os.environ.get("RENDER") or os.environ.get("LH_SYNC_SEEDS") == "1":
+        _run_startup_seeds()   # 本地/测试：保持同步，行为与以前一致
+    else:
+        threading.Thread(target=_run_startup_seeds, name="startup-seeds", daemon=True).start()
+    import keepalive
+    keepalive.start()
+
+_deep_lock = threading.Lock()
+_deep_cache = {"t": 0.0, "v": None}
+
+@app.get("/healthz/deep")
+def healthz_deep():
+    """深度健康检查：数据库连通（SELECT 1）、内容文件、后台保活状态。结果缓存 20 秒，不泄露连接信息。"""
+    now = time.time()
+    with _deep_lock:
+        if _deep_cache["v"] is not None and now - _deep_cache["t"] < 20:
+            return JSONResponse(_deep_cache["v"], status_code=200 if _deep_cache["v"]["ok"] else 503)
+    import keepalive
+    from community import _db_url, db, q
+    out = {"ok": True, "uptime_s": int(now - _BOOT_T), "commit": (os.environ.get("RENDER_GIT_COMMIT") or "")[:7],
+           "seeds_done": _SEED_STATE["done"], "checks": {}}
+    if _db_url():
+        t0 = time.time()
+        try:
+            with db() as conn:
+                q(conn, "SELECT 1 AS x", one=True)
+            out["checks"]["db"] = {"ok": True, "ms": int((time.time() - t0) * 1000)}
+        except Exception as e:  # noqa: BLE001
+            out["checks"]["db"] = {"ok": False, "error": type(e).__name__}
+            out["ok"] = False
+    else:
+        out["checks"]["db"] = {"ok": False, "error": "not_configured"}
+    for name in ("food.json", "attractions.json", "shopping-stores.json", "events.json", "daily-tips.json", "subway.json"):
+        try:
+            with open(os.path.join(BASE, "static", name), encoding="utf-8") as f:
+                json.load(f)
+            out["checks"][name] = {"ok": True}
+        except Exception:  # noqa: BLE001
+            out["checks"][name] = {"ok": False}
+            out["ok"] = False
+    ka = keepalive.STATE
+    out["keepalive"] = {"on": ka["started_at"] is not None, "pings": ka["pings"], "fail": ka["ping_fail"],
+                        "last_ok": ka["last_ping_ok"]}
+    with _deep_lock:
+        _deep_cache.update(t=now, v=out)
+    return JSONResponse(out, status_code=200 if out["ok"] else 503)
 
 @app.get("/static/subway.json")
 def static_subway_json():

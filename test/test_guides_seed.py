@@ -64,7 +64,7 @@ check("does not call official-post", "official-post" not in src)
 
 app = read("app.py")
 check("app starts both seeds", "seed_lanjing" in app and "seed_guides" in app)
-check("lanjing seed still runs", "seed_lanjing()" in app and "seed_guides()" in app)
+check("lanjing seed still runs", "for fn in (seed_lanjing, hide_shop_posts_v76, hide_shop_posts_v77, seed_guides, seed_official_daily)" in app and "_run_startup_seeds()" in app)
 
 print("%s passed, %s failed" % (ok, fail))
 if fail:

@@ -30,6 +30,7 @@ OWN_HOSTS = {
 }
 SKIP_PATHS = {
     "/healthz",
+    "/healthz/deep",
     "/robots.txt",
     "/favicon.ico",
     "/sw.js",

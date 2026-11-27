@@ -58,7 +58,7 @@ def main():
         pages = {
             "/pay": ["T-money", "闸机", "支付宝", "以现场为准"],
             "/tax-refund": ["即时退税", "15,000", "1,000,000", "5,000,000", "查阅"],
-            "/visa": ["2026-12-31", "2026-11-15", "不代办签证", "K-ETA", "驻上海", "指定旅行社", "3 人及以上", "15 天", "2027"],
+            "/visa": ["2027-12-31", "2026-11-27", "不代办签证", "K-ETA", "驻上海", "指定旅行社", "3 人及以上", "15 天", "2027"],
             "/itineraries": ["首次经典", "购物美妆", "追星", "美食", "itineraries.json"],
             "/chicken": ["个人代点", "非持牌", "过敏"],
             "/shops": ["避雷"],
@@ -72,10 +72,10 @@ def main():
                 check("%s contains %s" % (path, n), n in text, n)
 
         visa = cli.get("/visa").text
-        check("visa does not claim group scheme ended 2026-06-30",
-              "延长至 2026-12-31" in visa and "并未" in visa and "仍然有效" in visa)
+        check("visa shows group scheme extended to 2027-12-31 (embassy notice 2026-11-24)",
+              "2027-12-31" in visa and "2026-11-24" in visa and "seq=761597" in visa)
         check("visa cites official standard", "使领馆" in visa and "法务部" in visa)
-        check("visa notes no 2027 extension announcement", "2027" in visa and "尚未" in visa)
+        check("visa says independent travel not covered", "个人自由行" in visa and "不适用团体免签" in visa)
         check("visa keeps Jeju 30-day", "30 天" in visa and "直达济州" in visa)
         check("visa cites shanghai notice url", "seq=760833" in visa)
 

@@ -1,3 +1,15 @@
+## 2026-11-27 稳定性：防休眠保活、深度健康检查、后台种子；首页「今日旅韩速报」；签证与汇率更新
+
+- 根因：Render 免费实例空闲约 15 分钟就休眠，原先放在运维机上的保活脚本 11-21 停了，之后服务每天被反复休眠/唤醒几十次，访客与小程序首次打开要等 30–40 秒。新增 keepalive.py：只在 Render 上启用，进程内每约 9 分钟请求一次公开 /healthz（经 Render 边缘，计为入站流量），每小时重跑幂等的官方帖种子（按日期的帖子到点自动上线，不再依赖每日部署）并预热速报缓存。KEEPALIVE_DISABLE=1 可关闭。
+- 启动种子（蓝憬、隐藏帖、攻略、官方帖）在 Render 上改为后台线程执行，不再阻塞端口监听，冷启动更快；本地/测试仍同步执行。每个种子单独 try，失败只记异常类型。
+- 新增 /healthz/deep：数据库 SELECT 1 及耗时、内容 JSON 可读、保活状态、运行时长、部署版本（RENDER_GIT_COMMIT 前 7 位），20 秒缓存，不输出连接信息；/healthz 保持轻量。
+- 新增 daily_brief.py 与 /api/daily-brief，首页新增「今日旅韩速报」卡片：首尔天气（MET Norway，CC BY 4.0，18 点后显示明天）、人民币/韩元参考汇率（欧洲央行参考价，经 Frankfurter）、近期活动（static/events.json 人工核对 11 项 + VisitSeoul 官方活动日历自动合并去重）、今天在展的展览、每日贴士（static/daily-tips.json 32 条，按日期轮换）、小编最近帖子。外部请求只在后台线程，接口只读缓存；取不到就不显示。
+- /api/community/rate 增加 market（ECB 参考价）；汇率换算页优先用每日自动汇率，取不到时回退管理员手动值。炸鸡代点等业务报价仍用后台手动汇率。
+- 签证：韩国驻华大使馆 2026-11-24 通知，中国团体游客免签再延长至 2027-12-31；visa、tips、faq、SEO 描述同步更新并加官方来源。
+- 路线地点联想：Kakao 细分类韩文（관광,명소、케이블카、문화유적…）转中文。
+- 新脚本：scripts/uptime_check.py（线上巡检，可做定时任务，--quiet 无异常不输出）；scripts/daily_topics.py（从官方数据生成每日选题候选）。
+- 测试：新增 test/test_daily_brief.py；test_guides_seed / test_guide_chicken 按新结构与新签证事实更新。
+
 ## 2026-11-27 江南·瑞草内容日更：地点实景照片与官方帖
 
 - static/attractions.json 新增良才川、献仁陵、梅轩市民之林；static/shopping-stores.json 新增 COEX Mall（area_id: gangnam）与清潭洞名品街（fashion，area_id: gangnam）。地点按 VisitSeoul 官方英文页核对，shopping 条目的 source_url 与 source_note 随条目记录（attractions 的 schema 无 source_url，来源记在内容日志）。

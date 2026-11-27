@@ -1822,6 +1822,14 @@ def api_rate():
     out = {"cny_krw": float(v), "source": "manual"}
     if updated:
         out["updated_at"] = updated
+    # 市场参考汇率（欧洲央行每日参考价，后台自动更新）；取不到时页面回退到上面的手动值
+    try:
+        import daily_brief
+        fx = daily_brief.get("fx")
+        if fx:
+            out["market"] = fx
+    except Exception:  # noqa: BLE001
+        pass
     return out
 
 @router.get("/api/community/posts/{pid}")

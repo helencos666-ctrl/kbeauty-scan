@@ -367,6 +367,24 @@ body.is-home .disclaimer{display:none}
   .cats i{width:46px;height:46px;font-size:21px}
   .cats a{font-size:11px}
 }
+/* 今日旅韩速报（v100） */
+.brief{margin:12px 12px 4px;background:#fff;border-radius:16px;box-shadow:0 1px 6px rgba(20,110,104,.10);padding:12px 14px}
+.brief-h{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:6px}
+.brief-h b{font-size:16px;color:#146E68}.brief-h span{font-size:12px;color:#888}
+.brief-row{display:flex;gap:8px;margin:6px 0}
+.brief-cell{flex:1;background:#F2F8F7;border-radius:12px;padding:8px 10px;font-size:13px;line-height:1.5;color:#234}
+.brief-cell em{display:block;font-style:normal;font-size:12px;color:#5b7f7b}
+.brief-cell strong{font-size:17px;color:#123}
+.brief-sec{font-size:13px;font-weight:600;color:#146E68;margin:10px 0 4px}
+.brief-ev{display:block;padding:6px 0;border-top:1px dashed #e3ecea;font-size:13px;color:#234;text-decoration:none;line-height:1.5}
+.brief-ev:first-of-type{border-top:0}
+.brief-ev i{font-style:normal;font-size:11px;padding:1px 6px;border-radius:8px;margin-right:6px;background:#FFE9C7;color:#8a5a00}
+.brief-ev i.on{background:#D8F3EC;color:#0f6b55}
+.brief-ev small{display:block;color:#888;font-size:12px}
+.brief-tip{background:#FFF8E8;border-radius:12px;padding:8px 10px;font-size:13px;line-height:1.6;color:#4a3b17}
+.brief-tip a{color:#146E68}
+.brief-src{font-size:11px;color:#999;margin-top:8px;line-height:1.5}
+.brief-src a{color:#999}
 </style>
 </head>
 <body class="is-home">
@@ -404,6 +422,20 @@ body.is-home .disclaimer{display:none}
       </div>
     </div>
 
+
+    <!-- B2. 今日旅韩速报：天气/汇率自动更新，活动与贴士按日期轮换（/api/daily-brief） -->
+    <section class="brief" id="briefBlk" hidden>
+      <div class="brief-h"><b>📰 今日旅韩速报</b><span id="briefDate"></span></div>
+      <div class="brief-row">
+        <div class="brief-cell" id="briefWx"></div>
+        <a class="brief-cell" id="briefFx" href="/community/rate" style="text-decoration:none"></a>
+      </div>
+      <div id="briefEvWrap" hidden><div class="brief-sec">🎄 近期活动</div><div id="briefEv"></div></div>
+      <div id="briefExWrap" hidden><div class="brief-sec">🖼️ 今天可以看的展览</div><div id="briefEx"></div></div>
+      <div id="briefTipWrap" hidden><div class="brief-sec">💡 今日贴士</div><div class="brief-tip" id="briefTip"></div></div>
+      <div id="briefOffWrap" hidden><div class="brief-sec">📝 小编今日帖</div><div id="briefOff"></div></div>
+      <div class="brief-src" id="briefSrc"></div>
+    </section>
     <!-- C. 广告轮播（静态配置，自动轮播 + 左右滑动 + 无缝循环） -->
     <div class="ads" id="homeAds">
       <div class="ads-viewport">
@@ -1759,6 +1791,57 @@ drawScenes();
   });
   // 首页空闲时预取地铁数据（只预取，不恢复上次路线），首次打开路线页就不用等 100KB+ 的 json
   (window.requestIdleCallback||function(cb){setTimeout(cb,1)})(function(){ if(window.LHSub) LHSub.load(); });
+})();
+</script>
+<script>
+(function(){
+  var blk = document.getElementById('briefBlk'); if (!blk || !window.fetch) return;
+  function esc(t){ return String(t == null ? '' : t).replace(/[&<>"']/g, function(c){ return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]; }); }
+  function md(d){ var p = (d||'').split('-'); return p.length === 3 ? (+p[1]) + '月' + (+p[2]) + '日' : d; }
+  fetch('/api/daily-brief', {credentials: 'same-origin'}).then(function(r){ return r.ok ? r.json() : null; }).then(function(d){
+    if (!d) return;
+    var src = [];
+    document.getElementById('briefDate').textContent = md(d.date) + ' ' + (d.weekday || '');
+    var w = d.weather, wx = document.getElementById('briefWx');
+    if (w && (w.min != null || w.now != null)) {
+      wx.innerHTML = '<em>首尔' + esc(w.label || '') + '天气' + (w.desc ? ' · ' + esc(w.desc) : '') + '</em><strong>' + (w.min != null ? esc(Math.round(w.min)) + '° ~ ' + esc(Math.round(w.max)) + '°' : esc(Math.round(w.now)) + '°') + '</strong>' + (w.rain_mm >= 0.5 ? ' ☔ 约' + esc(w.rain_mm) + 'mm' : '');
+      src.push('天气：' + esc(w.source));
+    } else { wx.innerHTML = '<em>首尔天气</em>暂未取到，出门前看看天气预报'; }
+    var f = d.fx, fx = document.getElementById('briefFx');
+    if (f && f.cny_krw) {
+      fx.innerHTML = '<em>参考汇率 ›</em><strong>¥1 ≈ ₩' + esc(f.cny_krw) + '</strong><br>₩1万 ≈ ¥' + esc((10000 / f.cny_krw).toFixed(1));
+      src.push('汇率：' + esc(f.source) + ' ' + esc(f.date || ''));
+    } else { fx.innerHTML = '<em>汇率换算 ›</em>点这里换算'; }
+    var ev = d.events || [];
+    if (ev.length) {
+      document.getElementById('briefEv').innerHTML = ev.slice(0, 4).map(function(e){
+        var tag = e.status === 'ongoing' ? '<i class="on">进行中' + (e.days_left <= 3 ? ' · 还剩' + (e.days_left + 1) + '天' : '') + '</i>' : '<i>' + (e.days_to_start === 1 ? '明天开始' : e.days_to_start + '天后') + '</i>';
+        return '<a class="brief-ev" href="' + esc(e.source_url) + '" target="_blank" rel="noopener">' + tag + esc(e.title) +
+          '<small>' + md(e.start) + '–' + md(e.end) + ' · ' + esc(e.place) + ' · ' + esc(e.fee) + '（来源：' + esc(e.source) + '）</small></a>';
+      }).join('');
+      document.getElementById('briefEvWrap').hidden = false;
+    }
+    var ex = d.exhibitions || [];
+    if (ex.length) {
+      document.getElementById('briefEx').innerHTML = ex.map(function(e){
+        return '<a class="brief-ev" href="' + esc(e.source_url) + '" target="_blank" rel="noopener"><i class="on">在展</i>' + esc(e.title) +
+          '<small>至 ' + md(e.end) + ' · ' + esc(e.place) + '</small></a>';
+      }).join('') + (d.more_events_url ? '<a class="brief-ev" href="' + esc(d.more_events_url) + '" target="_blank" rel="noopener" style="color:#146E68">查看首尔官方活动日历 ›</a>' : '');
+      document.getElementById('briefExWrap').hidden = false;
+    }
+    var t = d.tip;
+    if (t) {
+      document.getElementById('briefTip').innerHTML = '<b>' + esc(t.title) + '</b>：' + esc(t.body) + (t.link ? ' <a href="' + esc(t.link) + '">详情 ›</a>' : '');
+      document.getElementById('briefTipWrap').hidden = false;
+    }
+    var of = (d.official || []).slice(0, 2);
+    if (of.length) {
+      document.getElementById('briefOff').innerHTML = of.map(function(p){ return '<a class="brief-ev" href="/community/post/' + esc(p.id) + '">' + esc(p.title) + '<small>' + md(p.date) + ' · 旅韩助手小编</small></a>'; }).join('');
+      document.getElementById('briefOffWrap').hidden = false;
+    }
+    document.getElementById('briefSrc').innerHTML = src.join('；') + (src.length ? '。' : '') + esc(d.note || '');
+    blk.hidden = false;
+  }).catch(function(){});
 })();
 </script>
 <script src="/static/maps.js"></script>

@@ -1,0 +1,230 @@
+{
+ "updated": "2026-11-27",
+ "note": "取自本站攻略、退税、签证页（2026-11-15 按官方页面核对），政策可能调整，请以官方为准。",
+ "items": [
+  {
+   "cat": "交通",
+   "title": "公交上下车都要刷卡",
+   "body": "在首尔坐公交，上车、下车都刷交通卡；下车不刷通常会失去换乘优惠，部分按距离计费的线路还可能多扣钱。",
+   "link": "/tips#tip-traffic",
+   "source_url": null
+  },
+  {
+   "cat": "交通",
+   "title": "T-money 卡在哪买",
+   "body": "T-money 等交通卡在便利店和地铁站一般都能买、能充值；退余额要到指定地点，通常扣手续费，卡本身的工本费一般不退。",
+   "link": "/tips#tip-traffic",
+   "source_url": null
+  },
+  {
+   "cat": "交通",
+   "title": "深夜打车看清加价时段",
+   "body": "首尔普通出租车夜间加价时段一般是 22:00–04:00，其中 23:00–02:00 加价更多；黑色模范出租起步价更高。以上车时计价器为准。",
+   "link": "/tips#tip-traffic",
+   "source_url": "https://english.seoul.go.kr/policy/transportation/modes-of-transport/taxi/"
+  },
+  {
+   "cat": "交通",
+   "title": "给司机看韩文地址更稳",
+   "body": "打车时把目的地的韩文地址或 Naver 地图地点链接给司机看，比只说中文店名更不容易走错。本站「路线」可以直接查起终点。",
+   "link": "/?tab=sub",
+   "source_url": null
+  },
+  {
+   "cat": "交通",
+   "title": "机场选仁川还是金浦",
+   "body": "仁川机场国际航班多但离市区远；金浦离市区更近，去弘大、明洞一般更方便。具体看航班和当天交通。",
+   "link": "/tips#tip-flight",
+   "source_url": null
+  },
+  {
+   "cat": "交通",
+   "title": "首尔的气候同行卡",
+   "body": "首尔有面向公共交通的「气候同行卡」（Climate Card），适合短期内大量坐地铁公交的人，购买与适用范围以首尔市官方说明为准。",
+   "link": "/tips#tip-traffic",
+   "source_url": "https://english.seoul.go.kr/policy/transportation/climate-card/"
+  },
+  {
+   "cat": "退税",
+   "title": "退税门槛是 15,000 韩元",
+   "body": "在贴有退税标识的商店，单笔消费满 15,000 韩元及以上才可能退税（不是以前常说的 3 万）。结账时出示护照并主动说要退税。",
+   "link": "/tax-refund",
+   "source_url": "https://english.visitkorea.or.kr/svc/contents/contentsView.do?vcontsId=140041"
+  },
+  {
+   "cat": "退税",
+   "title": "即时退税有上限",
+   "body": "即时退税单笔须低于 100 万韩元，同一行程累计一般在 500 万韩元以内；超出部分按一般退税办理。",
+   "link": "/tax-refund",
+   "source_url": "https://english.visitkorea.or.kr/svc/contents/contentsView.do?vcontsId=140041"
+  },
+  {
+   "cat": "退税",
+   "title": "机场退税要预留时间",
+   "body": "机场办理退税通常要先过海关确认携带出境，建议比平时更早到机场；商品保持未使用，方便海关查验。",
+   "link": "/tax-refund",
+   "source_url": "https://english.visitkorea.or.kr/svc/contents/contentsView.do?vcontsId=140041"
+  },
+  {
+   "cat": "退税",
+   "title": "别把护照交给「退税代办」",
+   "body": "不要把护照和退税单交给街上主动搭讪的所谓代办，按商店或官方退税点流程办理。",
+   "link": "/tips#scams",
+   "source_url": null
+  },
+  {
+   "cat": "支付",
+   "title": "准备少量韩元现金",
+   "body": "大商场、Olive Young、免税店越来越多支持微信、支付宝，但路边小摊、传统市场和不少小店仍可能只收现金或韩国卡。",
+   "link": "/tips#tip-pay",
+   "source_url": null
+  },
+  {
+   "cat": "支付",
+   "title": "换钱去正规兑换所",
+   "body": "换钱选有公示汇率的银行或正规兑换所，当面点清；不要在社区或街头私下找人换钱、转账，这是常见骗局。",
+   "link": "/community/rate",
+   "source_url": null
+  },
+  {
+   "cat": "支付",
+   "title": "机场换钱只换应急",
+   "body": "机场兑换处方便，但牌价常常不如市区正规兑换所，适合只换少量应急现金。",
+   "link": "/tips#tip-flight",
+   "source_url": null
+  },
+  {
+   "cat": "安全",
+   "title": "记住几个电话",
+   "body": "报警 112，火警和急救 119，旅游咨询 1330（有中文服务）。遇到危险先打 112 或 119，再联系领事保护。",
+   "link": "/tips#safety",
+   "source_url": null
+  },
+  {
+   "cat": "安全",
+   "title": "护照和现金分开放",
+   "body": "护照、现金分开放，重要证件拍照备份；不要把护照抵押给陌生人。",
+   "link": "/tips#scams",
+   "source_url": null
+  },
+  {
+   "cat": "安全",
+   "title": "街头拉客先问价",
+   "body": "对街上强力推销的酒吧、按摩或「免费参观」要谨慎，先问清价格再决定。",
+   "link": "/tips#scams",
+   "source_url": null
+  },
+  {
+   "cat": "签证",
+   "title": "团体免签≠自由行免签",
+   "body": "中国团体游客免签只适用于通过指定旅行社、3 人以上的团队，个人去首尔一般仍需签证。详见签证须知。",
+   "link": "/visa",
+   "source_url": "https://chinese.visitkorea.or.kr/svc/contents/contentsView.do?vcontsId=189505"
+  },
+  {
+   "cat": "签证",
+   "title": "K-ETA 不能代替签证",
+   "body": "K-ETA 是给免签国家旅客的电子许可，持中国普通护照去首尔等地，一般不能靠 K-ETA 代替签证。",
+   "link": "/visa",
+   "source_url": "https://www.k-eta.go.kr"
+  },
+  {
+   "cat": "签证",
+   "title": "济州免签只限济州",
+   "body": "从境外直飞济州可按规定免签停留，但活动范围限于济州，不能据此转去首尔、釜山。",
+   "link": "/visa",
+   "source_url": "https://chinese.visitkorea.or.kr/svc/contents/contentsView.do?vcontsId=189505"
+  },
+  {
+   "cat": "入境",
+   "title": "备好返程和住宿订单",
+   "body": "免签或持签证都不等于一定能入境，建议备好返程机票、首晚住宿订单和行程说明，入境时可能抽查。",
+   "link": "/tips#tip-visa",
+   "source_url": null
+  },
+  {
+   "cat": "上网",
+   "title": "eSIM 要先确认手机支持",
+   "body": "短期旅行不少人用 eSIM，但手机要支持且已解锁；也可以在机场办预付 SIM 或租随身 Wi-Fi。",
+   "link": "/tips#internet",
+   "source_url": null
+  },
+  {
+   "cat": "上网",
+   "title": "公共 Wi-Fi 别登网银",
+   "body": "咖啡馆和商场有公共 Wi-Fi，但不要在公共网络里登录网银或输入重要验证码。",
+   "link": "/tips#internet",
+   "source_url": null
+  },
+  {
+   "cat": "工具",
+   "title": "导航用 Naver 地图",
+   "body": "在韩国导航优先用 Naver 地图；谷歌地图在部分步行和公交路线上不够完整。本站地点页有 Naver、高德地图按钮。",
+   "link": "/tips#tip-net",
+   "source_url": null
+  },
+  {
+   "cat": "工具",
+   "title": "带一个转换插头",
+   "body": "韩国常用 220V、60Hz，插座是两个圆孔（常见欧标/德标），记得带转换插头。",
+   "link": "/tips#tip-net",
+   "source_url": null
+  },
+  {
+   "cat": "住宿",
+   "title": "酒店一次性用品自带",
+   "body": "不少韩国酒店不提供一次性牙刷、牙膏或拖鞋，建议自带。常见入住 15:00、退房 11:00，以酒店规定为准。",
+   "link": "/tips#tip-stay",
+   "source_url": null
+  },
+  {
+   "cat": "美食",
+   "title": "烤肉店常有 2 人起点",
+   "body": "不少烤肉店 2 人起点，一个人吃饭可以先问清楚，或找标明接待单人的店。",
+   "link": "/food",
+   "source_url": null
+  },
+  {
+   "cat": "美食",
+   "title": "韩国吃饭一般不给小费",
+   "body": "韩国日常餐饮一般没有给小费的习惯；账单上已经写了服务费就按账单付。",
+   "link": "/tips#tip-food",
+   "source_url": null
+  },
+  {
+   "cat": "游玩",
+   "title": "穿韩服逛宫殿",
+   "body": "穿着符合规定的韩服参观景福宫等部分宫殿可以免门票，服装须符合官方指引。",
+   "link": "/attractions",
+   "source_url": null
+  },
+  {
+   "cat": "游玩",
+   "title": "公休日先查营业",
+   "body": "韩国公休日部分小店和餐厅会休息，出行前查好日期和营业时间。",
+   "link": "/tips#tip-play",
+   "source_url": null
+  },
+  {
+   "cat": "天气",
+   "title": "冬天穿防滑鞋",
+   "body": "首尔冬季常低于冰点、干燥多风：厚外套、围巾手套、防滑鞋底；室内暖气足，穿方便穿脱的衣服。",
+   "link": "/tips#weather",
+   "source_url": null
+  },
+  {
+   "cat": "购物",
+   "title": "大量采购注意回国限额",
+   "body": "买很多东西回国时，注意中国海关对个人自用物品的限额，超额可能要申报或征税，以海关总署现行规定为准。",
+   "link": "/tips#tip-shop",
+   "source_url": null
+  },
+  {
+   "cat": "翻译",
+   "title": "信号差时用沟通卡",
+   "body": "提前在本站「翻译」生成常用韩文卡片，信号不好时也能直接给店员看。",
+   "link": "/?tab=card",
+   "source_url": null
+  }
+ ]
+}
