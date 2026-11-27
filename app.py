@@ -607,6 +607,11 @@ def faq():
 def beauty():
     return html_file_response("beauty.html", "/beauty")
 
+@app.get("/favicon.ico")
+def favicon():
+    return FileResponse(os.path.join(BASE, "static", "icons", "favicon.ico"), media_type="image/x-icon",
+                        headers={"Cache-Control": "public, max-age=604800"})
+
 @app.get("/manifest.webmanifest")
 def webmanifest():
     return FileResponse(
@@ -656,6 +661,8 @@ app.include_router(shop_partners_router)
 
 from daily_brief import router as daily_brief_router  # noqa: E402
 app.include_router(daily_brief_router)
+from mp_api import router as mp_api_router  # noqa: E402
+app.include_router(mp_api_router)
 _BOOT_T = time.time()
 _SEED_STATE = {"done": False, "error": None}
 
