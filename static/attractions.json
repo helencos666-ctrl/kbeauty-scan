@@ -1,5 +1,5 @@
 {
-  "updated": "2026-11-27",
+  "updated": "2026-11-28",
   "title": "韩国免费景点指南",
   "disclaimer": "本页为公开资料整理的免费指南，不接入收费接口。开放时间、门票、交通和节庆日期可能调整，请以现场公示、官方网站和韩国旅游咨询热线 1330（有中文服务）为准。",
   "sources": [
@@ -2702,6 +2702,114 @@
         "/static/attraction-photos/maeheon-forest-path.jpg"
       ],
       "photo_credit": "照片：Piotrus / Wikimedia Commons / CC BY-SA 3.0"
+    },
+    {
+      "id": "sangumburi",
+      "name_zh": "山君不离",
+      "name_ko": "산굼부리",
+      "city": "jeju",
+      "city_zh": "济州",
+      "area": "济州市 朝天 桥来",
+      "category": "nature",
+      "desc": "朝天邑桥来里的火山口，国家天然纪念物第 263 号。「굼부리」是济州话里火山口的说法，这里是玛珥型火山口，口子宽、深度不算深，口内生着亚热带与温带植物。沿平缓步道走到观景台约 40 分钟，能看到火山口内部、周边火山丘和中山间草原；秋天芒草成片，冬天则是安静的枯草原。",
+      "transport": "济州岛没有地铁。从济州市区乘东线巴士到桥来、榧子林一带，再按地图步行或打车到入口；自驾有停车场。",
+      "tips": [
+        "3–6月、9–10月 09:00–18:40，入场截止 18:00；7–8月、11–2月 09:00–17:40，入场截止 17:00。",
+        "门票成人 7,000 韩元，青少年与儿童 6,000 韩元，以现场公示为准。",
+        "火山口边缘和草坡是保护范围，走步道，不要踩进草地。",
+        "园区禁止宠物进入。"
+      ],
+      "hours": "3–6月、9–10月 09:00–18:40（入场截止 18:00）；7–8月、11–2月 09:00–17:40（入场截止 17:00）；全年无休。",
+      "fee": "成人 7,000 韩元（以现场公示为准）",
+      "address": "제주특별자치도 제주시 조천읍 비자림로 768",
+      "map_query": "산굼부리",
+      "cover": "/static/attraction-photos/sangumburi-cover.jpg",
+      "photos": [
+        "/static/attraction-photos/sangumburi-cover.jpg",
+        "/static/attraction-photos/sangumburi-crater.jpg"
+      ],
+      "photo_credit": "照片：Integral、골뱅이 / Wikimedia Commons / CC BY-SA 2.0 kr、CC BY-SA 3.0"
+    },
+    {
+      "id": "saebyeol-oreum",
+      "name_zh": "晓星岳",
+      "name_ko": "새별오름",
+      "city": "jeju",
+      "city_zh": "济州",
+      "area": "济州市 涯月 奉城",
+      "category": "nature",
+      "desc": "涯月邑奉城里的火山丘，海拔 519.3 米，山脊向几个方向伸开，从远处看像一颗星。登山口到山顶约 20–30 分钟，坡不算长但有几段较陡；山顶能望到济州西海岸和飞扬岛。秋天整座山被紫芒覆盖，是散步和看日落的地方，春天山下有油菜花田，济州野火节也在这一带举行。",
+      "transport": "济州岛没有地铁。从济州市区或涯月乘西线巴士到奉城一带，再按地图走到登山口；自驾入口有公共停车场。",
+      "tips": [
+        "全年开放，没有森林防火封山期，但大风、雨雪天别上山。",
+        "山顶风大，带件防风外套；下山路滑时放慢速度。",
+        "可携宠物，牵引绳不超过 2 米，排泄物要清理。",
+        "野火节期间周边道路管制，出发前看公告。"
+      ],
+      "hours": "全年开放。",
+      "fee": "免费",
+      "address": "제주특별자치도 제주시 애월읍 봉성리 산59-8",
+      "map_query": "새별오름",
+      "cover": "/static/attraction-photos/saebyeol-oreum-cover.jpg",
+      "photos": [
+        "/static/attraction-photos/saebyeol-oreum-cover.jpg",
+        "/static/attraction-photos/saebyeol-oreum-trail.jpg"
+      ],
+      "photo_credit": "照片：Grapesurgeon / Wikimedia Commons / CC BY-SA 4.0"
+    },
+    {
+      "id": "seongeup-village",
+      "name_zh": "城邑民俗村",
+      "name_ko": "성읍민속마을",
+      "city": "jeju",
+      "city_zh": "济州",
+      "area": "西归浦市 表善 城邑",
+      "category": "landmark",
+      "desc": "表善面的传统村落，整座村子被指定为重要民俗资料，石墙、茅草屋和榉树、朴树都保留着旧时样子，现在仍有居民住在里面。村内有导览路线，能看到济州老屋的灶间、酱缸台和院子；文化观光解说员可以带着走，解说免费。和圈起来参观的民俗村不同，这里先是有人生活的村子，参观时把音量放低。",
+      "transport": "济州岛没有地铁。从西归浦市区或济州市区乘东线巴士到表善、城邑一带，再按地图步行到村口；自驾有停车场。",
+      "tips": [
+        "村落全天可走，文化观光解说 11–2月 09:00–15:30，12:00–13:00 午休。",
+        "解说免费，可提前预约或在解说员办公室现场申请。",
+        "没有门票，停车费用以现场公示为准。",
+        "巷道窄、有人居住，拍照前先看是否挡到门口。"
+      ],
+      "hours": "村落全天开放；文化观光解说 11–2月 09:00–15:30（12:00–13:00 午休）。",
+      "fee": "免费（停车费以现场公示为准）",
+      "address": "제주특별자치도 서귀포시 표선면 성읍정의현로22번길 9-2",
+      "map_query": "성읍민속마을",
+      "cover": "/static/attraction-photos/seongeup-village-cover.jpg",
+      "photos": [
+        "/static/attraction-photos/seongeup-village-cover.jpg",
+        "/static/attraction-photos/seongeup-village-hareubang.jpg"
+      ],
+      "photo_credit": "照片：Trainholic、Seefooddiet / Wikimedia Commons / CC BY-SA 4.0"
+    },
+    {
+      "id": "sinchang-windmill-coast",
+      "name_zh": "新昌风车海岸道路",
+      "name_ko": "신창풍차해안도로",
+      "city": "jeju",
+      "city_zh": "济州",
+      "area": "济州市 翰京 新昌",
+      "category": "nature",
+      "desc": "翰京面海边的一段公路，路边立着一排白色风力发电机，黑色熔岩海岸、白色灯塔和草地连在一起。天气好时海水颜色很蓝，傍晚太阳落到海面上，整片海岸染成橘红色。路边有步道和拍照点，开车经过可以停下来走一段；风一直不小，帽子要拿稳。",
+      "transport": "济州岛没有地铁。从济州市区乘西线巴士到翰京、新昌一带，或自驾沿翰京海岸道路；路边有停车位，周末和日落时段较紧张。",
+      "tips": [
+        "全天开放，免费；没有围墙，注意来往车辆。",
+        "海边风大，外套和防滑鞋比好看更重要。",
+        "日落前后来的人多，拍照别站到车道中间。",
+        "这一带没有便利店，水和零食先备好。"
+      ],
+      "hours": "全天开放。",
+      "fee": "免费",
+      "address": "제주특별자치도 제주시 한경면 한경해안도로 일대",
+      "map_query": "신창풍차해안도로",
+      "cover": "/static/attraction-photos/sinchang-windmill-coast-cover.jpg",
+      "photos": [
+        "/static/attraction-photos/sinchang-windmill-coast-cover.jpg",
+        "/static/attraction-photos/sinchang-windmill-coast-pavilion.jpg"
+      ],
+      "photo_credit": "照片：Grapesurgeon / Wikimedia Commons / CC BY-SA 4.0"
     }
   ]
 }

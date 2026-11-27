@@ -1,5 +1,5 @@
 {
-  "updated": "2026-11-26",
+  "updated": "2026-11-28",
   "title": "韩国美食推荐",
   "disclaimer": "本页只收录公开资料中有记载、近期仍见诸米其林指南或官方/百科旅游介绍的餐厅与市场。营业状态、菜单和价格可能随时变化，请出发前用地图或电话再确认。米其林必比登是「性价比」标注，其符号并不等同本页的人均₩档；没有把握的人均价格已省略。信息可能变化，请出行前核实。餐厅已按游客常去的打卡区域归类，具体门牌以各条地址和地图为准；不在热门区域内、但资料可靠的店会放在「其他」。部分明洞门店根据实地招牌和公开地图资料补充收录。",
   "price_legend": [
@@ -3028,6 +3028,35 @@
       ],
       "photo_credit": "照片：Kim Sunjoo（韩国文化体育观光部 korea.net）/ Wikimedia Commons / CC BY-SA 2.0",
       "area_id": "hongdae"
+    },
+    {
+      "id": "jeju-five-day-market",
+      "name_zh": "济州民俗五日市场",
+      "name_ko": "제주민속오일시장",
+      "city": "jeju",
+      "city_zh": "济州",
+      "area": "济州市 道头",
+      "area_id": "jejusi",
+      "category": "street",
+      "cuisine": "集市小吃 / 熟食",
+      "desc": "济州五日集市（오일장）是本地人采买的传统集市，每月 2、7、12、17、22、27 日开市。棚顶下分几排：一边是橘子、柑橘干、海产干货和草药，一边是熟食摊，卖血肠、煎饼、面条和紫菜包饭，逛一圈能凑出一顿饭。开市日人多，上午货品齐全，下午有些摊子会收得早。",
+      "transport": "在济州市道头一洞一带，从济州机场或市区乘巴士到五日市场附近，按地图走；自驾有停车场，开市日车位紧张。",
+      "tips": [
+        "先对日期：每月 2、7、12、17、22、27 日开市，其余日子摊位少。",
+        "熟食摊多收现金，带些零钞更方便。",
+        "上午货品齐、人也多，带小孩的话牵好手。"
+      ],
+      "hours": "每月 2、7、12、17、22、27 日开市；各摊营业时间不同，以现场为准。",
+      "address": "제주특별자치도 제주시 오일장서로 26",
+      "map_query": "제주민속오일시장",
+      "source_note": "查阅 2026-11-28。济州旅游官方 VisitJeju 中文页「济州民俗五日市场」（页面更新 2026-11-28）：每月 2、7、12、17、22、27 日开市，地址济州市五日场西路26（道头一洞），电话 064-743-5985；页面列为传统市场与购物类。",
+      "source_url": "https://www.visitjeju.net/cn/detail/view?contentsid=CONT_000000000500748",
+      "cover": "/static/food-photos/jeju-five-day-market-cover.jpg",
+      "photos": [
+        "/static/food-photos/jeju-five-day-market-cover.jpg",
+        "/static/food-photos/jeju-five-day-market-food.jpg"
+      ],
+      "photo_credit": "照片：Grapesurgeon / Wikimedia Commons / CC BY-SA 4.0"
     }
   ],
   "areas": [

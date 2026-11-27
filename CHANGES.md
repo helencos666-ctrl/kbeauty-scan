@@ -1,3 +1,10 @@
+## 2026-11-28 济州岛内容日更：地点实景照片与官方帖
+
+- static/food.json 新增济州民俗五日市场（street，area_id: jejusi）；static/attractions.json 新增山君不离、晓星岳、城邑民俗村、新昌风车海岸道路；static/shopping-stores.json 新增济州中央地下商街（fashion，area_id: jejusi）。地点按济州旅游官方 VisitJeju 中文页核对，food / shopping 条目的 source_url 与 source_note 随条目记录（attractions 的 schema 无 source_url，来源记在内容日志）。
+- 每个新条目带 2 张实景照片，来源为 Wikimedia Commons 的自由授权文件（CC BY-SA 2.0 kr / CC BY-SA 3.0 / CC BY-SA 4.0 / Public domain），缩到 1280px 宽以内、JPEG 压缩到 300KB 以下；沿用 photo_credit 字段标注作者与许可。本次没有新增界面，缓存参数与 Service Worker 缓存名保持不变。
+- scripts/gen_official_daily_images.py 新增两张 11-28 卡片（济州12月冬季行程、济州免签与团体免签区分），配色为薄荷/杏色与沙色/水青，原有 18 张卡片输出不变。
+- official_daily.json 追加 2026-11-28 两条官方帖（board: daily、visa）。
+
 ## 2026-11-27 稳定性：防休眠保活、深度健康检查、后台种子；首页「今日旅韩速报」；签证与汇率更新
 
 - 根因：Render 免费实例空闲约 15 分钟就休眠，原先放在运维机上的保活脚本 11-21 停了，之后服务每天被反复休眠/唤醒几十次，访客与小程序首次打开要等 30–40 秒。新增 keepalive.py：只在 Render 上启用，进程内每约 9 分钟请求一次公开 /healthz（经 Render 边缘，计为入站流量），每小时重跑幂等的官方帖种子（按日期的帖子到点自动上线，不再依赖每日部署）并预热速报缓存。KEEPALIVE_DISABLE=1 可关闭。

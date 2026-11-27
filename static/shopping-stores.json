@@ -1,5 +1,5 @@
 {
-  "updated": "2026-11-27",
+  "updated": "2026-11-28",
   "title": "明洞逛街店铺",
   "disclaimer": "下列店铺根据实地照片和公开资料整理。营业时间、楼层和退税办理可能变化，请以店门口公示和店内说明为准。未核对到来源的退税信息不会写进介绍。",
   "categories": [
@@ -786,6 +786,36 @@
         "/static/shop-photos/cheongdam-fashion-street-crossing.jpg"
       ],
       "photo_credit": "照片：Michaela den、Cyberdoomslayer / Wikimedia Commons / CC BY-SA 3.0、CC BY-SA 4.0"
+    },
+    {
+      "id": "jeju-jungang-underground",
+      "name_zh": "济州中央地下商街",
+      "name_ko": "중앙로 지하상가",
+      "city": "jeju",
+      "city_zh": "济州",
+      "area": "济州市 中央路",
+      "area_id": "jejusi",
+      "category": "fashion",
+      "desc": "济州市中心的地下单层商街，沿中央路从东门市场一直通到观德路，1 到 12 号出入口分布在路面。里面以服饰、鞋店、杂货和饰品为主，也有餐厅和休息区，下雨或刮风时逛着舒服。全长不算短，先看入口编号再定从哪头走，免得走回头路。",
+      "transport": "从东门传统市场或七星路商圈步行即可进入，1–12 号出入口沿中央路分布；从济州机场乘巴士到市区后按地图走。",
+      "tips": [
+        "全年无休，10:00–22:00，各店时间略有不同。",
+        "出入口多，记好编号，约人定在某个出口上面。",
+        "部分店铺可退税，结账时问店员。",
+        "通道里手机信号一般，找店先看指示牌。"
+      ],
+      "hours": "全年无休，10:00–22:00（各店略有不同）。",
+      "address": "제주특별자치도 제주시 중앙로 지하 60",
+      "map_query": "중앙로 지하상가",
+      "tax_refund": "标有退税标志的店铺可办理，具体问店员",
+      "source_note": "查阅 2026-11-28。济州旅游官方 VisitJeju 中文页「济州中央地下商街」（页面更新 2026-10-26）：位于中央路地下，从东门传统市场到观德路共 12 处出入口、300 多家店铺，服饰、杂货、餐厅与文化设施集中；地址济州市中央路地下 60，全年无休 10:00–22:00（各店略有不同），电话 064-752-8776。",
+      "source_url": "https://www.visitjeju.net/cn/detail/view?contentsid=CNTS_200000000012176",
+      "cover": "/static/shop-photos/jeju-jungang-underground-cover.jpg",
+      "photos": [
+        "/static/shop-photos/jeju-jungang-underground-cover.jpg",
+        "/static/shop-photos/jeju-jungang-underground-arcade.jpg"
+      ],
+      "photo_credit": "照片：Abasaa / Wikimedia Commons / Public domain"
     }
   ]
 }
