@@ -8,6 +8,11 @@ Posts are inserted as 'published' with is_merchant FALSE, and the picture in
 static/official-daily/ is stored exactly like an uploaded post image
 (community.process_image -> c_images data/thumb/width/height, pos 0).
 
+An entry may set "sync": true to update the already-published post in place
+(body, board and picture) when its text differs from what is stored; that is
+the only way an existing post is ever rewritten, and it is a no-op once the
+stored body matches, so the hourly keepalive re-run does nothing.
+
 Never prints DATABASE_URL or other secrets, and never logs exception text.
 """
 from __future__ import annotations
@@ -52,6 +57,7 @@ def load_posts():
             "title": (p.get("title") or "").strip(),
             "body": (p.get("body") or "").strip(),
             "image": (p.get("image") or "").strip(),
+            "sync": p.get("sync") is True,
         })
     return out
 
@@ -80,7 +86,7 @@ def _log(msg):
 
 def seed_once():
     """Publish today's (and older) entries once per title. Never raises to the caller."""
-    inserted = existed = skipped = future = 0
+    inserted = existed = skipped = future = updated = 0
     try:
         posts = load_posts()
         from community import _db_url, db, q
@@ -104,13 +110,26 @@ def seed_once():
                     continue
                 row = q(
                     conn,
-                    """SELECT id FROM c_posts
+                    """SELECT id, body FROM c_posts
                        WHERE user_id=%s AND title=%s AND NOT deleted
                        ORDER BY id DESC LIMIT 1""",
                     (oid, p["title"]),
                     one=True,
                 )
                 if row:
+                    if p["sync"] and row["body"] != p["body"]:
+                        from community import process_image
+                        with open(image_path(p["image"]), "rb") as f:
+                            data, thumb, w, h = process_image(f.read())
+                        q(conn, "UPDATE c_posts SET body=%s, board=%s WHERE id=%s AND user_id=%s",
+                          (p["body"], p["board"], row["id"], oid))
+                        if q(conn, "SELECT 1 AS x FROM c_images WHERE post_id=%s AND pos=0", (row["id"],), one=True):
+                            q(conn, "UPDATE c_images SET data=%s, thumb=%s, width=%s, height=%s WHERE post_id=%s AND pos=0",
+                              (data, thumb, w, h, row["id"]))
+                        else:
+                            q(conn, "INSERT INTO c_images(post_id,pos,data,thumb,width,height) VALUES (%s,0,%s,%s,%s,%s)",
+                              (row["id"], data, thumb, w, h))
+                        updated += 1
                     existed += 1
                     continue
                 from community import process_image
@@ -133,8 +152,8 @@ def seed_once():
                     (post["id"], data, thumb, w, h),
                 )
                 inserted += 1
-        _log("inserted=%s existed=%s skipped=%s future=%s total=%s"
-             % (inserted, existed, skipped, future, len(posts)))
+        _log("inserted=%s updated=%s existed=%s skipped=%s future=%s total=%s"
+             % (inserted, updated, existed, skipped, future, len(posts)))
     except Exception:
         # Do not log the exception text: drivers may include the DSN.
         _log("failed: unexpected error inserted=%s existed=%s skipped=%s"

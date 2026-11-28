@@ -32,7 +32,13 @@
     #myPromo .pstats span{font-size:12px;color:#4A5560}
     #myPromo .money{display:flex;justify-content:space-between;gap:10px;font-size:14px;margin:4px 0 8px}
     #myPromo .money b{color:#146E68}
+    #myGma .gbar{height:8px;border-radius:5px;background:#E3EEEC;margin:8px 0 6px;overflow:hidden}
+    #myGma .gbar i{display:block;height:100%;background:linear-gradient(90deg,#146E68,#3D8F88)}
+    #myGma .gtop{display:flex;justify-content:space-between;align-items:baseline;gap:8px}
+    #myGma .gtop b{font-size:20px;color:#146E68}
+    #myGma .plink{word-break:break-all;font-size:13px;color:#4A5560;margin:6px 0 10px}
   </style>
+  <div class="card mecard" id="myGma" hidden></div>
   <div class="card mecard" id="myPromo" hidden></div>
   <div class="card mecard" id="guest" hidden>
     <b style="font-size:16px">免费注册 / 登录</b>
@@ -112,6 +118,30 @@
     document.body.appendChild(a); a.click(); a.remove();
     setTimeout(function(){ URL.revokeObjectURL(a.href); }, 2000);
   }
+  async function loadMyGma(){
+    var box = $('myGma'), d;
+    box.hidden = true; box.innerHTML = '';
+    try { d = await fetch('/api/event/gma/me', {credentials: 'same-origin', headers: {'X-LH-Dev': LHRef.dev()}}).then(function(r){ return r.json(); }); } catch(e){ return; }
+    if (!d || !d.user || (!d.open && !d.claim)) return;
+    var n = d.count || 0, need = d.need || 5, c = d.claim, pct = Math.min(100, Math.round(n / need * 100));
+    var act = c ? '<p class="tip" style="margin:0">入场名额申请：<b>' + E(c.label) + '</b>（最终以主办方确认为准）</p>' :
+      !d.open ? '<p class="tip" style="margin:0">活动已开始，申请已截止。</p>' :
+      n >= need ? '<button class="btn primary block" type="button" id="mgClaim">申请入场名额</button>' :
+      '<p class="tip" style="margin:0">再邀请 ' + (need - n) + ' 位好友注册，即可申请入场名额。</p>';
+    box.innerHTML = '<h3>🎬 首尔国际电影大奖 · 12月17日</h3>' +
+      '<p class="tip" style="margin:0">邀请好友注册，免费领入场名额</p><div class="gtop"><b>已邀请 ' + n + '/' + need + ' 人</b></div>' +
+      '<div class="gbar"><i style="width:' + pct + '%"></i></div>' +
+      '<p class="tip" style="margin:0 0 6px">按全部时间累计的有效注册账号统计。名额有限，最终以主办方确认为准。</p>' +
+      '<p class="plink">' + E(d.link) + '</p>' +
+      '<div class="row"><button class="btn ghost" type="button" id="mgCopy">复制邀请链接</button><a class="btn ghost" href="/event/seoul-movie-awards">二维码和详情</a></div>' +
+      '<div style="margin-top:10px" id="mgAct">' + act + '</div>';
+    box.hidden = false;
+    $('mgCopy').onclick = async function(){ var ok = await LH.copyText(d.link); this.textContent = ok === false ? '请长按复制' : '已复制'; };
+    if ($('mgClaim')) $('mgClaim').onclick = async function(){
+      this.disabled = true;
+      try { await LH.api('POST', '/api/event/gma/claim', {}); loadMyGma(); } catch(e){ this.disabled = false; err(e.message); }
+    };
+  }
   async function loadMyPromo(){
     var box = $('myPromo');
     box.hidden = true; box.innerHTML = '';
@@ -164,6 +194,7 @@
     if (u.msg_unread){ $('msgDot').hidden = false; $('msgDot').textContent = u.msg_unread > 99 ? '99+' : u.msg_unread; }
     $('avBtn').onclick = function(){ LH.pickAvatar(function(){ load(); }); };
     $('edBtn').onclick = editProfile;
+    loadMyGma();
     loadMyPromo();
     $('lvBtn').onclick = function(e){ e.preventDefault();
       openSheet('等级说明', '<p class="tip" style="font-size:14px">等级按<b>累计获得</b>的旅行豆计算（花掉不降级）。你已累计 ' + lv.earned + ' 豆' + (lv.next ? '，再得 ' + (lv.next - lv.earned) + ' 豆升到 LV.' + (lv.lv + 1) : '，已满级') + '。</p>' +

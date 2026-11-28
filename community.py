@@ -585,6 +585,8 @@ def db():
                         cur.execute(MIGRATE_FANPLACES)
                         from dazi import MIGRATE_DAZI
                         cur.execute(MIGRATE_DAZI)
+                        from event_gma import MIGRATE_EVENT_GMA
+                        cur.execute(MIGRATE_EVENT_GMA)
                     ensure_bot(conn)
                     from chicken import ensure_chicken_shops
                     ensure_chicken_shops(conn)
@@ -2980,3 +2982,5 @@ from chat import router as _chat_router  # noqa: E402
 router.include_router(_chat_router)
 from fanplaces import router as _fanplaces_router  # noqa: E402
 router.include_router(_fanplaces_router)
+from event_gma import router as _event_gma_router  # noqa: E402
+router.include_router(_event_gma_router)

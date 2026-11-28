@@ -252,6 +252,14 @@
       <p class="tip">修改后会员页、社区约定页和提示文字立即使用新价格。已开通的会员不受影响。关闭「AI 自动回复」后，旅韩小助手不再对新帖或评论自动回复。</p>
     </div>
     <div id="t-promo" style="display:none">
+      <div class="card" id="gmaCard">
+        <h2>首尔国际电影大奖 · 入场名额</h2>
+        <p class="tip" style="margin-top:0">用户邀请满 5 位好友注册后可在「我的」申请。人数按账号去重，含「邀请有奖」和推广码两种来源，全部时间累计。「复核中」是同网络批量/短时间多人注册的标记：照常计数，请确认前人工判断（可到「邀请奖励」页处理具体邀请）。</p>
+        <div class="row"><button class="btn primary" id="gmago">刷新</button><span class="tip" id="gmastat"></span></div>
+        <div id="gmaclaims" style="margin-top:8px;overflow-x:auto"></div>
+        <h3 style="margin:14px 0 4px;font-size:15px">已满 5 人的用户</h3>
+        <div id="gmaqual" style="overflow-x:auto"></div>
+      </div>
       <div class="card">
         <h2>推广员政策</h2>
         <ul class="promo-policy">
@@ -532,7 +540,28 @@ function openQrModal(code, name){
 document.getElementById('qrClose').onclick = closeQrModal;
 document.getElementById('qrModal').onclick = function(e){ if (e.target === this) closeQrModal(); };
 document.addEventListener('keydown', function(e){ if (e.key === 'Escape') closeQrModal(); });
+async function eventGma(){
+  var d = await call('GET', '/api/admin/event-gma'), st = d.stats;
+  document.getElementById('gmastat').textContent = '申请 ' + st.claims + '（待确认 ' + st.pending + ' · 已确认 ' + st.confirmed + ' · 未通过 ' + st.declined + '）· 满 ' + d.need + ' 人 ' + st.qualified + ' 人，未申请 ' + st.qualified_unclaimed + ' 人' + (d.open ? '' : ' · 申请已截止');
+  function flag(x){ return x.flagged ? ' <span class="tag o">复核中 ' + x.flagged + '</span>' + (x.why ? '<div class="tip" style="margin:2px 0 0">' + E(x.why) + '</div>' : '') : ''; }
+  document.getElementById('gmaclaims').innerHTML = d.claims.length ? d.claims.map(function(c){
+    return '<div class="ct" style="border-top:1px solid #E3EEEC;padding:8px 0"><b>' + E(c.who) + '</b> · 邀请 ' + c.count + ' 人' + flag(c) +
+      '<div class="tip" style="margin:2px 0 0">' + E(c.account) + ' · ' + E(c.time.slice(0, 16)) + '</div>' +
+      (c.note ? '<div style="margin:2px 0 0;font-size:14px">备注：' + E(c.note) + '</div>' : '') +
+      '<div class="row" style="margin-top:6px;align-items:center"><span class="tag ' + (c.status === 'confirmed' ? 'g' : c.status === 'declined' ? 'gr' : 'o') + '">' + E(c.label) + '</span>' +
+      '<button class="btn sm primary" data-gc="' + c.id + '" data-ga="confirm">确认</button><button class="btn sm gray" data-gc="' + c.id + '" data-ga="decline">不通过</button>' +
+      (c.status !== 'pending' ? '<button class="btn sm" data-gc="' + c.id + '" data-ga="pending">改回待确认</button>' : '') + '</div></div>';
+  }).join('') : '<div class="empty">还没有人申请</div>';
+  document.querySelectorAll('#gmaclaims [data-gc]').forEach(function(b){ b.onclick = async function(){
+    await call('POST', '/api/admin/event-gma/claims/' + b.dataset.gc, {action: b.dataset.ga}); eventGma(); }; });
+  document.getElementById('gmaqual').innerHTML = d.qualified.length ? d.qualified.map(function(x){
+    return '<div class="ct" style="border-top:1px solid #E3EEEC;padding:6px 0"><b>' + E(x.who) + '</b> · 邀请 ' + x.count + ' 人 · ' + (x.claimed ? '已申请' : '未申请') + flag(x) +
+      '<div class="tip" style="margin:2px 0 0">' + E(x.account) + '</div></div>';
+  }).join('') : '<div class="empty">还没有人邀满 ' + d.need + ' 位</div>';
+}
+document.getElementById('gmago').onclick = eventGma;
 async function promo(){
+  eventGma().catch(function(e){ msg(e.message, true); });
   var q = '?start=' + (document.getElementById('d1').value || '') + '&end=' + (document.getElementById('d2').value || '');
   var d = await call('GET', '/api/admin/promoters' + q);
   document.getElementById('prlist').innerHTML = d.promoters.length ? d.promoters.map(function(p){
