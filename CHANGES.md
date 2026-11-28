@@ -1,3 +1,12 @@
+## 2026-11-28 推广员政策与自助查询（未部署，待截图确认）
+
+- 后台「推广统计」政策改成三句话：链接或二维码注册，30 天内付费拿实付 50%；7 天后结算，退款不算；只算直接推荐的人
+- 新建推广员只填名称和推广码，去掉四个旧档位输入框（库里的旧字段保留，不影响已有记录）
+- 每名推广员可生成带旅韩助手标志的专属二维码（保存图片 / 复制链接），内容为 https://lvhanzhushou.com/?ref=推广码
+- 统计改为手机上好读的卡片：推广员、访问、注册、付费笔数、佣金、待结算，以及二维码、绑定用户、结算、停用
+- 管理员可用手机号或会员编号把推广码绑定到用户；该用户登录后在「我的」看到「我的推广」（只看自己的数据，推荐人姓名打码）
+- 测试：test/test_promo.py、test/test_promo_selfview.py（含 A 不能看 B、二维码解码）
+
 ## 2026-11-28 济州岛内容日更：地点实景照片与官方帖
 
 - static/food.json 新增济州民俗五日市场（street，area_id: jejusi）；static/attractions.json 新增山君不离、晓星岳、城邑民俗村、新昌风车海岸道路；static/shopping-stores.json 新增济州中央地下商街（fashion，area_id: jejusi）。地点按济州旅游官方 VisitJeju 中文页核对，food / shopping 条目的 source_url 与 source_note 随条目记录（attractions 的 schema 无 source_url，来源记在内容日志）。

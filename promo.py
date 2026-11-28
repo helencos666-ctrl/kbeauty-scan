@@ -11,11 +11,13 @@ import re
 import secrets
 from datetime import datetime, timedelta, timezone
 
+from pathlib import Path
+
 from fastapi import APIRouter, HTTPException, Request, Response
 
 from community import (
     BASE, csrf, current_user, db, ip_of, limit, need_admin, need_user, q, _json, _page, _ts,
-    active_codes, clean_text, merchant_activate, norm_code, set_tier,
+    active_codes, clean_text, merchant_activate, norm_code, parse_account, set_tier,
 )
 
 router = APIRouter()
@@ -35,6 +37,16 @@ PROMO_TERMS = (
     "禁止骚扰、群发、虚假承诺和任何医疗效果保证；佣金以管理员核实到账的实付金额的 50% 计算，"
     "需过冻结期且未被退款后才可申请发放。本站只支持人工打款。"
 )
+# 给推广员和管理员看的简短说明（三句话）
+POLICY_LINES = (
+    "朋友通过你的链接或二维码注册，30天内付费，你拿实付金额的50%。",
+    "7天后结算，退款不算。",
+    "只算你直接推荐的人。",
+)
+POLICY_TEXT = "".join(POLICY_LINES)
+_LOGO = Path(__file__).resolve().parent / "static" / "icons" / "icon-192.png"
+_FONT = Path("/usr/share/fonts/opentype/noto/NotoSansCJK-Regular.ttc")
+_FONT_BOLD = Path("/usr/share/fonts/opentype/noto/NotoSansCJK-Bold.ttc")
 PROMO_METHODS = ("户外直播", "短视频", "社群", "其他")
 DOUYIN_RE = re.compile("^[A-Za-z0-9_.\\-\u4e00-\u9fff]{2,40}$")
 
@@ -172,6 +184,161 @@ def _promoter_of_user(conn, uid):
     return q(conn, "SELECT * FROM c_promoters WHERE user_id=%s", (uid,), one=True)
 
 
+def promo_public_url(code: str) -> str:
+    from seo import site_origin
+    return site_origin() + "/?ref=" + code
+
+
+def _cjk_font(size, bold=False):
+    from PIL import ImageFont
+    path = _FONT_BOLD if bold and _FONT_BOLD.is_file() else _FONT
+    if path.is_file():
+        for idx in (2, 0, 1, 3, 4, 5):
+            try:
+                return ImageFont.truetype(str(path), size=size, index=idx)
+            except Exception:
+                continue
+        try:
+            return ImageFont.truetype(str(path), size=size)
+        except Exception:
+            pass
+    return ImageFont.load_default()
+
+
+def _qr_matrix(url: str):
+    import zxingcpp
+    bc = zxingcpp.create_barcode(url, zxingcpp.BarcodeFormat.QRCode, ec_level="H")
+    raw = zxingcpp.write_barcode_to_image(bc, scale=14, add_quiet_zones=True)
+    from PIL import Image
+    h, w = raw.shape[0], raw.shape[1]
+    return Image.frombytes("L", (w, h), bytes(memoryview(raw)))
+
+
+def _paste_logo(qr_im):
+    from PIL import Image
+    qr = qr_im.convert("RGB")
+    if not _LOGO.is_file():
+        return qr
+    try:
+        logo = Image.open(_LOGO).convert("RGBA")
+    except Exception:
+        return qr
+    side = max(32, int(min(qr.size) * 0.18))
+    pad = max(6, side // 10)
+    box = side + pad * 2
+    bg = Image.new("RGBA", (box, box), (255, 255, 255, 255))
+    logo = logo.resize((side, side), Image.Resampling.LANCZOS)
+    # 圆角白底，避免硬切标志
+    mask = Image.new("L", (box, box), 0)
+    from PIL import ImageDraw
+    ImageDraw.Draw(mask).rounded_rectangle((0, 0, box - 1, box - 1), radius=max(8, box // 8), fill=255)
+    bg.paste(logo, (pad, pad), logo)
+    out = Image.new("RGBA", qr.size, (255, 255, 255, 255))
+    out.paste(qr, (0, 0))
+    x = (qr.size[0] - box) // 2
+    y = (qr.size[1] - box) // 2
+    out.paste(bg, (x, y), mask)
+    return out.convert("RGB")
+
+
+def render_promo_qr_png(code: str, name: str = "") -> bytes:
+    """带旅韩助手标志、推广员名称和推广码的二维码 PNG。"""
+    from PIL import Image, ImageDraw
+    import io as _io
+    url = promo_public_url(code)
+    qr = _paste_logo(_qr_matrix(url))
+    title_font = _cjk_font(42, bold=True)
+    name_font = _cjk_font(30, bold=True)
+    code_font = _cjk_font(26)
+    name = (name or "推广员").strip()[:20]
+    label = "推广码 " + code
+    side = 720
+    qr_size = 480
+    qr = qr.resize((qr_size, qr_size), Image.Resampling.NEAREST)
+    # 量文字高度
+    tmp = Image.new("RGB", (10, 10), "white")
+    d0 = ImageDraw.Draw(tmp)
+    def _h(text, font):
+        b = d0.textbbox((0, 0), text, font=font)
+        return b[3] - b[1], b[2] - b[0]
+    th, tw = _h("旅韩助手", title_font)
+    nh, nw = _h(name, name_font)
+    ch, cw = _h(label, code_font)
+    top, gap, bottom = 36, 16, 36
+    height = top + th + gap + qr_size + gap + nh + 8 + ch + bottom
+    canvas = Image.new("RGB", (side, height), (255, 255, 255))
+    draw = ImageDraw.Draw(canvas)
+    # 顶栏淡青条
+    draw.rectangle((0, 0, side, top + th + gap - 4), fill=(230, 243, 241))
+    tx = (side - tw) // 2
+    draw.text((tx, top - 4), "旅韩助手", font=title_font, fill=(20, 110, 104))
+    qx = (side - qr_size) // 2
+    qy = top + th + gap
+    canvas.paste(qr, (qx, qy))
+    ny = qy + qr_size + gap
+    draw.text(((side - nw) // 2, ny), name, font=name_font, fill=(26, 35, 48))
+    draw.text(((side - cw) // 2, ny + nh + 8), label, font=code_font, fill=(20, 110, 104))
+    buf = _io.BytesIO()
+    canvas.save(buf, format="PNG", optimize=True)
+    return buf.getvalue()
+
+
+def find_user_for_bind(conn, raw: str):
+    """用手机号、邮箱或会员编号 / 用户 ID 找到要绑定的账号。"""
+    s = str(raw or "").strip()
+    if not s:
+        raise HTTPException(400, "请填写手机号或会员编号")
+    digits = re.sub(r"[\s\-()+]", "", s)
+    looks_phone = bool(
+        re.fullmatch(r"1[3-9]\d{9}", digits)
+        or re.fullmatch(r"01[016789]\d{7,8}", digits)
+        or re.fullmatch(r"86?1[3-9]\d{9}", digits)
+        or re.fullmatch(r"8201[016789]\d{7,8}", digits)
+    )
+    if not looks_phone and re.fullmatch(r"\d{1,12}", s):
+        n = int(s)
+        u = q(conn, "SELECT * FROM c_users WHERE member_no=%s", (n,), one=True)
+        if not u:
+            u = q(conn, "SELECT * FROM c_users WHERE id=%s", (n,), one=True)
+        if not u:
+            raise HTTPException(404, "找不到这个用户")
+        return u
+    try:
+        kind, acct = parse_account(s)
+    except HTTPException:
+        raise HTTPException(400, "请填写手机号或会员编号")
+    if kind == "phone":
+        u = q(conn, "SELECT * FROM c_users WHERE phone=%s", (acct,), one=True)
+    else:
+        u = q(conn, "SELECT * FROM c_users WHERE email=%s", (acct,), one=True)
+    if not u:
+        raise HTTPException(404, "找不到这个用户")
+    return u
+def bind_promoter(conn, code: str, raw=None, unbind=False):
+    p = q(conn, "SELECT * FROM c_promoters WHERE code=%s", (code,), one=True)
+    if not p:
+        raise HTTPException(404, "推广员不存在")
+    if unbind:
+        q(conn, "UPDATE c_promoters SET user_id=NULL WHERE code=%s", (code,))
+        return {"ok": True, "code": code, "user_id": None}
+    u = find_user_for_bind(conn, raw)
+    if p.get("user_id") and int(p["user_id"]) == int(u["id"]):
+        return {"ok": True, "code": code, "user_id": u["id"],
+                "member_no": u.get("member_no") or u["id"], "nickname": u["nickname"]}
+    other = q(conn, "SELECT code FROM c_promoters WHERE user_id=%s AND code<>%s", (u["id"], code), one=True)
+    if other:
+        raise HTTPException(409, "该用户已经绑定了推广码 " + other["code"])
+    try:
+        q(conn, "UPDATE c_promoters SET user_id=%s WHERE code=%s", (u["id"], code))
+    except Exception as e:
+        name = type(e).__name__
+        if "Unique" in name or "unique" in str(e).lower() or "duplicate" in str(e).lower():
+            raise HTTPException(409, "该用户已经绑定了其他推广码")
+        raise
+    return {"ok": True, "code": code, "user_id": u["id"],
+            "member_no": u.get("member_no") or u["id"], "nickname": u["nickname"]}
+
+
 # ---------------- 用户：申请 / 看板 ----------------
 @router.get("/promo")
 def p_promo():
@@ -189,6 +356,7 @@ def api_meta():
         days = hold_days(conn)
         bps = rate_bps(conn)
     return {"hold_days": days, "rate_percent": bps / 100.0, "terms": PROMO_TERMS,
+            "policy_lines": list(POLICY_LINES), "policy": POLICY_TEXT,
             "single_level": True, "disclaimer": PROMO_TERMS,
             "promo_methods": list(PROMO_METHODS), "douyin_required": True}
 
@@ -201,6 +369,7 @@ def api_me(req: Request):
         app = q(conn, "SELECT * FROM c_promo_applications WHERE user_id=%s", (u["id"],), one=True)
         days, bps = hold_days(conn), rate_bps(conn)
         out = {"is_promoter": bool(p and p["active"]), "terms": PROMO_TERMS,
+               "policy_lines": list(POLICY_LINES), "policy": POLICY_TEXT,
                "hold_days": days, "rate_percent": bps / 100.0, "application": None, "dashboard": None}
         if app:
             out["application"] = {"status": app["status"], "time": _ts(app["created_at"]),
@@ -215,19 +384,27 @@ def api_me(req: Request):
                                  (SELECT count(*) FROM c_commissions c WHERE c.user_id=u.id AND c.code=%s AND c.status<>'void') AS paid_n
                           FROM c_users u WHERE u.promoter_code=%s ORDER BY u.id DESC LIMIT 200""",
                  (p["code"], p["code"]))
+        unsettled_cents = stats["pending_cents"] + stats["payable_cents"]
         out["dashboard"] = {
             "code": p["code"],
+            "name": p.get("name") or "",
             "link": "/?ref=" + p["code"],
+            "url": promo_public_url(p["code"]),
+            "qr": "/api/promo/qr.png",
             "active": bool(p["active"]),
             "visits": stats["visits"],
             "regs": stats["regs"],
+            "paid_count": stats["paid_count"],
             "paid_conversions": stats["paid_conversions"],
             "pending": yuan(stats["pending_cents"]),
             "payable": yuan(stats["payable_cents"]),
             "paid": yuan(stats["paid_cents"]),
+            "settled": yuan(stats["paid_cents"]),
+            "unsettled": yuan(unsettled_cents),
             "pending_cents": stats["pending_cents"],
             "payable_cents": stats["payable_cents"],
             "paid_cents": stats["paid_cents"],
+            "unsettled_cents": unsettled_cents,
             "referrals": [{"name": mask_name(r["nickname"]), "joined": _ts(r["created_at"]),
                            "converted": r["paid_n"] > 0} for r in refs],
         }
@@ -277,10 +454,12 @@ def _code_stats(conn, code):
     regs = q(conn, "SELECT count(*) AS n FROM c_users WHERE promoter_code=%s", (code,), one=True)["n"]
     paid_conv = q(conn, """SELECT count(DISTINCT user_id) AS n FROM c_commissions
                            WHERE code=%s AND status IN ('pending','payable','paid')""", (code,), one=True)["n"]
+    paid_count = q(conn, """SELECT count(*) AS n FROM c_commissions
+                            WHERE code=%s AND status IN ('pending','payable','paid')""", (code,), one=True)["n"]
     sums = {s: 0 for s in STATUSES}
     for r in q(conn, "SELECT status, COALESCE(sum(cents),0) AS s FROM c_commissions WHERE code=%s GROUP BY status", (code,)):
         sums[r["status"]] = r["s"]
-    return {"visits": visits, "regs": regs, "paid_conversions": paid_conv,
+    return {"visits": visits, "regs": regs, "paid_conversions": paid_conv, "paid_count": paid_count,
             "pending_cents": sums["pending"], "payable_cents": sums["payable"], "paid_cents": sums["paid"]}
 
 
@@ -323,6 +502,39 @@ def confirm_payment(conn, uid, kind, amount, note="", apply_benefit=True):
     result["commission"] = {"id": row["id"], "cents": cents, "amount": yuan(cents),
                             "status": status, "payable_at": _ts(payable_at)}
     return result
+
+
+def _png_response(data: bytes, filename: str):
+    return Response(data, media_type="image/png", headers={
+        "Cache-Control": "no-store",
+        "Content-Disposition": 'inline; filename="%s"' % filename,
+    })
+
+
+@router.get("/api/promo/qr.png")
+def api_my_qr(req: Request):
+    """登录推广员只能下载自己的二维码，不接受别人的推广码参数。"""
+    with db() as conn:
+        u = need_user(conn, req)
+        p = _promoter_of_user(conn, u["id"])
+        if not p or not p["active"]:
+            raise HTTPException(404, "你还不是推广员")
+        data = render_promo_qr_png(p["code"], p.get("name") or u.get("nickname") or "")
+    return _png_response(data, "lvhan-promo-%s.png" % p["code"])
+
+
+@router.get("/api/admin/promoters/{code}/qr.png")
+def api_admin_qr(req: Request, code: str):
+    code = norm_code(code)
+    if not code:
+        raise HTTPException(400, "推广码不正确")
+    with db() as conn:
+        need_admin(conn, req)
+        p = q(conn, "SELECT * FROM c_promoters WHERE code=%s", (code,), one=True)
+        if not p:
+            raise HTTPException(404, "推广员不存在")
+        data = render_promo_qr_png(p["code"], p.get("name") or "")
+    return _png_response(data, "lvhan-promo-%s.png" % p["code"])
 
 
 # ---------------- 管理员 ----------------

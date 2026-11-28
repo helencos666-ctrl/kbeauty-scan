@@ -45,6 +45,31 @@
 #tabs .tab-badge[hidden]{
   display:none;
 }
+/* 推广统计：手机宽度下表头横排可读，不再竖着挤 */
+#t-promo .promo-policy{margin:0;padding:0;list-style:none}
+#t-promo .promo-policy li{font-size:14px;line-height:1.7;color:#1A2330;margin:0 0 4px}
+#t-promo .promo-policy li:last-child{margin-bottom:0}
+#prlist{overflow:visible}
+#prlist .pcard{border:1px solid #D5E4E1;border-radius:12px;padding:12px;margin:0 0 10px;background:#fff}
+#prlist .pcard-h{display:flex;justify-content:space-between;align-items:flex-start;gap:8px;margin:0 0 8px}
+#prlist .pcard-h b{font-size:16px;color:#1A2330}
+#prlist .p-sub{color:#4A5560;font-size:12px;font-weight:400;line-height:1.5;margin-top:2px}
+#prlist .pmetrics{display:grid;grid-template-columns:repeat(3,1fr);gap:8px 6px;text-align:center;margin:0 0 10px}
+#prlist .pmetrics div{background:#F3F7F6;border-radius:8px;padding:6px 4px}
+#prlist .pmetrics b{display:block;font-size:16px;color:#146E68;line-height:1.2}
+#prlist .pmetrics span{font-size:11px;color:#4A5560}
+#prlist .ops{display:grid;grid-template-columns:1fr 1fr;gap:6px}
+#prlist .ops .btn{width:100%;box-sizing:border-box;white-space:nowrap}
+#t-promo #pname{flex:2 1 140px;min-width:0}
+#t-promo #pcode{flex:1 1 110px;min-width:0}
+@media (max-width:420px){
+  #t-promo #pname{flex:1 1 100%}
+}
+#qrModal{position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:80;display:flex;align-items:center;justify-content:center;padding:16px}
+#qrModal[hidden]{display:none}
+#qrModal .qrbox{background:#fff;border-radius:16px;padding:16px 16px 18px;max-width:360px;width:100%;text-align:center;box-shadow:0 8px 28px rgba(0,0,0,.2)}
+#qrModal .qrbox img{width:100%;max-width:320px;height:auto;display:block;margin:0 auto 12px}
+#qrModal .qrbox .row{justify-content:center;margin-top:4px}
 </style>
 </head>
 <body>
@@ -228,17 +253,32 @@
     </div>
     <div id="t-promo" style="display:none">
       <div class="card">
+        <h2>推广员政策</h2>
+        <ul class="promo-policy">
+          <li>朋友通过你的链接或二维码注册，30天内付费，你拿实付金额的50%。</li>
+          <li>7天后结算，退款不算。</li>
+          <li>只算你直接推荐的人。</li>
+        </ul>
+      </div>
+      <div class="card">
         <h2>新建推广员</h2>
         <div class="row">
           <input class="f" id="pname" placeholder="名称，例如：小王" style="flex:2;min-width:120px">
-          <input class="f" id="pcode" placeholder="推广码，例如 A08" maxlength="12" style="flex:1;min-width:90px">
-          <input class="f" id="pcom" type="number" step="0.1" min="0" value="3" style="flex:1;min-width:80px" title="会员佣金（元/人）" placeholder="会员佣金">
-          <input class="f" id="pcom2" type="number" step="0.1" min="0" value="6" style="flex:1;min-width:80px" title="高级会员佣金（元/人）" placeholder="高级佣金">
-          <input class="f" id="pcom3" type="number" step="1" min="0" value="20" style="flex:1;min-width:80px" title="商家月付佣金（元/次）" placeholder="商家月付">
-          <input class="f" id="pcom4" type="number" step="1" min="0" value="200" style="flex:1;min-width:80px" title="商家年付佣金（元/次）" placeholder="商家年付">
+          <input class="f" id="pcode" placeholder="推广码 A08" maxlength="12" style="flex:1;min-width:90px">
           <button class="btn primary" id="padd">添加</button>
         </div>
-        <p class="tip">推广链接格式：<code id="linkfmt"></code>，访客 30 天内注册即归属该推广员（以第一次点进的推广码为准，不能事后更改，不能自己推自己）。佣金按管理员确认到账的<b>实付金额 50%</b> 计算（例如 ¥9.9 → ¥4.95），默认冻结 7 天后才可发放；退款则作废。只给直接推荐人计佣，推荐的人再发展下级不再计佣（单层，不是多层分销）。请在用户列表用「确认收款」录入实付金额。上面四个输入框仅用于兼容旧记录，新佣金不再按固定档位计提。</p>
+        <p class="tip">添加后可点「二维码」保存发给推广员；点「绑定用户」把推广码绑到对方账号，对方登录「我的」就能看到自己的推广数据。旧的固定档位佣金仍保留在系统里，新佣金一律按实付 50% 计算。</p>
+      </div>
+      <div id="qrModal" hidden role="dialog" aria-modal="true" aria-labelledby="qrTitle">
+        <div class="qrbox">
+          <b id="qrTitle">推广二维码</b>
+          <img id="qrImg" alt="推广二维码">
+          <div class="row">
+            <button class="btn primary" type="button" id="qrSave">保存图片</button>
+            <button class="btn ghost" type="button" id="qrCopy">复制链接</button>
+            <button class="btn gray" type="button" id="qrClose">关闭</button>
+          </div>
+        </div>
       </div>
       <div class="card">
         <h2>推广统计</h2>
@@ -299,7 +339,6 @@ async function loadTabCounts(){
   });
 }
 function showLogin(){ document.getElementById('loginBox').style.display = 'block'; document.getElementById('panel').style.display = 'none'; }
-document.getElementById('linkfmt').textContent = location.origin + '/?ref=推广码';
 document.getElementById('alogin').onclick = async function(){
   try { await call('POST', '/api/admin/login', {password: document.getElementById('apw').value}); document.getElementById('apw').value = ''; msg('', false); boot(); } catch(e){}
 };
@@ -464,32 +503,68 @@ async function comments(pid){
   box.querySelectorAll('[data-dc]').forEach(function(b){ b.onclick = async function(){ if (!confirm('删除评论？')) return; await call('DELETE', '/api/admin/comments/' + b.dataset.dc); comments(pid); }; });
 }
 document.getElementById('pmore').onclick = function(){ posts(false); };
+function yen(n){ return '¥' + (Math.round((Number(n)||0)*100)/100); }
+function promoLink(code){ return 'https://lvhanzhushou.com/?ref=' + code; }
+function closeQrModal(){ document.getElementById('qrModal').hidden = true; document.getElementById('qrImg').removeAttribute('src'); }
+async function saveQrPng(url, filename){
+  var r = await fetch(url, {credentials:'same-origin'});
+  if (!r.ok) throw new Error('无法下载二维码');
+  var b = await r.blob();
+  var a = document.createElement('a');
+  a.href = URL.createObjectURL(b);
+  a.download = filename || 'lvhan-promo.png';
+  document.body.appendChild(a); a.click(); a.remove();
+  setTimeout(function(){ URL.revokeObjectURL(a.href); }, 2000);
+}
+function openQrModal(code, name){
+  var url = '/api/admin/promoters/' + encodeURIComponent(code) + '/qr.png';
+  var link = promoLink(code);
+  document.getElementById('qrTitle').textContent = (name ? name + ' · ' : '') + code;
+  document.getElementById('qrImg').alt = '旅韩助手推广二维码 ' + code;
+  document.getElementById('qrImg').src = url;
+  document.getElementById('qrModal').hidden = false;
+  document.getElementById('qrSave').onclick = function(){ saveQrPng(url, '旅韩助手-推广码-' + code + '.png').catch(function(e){ msg(e.message, true); }); };
+  document.getElementById('qrCopy').onclick = function(){
+    if (navigator.clipboard) navigator.clipboard.writeText(link).then(function(){ msg('已复制：' + link, false); }, function(){ prompt('推广链接', link); });
+    else prompt('推广链接', link);
+  };
+}
+document.getElementById('qrClose').onclick = closeQrModal;
+document.getElementById('qrModal').onclick = function(e){ if (e.target === this) closeQrModal(); };
+document.addEventListener('keydown', function(e){ if (e.key === 'Escape') closeQrModal(); });
 async function promo(){
   var q = '?start=' + (document.getElementById('d1').value || '') + '&end=' + (document.getElementById('d2').value || '');
   var d = await call('GET', '/api/admin/promoters' + q);
-  document.getElementById('prlist').innerHTML = d.promoters.length ? '<table class="adm"><tr><th>推广员</th><th>抖音号</th><th>访问</th><th>注册</th><th>会员/高级/商家月/商家年</th><th>区间佣金</th><th>待结算</th><th>操作</th></tr>' + d.promoters.map(function(p){
-    return '<tr><td><b>' + E(p.code) + '</b> ' + E(p.name) + (p.active ? '' : ' <small style="color:#c62828">已停用</small>') + '<br><small>会员 ¥' + p.commission + ' · 高级 ¥' + p.commission2 + ' · 商家月 ¥' + p.commission3 + ' · 商家年 ¥' + p.commission4 + ' · 已结 ¥' + p.settled_total + '</small></td>' +
-      '<td>' + E(p.douyin_id||'—') + (p.promo_method ? ('<br><small>' + E(p.promo_method) + '</small>') : '') + '</td>' +
-      '<td>' + p.visits + '</td><td>' + p.regs + '</td><td>' + p.paid1 + ' / ' + p.paid2 + ' / ' + p.paid3 + ' / ' + p.paid4 + '</td><td>¥' + p.commission_in_range + '</td><td><b>¥' + p.owed + '</b><br><small>' + p.unsettled_members + ' 笔</small></td>' +
-      '<td class="row"><button class="btn sm primary" data-st="' + E(p.code) + '"' + (p.unsettled_members ? '' : ' disabled') + '>标记已结算</button>' +
-      '<button class="btn sm gray" data-cc="' + E(p.code) + '" data-c1="' + p.commission + '" data-c2="' + p.commission2 + '" data-c3="' + p.commission3 + '" data-c4="' + p.commission4 + '">改佣金</button>' +
-      '<button class="btn sm gray" data-tg="' + E(p.code) + '" data-on="' + (p.active ? 1 : 0) + '">' + (p.active ? '停用' : '启用') + '</button>' +
-      '<button class="btn sm gray" data-cp="' + E(p.code) + '">复制链接</button></td></tr>';
-  }).join('') + '</table>' : '<div class="empty">还没有推广员</div>';
+  document.getElementById('prlist').innerHTML = d.promoters.length ? d.promoters.map(function(p){
+    var bound = p.bound ? ('已绑定 #' + E(String(p.bound_member_no||'')) + ' ' + E(p.bound_nickname||'')) : '未绑定用户';
+    return '<div class="pcard"><div class="pcard-h"><div><b>' + E(p.name) + '</b><div class="p-sub">' + E(p.code) + (p.active ? '' : ' · 已停用') + ' · ' + bound + '</div></div></div>' +
+      '<div class="pmetrics" role="group" aria-label="推广统计">' +
+      '<div><b>' + p.visits + '</b><span>访问</span></div>' +
+      '<div><b>' + p.regs + '</b><span>注册</span></div>' +
+      '<div><b>' + p.paid + '</b><span>付费笔数</span></div>' +
+      '<div><b>' + yen(p.commission_in_range) + '</b><span>佣金</span></div>' +
+      '<div><b>' + yen(p.owed) + '</b><span>待结算</span></div></div>' +
+      '<div class="ops"><button class="btn sm primary" data-qr="' + E(p.code) + '" data-qn="' + E(p.name) + '">二维码</button>' +
+      '<button class="btn sm gray" data-bind="' + E(p.code) + '">' + (p.bound ? '换绑用户' : '绑定用户') + '</button>' +
+      (p.bound ? '<button class="btn sm gray" data-unbind="' + E(p.code) + '">解除绑定</button>' : '') +
+      '<button class="btn sm gray" data-st="' + E(p.code) + '"' + (p.unsettled_members ? '' : ' disabled') + '>标记已结算</button>' +
+      '<button class="btn sm gray" data-tg="' + E(p.code) + '" data-on="' + (p.active ? 1 : 0) + '">' + (p.active ? '停用' : '启用') + '</button></div></div>';
+  }).join('') : '<div class="empty">还没有推广员</div>';
+  document.querySelectorAll('#prlist [data-qr]').forEach(function(b){ b.onclick = function(){ openQrModal(b.dataset.qr, b.dataset.qn); }; });
+  document.querySelectorAll('#prlist [data-bind]').forEach(function(b){ b.onclick = async function(){
+    var v = prompt('请输入要绑定的手机号或会员编号', '');
+    if (v === null) return;
+    var r = await call('POST', '/api/admin/promoters/' + encodeURIComponent(b.dataset.bind), {action: 'bind', user: v});
+    msg('已绑定 ' + b.dataset.bind + ' → #' + (r.member_no||r.user_id) + ' ' + (r.nickname||''), false); promo(); }; });
+  document.querySelectorAll('#prlist [data-unbind]').forEach(function(b){ b.onclick = async function(){
+    if (!confirm('解除 ' + b.dataset.unbind + ' 与用户的绑定？对方将看不到「我的推广」。')) return;
+    await call('POST', '/api/admin/promoters/' + encodeURIComponent(b.dataset.unbind), {action: 'unbind'});
+    msg('已解除绑定', false); promo(); }; });
   document.querySelectorAll('#prlist [data-st]').forEach(function(b){ b.onclick = async function(){
     if (!confirm('确认已向 ' + b.dataset.st + ' 支付待结算佣金，并标记为已结算？')) return;
     var r = await call('POST', '/api/admin/promoters/' + b.dataset.st, {action: 'settle'}); msg('已结算 ' + r.members + ' 人，¥' + r.amount, false); promo(); }; });
-  document.querySelectorAll('#prlist [data-cc]').forEach(function(b){ b.onclick = async function(){
-    var v = prompt('会员佣金（元/人）', b.dataset.c1); if (v === null) return;
-    var v2 = prompt('高级会员佣金（元/人）', b.dataset.c2); if (v2 === null) return;
-    var v3 = prompt('商家月付佣金（元/次）', b.dataset.c3); if (v3 === null) return;
-    var v4 = prompt('商家年付佣金（元/次）', b.dataset.c4); if (v4 === null) return;
-    await call('POST', '/api/admin/promoters/' + b.dataset.cc, {action: 'commission', commission: v, commission2: v2, commission3: v3, commission4: v4}); promo(); }; });
   document.querySelectorAll('#prlist [data-tg]').forEach(function(b){ b.onclick = async function(){
     await call('POST', '/api/admin/promoters/' + b.dataset.tg, {action: b.dataset.on === '1' ? 'disable' : 'enable'}); promo(); }; });
-  document.querySelectorAll('#prlist [data-cp]').forEach(function(b){ b.onclick = function(){
-    var link = location.origin + '/?ref=' + b.dataset.cp;
-    if (navigator.clipboard) navigator.clipboard.writeText(link).then(function(){ msg('已复制：' + link, false); }, function(){ prompt('推广链接', link); }); else prompt('推广链接', link); }; });
   var s = await call('GET', '/api/admin/settlements');
   document.getElementById('slist').innerHTML = s.settlements.length ? '<table class="adm"><tr><th>时间</th><th>推广码</th><th>笔数</th><th>金额</th></tr>' + s.settlements.map(function(x){
     return '<tr><td>' + E(x.time) + '</td><td>' + E(x.code) + '</td><td>' + x.members + '</td><td>¥' + x.amount + '</td></tr>'; }).join('') + '</table>' : '<div class="tip">暂无</div>';
@@ -897,8 +972,8 @@ document.getElementById('ckadd').onclick = function(){
   call('POST','/api/admin/chicken/shops',{name:name,area:area,address:address,menu:items,notes:'',is_example:true,active:true,sort_order:0}).then(function(){ msg('已新增', false); chickenAdmin(); });
 };
 document.getElementById('padd').onclick = async function(){
-  var r = await call('POST', '/api/admin/promoters', {name: document.getElementById('pname').value, code: document.getElementById('pcode').value, commission: document.getElementById('pcom').value || 3, commission2: document.getElementById('pcom2').value || 6, commission3: document.getElementById('pcom3').value || 20, commission4: document.getElementById('pcom4').value || 200});
-  msg('已添加推广员 ' + r.code + '，链接：' + location.origin + '/?ref=' + r.code, false);
+  var r = await call('POST', '/api/admin/promoters', {name: document.getElementById('pname').value, code: document.getElementById('pcode').value});
+  msg('已添加推广员 ' + r.code + '，链接：https://lvhanzhushou.com/?ref=' + r.code, false);
   document.getElementById('pname').value = document.getElementById('pcode').value = ''; promo();
 };
 boot();

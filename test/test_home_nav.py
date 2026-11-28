@@ -159,7 +159,12 @@ for name, txt in ALL.items():
     check("%s 无「奋韩」" % name, "奋韩" not in txt)
     check("%s 无微信号/加微信" % name,
           ("微信号" not in txt) and ("加微信" not in txt) and ("添加微信" not in txt))
-    check("%s 无二维码引导" % name, ("二维码" not in txt) and ("扫码" not in txt))
+    # 我的页允许「我的推广」专属推广码图片；仍禁止扫码加微信一类引导
+    if name == "me.html":
+        check("me.html 无扫码加微引导", "扫码" not in txt)
+        check("me.html 二维码仅用于我的推广", "二维码" in txt and "我的推广" in txt and 'id="myPromo"' in txt)
+    else:
+        check("%s 无二维码引导" % name, ("二维码" not in txt) and ("扫码" not in txt))
     check("%s 无绝对化宣传语" % name,
           not re.search(r"唯一|第一名|第一品牌|销量第一|排名第一|最(好|佳|优|强|低|便宜|值得|受欢|专业|靠谱|出名)|顶级|极致|国家级", txt))
 

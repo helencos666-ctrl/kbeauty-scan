@@ -2727,7 +2727,9 @@ def api_admin_promoters(req: Request, start: str = "", end: str = ""):
             (SELECT COALESCE(sum(cents),0) FROM c_commissions c WHERE c.code=p.code AND COALESCE(c.status,'payable')<>'void' AND c.created_at>=%(a)s AND c.created_at<%(b)s) AS range_cents,
             (SELECT count(*) FROM c_commissions c WHERE c.code=p.code AND c.settled_at IS NULL AND COALESCE(c.status,'payable')<>'void') AS unsettled,
             (SELECT COALESCE(sum(cents),0) FROM c_commissions c WHERE c.code=p.code AND c.settled_at IS NULL AND COALESCE(c.status,'payable')<>'void') AS owed_cents,
-            (SELECT COALESCE(sum(amount_cents),0) FROM c_settlements s WHERE s.code=p.code) AS settled_cents
+            (SELECT COALESCE(sum(amount_cents),0) FROM c_settlements s WHERE s.code=p.code) AS settled_cents,
+            (SELECT u.member_no FROM c_users u WHERE u.id=p.user_id) AS bound_member_no,
+            (SELECT u.nickname FROM c_users u WHERE u.id=p.user_id) AS bound_nickname
             FROM c_promoters p ORDER BY p.created_at""", {"a": t0, "b": t1})
     return {"promoters": [{"code": r["code"], "name": r["name"], "active": r["active"],
                            "commission": r["commission_cents"] / 100, "commission2": r["commission2_cents"] / 100,
@@ -2739,7 +2741,11 @@ def api_admin_promoters(req: Request, start: str = "", end: str = ""):
                            "unsettled_members": r["unsettled"], "owed": r["owed_cents"] / 100,
                            "settled_total": r["settled_cents"] / 100,
                            "douyin_id": r.get("douyin_id") or "",
-                           "promo_method": r.get("promo_method") or ""} for r in rows]}
+                           "promo_method": r.get("promo_method") or "",
+                           "user_id": r.get("user_id"),
+                           "bound_member_no": r.get("bound_member_no") or (r.get("user_id") or None),
+                           "bound_nickname": r.get("bound_nickname") or "",
+                           "bound": bool(r.get("user_id"))} for r in rows]}
 
 def _cents(v):
     try:
@@ -2805,6 +2811,12 @@ async def api_admin_promoter_action(req: Request, code: str):
                 q(conn, "INSERT INTO c_settlements(code,members,amount_cents) VALUES (%s,%s,%s)", (code, n, amt))
             active_codes(conn)
             return {"ok": True, "members": n, "amount": amt / 100}
+        elif act == "bind":
+            from promo import bind_promoter
+            return bind_promoter(conn, code, raw=d.get("user") or d.get("account") or d.get("member_no") or d.get("phone"))
+        elif act == "unbind":
+            from promo import bind_promoter
+            return bind_promoter(conn, code, unbind=True)
         else:
             raise HTTPException(400, "未知操作")
         active_codes(conn)

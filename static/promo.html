@@ -44,23 +44,37 @@
   var d;
   try { d = await LH.api('GET', '/api/promo/me'); }
   catch(e){ box.textContent = e.message; return; }
-  var terms = '<p class="tip">' + LH.esc(d.terms||'') + ' 详见 <a href="/promo/rules">推广约定</a>。当前比例 ' + (d.rate_percent||50) + '%，冻结 ' + (d.hold_days||0) + ' 天。</p>';
+  var lines = (d.policy_lines && d.policy_lines.length) ? d.policy_lines : [
+    '朋友通过你的链接或二维码注册，30天内付费，你拿实付金额的50%。',
+    '7天后结算，退款不算。',
+    '只算你直接推荐的人。'
+  ];
+  var terms = '<ul class="promo-policy" style="margin:10px 0 0;padding:0 0 0 18px">' + lines.map(function(t){ return '<li style="font-size:14px;line-height:1.7;margin:0 0 4px">' + LH.esc(t) + '</li>'; }).join('') + '</ul>' +
+    '<p class="tip">详见 <a href="/promo/rules">推广约定</a>。</p>';
+  async function saveQr(url, filename){
+    var r = await fetch(url, {credentials:'same-origin'});
+    if (!r.ok) throw new Error('无法下载二维码');
+    var b = await r.blob();
+    var a = document.createElement('a');
+    a.href = URL.createObjectURL(b);
+    a.download = filename;
+    document.body.appendChild(a); a.click(); a.remove();
+    setTimeout(function(){ URL.revokeObjectURL(a.href); }, 2000);
+  }
   if (d.dashboard){
-    var x = d.dashboard, origin = location.origin, link = origin + x.link;
+    var x = d.dashboard, link = x.url || ('https://lvhanzhushou.com' + x.link);
     var refs = (x.referrals||[]).map(function(r){ return '<li>' + LH.esc(r.name) + ' · ' + LH.esc(r.joined||'') + (r.converted?' · 已付费':'') + '</li>'; }).join('');
-    box.innerHTML = '<div class="card"><h2>我的推广码</h2><p style="font-size:22px;font-weight:700;letter-spacing:1px">' + LH.esc(x.code) + '</p>' +
-      '<p class="tip" id="plink">' + LH.esc(link) + '</p>' +
-      '<div class="row"><button class="btn primary" id="copy">复制链接</button><button class="btn ghost" id="share">分享</button></div>' +
-      '<div class="chips" style="margin-top:12px"><span class="chip">点击 ' + x.visits + '</span><span class="chip">注册 ' + x.regs + '</span><span class="chip">付费转化 ' + x.paid_conversions + '</span></div>' +
-      '<p style="margin-top:10px">冻结中 ¥' + x.pending + ' · 待发放 ¥' + x.payable + ' · 已发放 ¥' + x.paid + '</p>' +
+    box.innerHTML = '<div class="card"><h2>我的推广</h2>' +
+      '<p style="font-size:22px;font-weight:700;letter-spacing:1px;margin:0 0 8px">' + LH.esc(x.code) + '</p>' +
+      '<img src="/api/promo/qr.png" alt="旅韩助手推广二维码" style="display:block;width:100%;max-width:280px;margin:0 auto 8px;background:#fff">' +
+      '<p class="tip" id="plink" style="word-break:break-all">' + LH.esc(link) + '</p>' +
+      '<div class="row"><button class="btn primary" id="saveqr">保存图片</button><button class="btn ghost" id="copy">复制链接</button></div>' +
+      '<div class="chips" style="margin-top:14px"><span class="chip">访问 ' + x.visits + '</span><span class="chip">注册 ' + x.regs + '</span><span class="chip">付费笔数 ' + (x.paid_count!=null?x.paid_count:x.paid_conversions) + '</span></div>' +
+      '<p style="margin-top:10px">已结算佣金 <b>¥' + x.paid + '</b> · 待结算佣金 <b>¥' + (x.unsettled!=null?x.unsettled:(Number(x.pending||0)+Number(x.payable||0))) + '</b></p>' +
       terms + '</div>' +
       '<div class="card"><h2>推荐用户（姓名已打码）</h2>' + (refs ? '<ul>' + refs + '</ul>' : '<p class="tip">还没有推荐注册。</p>') + '</div>';
     document.getElementById('copy').onclick = function(){ if (navigator.clipboard) navigator.clipboard.writeText(link).then(function(){ show(ok,'已复制'); }); else prompt('推广链接', link); };
-    document.getElementById('share').onclick = function(){
-      if (navigator.share) navigator.share({title:'旅韩助手', text:'我的推荐链接', url:link}).catch(function(){});
-      else if (navigator.clipboard) navigator.clipboard.writeText(link).then(function(){ show(ok,'已复制链接，可发给朋友'); });
-      else prompt('推广链接', link);
-    };
+    document.getElementById('saveqr').onclick = function(){ saveQr('/api/promo/qr.png', '旅韩助手-推广码-' + x.code + '.png').then(function(){ show(ok,'已保存'); }).catch(function(e){ show(err,e.message); }); };
     return;
   }
   var app = d.application;
