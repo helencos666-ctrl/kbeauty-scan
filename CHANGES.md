@@ -1,3 +1,10 @@
+## 2026-11-28 第14届首尔国际电影大奖（12月17日华克山庄）
+
+- static/events.json 新增「2026 第14届首尔国际电影大奖」（2026-12-17 17:00，广津区华克山庄路177号 Vista大厅）。按韩联社 2026-10-27 及粉丝投票页核对：韩国电影演员协会主办的颁奖典礼，不是电影节。交通写明广纳鲁站 / 江边站免费班车；费用栏注明目前未见对公众公开售票。
+- official_daily.json 追加 2026-11-28 出行提醒官方帖，正文含时间地点、交通、投票链接（STARDOM / sgmafans.com）和「未见公开售票」说明。未使用活动海报，也未使用「往届参与明星」及明星照片。
+- scripts/gen_official_daily_images.py 新增一张 typographic 信息卡（2026-11-28-seoul-movie-awards.jpg），仅含时间、地点、交通和入场说明。
+- 测试：test/test_seoul_movie_awards.py。Service Worker 缓存名保持 v99。
+
 ## 2026-11-28 BEANSBINS 明洞店到店优惠（特调 1+1，提 prettyskin）
 
 - 开业活动新增「BEANSBINS 明洞店 特调 1+1」：购买特调饮品送一杯美式，到店提 prettyskin；链到美食页 `/food#beansbins-myeongdong`。
