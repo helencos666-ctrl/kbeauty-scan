@@ -7,11 +7,11 @@
 <meta name="description" content="邀请同行一起用旅韩助手，好友完成首次使用后双方都可获得站内抵用券。">
 <meta name="theme-color" content="#146E68">
 <link rel="manifest" href="/manifest.webmanifest">
-<link rel="apple-touch-icon" href="/static/icons/apple-touch-icon.png?v=100">
-<link rel="icon" type="image/png" sizes="192x192" href="/static/icons/icon-192.png?v=100">
-<link rel="stylesheet" href="/static/pwa.css?v=100">
-<link rel="stylesheet" href="/static/community.css?v=100">
-<link rel="stylesheet" href="/static/me.css?v=100">
+<link rel="apple-touch-icon" href="/static/icons/apple-touch-icon.png?v=101">
+<link rel="icon" type="image/png" sizes="192x192" href="/static/icons/icon-192.png?v=101">
+<link rel="stylesheet" href="/static/pwa.css?v=101">
+<link rel="stylesheet" href="/static/community.css?v=101">
+<link rel="stylesheet" href="/static/me.css?v=101">
 </head>
 <body class="mepage invpage">
 <div class="metop"><a class="back" href="/me" aria-label="返回">‹</a>邀请有奖</div>
@@ -37,8 +37,8 @@
   <a href="/?tab=more"><i>☰</i>全部</a>
   <a href="/me" class="on"><i>👤</i>我的</a>
 </nav>
-<script src="/static/community.js?v=100"></script>
-<script src="/static/ref.js"></script>
+<script src="/static/community.js?v=101"></script>
+<script src="/static/ref.js?v=101"></script>
 <script>
 (async function(){
   var $ = function(id){ return document.getElementById(id); }, E = LH.esc, box = $('box');
@@ -51,7 +51,7 @@
   if (!d.user){
     box.innerHTML = off + '<div class="card mecard"><b>' + (invited ? '你的朋友邀请你一起用旅韩助手' : '登录后获取你的邀请链接') + '</b>' +
       '<p class="tip">' + (invited ? '注册后查一次地铁路线（或收藏一条购物优惠），即可获得 10 元新客代订抵用券（满 50 可用）。' : '可用邮箱或手机号注册，手机号不是必填。') + '</p>' +
-      '<a class="btn primary block" href="/login?mode=reg&next=' + encodeURIComponent(invited ? '/?tab=sub' : '/invite') + '">' + (invited ? '注册并去查地铁' : '注册 / 登录') + '</a></div>';
+      '<a class="btn primary block" href="/login?mode=reg&next=' + encodeURIComponent(invited ? '/?tab=sub' : '/invite') + (invited ? '&inv=' + invited : '') + '">' + (invited ? '注册并去查地铁' : '注册 / 登录') + '</a></div>';
     return;
   }
   if (invited) await LHRef.bind();

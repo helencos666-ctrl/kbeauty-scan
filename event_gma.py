@@ -93,9 +93,9 @@ def render_event_qr_png(url: str, code: str) -> bytes:
     import io
     from promo import _cjk_font, _paste_logo, _qr_matrix
     qr = _paste_logo(_qr_matrix(url)).resize((480, 480), Image.Resampling.NEAREST)
-    f1, f2, f3 = _cjk_font(40, bold=True), _cjk_font(30, bold=True), _cjk_font(26)
+    f1, f2, f3 = _cjk_font(44, bold=True), _cjk_font(38, bold=True), _cjk_font(38, bold=True)
     side = 720
-    canvas = Image.new("RGB", (side, 36 + 56 + 16 + 480 + 16 + 44 + 8 + 36 + 36), "white")
+    canvas = Image.new("RGB", (side, 116 + 480 + 16 + 56 + 12 + 56 + 36), "white")
     d = ImageDraw.Draw(canvas)
     d.rectangle((0, 0, side, 100), fill=(230, 243, 241))
 
@@ -103,10 +103,10 @@ def render_event_qr_png(url: str, code: str) -> bytes:
         b = d.textbbox((0, 0), text, font=font)
         d.text(((side - (b[2] - b[0])) // 2, y), text, font=font, fill=fill)
 
-    centered("旅韩助手 · 首尔国际电影大奖", f1, 28, (20, 110, 104))
+    centered("旅韩助手 · 首尔国际电影大奖", f1, 24, (20, 110, 104))
     canvas.paste(qr, ((side - 480) // 2, 116))
     centered("扫码注册，帮朋友凑齐 5 人", f2, 116 + 480 + 16, (26, 35, 48))
-    centered("邀请码 " + code, f3, 116 + 480 + 16 + 44 + 8, (20, 110, 104))
+    centered("邀请码 " + code, f3, 116 + 480 + 16 + 56 + 12, (20, 110, 104))
     buf = io.BytesIO()
     canvas.save(buf, format="PNG", optimize=True)
     return buf.getvalue()

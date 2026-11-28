@@ -10,10 +10,10 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="旅韩助手">
 <link rel="manifest" href="/manifest.webmanifest">
-<link rel="apple-touch-icon" href="/static/icons/apple-touch-icon.png?v=100">
-<link rel="icon" type="image/png" sizes="192x192" href="/static/icons/icon-192.png?v=100">
-<link rel="stylesheet" href="/static/pwa.css?v=100">
-<link rel="stylesheet" href="/static/community.css?v=100">
+<link rel="apple-touch-icon" href="/static/icons/apple-touch-icon.png?v=101">
+<link rel="icon" type="image/png" sizes="192x192" href="/static/icons/icon-192.png?v=101">
+<link rel="stylesheet" href="/static/pwa.css?v=101">
+<link rel="stylesheet" href="/static/community.css?v=101">
 </head>
 <body>
 <header>
@@ -52,7 +52,8 @@
   <a href="/?tab=more"><i>☰</i>全部</a>
   <a href="/me"><i>👤</i>我的</a>
 </nav>
-<script src="/static/community.js?v=100"></script>
+<script src="/static/community.js?v=101"></script>
+<script src="/static/ref.js?v=101"></script>
 <script>
 var mode = 'login';
 var next = LH.qs('next') || '/community';
@@ -82,10 +83,20 @@ document.getElementById('go').onclick = async function(){
     if (!body.agree){ LH.showErr(err, '请先勾选同意用户协议、社区约定和隐私政策'); return; }
   }
   this.disabled = true;
-  try { await LH.api('POST', mode === 'login' ? '/api/community/login' : '/api/community/register', body); location.href = mode === 'reg' ? '/member?new=1' : next; }
+  try {
+    if (mode === 'reg'){
+      // 带上暂存的邀请码，服务器注册成功后立即绑定；有明确结果才清除暂存（活动未开始 / 出错则保留，之后任何页面打开会自动补绑）
+      body.inv = LHRef.code();
+      var r = await LHRef.post('/api/community/register', body);
+      if (r && r.ref && r.ref !== 'inactive') LHRef.clear();
+      location.href = '/member?new=1';
+    } else {
+      await LH.api('POST', '/api/community/login', body); location.href = next;
+    }
+  }
   catch(e){ LH.showErr(err, e.message); this.disabled = false; }
 };
 </script>
-<script src="/static/pwa.js?v=100" defer></script>
+<script src="/static/pwa.js?v=101" defer></script>
 </body>
 </html>

@@ -76,6 +76,19 @@ CREATE TABLE IF NOT EXISTS c_ref_devices (
 );
 CREATE INDEX IF NOT EXISTS c_ref_devices_dev_idx ON c_ref_devices(dev_hash);
 CREATE UNIQUE INDEX IF NOT EXISTS c_coupons_ref_uidx ON c_coupons(user_id, kind) WHERE kind LIKE 'ref_%';
+CREATE TABLE IF NOT EXISTS c_ref_backfill (
+  id BIGSERIAL PRIMARY KEY,
+  job_key TEXT NOT NULL DEFAULT '',
+  target TEXT NOT NULL DEFAULT '',
+  inviter_code TEXT NOT NULL,
+  inviter_id BIGINT,
+  invitee_id BIGINT,
+  outcome TEXT NOT NULL,
+  detail TEXT NOT NULL DEFAULT '',
+  actor TEXT NOT NULL DEFAULT 'system',
+  created_at TIMESTAMPTZ NOT NULL DEFAULT now()
+);
+CREATE INDEX IF NOT EXISTS c_ref_backfill_job_idx ON c_ref_backfill(job_key, target);
 CREATE TABLE IF NOT EXISTS c_feedback (
   id BIGSERIAL PRIMARY KEY,
   user_id BIGINT REFERENCES c_users(id) ON DELETE SET NULL,
@@ -454,8 +467,13 @@ async def api_ref_bind(req: Request):
     csrf(req)
     d = await _json(req)
     with db() as conn:
-        u = need_user(conn, req)
-        limit("refb:" + str(u["id"]), 10, 3600)
+        if d.get("soft"):
+            u = current_user(conn, req)
+            if not u:                       # 每个页面的自动补绑：没登录就静默跳过，不报错
+                return {"ok": True, "status": "guest"}
+        else:
+            u = need_user(conn, req)
+        limit("refb:" + str(u["id"]), 30 if d.get("soft") else 10, 3600)
         st = _bind(conn, req, u, d.get("code"))
     return {"ok": True, "status": st}
 
@@ -484,6 +502,100 @@ async def api_ref_use(req: Request):
                 _reward(conn, inv)
                 return {"ok": True, "status": "valid", "reward": INVITEE_TITLE}
         return {"ok": True, "status": inv["status"]}
+
+# ---------------- 补录漏绑的邀请（有审计记录） ----------------
+BACKFILL_WINDOW = (datetime.timedelta(seconds=6), datetime.timedelta(seconds=2))   # 日志时间前 6 秒 ~ 后 2 秒内创建的账号
+
+def _audit(conn, job_key, target, code, inviter_id, invitee_id, outcome, detail, actor):
+    q(conn, """INSERT INTO c_ref_backfill(job_key,target,inviter_code,inviter_id,invitee_id,outcome,detail,actor)
+               VALUES (%s,%s,%s,%s,%s,%s,%s,%s)""", (job_key, target, code, inviter_id, invitee_id, outcome, detail[:300], actor))
+    print("ref backfill", job_key or "manual", target, "inviter=%s" % code, "invitee=%s" % invitee_id, outcome, flush=True)
+
+def backfill_invite(conn, code, invitee_id, evidence, actor="admin", job_key="", target=""):
+    """补录一条被漏绑的邀请。规则与 _bind 完全一致（邀请有奖未开启 / 邀请码无效 / 自邀 / 已绑 / 账号超过 48 小时 /
+    同一设备 / 设备已被其他邀请使用 都不补），通过后写入 pending 并留审计。返回 (outcome, detail)。"""
+    code = (code or "").strip().upper()
+    def done(outcome, detail, inviter_id=None):
+        _audit(conn, job_key, target, code, inviter_id, invitee_id, outcome, detail, actor)
+        return outcome, detail
+    c = _cfg(conn)
+    if not _active(c):
+        return done("skipped", "邀请有奖未开启")
+    inviter = q(conn, "SELECT id,is_banned FROM c_users WHERE invite_code=%s", (code,), one=True)
+    if not inviter or inviter["is_banned"]:
+        return done("skipped", "邀请码无效或邀请人已封禁")
+    u = q(conn, "SELECT id,created_at,is_banned,is_bot FROM c_users WHERE id=%s", (invitee_id,), one=True) if invitee_id else None
+    if not u:
+        return done("skipped", "找不到被邀请账号", inviter["id"])
+    if u["is_banned"] or u.get("is_bot"):
+        return done("skipped", "被邀请账号已封禁或是系统账号", inviter["id"])
+    if u["id"] == inviter["id"]:
+        return done("skipped", "自己邀请自己", inviter["id"])
+    if q(conn, "SELECT 1 AS x FROM c_ref_invites WHERE invitee_id=%s", (u["id"],), one=True):
+        return done("skipped", "该账号已有邀请记录", inviter["id"])
+    if u["created_at"] < datetime.datetime.now(UTC) - datetime.timedelta(hours=48) or u["created_at"] < c["starts_at"]:
+        return done("skipped", "账号创建已超过 48 小时", inviter["id"])
+    devs = [r["dev_hash"] for r in q(conn, "SELECT dev_hash FROM c_ref_devices WHERE user_id=%s", (u["id"],))]
+    if devs:
+        if q(conn, "SELECT 1 AS x FROM c_ref_devices WHERE user_id=%s AND dev_hash = ANY(%s)", (inviter["id"], devs), one=True):
+            return done("skipped", "与邀请人同一设备", inviter["id"])
+        if q(conn, "SELECT 1 AS x FROM c_ref_invites WHERE dev_hash = ANY(%s) AND invitee_id<>%s", (devs, u["id"]), one=True):
+            return done("skipped", "该设备已被其他邀请使用", inviter["id"])
+    q(conn, """INSERT INTO c_ref_invites(inviter_id,invitee_id,status,reason,flags,dev_hash,ip_hash)
+               VALUES (%s,%s,'pending',%s,'管理员补录',%s,NULL) ON CONFLICT (invitee_id) DO NOTHING""",
+      (inviter["id"], u["id"], ("补录：" + evidence)[:120], devs[0] if devs else None))
+    return done("added", evidence, inviter["id"])
+
+# 一次性补录：2026-11-28 邀请码在注册后丢失（登录页没带 ref.js）的访客。
+# 证据来自请求日志：同一客户端先打开带该邀请码的活动页、随后注册，注册后没有绑定请求。
+# 日志只有时间没有账号，所以按「注册时间前后几秒内创建、且唯一」的账号补；对不上或不唯一就不补。
+# 不补：同一 IPv6 /64 内多个账号（疑似同设备）、与已绑账号同 IP 的再次注册。
+BACKFILL_JOBS = [
+    ("gma-20261128", "t1", "3K6GZG", "2026-11-28T11:41:45.540+00:00"),
+    ("gma-20261128", "t2", "3K6GZG", "2026-11-28T11:45:11.242+00:00"),
+    ("gma-20261128", "t3", "TZCGEU", "2026-11-28T11:37:43.835+00:00"),
+]
+BACKFILL_EVIDENCE = "请求日志：先打开带邀请码的活动页再注册，注册后无绑定请求（邀请码丢失）"
+
+def run_backfill_jobs():
+    done = 0
+    with db() as conn:
+        for job, target, code, at in BACKFILL_JOBS:
+            if q(conn, "SELECT 1 AS x FROM c_ref_backfill WHERE job_key=%s AND target=%s", (job, target), one=True):
+                continue
+            t = datetime.datetime.fromisoformat(at)
+            rows = q(conn, "SELECT id FROM c_users WHERE created_at BETWEEN %s AND %s", (t - BACKFILL_WINDOW[0], t + BACKFILL_WINDOW[1]))
+            if len(rows) != 1:
+                _audit(conn, job, target, code, None, None, "skipped", "按注册时间找到 %d 个账号，不唯一/找不到，未补" % len(rows), "system")
+                continue
+            backfill_invite(conn, code, rows[0]["id"], BACKFILL_EVIDENCE, "system", job, target)
+            done += 1
+    return done
+
+@router.post("/api/admin/referral/backfill")
+async def api_admin_referral_backfill(req: Request):
+    """管理员补录：填邀请码 + 被邀请人（会员编号 / 邮箱 / 手机）+ 依据。规则同自动绑定，留审计。"""
+    csrf(req)
+    d = await _json(req)
+    with db() as conn:
+        need_admin(conn, req)
+        evidence = clean_text(d.get("evidence"), 100, "补录依据", 4)
+        from promo import find_user_for_bind
+        u = find_user_for_bind(conn, d.get("invitee"))
+        out, detail = backfill_invite(conn, d.get("code"), u["id"], evidence, "admin")
+    return {"ok": True, "outcome": out, "detail": detail}
+
+@router.get("/api/admin/referral/backfill")
+def api_admin_referral_backfill_list(req: Request):
+    with db() as conn:
+        need_admin(conn, req)
+        rows = q(conn, """SELECT b.*, a.nickname AS inviter, a.member_no AS inviter_no, i.nickname AS invitee, i.member_no AS invitee_no
+                          FROM c_ref_backfill b LEFT JOIN c_users a ON a.id=b.inviter_id LEFT JOIN c_users i ON i.id=b.invitee_id
+                          ORDER BY b.id DESC LIMIT 200""")
+    return {"items": [{"id": r["id"], "job": r["job_key"], "code": r["inviter_code"], "outcome": r["outcome"], "detail": r["detail"],
+                       "actor": r["actor"], "time": _ts(r["created_at"]),
+                       "inviter": ("#%s %s" % (r["inviter_no"] or r["inviter_id"], r["inviter"])) if r["inviter_id"] else "",
+                       "invitee": ("#%s %s" % (r["invitee_no"] or r["invitee_id"], r["invitee"])) if r["invitee_id"] else ""} for r in rows]}
 
 # ---------------- 后台：邀请奖励 / 意见反馈 ----------------
 @router.get("/api/admin/referral")

@@ -45,8 +45,13 @@ POLICY_LINES = (
 )
 POLICY_TEXT = "".join(POLICY_LINES)
 _LOGO = Path(__file__).resolve().parent / "static" / "icons" / "icon-192.png"
-_FONT = Path("/usr/share/fonts/opentype/noto/NotoSansCJK-Regular.ttc")
-_FONT_BOLD = Path("/usr/share/fonts/opentype/noto/NotoSansCJK-Bold.ttc")
+# 服务器（Render）没有系统中文字体，所以随仓库带 Noto Sans CJK SC 子集（SIL OFL，见 fonts/OFL.txt）。
+# 先用仓库内的相对路径，找不到才退回系统字体。
+_FONT_DIR = Path(__file__).resolve().parent / "fonts"
+_FONT = _FONT_DIR / "NotoSansCJKsc-Regular-subset.otf"
+_FONT_BOLD = _FONT_DIR / "NotoSansCJKsc-Bold-subset.otf"
+_SYS_FONT = Path("/usr/share/fonts/opentype/noto/NotoSansCJK-Regular.ttc")
+_SYS_FONT_BOLD = Path("/usr/share/fonts/opentype/noto/NotoSansCJK-Bold.ttc")
 PROMO_METHODS = ("户外直播", "短视频", "社群", "其他")
 DOUYIN_RE = re.compile("^[A-Za-z0-9_.\\-\u4e00-\u9fff]{2,40}$")
 
@@ -191,17 +196,16 @@ def promo_public_url(code: str) -> str:
 
 def _cjk_font(size, bold=False):
     from PIL import ImageFont
-    path = _FONT_BOLD if bold and _FONT_BOLD.is_file() else _FONT
-    if path.is_file():
-        for idx in (2, 0, 1, 3, 4, 5):
+    cands = [_FONT_BOLD, _SYS_FONT_BOLD] if bold else []
+    cands += [_FONT, _SYS_FONT]
+    for path in cands:
+        if not path.is_file():
+            continue
+        for idx in ((0,) if path.suffix == ".otf" else (2, 0, 1, 3, 4, 5)):
             try:
                 return ImageFont.truetype(str(path), size=size, index=idx)
             except Exception:
                 continue
-        try:
-            return ImageFont.truetype(str(path), size=size)
-        except Exception:
-            pass
     return ImageFont.load_default()
 
 

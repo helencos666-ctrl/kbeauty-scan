@@ -653,6 +653,7 @@ def static_html(name: str):
 from lanjing_seed import router as lanjing_router, seed_once as seed_lanjing  # noqa: E402
 from guides_seed import seed_once as seed_guides  # noqa: E402
 from official_daily_seed import seed_once as seed_official_daily  # noqa: E402
+from me import run_backfill_jobs  # noqa: E402
 from hide_shop_posts_v76 import hide_once as hide_shop_posts_v76  # noqa: E402
 from hide_shop_posts_v77 import hide_once as hide_shop_posts_v77  # noqa: E402
 app.include_router(lanjing_router)
@@ -675,6 +676,10 @@ def _run_startup_seeds():
         except Exception as e:  # noqa: BLE001
             _SEED_STATE["error"] = type(e).__name__
             print("startup seed error", getattr(fn, "__module__", "?"), type(e).__name__, flush=True)
+    try:
+        run_backfill_jobs()   # 邀请漏绑补录（一次性、幂等、有审计）；没有数据库时跳过
+    except Exception as e:  # noqa: BLE001
+        print("ref backfill: skipped:", type(e).__name__, flush=True)
     _SEED_STATE["done"] = True
 
 @app.on_event("startup")

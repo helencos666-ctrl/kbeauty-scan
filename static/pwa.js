@@ -1,10 +1,21 @@
 /* 旅韩助手：全站底部导航 + 注册 Service Worker + 可关闭的安装提示 */
 (function(){
 
+  /* 手里有邀请码（存储、cookie 或链接里带 inv）的访客：任何页面都加载 ref.js，登录后自动补绑，不用非得回活动页 */
+  try {
+    if (!window.LHRef && !document.querySelector('script[src*="/static/ref.js"]') &&
+        (localStorage.getItem('lh_inv') || /(?:^|;\s*)lh_invc=/.test(document.cookie) || /[?&]inv=[2-9A-Za-z]{6}(&|$)/.test(location.search))) {
+      var rs = document.createElement('script');
+      rs.src = '/static/ref.js?v=101';
+      rs.async = true;
+      document.head.appendChild(rs);
+    }
+  } catch (e) {}
+
   /* 开业活动脚本：红标「我的」+ 首页每日弹层 */
   if (!document.querySelector('script[data-lh-opening]')) {
     var s = document.createElement('script');
-    s.src = '/static/opening-promos.js?v=100';
+    s.src = '/static/opening-promos.js?v=101';
     s.async = true;
     s.setAttribute('data-lh-opening', '1');
     document.head.appendChild(s);

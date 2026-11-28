@@ -44,8 +44,8 @@ def check_source_fixes():
     check("发帖提交前重建内存 File 并限制 18MB", "arrayBuffer()" in newp and "18 * 1024 * 1024" in newp)
     check("pick 压缩完成后再清空 value", "ok.push(await LH.compress" in newp and "this.value = ''" in newp)
     check("后端识别空包并给出准确提示", "上传内容未到达服务器" in py and "post_upload_empty" in py)
-    check("sw.js 缓存为 v99", "lvhan-shell-v100" in sw and "shops.js?v=100" in sw)
-    check("community-new 使用 v99", "?v=100" in newp and "?v=91" not in newp)
+    check("sw.js 缓存为 v99", "lvhan-shell-v101" in sw and "shops.js?v=101" in sw)
+    check("community-new 使用 v99", "?v=101" in newp and "?v=91" not in newp)
 
 # ---------------- local server ----------------
 def start_server():

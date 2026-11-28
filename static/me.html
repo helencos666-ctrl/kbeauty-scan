@@ -9,11 +9,11 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="旅韩助手">
 <link rel="manifest" href="/manifest.webmanifest">
-<link rel="apple-touch-icon" href="/static/icons/apple-touch-icon.png?v=100">
-<link rel="icon" type="image/png" sizes="192x192" href="/static/icons/icon-192.png?v=100">
-<link rel="stylesheet" href="/static/pwa.css?v=100">
-<link rel="stylesheet" href="/static/community.css?v=100">
-<link rel="stylesheet" href="/static/me.css?v=100">
+<link rel="apple-touch-icon" href="/static/icons/apple-touch-icon.png?v=101">
+<link rel="icon" type="image/png" sizes="192x192" href="/static/icons/icon-192.png?v=101">
+<link rel="stylesheet" href="/static/pwa.css?v=101">
+<link rel="stylesheet" href="/static/community.css?v=101">
+<link rel="stylesheet" href="/static/me.css?v=101">
 </head>
 <body class="mepage">
 <div class="metop">我的<a class="bell" href="/community/notices" aria-label="通知">🔔<span class="dot" id="bellDot" hidden></span></a></div>
@@ -24,7 +24,7 @@
   <style>
     #myPromo .promo-policy{margin:8px 0 0;padding:0 0 0 18px}
     #myPromo .promo-policy li{font-size:14px;line-height:1.7;margin:0 0 4px;color:#1A2330}
-    #myPromo .plink{word-break:break-all;font-size:13px;color:#4A5560;margin:6px 0 10px}
+    #myPromo .plink{word-break:break-all;font-size:14px;line-height:1.5;color:#1A2330;margin:6px 0 10px}
     #myPromo{margin-bottom:24px;padding-bottom:8px}
     #myPromo .promo-qr{display:block;width:100%;max-width:220px;margin:4px auto 8px;background:#fff;border:0;padding:0}
     #myPromo .pstats{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin:12px 0 8px;text-align:center}
@@ -36,7 +36,11 @@
     #myGma .gbar i{display:block;height:100%;background:linear-gradient(90deg,#146E68,#3D8F88)}
     #myGma .gtop{display:flex;justify-content:space-between;align-items:baseline;gap:8px}
     #myGma .gtop b{font-size:20px;color:#146E68}
-    #myGma .plink{word-break:break-all;font-size:13px;color:#4A5560;margin:6px 0 10px}
+    #myGma .plink{word-break:break-all;font-size:14px;line-height:1.5;color:#1A2330;margin:6px 0 10px}
+    .codebar{display:flex;align-items:center;justify-content:space-between;gap:10px;background:#E6F3F1;border-radius:12px;padding:8px 12px;margin:8px 0}
+    .codebar span{font-size:14px;color:#4A5560}
+    .codebar b{font-size:28px;letter-spacing:3px;color:#146E68;font-family:ui-monospace,Menlo,Consolas,monospace}
+    .codebar .btn.sm{font-size:14px;padding:8px 12px;white-space:nowrap}
   </style>
   <div class="card mecard" id="myGma" hidden></div>
   <div class="card mecard" id="myPromo" hidden></div>
@@ -84,8 +88,8 @@
   <a href="/trips" data-nav="trips" class="loc"><i>🗓️</i>行程安排</a>
   <a href="/me" data-nav="me" class="me on" aria-current="page"><i>👤</i>我的</a>
 </nav>
-<script src="/static/community.js?v=100"></script>
-<script src="/static/ref.js"></script>
+<script src="/static/community.js?v=101"></script>
+<script src="/static/ref.js?v=101"></script>
 <script>
 (function(){
   var $ = function(id){ return document.getElementById(id); }, E = LH.esc, ME = null;
@@ -132,11 +136,13 @@
       '<p class="tip" style="margin:0">邀请好友注册，免费领入场名额</p><div class="gtop"><b>已邀请 ' + n + '/' + need + ' 人</b></div>' +
       '<div class="gbar"><i style="width:' + pct + '%"></i></div>' +
       '<p class="tip" style="margin:0 0 6px">按全部时间累计的有效注册账号统计。名额有限，最终以主办方确认为准。</p>' +
+      '<div class="codebar"><span>邀请码</span><b>' + E(d.code) + '</b><button class="btn ghost sm" type="button" id="mgCopyCode">复制邀请码</button></div>' +
       '<p class="plink">' + E(d.link) + '</p>' +
       '<div class="row"><button class="btn ghost" type="button" id="mgCopy">复制邀请链接</button><a class="btn ghost" href="/event/seoul-movie-awards">二维码和详情</a></div>' +
       '<div style="margin-top:10px" id="mgAct">' + act + '</div>';
     box.hidden = false;
     $('mgCopy').onclick = async function(){ var ok = await LH.copyText(d.link); this.textContent = ok === false ? '请长按复制' : '已复制'; };
+    $('mgCopyCode').onclick = async function(){ var ok = await LH.copyText(d.code); this.textContent = ok === false ? '请长按复制' : '已复制'; };
     if ($('mgClaim')) $('mgClaim').onclick = async function(){
       this.disabled = true;
       try { await LH.api('POST', '/api/event/gma/claim', {}); loadMyGma(); } catch(e){ this.disabled = false; err(e.message); }
@@ -158,6 +164,7 @@
     var unsettled = (x.unsettled!=null?x.unsettled:(Number(x.pending||0)+Number(x.payable||0)));
     box.innerHTML = '<h3>我的推广</h3>' +
       '<img class="promo-qr" src="/api/promo/qr.png" alt="旅韩助手推广二维码">' +
+      '<div class="codebar"><span>推广码</span><b>' + E(x.code) + '</b><button class="btn ghost sm" type="button" id="mpCopyCode">复制推广码</button></div>' +
       '<p class="plink">' + E(link) + '</p>' +
       '<div class="row"><button class="btn primary" type="button" id="mpSave">保存图片</button><button class="btn ghost" type="button" id="mpCopy">复制链接</button></div>' +
       '<div class="pstats"><div><b>' + x.visits + '</b><span>访问</span></div><div><b>' + x.regs + '</b><span>注册</span></div><div><b>' + paidN + '</b><span>付费笔数</span></div></div>' +
@@ -165,6 +172,7 @@
       '<ul class="promo-policy">' + lines.map(function(t){ return '<li>' + E(t) + '</li>'; }).join('') + '</ul>' +
       '<p class="tip" style="margin:8px 0 0"><a href="/promo">查看推荐明细</a></p>';
     box.hidden = false;
+    $('mpCopyCode').onclick = async function(){ var ok = await LH.copyText(x.code); this.textContent = ok === false ? '请长按复制' : '已复制'; };
     $('mpSave').onclick = function(){ saveQr('/api/promo/qr.png', '旅韩助手-推广码-' + x.code + '.png').catch(function(e){ err(e.message); }); };
     $('mpCopy').onclick = function(){
       if (navigator.clipboard) navigator.clipboard.writeText(link).then(function(){ err(''); }, function(){ prompt('推广链接', link); });
@@ -240,7 +248,7 @@
 })();
 </script>
 
-<script src="/static/opening-promos.js?v=100" data-lh-opening="1"></script>
+<script src="/static/opening-promos.js?v=101" data-lh-opening="1"></script>
 <script>
 document.addEventListener('DOMContentLoaded', function(){
   if (!window.LHOpening) return;
@@ -254,6 +262,6 @@ document.addEventListener('DOMContentLoaded', function(){
   });
 });
 </script>
-<script src="/static/pwa.js?v=100" defer></script>
+<script src="/static/pwa.js?v=101" defer></script>
 </body>
 </html>

@@ -14,7 +14,7 @@ check("SW：去过的页面先秒开，后台再更新", "staleWhileRevalidate" 
 check("SW：详情/私信/咨询/搭子用模板秒开", all(x in sw for x in ["/static/community-post.html", "/static/chat.html", "/static/consult.html", "/static/dazi.html"]))
 check("SW：登录/支付/后台/跳转不走缓存", "NO_SWR" in sw and "login" in sw and "pay" in sw and "admin" in sw)
 check("SW：缓存太旧（7 天）不用", "MAX_STALE_MS" in sw)
-check("SW：缓存版本 v99", "lvhan-shell-v100" in sw)
+check("SW：缓存版本 v99", "lvhan-shell-v101" in sw)
 check("返回键真正后退（standalone 也能恢复列表）", "a.pback" in pwa and "history.back()" in pwa and "lh_back" in pwa)
 check("按下链接即预取，且不计入浏览量", "touchstart" in pwa and "X-LH-Prefetch" in pwa and "x-lh-prefetch" in R("visits.py"))
 check("主屏幕 App 回到前台检查新版本", "r.update()" in pwa)

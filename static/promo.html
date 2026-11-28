@@ -8,10 +8,10 @@
 <meta name="theme-color" content="#146E68">
 <meta name="robots" content="noindex">
 <link rel="manifest" href="/manifest.webmanifest">
-<link rel="apple-touch-icon" href="/static/icons/apple-touch-icon.png?v=100">
-<link rel="icon" type="image/png" sizes="192x192" href="/static/icons/icon-192.png?v=100">
-<link rel="stylesheet" href="/static/pwa.css?v=100">
-<link rel="stylesheet" href="/static/community.css?v=100">
+<link rel="apple-touch-icon" href="/static/icons/apple-touch-icon.png?v=101">
+<link rel="icon" type="image/png" sizes="192x192" href="/static/icons/icon-192.png?v=101">
+<link rel="stylesheet" href="/static/pwa.css?v=101">
+<link rel="stylesheet" href="/static/community.css?v=101">
 </head>
 <body>
 <header>
@@ -31,7 +31,7 @@
   <a href="/?tab=more"><i>☰</i>全部</a>
   <a href="/me"><i>👤</i>我的</a>
 </nav>
-<script src="/static/community.js?v=100"></script>
+<script src="/static/community.js?v=101"></script>
 <script>
 (async function(){
   var box = document.getElementById('box'), err = document.getElementById('err'), ok = document.getElementById('ok');
@@ -65,14 +65,15 @@
     var x = d.dashboard, link = x.url || ('https://lvhanzhushou.com' + x.link);
     var refs = (x.referrals||[]).map(function(r){ return '<li>' + LH.esc(r.name) + ' · ' + LH.esc(r.joined||'') + (r.converted?' · 已付费':'') + '</li>'; }).join('');
     box.innerHTML = '<div class="card"><h2>我的推广</h2>' +
-      '<p style="font-size:22px;font-weight:700;letter-spacing:1px;margin:0 0 8px">' + LH.esc(x.code) + '</p>' +
+      '<div style="display:flex;align-items:center;justify-content:space-between;gap:10px;background:#E6F3F1;border-radius:12px;padding:8px 12px;margin:0 0 8px"><span style="font-size:14px;color:#4A5560">推广码</span><b style="font-size:28px;letter-spacing:3px;color:#146E68;font-family:ui-monospace,Menlo,Consolas,monospace">' + LH.esc(x.code) + '</b><button class="btn ghost" id="copycode" style="font-size:14px;white-space:nowrap">复制推广码</button></div>' +
       '<img src="/api/promo/qr.png" alt="旅韩助手推广二维码" style="display:block;width:100%;max-width:280px;margin:0 auto 8px;background:#fff">' +
-      '<p class="tip" id="plink" style="word-break:break-all">' + LH.esc(link) + '</p>' +
+      '<p class="tip" id="plink" style="word-break:break-all;font-size:14px;color:#1A2330">' + LH.esc(link) + '</p>' +
       '<div class="row"><button class="btn primary" id="saveqr">保存图片</button><button class="btn ghost" id="copy">复制链接</button></div>' +
       '<div class="chips" style="margin-top:14px"><span class="chip">访问 ' + x.visits + '</span><span class="chip">注册 ' + x.regs + '</span><span class="chip">付费笔数 ' + (x.paid_count!=null?x.paid_count:x.paid_conversions) + '</span></div>' +
       '<p style="margin-top:10px">已结算佣金 <b>¥' + x.paid + '</b> · 待结算佣金 <b>¥' + (x.unsettled!=null?x.unsettled:(Number(x.pending||0)+Number(x.payable||0))) + '</b></p>' +
       terms + '</div>' +
       '<div class="card"><h2>推荐用户（姓名已打码）</h2>' + (refs ? '<ul>' + refs + '</ul>' : '<p class="tip">还没有推荐注册。</p>') + '</div>';
+    document.getElementById('copycode').onclick = function(){ if (navigator.clipboard) navigator.clipboard.writeText(x.code).then(function(){ show(ok,'已复制推广码'); }); else prompt('推广码', x.code); };
     document.getElementById('copy').onclick = function(){ if (navigator.clipboard) navigator.clipboard.writeText(link).then(function(){ show(ok,'已复制'); }); else prompt('推广链接', link); };
     document.getElementById('saveqr').onclick = function(){ saveQr('/api/promo/qr.png', '旅韩助手-推广码-' + x.code + '.png').then(function(){ show(ok,'已保存'); }).catch(function(e){ show(err,e.message); }); };
     return;
@@ -114,6 +115,6 @@
   };
 })();
 </script>
-<script src="/static/pwa.js?v=100" defer></script>
+<script src="/static/pwa.js?v=101" defer></script>
 </body>
 </html>

@@ -1191,7 +1191,22 @@ async def api_register(req: Request, resp: Response):
         from opening_promo import on_new_user
         on_new_user(conn, row["id"])
         new_session(conn, resp, req, user_id=row["id"])
-    return {"ok": True}
+        new_uid = row["id"]
+    # 注册成功后立即绑定邀请码（页面传来的 inv，或浏览器 cookie 里暂存的）。沿用邀请有奖的同设备/自邀/48 小时规则；
+    # 绑定失败不影响注册。
+    ref_status = None
+    inv = str(d.get("inv") or "").strip().upper()
+    if not re.fullmatch(r"[2-9A-Z]{6}", inv):
+        inv = (req.cookies.get("lh_invc") or "").split(".")[0].strip().upper()
+    if re.fullmatch(r"[2-9A-Z]{6}", inv):
+        try:
+            from me import _bind
+            with db() as conn:
+                u2 = q(conn, "SELECT id,created_at FROM c_users WHERE id=%s", (new_uid,), one=True)
+                ref_status = _bind(conn, req, u2, inv)
+        except Exception as e:  # noqa: BLE001
+            print("register bind error", type(e).__name__, flush=True)
+    return {"ok": True, "ref": ref_status}
 
 @router.post("/api/community/login")
 async def api_login(req: Request, resp: Response):
