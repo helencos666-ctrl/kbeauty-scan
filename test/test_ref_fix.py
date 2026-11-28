@@ -41,7 +41,7 @@ def static_checks():
     check("活动页：邀请码大字 + 复制邀请码按钮", 'class="codebar"' in page and "gCpCode" in page and "font-size:30px" in page)
     check("活动页：邀请链接字号 ≥ 14px", ".gma-link{word-break:break-all;font-size:14px" in page)
     check("我的页：邀请码/推广码大字 + 复制按钮，链接 ≥ 14px", "mgCopyCode" in me and "mpCopyCode" in me and "font-size:14px;line-height:1.5" in me and "font-size:13px;color:#4A5560;margin:6px 0 10px" not in me)
-    check("缓存版本 v101", "lvhan-shell-v101" in rd("static", "sw.js") and "?v=100" not in login)
+    check("缓存版本 v102", "lvhan-shell-v102" in rd("static", "sw.js") and "?v=100" not in login)
     fonts = Path(ROOT, "fonts")
     check("字体子集和 OFL 许可随仓库", (fonts / "NotoSansCJKsc-Regular-subset.otf").is_file() and (fonts / "NotoSansCJKsc-Bold-subset.otf").is_file() and "SIL OPEN FONT LICENSE" in (fonts / "OFL.txt").read_text())
     import community  # noqa: F401  (先于 promo，避免循环导入)

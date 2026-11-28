@@ -6,7 +6,7 @@
     if (!window.LHRef && !document.querySelector('script[src*="/static/ref.js"]') &&
         (localStorage.getItem('lh_inv') || /(?:^|;\s*)lh_invc=/.test(document.cookie) || /[?&]inv=[2-9A-Za-z]{6}(&|$)/.test(location.search))) {
       var rs = document.createElement('script');
-      rs.src = '/static/ref.js?v=101';
+      rs.src = '/static/ref.js?v=102';
       rs.async = true;
       document.head.appendChild(rs);
     }
@@ -15,7 +15,7 @@
   /* 开业活动脚本：红标「我的」+ 首页每日弹层 */
   if (!document.querySelector('script[data-lh-opening]')) {
     var s = document.createElement('script');
-    s.src = '/static/opening-promos.js?v=101';
+    s.src = '/static/opening-promos.js?v=102';
     s.async = true;
     s.setAttribute('data-lh-opening', '1');
     document.head.appendChild(s);

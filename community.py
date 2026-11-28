@@ -587,6 +587,8 @@ def db():
                         cur.execute(MIGRATE_DAZI)
                         from event_gma import MIGRATE_EVENT_GMA
                         cur.execute(MIGRATE_EVENT_GMA)
+                        from premium_promo import MIGRATE_PREMIUM_PROMO
+                        cur.execute(MIGRATE_PREMIUM_PROMO)
                     ensure_bot(conn)
                     from chicken import ensure_chicken_shops
                     ensure_chicken_shops(conn)
@@ -683,12 +685,15 @@ def current_user(conn, req: Request):
     u = q(conn, """SELECT u.id,u.nickname,u.tier,u.is_banned,u.phone,u.email,u.created_at,
                       u.merchant_until,u.merchant_started,u.merchant_plan,u.merchant_credits,u.verified,
                       u.member_no, u.id_verified, u.buddy_banned_until, u.buddy_ban_reason,
+                      u.promo_premium_until, u.promo_revert_tier,
                       (u.avatar IS NOT NULL OR COALESCE(u.is_bot, FALSE)) AS has_avatar,
                       (u.merchant_until IS NOT NULL AND u.merchant_until>now()) AS merchant
                       FROM c_sessions s JOIN c_users u ON u.id=s.user_id
                       WHERE s.token_hash=%s AND NOT s.is_admin AND s.expires_at>now() AND NOT u.is_banned""",
              (_th(tok),), one=True)
     if u:
+        from premium_promo import apply_user_promo
+        apply_user_promo(conn, u)
         u["base_tier"] = u["tier"]
         if u["merchant"]:
             u["tier"] = max(u["tier"], 2)       # 有效商家会员同时拥有高级会员权限
@@ -1083,7 +1088,9 @@ def api_me(req: Request):
         u = current_user(conn, req)
         st = get_settings(conn)
         if not u:
-            return {"user": None, "boards": public_board_map(), "merchant_boards": public_merchant_board_list(), "prices": st, "flags": public_flags()}
+            from premium_promo import public_state as premium_public
+            return {"user": None, "boards": public_board_map(), "merchant_boards": public_merchant_board_list(), "prices": st, "flags": public_flags(),
+                    "premium_promo": premium_public()}
         disp = 3 if u["merchant"] else u["tier"]
         unread = q(conn, """SELECT count(*) AS n FROM c_messages m WHERE m.recipient_id=%s AND m.read_at IS NULL AND NOT m.deleted
                             AND NOT EXISTS (SELECT 1 FROM c_blocks b WHERE b.blocker_id=%s AND b.blocked_id=m.sender_id)""",
@@ -1096,6 +1103,8 @@ def api_me(req: Request):
         from retention import notif_unread, badges_out
         nun = notif_unread(conn, u["id"])
         ub = q(conn, "SELECT COALESCE(is_official,FALSE) AS o, (SELECT string_agg(badge, ',' ORDER BY created_at) FROM c_badges WHERE user_id=%s) AS b FROM c_users WHERE id=%s", (u["id"], u["id"]), one=True)
+        from premium_promo import promo_fields, public_state as premium_public
+        pu = promo_fields(u)
         return {"user": {"id": u["id"], "member_no": u.get("member_no") or u["id"], "nickname": u["nickname"], "tier": u["tier"], "base_tier": u["base_tier"],
                          "display_tier": disp, "tier_name": TIER_NAMES[disp], "is_member": u["tier"] >= 1,
                          "merchant": bool(u["merchant"]), "merchant_info": merchant_quota(conn, u),
@@ -1104,8 +1113,11 @@ def api_me(req: Request):
                          "verified": bool(u.get("verified")), "id_verified": bool(u.get("id_verified")), "unread": unread, "consult_unread": cun, "notif_unread": nun, "official": bool(ub["o"]), "badges": badges_out(ub["b"]), "has_profile": has_profile,
                          "has_avatar": bool(u.get("has_avatar")),
                          "points_name": pts["name"], "points_balance": pts["balance"],
-                         "points_streak": pts["streak"], "coupon_available": pts["coupon_available"]},
-                "boards": public_board_map(), "merchant_boards": public_merchant_board_list(), "prices": st, "flags": public_flags()}
+                         "points_streak": pts["streak"], "coupon_available": pts["coupon_available"],
+                         "promo_premium": pu["promo_premium"], "promo_premium_until": pu["promo_premium_until"],
+                         "promo_notice": pu["promo_notice"]},
+                "boards": public_board_map(), "merchant_boards": public_merchant_board_list(), "prices": st, "flags": public_flags(),
+                "premium_promo": premium_public()}
 
 @router.get("/api/community/prices")
 def api_prices():
@@ -1190,6 +1202,11 @@ async def api_register(req: Request, resp: Response):
         issue_welcome_coupon(conn, row["id"])
         from opening_promo import on_new_user
         on_new_user(conn, row["id"])
+        try:
+            from premium_promo import grant_on_register
+            grant_on_register(conn, row["id"])
+        except Exception as e:  # noqa: BLE001
+            print("premium promo register:", type(e).__name__, flush=True)
         new_session(conn, resp, req, user_id=row["id"])
         new_uid = row["id"]
     # 注册成功后立即绑定邀请码（页面传来的 inv，或浏览器 cookie 里暂存的）。沿用邀请有奖的同设备/自邀/48 小时规则；
@@ -2866,11 +2883,18 @@ def api_admin_settlements(req: Request):
 
 
 def set_tier(conn, uid, t):
-    """设置会员等级。推广佣金改为按管理员确认的实付金额 50% 记账，见 promo.confirm_payment。"""
+    """设置会员等级。推广佣金改为按管理员确认的实付金额 50% 记账，见 promo.confirm_payment。
+    推广期有效时，实付/管理员调档只抬高到期回退档，不会把当前有效档降到低于高级会员。"""
+    t = int(t)
+    row = q(conn, "SELECT promo_premium_until FROM c_users WHERE id=%s", (uid,), one=True)
+    promo_on = bool(row and row.get("promo_premium_until") and row["promo_premium_until"] > datetime.datetime.now(datetime.timezone.utc))
+    effective = max(t, 2) if promo_on and t < 2 else t
     q(conn, """UPDATE c_users SET tier=%s, is_member=%s,
                member_since=CASE WHEN %s>=1 THEN COALESCE(member_since, now()) ELSE member_since END,
                tier2_since=CASE WHEN %s>=2 THEN COALESCE(tier2_since, now()) ELSE tier2_since END
-               WHERE id=%s""", (t, t >= 1, t, t, uid))
+               WHERE id=%s""", (effective, effective >= 1, t, t, uid))
+    from premium_promo import note_earned_tier
+    note_earned_tier(conn, uid, t)
 
 
 def merchant_activate(conn, uid, plan):
@@ -2994,6 +3018,8 @@ from promo import router as _promo_router   # noqa: E402
 router.include_router(_promo_router)
 from opening_promo import router as _opening_promo_router   # noqa: E402
 router.include_router(_opening_promo_router)
+from premium_promo import router as _premium_promo_router   # noqa: E402
+router.include_router(_premium_promo_router)
 from pay_proof import router as _pay_proof_router   # noqa: E402
 router.include_router(_pay_proof_router)
 from chicken_merchant import router as _chicken_merchant_router   # noqa: E402

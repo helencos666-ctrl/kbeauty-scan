@@ -25,7 +25,7 @@ for f in ["static/dazi.html"]:
     s = open(os.path.join(ROOT, f), encoding="utf-8").read()
     check(f + " 无奋韩/外链", "奋韩" not in s and "cdn" not in s.lower())
     check(f + " 无 inline onclick", "onclick=" not in s)
-    check(f + " 使用 v99", "?v=101" in s and "?v=95" not in s)
+    check(f + " 使用 v99", "?v=102" in s and "?v=95" not in s)
 cp = open(os.path.join(ROOT, "community.py"), encoding="utf-8").read()
 check("社区发帖对找搭子频道做联系方式拦截", 'if board == "group":' in cp and "找搭子发帖" in cp)
 check("频道显示名改为找搭子（键名不变）", '"group": "找搭子"' in cp)

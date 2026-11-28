@@ -166,7 +166,8 @@ def api_me_summary(req: Request):
     with db() as conn:
         u = current_user(conn, req)
         if not u:
-            return {"user": None}
+            from premium_promo import public_state as premium_public
+            return {"user": None, "premium_promo": premium_public()}
         _touch_device(conn, u["id"], req)
         from points import user_points_summary
         pts = user_points_summary(conn, u["id"])
@@ -180,11 +181,19 @@ def api_me_summary(req: Request):
                    (u["id"],), one=True)["n"]
         from merch import consult_unread
         cun = consult_unread(conn, u["id"])
+    from community import TIER_NAMES
+    from premium_promo import promo_fields, public_state as premium_public
+    pu = promo_fields(u)
+    disp = 3 if u.get("merchant") else u["tier"]
     return {"user": {"id": u["id"], "member_no": u.get("member_no") or u["id"], "nickname": u["nickname"],
                      "bio": r["bio"] or "", "has_avatar": bool(u.get("has_avatar")), "joined": _ts(u["created_at"]),
                      "level": level_of(int(r["earned"])), "points": pts["balance"], "points_name": pts["name"],
                      "coupons": pts["coupon_available"], "posts": int(r["posts"]), "notif_unread": nun, "msg_unread": int(unread),
-                     "consult_unread": cun}}
+                     "consult_unread": cun,
+                     "tier": u["tier"], "display_tier": disp, "tier_name": TIER_NAMES.get(disp, ""),
+                     "promo_premium": pu["promo_premium"], "promo_premium_until": pu["promo_premium_until"],
+                     "promo_notice": pu["promo_notice"]},
+            "premium_promo": premium_public()}
 
 BAD_NICK = re.compile(r"管理员|官方|admin|旅韩小助手", re.I)
 

@@ -18,6 +18,7 @@ a.close()
 os.environ["DATABASE_URL"] = "postgresql://postgres@127.0.0.1:54329/" + NAME
 os.environ["COOKIE_INSECURE"] = "1"
 os.environ["ADMIN_PASSWORD"] = "test-admin-pw-1234"
+os.environ["PROMO_AUTO_PREMIUM"] = "0"
 from PIL import Image
 from fastapi import FastAPI
 from fastapi.testclient import TestClient

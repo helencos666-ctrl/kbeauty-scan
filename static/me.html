@@ -9,11 +9,11 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="旅韩助手">
 <link rel="manifest" href="/manifest.webmanifest">
-<link rel="apple-touch-icon" href="/static/icons/apple-touch-icon.png?v=101">
-<link rel="icon" type="image/png" sizes="192x192" href="/static/icons/icon-192.png?v=101">
-<link rel="stylesheet" href="/static/pwa.css?v=101">
-<link rel="stylesheet" href="/static/community.css?v=101">
-<link rel="stylesheet" href="/static/me.css?v=101">
+<link rel="apple-touch-icon" href="/static/icons/apple-touch-icon.png?v=102">
+<link rel="icon" type="image/png" sizes="192x192" href="/static/icons/icon-192.png?v=102">
+<link rel="stylesheet" href="/static/pwa.css?v=102">
+<link rel="stylesheet" href="/static/community.css?v=102">
+<link rel="stylesheet" href="/static/me.css?v=102">
 </head>
 <body class="mepage">
 <div class="metop">我的<a class="bell" href="/community/notices" aria-label="通知">🔔<span class="dot" id="bellDot" hidden></span></a></div>
@@ -41,12 +41,16 @@
     .codebar span{font-size:14px;color:#4A5560}
     .codebar b{font-size:28px;letter-spacing:3px;color:#146E68;font-family:ui-monospace,Menlo,Consolas,monospace}
     .codebar .btn.sm{font-size:14px;padding:8px 12px;white-space:nowrap}
+    .promo-note{margin:8px 18px 4px;padding:8px 12px;background:#E6F3F1;border-radius:10px;font-size:13px;line-height:1.65;color:#146E68;max-width:560px}
+    @media(min-width:560px){.promo-note{margin-left:auto;margin-right:auto}}
+    .nm .mbadge{flex:none}
   </style>
   <div class="card mecard" id="myGma" hidden></div>
   <div class="card mecard" id="myPromo" hidden></div>
   <div class="card mecard" id="guest" hidden>
     <b style="font-size:16px">免费注册 / 登录</b>
     <p class="tip" style="margin:4px 0 12px">可用邮箱或手机号注册，手机号不是必填。登录后可保存卡券、旅行豆和帖子。</p>
+    <p class="promo-note" id="guestPromo" hidden></p>
     <a class="btn primary block" href="/login?mode=reg&next=/me">注册新账号</a>
     <a class="btn ghost block" style="margin-top:8px" href="/login?next=/me">已有账号，去登录</a>
     <p class="tip" style="margin:10px 0 0">翻译、地铁、常用句不登录也能用；翻译记录先保存在本机。</p>
@@ -88,8 +92,8 @@
   <a href="/trips" data-nav="trips" class="loc"><i>🗓️</i>行程安排</a>
   <a href="/me" data-nav="me" class="me on" aria-current="page"><i>👤</i>我的</a>
 </nav>
-<script src="/static/community.js?v=101"></script>
-<script src="/static/ref.js?v=101"></script>
+<script src="/static/community.js?v=102"></script>
+<script src="/static/ref.js?v=102"></script>
 <script>
 (function(){
   var $ = function(id){ return document.getElementById(id); }, E = LH.esc, ME = null;
@@ -184,14 +188,25 @@
     var u = ME = d.user;
     if (!u){
       $('prof').innerHTML = '<div class="avbox"><span class="av av-xl guest"><span class="av-letter">👤</span></span></div><div><div class="nm">游客</div><div class="bio">登录后可保存卡券、旅行豆和帖子</div></div>';
-      $('guest').hidden = false; $('stats').hidden = true; return;
+      $('guest').hidden = false; $('stats').hidden = true;
+      var gp = $('guestPromo'), pub = d.premium_promo;
+      if (gp && pub && pub.enabled && pub.notice){ gp.hidden = false; gp.textContent = pub.notice; }
+      return;
     }
     LHRef.bind();
     var lv = u.level;
+    var badge = (typeof LH.badge === 'function') ? LH.badge(u.display_tier) : '';
     $('prof').innerHTML = '<button class="avbox" type="button" id="avBtn" aria-label="更换头像">' + avHTML(u) + '<span class="cam">📷</span></button>' +
-      '<div style="min-width:0;flex:1"><div class="nm"><span class="nmt">' + E(u.nickname) + '</span><span class="lv" title="按累计获得的旅行豆计算">LV.' + lv.lv + '</span></div>' +
+      '<div style="min-width:0;flex:1"><div class="nm"><span class="nmt">' + E(u.nickname) + '</span>' + badge + '<span class="lv" title="按累计获得的旅行豆计算">LV.' + lv.lv + '</span></div>' +
       '<div class="bio">' + (u.bio ? E(u.bio) : '<span style="opacity:.7">还没有简介，点「编辑资料」写一句</span>') + '</div></div>' +
       '<button class="edit" type="button" id="edBtn">编辑资料</button>';
+    var oldN = $('promoNote');
+    if (oldN) oldN.remove();
+    if (u.promo_notice){
+      var n = document.createElement('div');
+      n.id = 'promoNote'; n.className = 'promo-note'; n.textContent = u.promo_notice;
+      $('prof').insertAdjacentElement('afterend', n);
+    }
     $('stats').innerHTML = '<a href="/points"><b>' + u.points + '</b><span>' + E(u.points_name || '旅行豆') + '</span></a>' +
       '<a href="#" id="lvBtn"><b>LV.' + lv.lv + '</b><span>等级</span></a>' +
       '<a href="/coupons"><b>' + u.coupons + '</b><span>卡券</span></a>' +
@@ -248,7 +263,7 @@
 })();
 </script>
 
-<script src="/static/opening-promos.js?v=101" data-lh-opening="1"></script>
+<script src="/static/opening-promos.js?v=102" data-lh-opening="1"></script>
 <script>
 document.addEventListener('DOMContentLoaded', function(){
   if (!window.LHOpening) return;
@@ -262,6 +277,6 @@ document.addEventListener('DOMContentLoaded', function(){
   });
 });
 </script>
-<script src="/static/pwa.js?v=101" defer></script>
+<script src="/static/pwa.js?v=102" defer></script>
 </body>
 </html>

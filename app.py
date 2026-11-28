@@ -680,6 +680,11 @@ def _run_startup_seeds():
         run_backfill_jobs()   # 邀请漏绑补录（一次性、幂等、有审计）；没有数据库时跳过
     except Exception as e:  # noqa: BLE001
         print("ref backfill: skipped:", type(e).__name__, flush=True)
+    try:
+        from premium_promo import run_startup
+        run_startup()   # 近 30 天普通会员限时升级高级会员（可开关、有到期、有审计）
+    except Exception as e:  # noqa: BLE001
+        print("premium promo: skipped:", type(e).__name__, flush=True)
     _SEED_STATE["done"] = True
 
 @app.on_event("startup")

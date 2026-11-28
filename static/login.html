@@ -10,10 +10,10 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="旅韩助手">
 <link rel="manifest" href="/manifest.webmanifest">
-<link rel="apple-touch-icon" href="/static/icons/apple-touch-icon.png?v=101">
-<link rel="icon" type="image/png" sizes="192x192" href="/static/icons/icon-192.png?v=101">
-<link rel="stylesheet" href="/static/pwa.css?v=101">
-<link rel="stylesheet" href="/static/community.css?v=101">
+<link rel="apple-touch-icon" href="/static/icons/apple-touch-icon.png?v=102">
+<link rel="icon" type="image/png" sizes="192x192" href="/static/icons/icon-192.png?v=102">
+<link rel="stylesheet" href="/static/pwa.css?v=102">
+<link rel="stylesheet" href="/static/community.css?v=102">
 </head>
 <body>
 <header>
@@ -23,6 +23,7 @@
 <main>
   <div class="card">
     <div class="tabs"><button id="tLogin" class="on">登录</button><button id="tReg">注册</button></div>
+    <p id="promoNotice" hidden style="margin:0 0 12px;padding:8px 12px;background:#E6F3F1;border-radius:10px;font-size:13px;line-height:1.65;color:#146E68"></p>
     <div class="err" id="err"></div>
     <label class="f">手机号或邮箱</label>
     <input class="f" id="account" autocomplete="username" placeholder="中国 11 位手机号 / 韩国 010 手机号 / 邮箱">
@@ -52,8 +53,8 @@
   <a href="/?tab=more"><i>☰</i>全部</a>
   <a href="/me"><i>👤</i>我的</a>
 </nav>
-<script src="/static/community.js?v=101"></script>
-<script src="/static/ref.js?v=101"></script>
+<script src="/static/community.js?v=102"></script>
+<script src="/static/ref.js?v=102"></script>
 <script>
 var mode = 'login';
 var next = LH.qs('next') || '/community';
@@ -70,6 +71,13 @@ function setMode(m){
 document.getElementById('tLogin').onclick = function(){ setMode('login'); };
 document.getElementById('tReg').onclick = function(){ setMode('reg'); };
 if (LH.qs('mode') === 'reg') setMode('reg');
+LH.api('GET', '/api/premium-promo').then(function(p){
+  if (p && p.enabled && p.notice){
+    var n = document.getElementById('promoNotice');
+    n.hidden = false;
+    n.textContent = p.notice;
+  }
+}).catch(function(){});
 LH.api('GET', '/api/community/ref').then(function(r){
   if (r.ref){ var p = document.getElementById('promoter'); p.value = r.ref; p.readOnly = true; }
 }).catch(function(){});
@@ -97,6 +105,6 @@ document.getElementById('go').onclick = async function(){
   catch(e){ LH.showErr(err, e.message); this.disabled = false; }
 };
 </script>
-<script src="/static/pwa.js?v=101" defer></script>
+<script src="/static/pwa.js?v=102" defer></script>
 </body>
 </html>

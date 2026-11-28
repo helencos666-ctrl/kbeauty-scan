@@ -157,11 +157,11 @@ def run_live(base, check):
     c = httpx.Client(base_url=base, timeout=20)
     sw = c.get("/sw.js").text
     check("[线上] SW 去过的页面先秒开（stale-while-revalidate）", "staleWhileRevalidate" in sw and "templateFor" in sw)
-    r = c.get("/static/community.css?v=101")
+    r = c.get("/static/community.css?v=102")
     check("[线上] 带版本号静态资源长缓存", "max-age=31536000" in r.headers.get("cache-control", "") or "immutable" in r.headers.get("cache-control", ""),
           r.headers.get("cache-control"))
-    check("[线上] 开屏只在打开时出现一次", "lh_splash_seen" in c.get("/static/splash.js?v=101").text)
-    check("[线上] 返回键真正后退", "a.pback" in c.get("/static/pwa.js?v=101").text)
+    check("[线上] 开屏只在打开时出现一次", "lh_splash_seen" in c.get("/static/splash.js?v=102").text)
+    check("[线上] 返回键真正后退", "a.pback" in c.get("/static/pwa.js?v=102").text)
 
 
 if __name__ == "__main__":
