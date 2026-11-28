@@ -48,6 +48,7 @@ nav a.on{color:var(--primary);font-weight:700}
 .place .desc{font-size:15px;line-height:1.65;margin:10px 0 0}
 
 .place .cover{width:100%;border-radius:12px;margin:10px 0 0;max-height:240px;object-fit:cover;background:#E3EEEC;display:block}
+.place .coupon{width:100%;border-radius:12px;margin:10px 0 0;object-fit:contain;background:#f7f7f7;display:block}
 .gallery{display:flex;gap:8px;overflow-x:auto;margin-top:10px;padding-bottom:2px;-webkit-overflow-scrolling:touch}
 .gallery a{flex:none}
 .gallery img{height:100px;width:auto;max-width:180px;object-fit:cover;border-radius:10px;display:block;background:#E3EEEC}
@@ -179,7 +180,7 @@ function filtered(){
     if(area && (it.area_id||'')!==area) return false;
     if(cat && it.category!==cat && !(cat==='chinese_fav' && (it.tags||[]).includes('chinese_fav'))) return false;
     if(!k) return true;
-    const blob=[it.name_zh,it.name_ko,it.area,it.area_id,it.city_zh,it.cuisine,it.desc,it.transport,it.address,it.hours,(it.tips||[]).join(' ')].join(' ').toLowerCase();
+    const blob=[it.name_zh,it.name_ko,it.area,it.area_id,it.city_zh,it.cuisine,it.desc,it.transport,it.address,it.hours,it.phone,it.offer,(it.tips||[]).join(' ')].join(' ').toLowerCase();
     const am=areaMeta(it.area_id);
     if(am && (am.zh.toLowerCase().includes(k) || (am.intro||'').toLowerCase().includes(k))) return true;
     return blob.includes(k);
@@ -214,8 +215,10 @@ function render(){
     if((it.tags||[]).includes('bib2026')) badges.push(`<span class="badge">米其林2026必比登</span>`);
     if((it.tags||[]).includes('chinese_fav') && it.category!=='chinese_fav') badges.push(`<span class="badge">华人常去</span>`);
     const rows=[];
+    if(it.offer) rows.push(`<h3>到店优惠</h3><p>${esc(it.offer)}</p>`);
     if(it.address) rows.push(`<h3>地址</h3><p>${esc(it.address)}</p>`);
     if(it.hours) rows.push(`<h3>营业时间</h3><p>${esc(it.hours)}</p>`);
+    if(it.phone) rows.push(`<h3>电话</h3><p>${esc(it.phone)}</p>`);
     rows.push(`<h3>怎么去</h3><p>${esc(it.transport)}</p>`);
     if(it.tips&&it.tips.length) rows.push(`<h3>实用提示</h3><ul>${it.tips.map(t=>`<li>${esc(t)}</li>`).join('')}</ul>`);
     const go=it.station?`<a class="go" href="/?tab=sub&to=${encodeURIComponent(it.station)}">用地铁查到这里</a>`:'';
@@ -225,8 +228,10 @@ function render(){
     const maps=LHMap.buttons(LHMap.naverSearch(nq), LHMap.amapSearch(aq, c));
     const photos=(it.photos||[]).filter(Boolean);
     const cover=it.cover||photos[0]||'';
+    const coupon=it.coupon||'';
     const coverHtml=cover?`<img class="cover" alt="${esc(it.name_zh)}" src="${esc(cover)}" loading="lazy">`:'';
-    const rest=photos.filter(p=>p!==cover);
+    const couponHtml=coupon?`<a href="${esc(coupon)}" target="_blank" rel="noopener"><img class="coupon" alt="${esc(it.name_zh)} 优惠券" src="${esc(coupon)}" loading="lazy"></a>`:'';
+    const rest=photos.filter(p=>p!==cover && p!==coupon);
     const gal=rest.length?`<div class="gallery">${rest.map(p=>`<a href="${esc(p)}" target="_blank" rel="noopener"><img alt="${esc(it.name_zh)}" loading="lazy" src="${esc(p)}"></a>`).join('')}</div>`:'';
     const credit=it.photo_credit?`<p class="photo-credit">${esc(it.photo_credit)}</p>`:'';
     return `<article class="place" id="${esc(it.id)}">
@@ -234,6 +239,7 @@ function render(){
       <div class="name-ko">${esc(it.name_ko)}</div>
       <div class="badges">${badges.join('')}</div>
       ${coverHtml}
+      ${couponHtml}
       <p class="desc">${esc(it.desc)}</p>
       ${gal}
       ${credit}

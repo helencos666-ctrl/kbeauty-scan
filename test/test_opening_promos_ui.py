@@ -31,7 +31,7 @@ by_id = {i["id"]: i for i in items}
 
 check("配置默认开启且有起止日期", cfg.get("enabled") is True and "starts" in cfg and "ends" in cfg)
 check("配置至少 8 条活动", len(items) >= 8, len(items))
-for key in ("invite", "lanjing-sim", "hamcho-10", "daega-10", "seoul-film", "merchant-free", "promoter", "blogger"):
+for key in ("invite", "lanjing-sim", "hamcho-10", "daega-10", "beansbins-11", "seoul-film", "merchant-free", "promoter", "blogger"):
     check("含活动 %s" % key, key in by_id)
     it = by_id.get(key) or {}
     check("%s 为进行中且可关闭" % key, it.get("enabled") is True and it.get("status") == "active")
@@ -53,7 +53,7 @@ check("推广员应聘走站内咨询", (pr.get("href") or "").startswith("/cons
 check("推广员按钮为应聘/咨询", "应聘" in (pr.get("cta") or "") and "咨询" in (pr.get("cta") or ""))
 check("推广员注明合作协议为准", pr.get("note") == "具体规则以合作协议为准" or "具体规则以合作协议为准" in pr_text)
 
-for key in ("hamcho-10", "daega-10", "seoul-film", "lanjing-sim"):
+for key in ("hamcho-10", "daega-10", "beansbins-11", "seoul-film", "lanjing-sim"):
     it = by_id[key]
     blob = json.dumps(it, ensure_ascii=False)
     check("%s 不是筹备中/即将开放" % key, "筹备中" not in blob and "即将开放" not in blob)
@@ -72,6 +72,11 @@ check("博主注明标准结算与名额规则", "优质标准与结算规则以
 
 check("酱蟹链到美食页", (by_id["hamcho-10"].get("href") or "").startswith("/food#hamcho"))
 check("烤肉链到美食页", (by_id["daega-10"].get("href") or "").startswith("/food#daega"))
+check("咖啡优惠链到美食页", (by_id["beansbins-11"].get("href") or "") == "/food#beansbins-myeongdong")
+bb = json.dumps(by_id["beansbins-11"], ensure_ascii=False)
+check("咖啡口令为 prettyskin", "prettyskin" in bb and "PrettySkin" not in bb and "Prettyskin" not in bb)
+check("咖啡优惠不含无限次使用", "无限次" not in bb)
+check("咖啡优惠注明以店内/现场为准", "以店内为准" in bb or "现场规则为准" in bb)
 check("电话卡链到蓝憬活动", by_id["lanjing-sim"].get("href") == "/ads/lanjing")
 check("入驻链到 /partner", by_id["merchant-free"].get("href") == "/partner")
 

@@ -204,15 +204,17 @@
       "area_id": "myeongdong",
       "category": "cafe",
       "cuisine": "咖啡 / 华夫 / 鲜榨果汁",
-      "desc": "BEANSBINS COFFEE 在사보이호텔（萨沃伊酒店）二楼，一楼是 GS25 사보이호텔점，从便利店旁的楼梯上去。遮阳篷上写着 The Specialty Coffee Roastery。除了咖啡，门口还能看到冰淇淋华夫、蜂蜜水果华夫、比利时华夫等，以及新鲜果汁。立牌上写着店内有卫生间、无线网、吸烟室和团体座位。",
+      "desc": "BEANSBINS COFFEE 在사보이호텔（萨沃伊酒店）二楼，一楼是 GS25 사보이호텔점，从便利店旁的楼梯上去。遮阳篷上写着 The Specialty Coffee Roastery。除了咖啡，门口还能看到冰淇淋华夫、蜂蜜水果华夫、比利时华夫等，以及新鲜果汁。立牌上写着店内有卫生间、无线网、吸烟室和团体座位。 路过明洞想喝咖啡可以来这里。购买特调饮品可获赠美式 1 杯，到店提 prettyskin。休息空间较大。具体使用规则以店内为准。",
       "transport": "地铁4号线明洞站（명동역）出站步行约数分钟，按 GS25 사보이호텔점 和二楼的绿色 BEANSBINS COFFEE 招牌上楼。",
       "tips": [
         "店在二楼，入口是 GS25 사보이호텔점 旁边的楼梯。",
         "华夫和果汁的种类以店内当日菜单为准。",
-        "立牌写有卫生间、Wi-Fi、吸烟室和团体座位，具体以店内为准。"
+        "立牌写有卫生间、Wi-Fi、吸烟室和团体座位，具体以店内为准。",
+        "到店提 prettyskin。购买特调饮品送一杯美式。",
+        "具体使用规则以店内为准。"
       ],
       "station": "명동역",
-      "hours": "门口立牌写着 Open / Closed 8:00–21:00，最后点餐 20:30。部分较旧的资料写成更晚打烊，请以店内当日公示为准。",
+      "hours": "优惠券印着每天 08:00–23:00。此前门口立牌曾写 8:00–21:00、最后点餐 20:30。请以店内当日公示为准。",
       "address": "서울 중구 명동8나길 10 사보이호텔 2층 (충무로1가 23-1)",
       "map_query": "빈스빈스 명동사보이호텔점",
       "cover": "/static/food-photos/beansbins-myeongdong-cover.jpg",
@@ -221,8 +223,12 @@
         "/static/food-photos/beansbins-myeongdong-entrance.jpg",
         "/static/food-photos/beansbins-myeongdong-waffles.jpg"
       ],
-      "source_note": "店门口立牌与门面招牌（查阅 2026-11-16）；道路名地址见公开地图资料 명동8나길 10 사보이호텔 2층。",
-      "source_url": "https://beansbins.com/"
+      "source_note": "店门口立牌与门面招牌（查阅 2026-11-16）；道路名地址见公开地图资料 명동8나길 10 사보이호텔 2층。到店优惠与电话、营业时间 08:00–23:00 见店家优惠券（2026-11-28），具体以店内当日公示为准。",
+      "source_url": "https://beansbins.com/",
+      "pinned": 3,
+      "phone": "02-3789-7023",
+      "offer": "购买特调饮品（제조 음료）送一杯美式（아메리카노 1잔 무료）。到店提 prettyskin。休息空间较大。每人限用 1 张，不可与其他优惠叠加。具体使用规则以店内为准。",
+      "coupon": "/static/food-photos/beansbins-myeongdong-coupon.jpg"
     },
     {
       "id": "ungteori-myeongdong",

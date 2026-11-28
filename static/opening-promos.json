@@ -56,6 +56,18 @@
       "note": "以店家现场规则为准"
     },
     {
+      "id": "beansbins-11",
+      "enabled": true,
+      "status": "active",
+      "icon": "☕",
+      "title": "BEANSBINS 明洞店 特调 1+1",
+      "summary": "路过明洞想喝咖啡，可到 BEANSBINS（Savoy 酒店店）。购买特调饮品送一杯美式，到店提 prettyskin。",
+      "body": "路过明洞想喝咖啡，可以去 BEANSBINS COFFEE 明洞 Savoy 酒店店（서울 중구 명동8나길 10 사보이호텔 2층）。购买特调饮品（제조 음료）送一杯美式（아메리카노 1잔 무료）。到店提 prettyskin。休息空间较大。营业时间 08:00–23:00，电话 02-3789-7023。每人限用 1 张，不可与其他优惠叠加。具体使用规则以店家现场规则为准。",
+      "href": "/food#beansbins-myeongdong",
+      "cta": "查看店铺",
+      "note": "具体使用规则以店家现场规则为准"
+    },
+    {
       "id": "seoul-film",
       "enabled": true,
       "status": "active",
