@@ -1,6 +1,6 @@
 /* 开业活动：读取 JSON 配置，控制「我的」红标、首页每日弹层和活动列表。 */
 (function(w){
-  var CFG_URL = '/static/opening-promos.json?v=99';
+  var CFG_URL = '/static/opening-promos.json?v=100';
   var cache = null, inflight = null;
 
   function kstDay(d){
@@ -68,7 +68,16 @@
       return;
     }
     el.innerHTML = items.map(function(it){ return cardHTML(it, compact); }).join('');
+    if (!compact) jumpHash();
   }
+
+  function jumpHash(){
+    var id = (location.hash || '').replace(/^#/, '');
+    if (!id || !/^[A-Za-z][\w:-]*$/.test(id)) return;
+    var el = document.getElementById(id);
+    if (el && el.scrollIntoView) el.scrollIntoView({block: 'start'});
+  }
+  w.addEventListener('hashchange', jumpHash);
 
   function injectSheet(){
     if (document.getElementById('openPromoSheet')) return document.getElementById('openPromoSheet');
@@ -151,6 +160,7 @@
     visibleItems: visibleItems,
     renderList: renderList,
     paintMeTab: paintMeTab,
+    jumpHash: jumpHash,
     esc: esc,
     kstDay: kstDay
   };

@@ -7,11 +7,11 @@
 <meta name="description" content="Korea Grand Sale 冬季购物季（2026-12-23 至 2027-02-13）：官方活动、免税店、药妆与退税入口，每条注明来源。">
 <meta name="theme-color" content="#8B1E1E">
 <link rel="manifest" href="/manifest.webmanifest">
-<link rel="apple-touch-icon" href="/static/icons/apple-touch-icon.png?v=99">
-<link rel="icon" type="image/png" sizes="192x192" href="/static/icons/icon-192.png?v=99">
-<link rel="stylesheet" href="/static/pwa.css?v=99">
-<link rel="stylesheet" href="/static/community.css?v=99">
-<link rel="stylesheet" href="/static/me.css?v=99">
+<link rel="apple-touch-icon" href="/static/icons/apple-touch-icon.png?v=100">
+<link rel="icon" type="image/png" sizes="192x192" href="/static/icons/icon-192.png?v=100">
+<link rel="stylesheet" href="/static/pwa.css?v=100">
+<link rel="stylesheet" href="/static/community.css?v=100">
+<link rel="stylesheet" href="/static/me.css?v=100">
 <style>
 .festpage .metop{background:linear-gradient(90deg,#8B1E1E,#C45C26);color:#fff}
 .festpage .metop .back{color:#fff}
@@ -33,13 +33,24 @@
 .it .go{display:inline-block;margin-top:8px;background:linear-gradient(90deg,#C45C26,#C9A227);color:#fff;border-radius:9px;padding:7px 12px;font-size:13px;font-weight:700;text-decoration:none}
 .more{text-align:center;margin:8px 0 20px}
 .more a{color:#8B1E1E;font-weight:700;text-decoration:none;font-size:14px}
-.tag.w{background:#fff;color:#8B1E1E}
+ .tag.w{background:#fff;color:#8B1E1E}
+
+.op-card{display:flex;gap:12px;background:#fff;border-radius:16px;padding:12px;margin:0 0 9px;box-shadow:0 4px 16px rgba(20,110,104,.08)}
+.op-ico{flex:none;width:44px;height:44px;border-radius:12px;background:#FFF4E8;display:flex;align-items:center;justify-content:center;font-size:22px}
+.op-bd{flex:1;min-width:0}
+.op-bd h3{margin:0 0 4px;font-size:16px}
+.op-bd p{margin:0;font-size:13.5px;line-height:1.65;color:#444}
+.op-note{margin-top:6px!important;font-size:12px!important;color:#8B1E1E!important}
+.op-cta{display:inline-block;margin-top:8px;background:linear-gradient(90deg,#C45C26,#C9A227);color:#fff;border-radius:9px;padding:7px 12px;font-size:13px;font-weight:700;text-decoration:none}
+
 </style>
 </head>
 <body class="mepage festpage">
 <div class="metop"><a class="back" href="/" aria-label="返回首页">‹</a>韩国购物节</div>
 <main class="mewrap">
   <div class="fhero" id="gs"></div>
+  <h2 class="sec" id="lhOpeningSec" hidden>旅韩助手开业活动</h2>
+  <div id="lhOpeningList"></div>
   <h2 class="sec">商家活动入口</h2>
   <div id="list"></div>
   <div class="card mecard" id="howto">
@@ -161,6 +172,27 @@
   }
 })();
 </script>
-<script src="/static/pwa.js?v=99" defer></script>
+
+<script>
+(function(){
+  function paint(){
+    if (!window.LHOpening) return false;
+    LHOpening.load().then(function(cfg){
+      if (!cfg || !LHOpening.isActive(cfg) || !LHOpening.visibleItems(cfg).length) return;
+      var sec = document.getElementById('lhOpeningSec');
+      var list = document.getElementById('lhOpeningList');
+      if (!sec || !list) return;
+      sec.hidden = false;
+      LHOpening.renderList(list, cfg, true);
+    });
+    return true;
+  }
+  if (!paint()){
+    var n = 0, t = setInterval(function(){ if (paint() || ++n > 40) clearInterval(t); }, 100);
+  }
+})();
+</script>
+
+<script src="/static/pwa.js?v=100" defer></script>
 </body>
 </html>

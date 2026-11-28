@@ -217,6 +217,12 @@ PAGES = {
         "开业活动,邀请有奖,旅韩助手",
         True,
     ),
+    "/event/seoul-movie-awards": (
+        "首尔国际电影大奖 12月17日 · 邀请好友领入场名额 · 旅韩助手",
+        "2026 第14届首尔国际电影大奖（12月17日，广津华克山庄）。邀请 5 位好友注册旅韩助手，即可申请免费入场名额，名额有限，最终以主办方确认为准。",
+        "首尔国际电影大奖,旅韩助手",
+        True,
+    ),
     "/services": (
         "服务商家 · 旅韩助手",
         "经平台审核的门店代订、接送机、中文应急协助服务商，仅供参考。",
@@ -330,6 +336,7 @@ FILE_PATHS = {
     "festival.html": "/festival",
     "invite.html": "/invite",
     "opening.html": "/opening",
+    "event-gma.html": "/event/seoul-movie-awards",
     "services.html": "/services",
     "consult.html": "/consult",
     "notices.html": "/community/notices",
@@ -374,7 +381,7 @@ SITEMAP_PATHS = [
     "/", "/attractions", "/food", "/shopping", "/tips", "/beauty", "/faq",
     "/community", "/dazi", "/community/boards", "/community/rate", "/community/friends",
     "/rules", "/member", "/shops", "/pay", "/tax-refund", "/visa", "/itineraries", "/privacy", "/terms", "/promo/rules",
-    "/services", "/partner", "/shops/join-guide", "/deals", "/festival", "/opening", "/places", "/trips",
+    "/services", "/partner", "/shops/join-guide", "/deals", "/festival", "/opening", "/event/seoul-movie-awards", "/places", "/trips",
 ]
 
 router = APIRouter()

@@ -80,6 +80,13 @@ check("咖啡优惠注明以店内/现场为准", "以店内为准" in bb or "�
 check("电话卡链到蓝憬活动", by_id["lanjing-sim"].get("href") == "/ads/lanjing")
 check("入驻链到 /partner", by_id["merchant-free"].get("href") == "/partner")
 
+
+film = by_id["seoul-film"]
+check("电影大奖「查看说明」链到活动页，不再指向本页锚点", film.get("href") == "/event/seoul-movie-awards" and film.get("cta") == "查看说明")
+check("电影大奖说明含邀请 5 人与主办方确认", "邀请 5 位好友" in (film.get("body") or "") and "主办方确认为准" in ((film.get("body") or "") + (film.get("note") or "")))
+check("活动页异步渲染后会滚到 #锚点", "function jumpHash" in js and "jumpHash()" in js)
+check("活动页给卡片留出顶部锚点边距", "scroll-margin-top" in page)
+
 blob = json.dumps(cfg, ensure_ascii=False) + js + page
 for name, txt in (("开业配置和活动页", blob), ("pwa.css", pwa_css), ("pwa.js", pwa_js)):
     check("%s 无微信/二维码引导" % name, "微信" not in txt and "二维码" not in txt and "扫码" not in txt)
@@ -89,14 +96,14 @@ for name, txt in (("开业配置和活动页", blob), ("pwa.css", pwa_css), ("pw
 check("活动页读取配置并渲染列表", "opening-promos.json" in js and "renderList" in js and "LHOpening" in page)
 check("弹层每日一次写入 localStorage", "lh_opening_popup_day" in json.dumps(cfg) and "localStorage.setItem" in js)
 check("弹层只在首页出现", "onHome" in js and "openPromoSheet" in js)
-check("pwa.js 会加载开业脚本", "opening-promos.js?v=99" in pwa_js)
+check("pwa.js 会加载开业脚本", "opening-promos.js?v=100" in pwa_js)
 check("pwa.css 开业期间我的为红色", "body.lh-opening nav.tabbar a.me" in pwa_css and "#C62828" in pwa_css)
 check("pwa.css 有「开」角标", "tab-hot" in pwa_css)
 check("我的页有开业活动入口且保留邀请有奖", 'id="openPromoRow"' in me and 'href="/opening"' in me and 'href="/invite"' in me)
 check("邀请有奖仍在开业活动下方", me.index('id="openPromoRow"') < me.index('href="/invite"'))
 check("存在 /opening 路由与 SEO", 'p_opening' in read("me.py") and '"/opening"' in seo)
-check("sw.js 含活动页与配置", "'/opening'" in sw and "opening-promos.json?v=99" in sw)
-check("sw.js CACHE 为 v76", "lvhan-shell-v99" in sw)
+check("sw.js 含活动页与配置", "'/opening'" in sw and "opening-promos.json?v=100" in sw)
+check("sw.js CACHE 为 v76", "lvhan-shell-v100" in sw)
 
 print("%s passed, %s failed" % (ok, fail))
 if fail:

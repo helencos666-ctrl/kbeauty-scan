@@ -10,11 +10,11 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="旅韩助手">
 <link rel="manifest" href="/manifest.webmanifest">
-<link rel="apple-touch-icon" href="/static/icons/apple-touch-icon.png?v=99">
-<link rel="icon" type="image/png" sizes="192x192" href="/static/icons/icon-192.png?v=99">
-<link rel="stylesheet" href="/static/pwa.css?v=99">
-<link rel="stylesheet" href="/static/community.css?v=99">
-<link rel="stylesheet" href="/static/chat.css?v=99">
+<link rel="apple-touch-icon" href="/static/icons/apple-touch-icon.png?v=100">
+<link rel="icon" type="image/png" sizes="192x192" href="/static/icons/icon-192.png?v=100">
+<link rel="stylesheet" href="/static/pwa.css?v=100">
+<link rel="stylesheet" href="/static/community.css?v=100">
+<link rel="stylesheet" href="/static/chat.css?v=100">
 </head>
 <body class="post-page no-hero">
 <a class="pback" href="/community" aria-label="返回">‹</a>
@@ -48,7 +48,7 @@
   <a href="/?tab=more"><i>☰</i>全部</a>
   <a href="/me"><i>👤</i>我的</a>
 </nav>
-<script src="/static/community.js?v=99"></script>
+<script src="/static/community.js?v=100"></script>
 <script>
 var pid = parseInt(location.pathname.split('/').pop(), 10);
 var WARN = {visa: '⚠️ 本帖为网友个人签证经验，本站不提供签证代办。政策以韩国驻华使领馆、韩国签证申请中心和 K-ETA 官网为准。',
@@ -76,8 +76,15 @@ function topicList(p){
   return ts;
 }
 function linkBody(text){
-  return LH.esc(text).replace(/#([^\s#]{1,20})/g, function(_, t){
+  var html = LH.esc(text).replace(/#([^\s#]{1,20})/g, function(_, t){
     return '<a class="hash" href="/community?tab=search&q=' + encodeURIComponent(t) + '">#' + t + '</a>';
+  });
+  return html.replace(/\bhttps?:\/\/[^\s<>"']+/g, function(u){
+    var trail = '';
+    while (u && /[.,;:!?）)\]]$/.test(u)){ trail = u.slice(-1) + trail; u = u.slice(0, -1); }
+    if (!u) return arguments[0];
+    var local = /^https?:\/\/lvhanzhushou\.com\//i.test(u);
+    return '<a href="' + u + '"' + (local ? '' : ' target="_blank" rel="noopener noreferrer"') + '>' + u + '</a>' + trail;
   });
 }
 function needLogin(){
@@ -328,6 +335,6 @@ async function load(opts){
 }
 load();
 </script>
-<script src="/static/pwa.js?v=99" defer></script>
+<script src="/static/pwa.js?v=100" defer></script>
 </body>
 </html>

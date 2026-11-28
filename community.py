@@ -923,6 +923,23 @@ def public_merchant_board_list():
 def _esc_html(s):
     return html_lib.escape("" if s is None else str(s))
 
+_URL_RE = re.compile(r'https?://[^\s<>"\']+', re.I)
+
+def linkify_escaped(escaped: str) -> str:
+    """Turn already-escaped plain-text URLs into anchors. Never pass raw HTML."""
+    def repl(m):
+        u = m.group(0)
+        trail = ""
+        while u and u[-1] in ".,;:!?）)]":
+            trail = u[-1] + trail
+            u = u[:-1]
+        if not u:
+            return m.group(0)
+        local = u.lower().startswith(("https://lvhanzhushou.com/", "http://lvhanzhushou.com/"))
+        blank = "" if local else ' target="_blank" rel="noopener noreferrer"'
+        return '<a href="%s"%s>%s</a>%s' % (u, blank, u, trail)
+    return _URL_RE.sub(repl, escaped)
+
 def _page(name, url_path=None, extra=None, ssr_target=None, ssr_html=""):
     from seo import html_file_response, FILE_PATHS
     return html_file_response(name, url_path=url_path or FILE_PATHS.get(name), extra=extra,
@@ -1011,7 +1028,7 @@ def p_post(pid: str, req: Request):
                          "keywords": "韩国旅游攻略,韩友圈,旅韩助手",
                          "schema_type": "DiscussionForumPosting",
                          "author": r["nickname"], "date": date, "index": True}
-                body = _esc_html(r["body"] or "").replace("\n", "<br>")
+                body = linkify_escaped(_esc_html(r["body"] or "")).replace("\n", "<br>")
                 ssr = (f'<h1>{_esc_html(r["title"])}</h1>'
                        f'<p class="meta">{_esc_html(r["nickname"])} · {_esc_html(_ts(r["created_at"]))}</p>'
                        f'<div class="body">{body}</div>')

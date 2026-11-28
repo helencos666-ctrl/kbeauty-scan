@@ -46,6 +46,14 @@ check("官方帖含交通与主办", "광나루역" in post["body"] and "韩国�
 check("官方信息卡存在且非海报文件", os.path.isfile(img) and os.path.getsize(img) > 20000)
 check("信息卡不是提交的活动海报", os.path.getsize(img) != 2035880)
 
+
+post_page = read("static", "community-post.html")
+comm = read("community.py")
+check("帖子正文会把 http(s) 链接做成可点击", "linkBody" in post_page and "https?:" in post_page and "lvhanzhushou" in post_page)
+check("服务端 SSR 也会把帖子里的网址做成链接", "def linkify_escaped" in comm)
+openj = read("static", "opening-promos.json")
+check("开业活动「查看说明」指向活动页", "/event/seoul-movie-awards" in openj and "查看说明" in openj)
+
 # 11月28日应落入首页速报 21 天窗口（与 daily_brief.events_for 相同规则）
 d = datetime.date(2026, 11, 28)
 s = datetime.date.fromisoformat(item["start"])

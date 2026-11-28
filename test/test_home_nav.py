@@ -1,4 +1,4 @@
-"""纯静态检查：首页七格底部导航、?v=99 缓存版本、新页面（trips）与禁词。
+"""纯静态检查：首页七格底部导航、?v=100 缓存版本、新页面（trips）与禁词。
 不需要启服务，直接 python test/test_home_nav.py 即可。"""
 import os, re
 
@@ -38,13 +38,13 @@ PAGES = {
 }
 
 # ---------- 1. 缓存版本 v63 ----------
-check("sw.js CACHE is lvhan-shell-v99", "'lvhan-shell-v99'" in sw or '"lvhan-shell-v99"' in sw)
-check("sw.js uses ?v=99", "?v=99" in sw)
+check("sw.js CACHE is lvhan-shell-v100", "'lvhan-shell-v100'" in sw or '"lvhan-shell-v100"' in sw)
+check("sw.js uses ?v=100", "?v=100" in sw)
 check("sw.js has no ?v=60", "?v=60" not in sw)
 for name, txt in PAGES.items():
-    check("%s uses ?v=99 (or tabbar)" % name, ("?v=99" in txt) or ("tabbar" in txt))
+    check("%s uses ?v=100 (or tabbar)" % name, ("?v=100" in txt) or ("tabbar" in txt))
     check("%s has no ?v=60" % name, "?v=60" not in txt)
-check("sw.js SHELL has four home ads", all("/static/home-ads/ad-%d.jpg?v=99" % i in sw for i in (1, 2, 3, 4)))
+check("sw.js SHELL has four home ads", all("/static/home-ads/ad-%d.jpg?v=100" % i in sw for i in (1, 2, 3, 4)))
 check("sw.js SHELL has /trips", "'/trips'" in sw and "'/local'" not in sw)
 check("sw.js SHELL has trips.html", "/static/trips.html" in sw and "/static/local.html" not in sw)
 
@@ -122,7 +122,7 @@ check("trips can add/edit/delete/reorder", all(w in trips for w in ("添加地�
 check("trips links subway planner", "/?tab=sub" in trips)
 check("trips links /itineraries", "/itineraries" in trips)
 check("trips has back and me", 'href="/"' in trips and 'href="/me"' in trips)
-check("trips loads pwa.js?v=99", "/static/pwa.js?v=99" in trips)
+check("trips loads pwa.js?v=100", "/static/pwa.js?v=100" in trips)
 
 
 # ---------- 5b. festival.html 韩国购物节 ----------
@@ -148,6 +148,8 @@ check("festival 点亮购物节", 'data-nav="festival" class="fest on"' in festi
 check("pwa.js 含购物节且在发布之后",
       "label:'购物节'" in pwa_js and pwa_js.find("label:'发布'") < pwa_js.find("label:'购物节'") < pwa_js.find("label:'商业服务'"))
 check("sw.js SHELL 含 /festival", "'/festival'" in sw and "/static/festival.html" in sw)
+check("festival 含开业活动卡片并渲染 LHOpening", 'id="lhOpeningList"' in festival and "LHOpening.renderList" in festival)
+
 
 # ---------- 6. 禁词 ----------
 ALL = dict(PAGES)
