@@ -258,8 +258,8 @@ def main():
             M.BACKFILL_JOBS = old_jobs
         r = one("SELECT outcome FROM c_ref_backfill WHERE job_key='t-job2'")
         check("一次性任务：唯一匹配 + 规则通过 → added，计数 +1", r and r["outcome"] == "added" and cnt(alice) == before + 1, (r, cnt(alice), before))
-        check("正式任务清单只有 3 条，且包含 3K6GZG ×2 和 TZCGEU ×1",
-              [x[2] for x in old_jobs].count("3K6GZG") == 2 and [x[2] for x in old_jobs].count("TZCGEU") == 1 and len(old_jobs) == 3)
+        check("正式任务清单 4 条：3K6GZG ×2、TZCGEU ×2",
+              [x[2] for x in old_jobs].count("3K6GZG") == 2 and [x[2] for x in old_jobs].count("TZCGEU") == 2 and len(old_jobs) == 4)
 
     # 管理员接口
     adm = TestClient(app)
