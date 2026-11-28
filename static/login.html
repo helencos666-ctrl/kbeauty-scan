@@ -24,8 +24,11 @@
   <div class="card">
     <div class="tabs"><button id="tLogin" class="on">登录</button><button id="tReg">注册</button></div>
     <div class="err" id="err"></div>
+    <div id="accBox">
     <label class="f">手机号或邮箱</label>
     <input class="f" id="account" autocomplete="username" placeholder="中国 11 位手机号 / 韩国 010 手机号 / 邮箱">
+    </div>
+    <div id="poBox" style="display:none"></div>
     <div id="regOnly" style="display:none">
       <label class="f">昵称（2–16 字，公开显示）</label>
       <input class="f" id="nickname" maxlength="16" placeholder="例如：首尔小旅人">
@@ -40,7 +43,7 @@
       </label>
     </div>
     <button class="btn primary block" id="go" style="margin-top:16px">登录</button>
-    <p class="tip">本站暂不发送短信或邮件验证码。忘记密码请联系管理员重置。</p>
+    <p class="tip" id="tipTxt">本站暂不发送短信或邮件验证码。忘记密码请联系管理员重置。</p>
   </div>
   <p style="font-size:12px;color:#888;text-align:center;margin:10px 0 16px;line-height:1.7">旅韩助手为个人运营的免费信息网站，内容仅供参考，不是旅行社，不代办签证。<br><a href="/terms" style="color:#2c7be5">用户协议与免责声明</a> · <a href="/privacy" style="color:#2c7be5">隐私政策</a> · <a href="/rules" style="color:#2c7be5">社区约定</a></p>
 </main>
@@ -53,8 +56,10 @@
   <a href="/me"><i>👤</i>我的</a>
 </nav>
 <script src="/static/community.js?v=99"></script>
+<script src="/static/phone-otp.js?v=1"></script>
 <script>
 var mode = 'login';
+var po = null, poCfg = null;     // 手机号验证码开关（PHONE_OTP_REQUIRED）打开时才启用
 var next = LH.qs('next') || '/community';
 if (!/^\/(?![\/\\])/.test(next)) next = '/community';
 function setMode(m){
@@ -62,6 +67,12 @@ function setMode(m){
   document.getElementById('tLogin').className = m === 'login' ? 'on' : '';
   document.getElementById('tReg').className = m === 'reg' ? 'on' : '';
   document.getElementById('regOnly').style.display = document.getElementById('regOnly2').style.display = m === 'reg' ? 'block' : 'none';
+  if (poCfg && poCfg.enabled){
+    var usePhone = m === 'reg';
+    document.getElementById('accBox').style.display = usePhone ? 'none' : 'block';
+    document.getElementById('poBox').style.display = usePhone ? 'block' : 'none';
+    if (usePhone && !po) po = PhoneOtp.mount(document.getElementById('poBox'), {purpose: 'register', onError: function(msg){ LH.showErr(document.getElementById('err'), msg); }});
+  }
   document.getElementById('go').textContent = m === 'login' ? '登录' : '注册';
   document.getElementById('password').autocomplete = m === 'login' ? 'current-password' : 'new-password';
   LH.showErr(document.getElementById('err'), '');
@@ -69,12 +80,25 @@ function setMode(m){
 document.getElementById('tLogin').onclick = function(){ setMode('login'); };
 document.getElementById('tReg').onclick = function(){ setMode('reg'); };
 if (LH.qs('mode') === 'reg') setMode('reg');
+LH.api('GET', '/api/community/phone/config').then(function(c){
+  poCfg = c;
+  if (c.enabled){
+    document.getElementById('tipTxt').textContent = '注册需要手机号 + 短信验证码（支持中国 +86、韩国 +82）。忘记密码请联系管理员重置。';
+    setMode(mode);
+  }
+}).catch(function(){});
 LH.api('GET', '/api/community/ref').then(function(r){
   if (r.ref){ var p = document.getElementById('promoter'); p.value = r.ref; p.readOnly = true; }
 }).catch(function(){});
 document.getElementById('go').onclick = async function(){
   var err = document.getElementById('err'); LH.showErr(err, '');
   var body = {account: document.getElementById('account').value, password: document.getElementById('password').value};
+  if (mode === 'reg' && poCfg && poCfg.enabled && po){
+    var pv = po.values(); delete body.account;
+    body.country = pv.country; body.phone = pv.phone; body.phone_code = pv.code;
+    if (!pv.phone.trim()){ LH.showErr(err, '请输入手机号'); return; }
+    if (!pv.code.trim()){ LH.showErr(err, '请输入短信验证码'); return; }
+  }
   if (mode === 'reg'){
     body.nickname = document.getElementById('nickname').value;
     body.promoter = document.getElementById('promoter').value;
@@ -82,7 +106,16 @@ document.getElementById('go').onclick = async function(){
     if (!body.agree){ LH.showErr(err, '请先勾选同意用户协议、社区约定和隐私政策'); return; }
   }
   this.disabled = true;
-  try { await LH.api('POST', mode === 'login' ? '/api/community/login' : '/api/community/register', body); location.href = mode === 'reg' ? '/member?new=1' : next; }
+  try {
+    var r = await LH.api('POST', mode === 'login' ? '/api/community/login' : '/api/community/register', body);
+    var dest = mode === 'reg' ? '/member?new=1' : next;
+    // 老账号登录后软提示绑定手机号：三天最多提示一次；到期后（required_now）每次都提示；随时可点「以后再说」
+    if (mode === 'login' && r && r.phone && !r.phone.verified){
+      var last = 0; try { last = Number(localStorage.getItem('lh_phone_prompt') || 0); } catch(_){}
+      if (r.phone.required_now || Date.now() - last > 3 * 86400 * 1000) dest = '/phone-bind?next=' + encodeURIComponent(next);
+    }
+    location.href = dest;
+  }
   catch(e){ LH.showErr(err, e.message); this.disabled = false; }
 };
 </script>

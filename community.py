@@ -585,6 +585,8 @@ def db():
                         cur.execute(MIGRATE_FANPLACES)
                         from dazi import MIGRATE_DAZI
                         cur.execute(MIGRATE_DAZI)
+                        from phone_otp import MIGRATE_PHONE_OTP
+                        cur.execute(MIGRATE_PHONE_OTP)
                     ensure_bot(conn)
                     from chicken import ensure_chicken_shops
                     ensure_chicken_shops(conn)
@@ -680,7 +682,7 @@ def current_user(conn, req: Request):
         return None
     u = q(conn, """SELECT u.id,u.nickname,u.tier,u.is_banned,u.phone,u.email,u.created_at,
                       u.merchant_until,u.merchant_started,u.merchant_plan,u.merchant_credits,u.verified,
-                      u.member_no, u.id_verified, u.buddy_banned_until, u.buddy_ban_reason,
+                      u.member_no, u.id_verified, u.buddy_banned_until, u.buddy_ban_reason, u.phone_verified_at,
                       (u.avatar IS NOT NULL OR COALESCE(u.is_bot, FALSE)) AS has_avatar,
                       (u.merchant_until IS NOT NULL AND u.merchant_until>now()) AS merchant
                       FROM c_sessions s JOIN c_users u ON u.id=s.user_id
@@ -737,6 +739,8 @@ def need_user(conn, req):
     u = current_user(conn, req)
     if not u:
         raise HTTPException(401, "请先登录")
+    from phone_otp import check_enforcement   # PHONE_OTP_REQUIRED 关闭时什么都不做
+    check_enforcement(u, req)
     return u
 
 def need_tier(conn, req, tier, msg=None):
@@ -1020,6 +1024,12 @@ def p_post(pid: str, req: Request):
 @router.get("/login")
 def p_login(): return _page("login.html", "/login")
 
+@router.get("/phone-bind")
+def p_phone_bind():
+    from phone_otp import need_enabled
+    need_enabled()          # 开关关闭时与以前一样是 404
+    return _page("phone-bind.html", "/phone-bind", extra={"title": "绑定手机号 · 旅韩助手", "index": False})
+
 @router.get("/member")
 def p_member(): return _page("member.html", "/member")
 
@@ -1077,7 +1087,9 @@ def api_me(req: Request):
         from retention import notif_unread, badges_out
         nun = notif_unread(conn, u["id"])
         ub = q(conn, "SELECT COALESCE(is_official,FALSE) AS o, (SELECT string_agg(badge, ',' ORDER BY created_at) FROM c_badges WHERE user_id=%s) AS b FROM c_users WHERE id=%s", (u["id"], u["id"]), one=True)
-        return {"user": {"id": u["id"], "member_no": u.get("member_no") or u["id"], "nickname": u["nickname"], "tier": u["tier"], "base_tier": u["base_tier"],
+        from phone_otp import enabled as _po_on, user_phone_status as _po_status
+        _po = {"phone": _po_status(u)} if _po_on() else {}
+        return {"user": {**_po, "id": u["id"], "member_no": u.get("member_no") or u["id"], "nickname": u["nickname"], "tier": u["tier"], "base_tier": u["base_tier"],
                          "display_tier": disp, "tier_name": TIER_NAMES[disp], "is_member": u["tier"] >= 1,
                          "merchant": bool(u["merchant"]), "merchant_info": merchant_quota(conn, u),
                          "merchant_expired": bool(u["merchant_until"] and not u["merchant"]),
@@ -1144,11 +1156,17 @@ def api_del_avatar(req: Request):
 @router.post("/api/community/register")
 async def api_register(req: Request, resp: Response):
     csrf(req)
-    limit("reg:" + ip_of(req), 5, 3600, "注册太频繁，请一小时后再试")
-    limit("reg-day:" + ip_of(req), 10, 86400, "今天注册次数太多，请明天再试")
+    import phone_otp as PO
+    po_on = PO.enabled()
+    # 手机验证码打开后，注册本身已有短信/验证码层层限流；共用出口 IP（校园网、运营商 NAT）的人多，所以放宽 IP 次数
+    limit("reg:" + ip_of(req), 15 if po_on else 5, 3600, "注册太频繁，请一小时后再试")
+    limit("reg-day:" + ip_of(req), 30 if po_on else 10, 86400, "今天注册次数太多，请明天再试")
     limit("reg-global", 300, 3600, "注册人数太多，请稍后再试")
     d = await _json(req)
-    kind, acct = parse_account(str(d.get("account") or ""))
+    if po_on:
+        kind, acct, po_phone = PO.register_fields(d)      # 开关打开：必须带手机号 + 短信验证码
+    else:
+        kind, acct = parse_account(str(d.get("account") or ""))
     pw = str(d.get("password") or "")
     if len(pw) < 8 or len(pw) > 128:
         raise HTTPException(400, "密码需 8–128 位")
@@ -1164,8 +1182,25 @@ async def api_register(req: Request, resp: Response):
         if exists:
             raise HTTPException(409, "这个账号已注册，请直接登录")
         ref = resolve_ref(conn, req, d.get("promoter"))
-        row = q(conn, f"INSERT INTO c_users({kind},nickname,pw_hash,last_login,promoter_code) VALUES (%s,%s,%s,now(),%s) RETURNING id",
-                (acct, nick, hash_pw(pw), ref), one=True)
+        if po_on:
+            if q(conn, "SELECT 1 AS x FROM c_users WHERE phone=%s", (po_phone,), one=True):
+                raise HTTPException(409, "这个手机号已注册，请直接登录")
+            PO.consume_otp(conn, po_phone, "register", d.get("phone_code"))     # 校验通过才建号；验证码一次性
+            try:
+                row = q(conn, f"INSERT INTO c_users({kind},phone,nickname,pw_hash,last_login,promoter_code,phone_verified_at,phone_verify_method) "
+                              "VALUES (%s,%s,%s,%s,now(),%s,now(),'sms') RETURNING id"
+                        if kind == "email" else
+                        "INSERT INTO c_users(phone,nickname,pw_hash,last_login,promoter_code,phone_verified_at,phone_verify_method) "
+                        "VALUES (%s,%s,%s,now(),%s,now(),'sms') RETURNING id",
+                        (acct, po_phone, nick, hash_pw(pw), ref) if kind == "email" else (po_phone, nick, hash_pw(pw), ref), one=True)
+            except Exception as e:
+                if PO._unique_violation(e):
+                    conn.rollback()
+                    raise HTTPException(409, "这个账号或手机号已注册，请直接登录")
+                raise
+        else:
+            row = q(conn, f"INSERT INTO c_users({kind},nickname,pw_hash,last_login,promoter_code) VALUES (%s,%s,%s,now(),%s) RETURNING id",
+                    (acct, nick, hash_pw(pw), ref), one=True)
         assign_member_no(conn, row["id"])
         from points import issue_welcome_coupon
         issue_welcome_coupon(conn, row["id"])
@@ -1193,6 +1228,10 @@ async def api_login(req: Request, resp: Response):
             raise HTTPException(403, "该账号已被封禁")
         q(conn, "UPDATE c_users SET last_login=now() WHERE id=%s", (u["id"],))
         new_session(conn, resp, req, user_id=u["id"])
+        from phone_otp import enabled as _po_on, user_phone_status as _po_status
+        if _po_on():     # 开关打开：告诉前端该不该提示绑定手机号（软提示，不拦登录）
+            cu = q(conn, "SELECT phone, phone_verified_at FROM c_users WHERE id=%s", (u["id"],), one=True)
+            return {"ok": True, "phone": _po_status(cu)}
     return {"ok": True}
 
 @router.post("/api/community/logout")
@@ -1249,6 +1288,7 @@ def delete_user_data(conn, uid):
     举报和推广佣金记录里的用户 ID 置空，只保留不含个人信息的统计。"""
     pids = q(conn, "SELECT DISTINCT post_id FROM c_comments WHERE user_id=%s", (uid,))
     liked = q(conn, "SELECT DISTINCT post_id FROM c_likes WHERE user_id=%s", (uid,))
+    q(conn, "DELETE FROM c_phone_otp WHERE user_id=%s", (uid,))
     q(conn, "DELETE FROM c_users WHERE id=%s", (uid,))
     for p in pids:
         _recount(conn, p["post_id"])
@@ -2980,3 +3020,5 @@ from chat import router as _chat_router  # noqa: E402
 router.include_router(_chat_router)
 from fanplaces import router as _fanplaces_router  # noqa: E402
 router.include_router(_fanplaces_router)
+from phone_otp import router as _phone_otp_router  # noqa: E402
+router.include_router(_phone_otp_router)

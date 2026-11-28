@@ -60,6 +60,7 @@
     <a href="/opening" id="openPromoRow" class="promo-hot"><span class="e">🎉</span>开业活动<span class="hint">进行中</span><span class="ar">›</span></a>
     <a href="/invite" id="inviteRow" class="promo-hot"><span class="e">🎁</span>邀请有奖<span class="hint">双方得抵用券</span><span class="ar">›</span></a>
     <a href="/shops/start" id="merchantStartRow"><span class="e">🏪</span>我是商家 · 入驻并发布服务<span class="hint">看教程，入驻后直接发布</span><span class="ar">›</span></a>
+    <a href="/phone-bind?next=/me" id="phoneRow" hidden><span class="e">📱</span>绑定手机号<span class="hint" id="phoneHint">更安全，30 秒搞定</span><span class="ar">›</span></a>
     <a href="#" id="mFb"><span class="e">📮</span>意见反馈<span class="ar">›</span></a>
     <a href="#" id="mSet"><span class="e">⚙️</span>设置<span class="ar">›</span></a>
     <a href="/faq"><span class="e">ℹ️</span>关于旅韩助手<span class="ar">›</span></a>
@@ -144,6 +145,7 @@
   async function load(){
     var d; try { d = await fetch('/api/me/summary', {credentials: 'same-origin', headers: {'X-LH-Dev': LHRef.dev()}}).then(function(r){ return r.json(); }); } catch(e){ err('网络不太好，请稍后再试'); return; }
     var u = ME = d.user;
+    if (u && u.phone && !u.phone.verified && window.lhShowPhoneRow) window.lhShowPhoneRow(u.phone);
     if (!u){
       $('prof').innerHTML = '<div class="avbox"><span class="av av-xl guest"><span class="av-letter">👤</span></span></div><div><div class="nm">游客</div><div class="bio">登录后可保存卡券、旅行豆和帖子</div></div>';
       $('guest').hidden = false; $('stats').hidden = true; return;
@@ -222,6 +224,15 @@ document.addEventListener('DOMContentLoaded', function(){
     }
   });
 });
+</script>
+<script>
+/* 手机号验证码开关（PHONE_OTP_REQUIRED）打开后，/api/me/summary 才会带 user.phone；关闭时这里什么都不显示 */
+window.lhShowPhoneRow = function(p){
+  var row = document.getElementById('phoneRow'); if (!row) return;
+  row.hidden = false;
+  if (p.required_now) document.getElementById('phoneHint').textContent = '需要先绑定才能发帖、评论';
+  else if (p.days_left != null) document.getElementById('phoneHint').textContent = '请在 ' + p.enforce_from + ' 前完成';
+};
 </script>
 <script src="/static/pwa.js?v=99" defer></script>
 </body>

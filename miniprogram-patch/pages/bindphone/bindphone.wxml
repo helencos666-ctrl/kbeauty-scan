@@ -1,0 +1,42 @@
+<view class="wrap">
+  <view class="card" wx:if="{{done}}">
+    <view class="h2">✅ 已绑定</view>
+    <view class="sub">{{maskedNo}}</view>
+    <button class="btn-main btn-block mt" bindtap="goBack">继续使用</button>
+  </view>
+
+  <block wx:else>
+    <view class="card">
+      <view class="h2">为什么要绑定？</view>
+      <view class="sub">防止机器人和小号刷帖、刷推广佣金；账号被盗时能证明是你本人。手机号只用于登录和安全验证，不会公开显示。</view>
+    </view>
+
+    <view class="card" wx:if="{{wechatOk}}">
+      <view class="h2">微信一键绑定</view>
+      <view class="sub">使用微信里已验证的手机号（中国大陆号码）</view>
+      <button class="btn-main btn-block mt" open-type="getPhoneNumber" bindgetphonenumber="onWxPhone">用微信手机号绑定</button>
+      <view class="tip">仅认证过的非个人主体小程序可用；韩国号码请用下面的短信验证码。</view>
+    </view>
+
+    <view class="card">
+      <view class="h2">短信验证码绑定</view>
+      <view class="err" wx:if="{{err}}">{{err}}</view>
+      <view class="row">
+        <picker range="{{countries}}" range-key="name" value="{{ci}}" bindchange="onCountry">
+          <view class="pk">{{countries[ci].name}} ▾</view>
+        </picker>
+        <input class="ipt flex1" type="number" placeholder="手机号" value="{{phone}}" bindinput="onPhone" maxlength="13" />
+      </view>
+      <view class="row mt" wx:if="{{capImg}}">
+        <input class="ipt flex1" placeholder="图形验证码" value="{{capAns}}" bindinput="onCapAns" maxlength="6" />
+        <image class="cap" src="{{capImg}}" mode="aspectFit" bindtap="loadCaptcha" />
+      </view>
+      <view class="row mt">
+        <input class="ipt flex1" type="number" placeholder="6 位短信验证码" value="{{code}}" bindinput="onCode" maxlength="6" />
+        <button class="btn-ghost send" bindtap="send" disabled="{{left > 0 || sending}}">{{left > 0 ? left + ' 秒后重发' : '获取验证码'}}</button>
+      </view>
+      <button class="btn-main btn-block mt" bindtap="bind" disabled="{{binding}}">验证并绑定</button>
+      <view class="tip" wx:if="{{!force}}" bindtap="goBack">以后再说</view>
+    </view>
+  </block>
+</view>

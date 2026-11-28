@@ -1,3 +1,12 @@
+## 2026-11-28 手机号绑定 + 短信验证码（分支 feat/phone-otp，开关 PHONE_OTP_REQUIRED 默认关闭，未合并未部署）
+
+- 新增 phone_otp.py、sms_providers.py（mock/阿里云/腾讯云/NHN Cloud/Twilio 适配器）、static/phone-bind.html、static/phone-otp.js；community.py / me.py / login.html / me.html 里的改动都在开关打开时才生效
+- 开关关闭：注册、登录、/me 返回与以前完全一致，新接口与 /phone-bind 页一律 404（config 接口除外，返回 enabled:false）
+- 打开：新注册必须手机号 + 6 位短信验证码（+86/+82）；老账号软提示绑定；可选 PHONE_OTP_ENFORCE_FROM 到期后只拦写操作
+- 数据库迁移（只新增）：c_users.phone_verified_at、phone_verify_method；表 c_phone_otp、c_phone_captcha
+- 小程序：POST /api/mp/phone/wx-bind（getPhoneNumber）与 Bearer 会话；小程序界面改动在 miniprogram-patch/（未上传）
+- 详情、打开步骤、服务商价格与风险见 docs/PHONE_OTP.md；测试 test/test_phone_otp.py
+
 ## 2026-11-28 推广员政策与自助查询（未部署，待截图确认）
 
 - 后台「推广统计」政策改成三句话：链接或二维码注册，30 天内付费拿实付 50%；7 天后结算，退款不算；只算直接推荐的人

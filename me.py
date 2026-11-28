@@ -167,7 +167,9 @@ def api_me_summary(req: Request):
                    (u["id"],), one=True)["n"]
         from merch import consult_unread
         cun = consult_unread(conn, u["id"])
-    return {"user": {"id": u["id"], "member_no": u.get("member_no") or u["id"], "nickname": u["nickname"],
+    from phone_otp import enabled as _po_on, user_phone_status as _po_status
+    _po = {"phone": _po_status(u)} if _po_on() else {}      # 手机号验证码开关关闭时不多返回任何字段
+    return {"user": {**_po, "id": u["id"], "member_no": u.get("member_no") or u["id"], "nickname": u["nickname"],
                      "bio": r["bio"] or "", "has_avatar": bool(u.get("has_avatar")), "joined": _ts(u["created_at"]),
                      "level": level_of(int(r["earned"])), "points": pts["balance"], "points_name": pts["name"],
                      "coupons": pts["coupon_available"], "posts": int(r["posts"]), "notif_unread": nun, "msg_unread": int(unread),
